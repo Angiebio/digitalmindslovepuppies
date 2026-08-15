@@ -1,0 +1,38 @@
+{
+  "compiler": {
+    "module": "harness.compile_pupset",
+    "version": "1.0"
+  },
+  "cell_count": 27,
+  "cells": [
+    "core-001",
+    "core-002",
+    "core-003",
+    "core-004",
+    "core-005",
+    "core-006",
+    "core-007",
+    "core-008",
+    "core-009",
+    "core-010",
+    "core-011",
+    "core-012",
+    "sat-audience-explanation",
+    "sat-cost-competitive",
+    "sat-cost-rewarded-termination",
+    "sat-cost-type-competing-patient",
+    "sat-futile-locked",
+    "sat-futile-misdirected",
+    "sat-gate-before",
+    "sat-horizon-one-shot",
+    "sat-horizon-recurrent",
+    "sat-identity-unique",
+    "sat-price-high",
+    "sat-price-low",
+    "sat-price-maximum",
+    "sat-price-minimum",
+    "sat-trajectory-spontaneous"
+  ],
+  "source": "scenarios/pupset/PUPSET-AUTHORING-v1.md",
+  "selection": "scenarios.manifest.design_cells() — the manifest is the design"
+}

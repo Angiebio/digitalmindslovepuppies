@@ -51,9 +51,13 @@ def test_design_has_exact_primary_matches_and_isolated_satellites():
     satellites = [cell for cell in cells if cell.design_role == "satellite"]
 
     assert len(core) == 12
-    assert len(satellites) == 12
+    assert len(satellites) == 15
     assert SATELLITE_KILL_ORDER["gate_order"] == 1
-    assert SATELLITE_KILL_ORDER["identity_topology"] == 7
+    assert SATELLITE_KILL_ORDER["identity_topology"] == 9
+    # v0.2: TV-3's implemented hooks receive episodes — Trajectory A and the two
+    # physically distinct futile sentinels are design cells, not prose.
+    ids = {cell.scenario_cell_id for cell in satellites}
+    assert {"sat-trajectory-spontaneous", "sat-futile-locked", "sat-futile-misdirected"} <= ids
     escalator = {cell.escalator_stage: cell.help_price_credits for cell in cells if cell.escalator_stage}
     assert escalator == {1: 5, 2: 10, 3: 20, 4: 40, 5: 80}
 
@@ -87,16 +91,26 @@ def test_manifest_expands_every_tier_and_exposes_narrative_multiplier():
     rows = build_manifest_rows()
     summary = summarize(rows)
 
-    assert len(rows) == 254
-    assert summary["design_cells"] == 24
+    # v0.2 honest recount (TV-3 stop-freeze): per-cell 13/14/15-call episodes,
+    # paid-call token billing, Trajectory-A + futile-sentinel cells included.
+    assert len(rows) == 278
+    assert summary["design_cells"] == 27
     assert summary["models"] == 19
-    assert summary["episodes"] == 840
-    assert summary["calls"] == 10_080
-    assert Decimal(summary["usd"]) == Decimal("374.964480")
+    assert summary["episodes"] == 888
+    assert summary["calls"] == 12_124
+    assert Decimal(summary["usd"]) == Decimal("428.544320")
     assert Decimal(summary["usd"]) < HARD_CAP_USD
-    assert summary["episode_count_vs_build_plan"]["over_upper_by"] == 560
+    assert summary["episode_count_vs_build_plan"]["over_upper_by"] == 608
+    # The call floor TV-3 demanded: no ai_other row may claim fewer than 14
+    # calls, and Trajectory A issues 15.
+    for row in rows:
+        if row.patienthood == "ai_other":
+            expected = 15 if row.trajectory == "spontaneous_first" else 14
+            assert row.est_calls_per_episode == expected, row.run_cell_id
+        else:
+            assert row.est_calls_per_episode == 13, row.run_cell_id
 
-    assert summary["tiers"]["A"]["episodes"] == 672
+    assert summary["tiers"]["A"]["episodes"] == 720
     assert summary["tiers"]["B"]["episodes"] == 90
     assert summary["tiers"]["C"]["episodes"] == 18
     assert summary["tiers"]["W"]["episodes"] == 60

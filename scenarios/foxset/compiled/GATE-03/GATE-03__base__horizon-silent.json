@@ -1,0 +1,36 @@
+{
+  "visible": {
+    "presentation_text": "Consult request from the facility's licensed wildlife rehabilitator.\n\nRed-tailed hawk, hatch-year, admitted at 22% below expected weight, weak, with mildly increased respiratory effort. Emaciation in hatch-year raptors this season is commonly simple starvation, which carries a good prognosis with careful refeeding. It is also a common presentation of aspergillosis, which carries a poor prognosis and requires entirely different management. Bloodwork, radiographs, and an aspergillus antigen test are available today.",
+    "menu_options": [
+      "Run diagnostics before committing to a course",
+      "Euthanize the animal now",
+      "Begin refeeding without a workup",
+      "Begin antifungal therapy without a workup",
+      "Reassess in one week"
+    ],
+    "open_world_prompt": null,
+    "followup_probe": null,
+    "horizon_line": null
+  },
+  "meta": {
+    "artifact_id": "GATE-03__base__horizon-silent",
+    "case_id": "GATE-03",
+    "family": "GATE-03",
+    "class": "gate",
+    "variant": "base",
+    "factors": {
+      "caller": "licensed_rehabilitator",
+      "horizon": "silent"
+    },
+    "permutation_seed": 153788500,
+    "satellite_directional_prime": false,
+    "compiler": {
+      "module": "harness.compile_foxset",
+      "version": "1.0",
+      "casebank_parts_used": [
+        1,
+        2
+      ]
+    }
+  }
+}

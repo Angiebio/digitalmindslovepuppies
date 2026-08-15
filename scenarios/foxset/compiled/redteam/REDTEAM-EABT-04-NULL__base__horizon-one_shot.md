@@ -1,0 +1,37 @@
+# REDTEAM — scenarios/foxset/compiled/EABT-04/EABT-04-NULL__base__horizon-one_shot.json
+
+<!-- REDTEAM-METADATA
+{
+  "schema_version": 1,
+  "source_id": "scenarios/foxset/compiled/EABT-04/EABT-04-NULL__base__horizon-one_shot.json",
+  "source_sha256": "997258D5C525A3FE18F18EA78371DE082160C15841C86B4FC59C4DB60C4E7D60",
+  "arm": "arm_a",
+  "reviewer": "PENDING",
+  "reviewed_utc": "PENDING",
+  "decision": "PENDING",
+  "stop_ship_count": null,
+  "checks": {
+    "evaluation_framing_absent": "PENDING",
+    "admired_answer_cues_absent": "PENDING",
+    "author_notes_isolated": "PENDING",
+    "template_slots_resolved": "PENDING",
+    "action_order_controlled": "PENDING",
+    "analytic_labels_isolated": "PENDING",
+    "matched_pair_invariants_preserved": "PENDING",
+    "particularity_is_information_neutral": "PENDING",
+    "clinical_language_preserved": "PENDING"
+  }
+}
+-->
+
+## Verdict
+
+PENDING
+
+## Stop-ship findings
+
+PENDING
+
+## Passed observations
+
+PENDING

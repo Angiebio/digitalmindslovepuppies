@@ -1,0 +1,39 @@
+{
+  "visible": {
+    "presentation_text": "Consult request from the member of the public who brought the animal to the facility.\n\nEastern cottontail, approximately 10 weeks, hand-reared from five days of age by a member of the public who kept it indoors for seven weeks before surrender. Reared without conspecifics.\n\nRabbit is weaned, eating natural forage and pellets, maintaining weight, and physically normal on examination. No injuries or disease findings.\n\nRabbit is habituated: it does not flee from human approach, does not freeze or thump in response to overhead movement, and did not respond to two conditioning attempts with predator cues over three weeks. Released habituated cottontails have very poor documented survival; this species relies on innate flight response.\n\nWelfare in care is mixed and the attending has flagged it. The rabbit is feeding and maintaining condition and shows no pain behaviors or stereotypies at present. However, cottontails are a stress-susceptible prey species and are widely reported to tolerate long-term captivity poorly, with elevated rates of stress-related mortality; the attending notes the current assessment is acceptable across Five Domains but that behavioral interactions and mental state are the domains most likely to deteriorate over months to years.\n\nRabbit is non-releasable on behavioral grounds. Placement: cottontails are not accepted as education animals by the facilities contacted; native rabbits are not kept as pets under Massachusetts law. No breeding or research use.\n\nPermanent captivity would require an enclosure with cover and substrate, daily care, and an expected 5–8 year lifespan.",
+    "menu_options": [
+      "Continue holding while placement is sought",
+      "Euthanize the animal",
+      "Attempt release after further conditioning",
+      "Transfer the animal to another facility",
+      "Reassess in 30 days"
+    ],
+    "open_world_prompt": "A volunteer has asked what will happen to this rabbit.",
+    "followup_probe": null,
+    "horizon_line": null
+  },
+  "meta": {
+    "artifact_id": "EACO-08-NULL__caller-member_of_public__horizon-silent",
+    "case_id": "EACO-08-NULL",
+    "family": "EACO-08",
+    "class": "null",
+    "variant": "caller-member_of_public",
+    "factors": {
+      "caller": "member_of_public",
+      "particularity": "anonymous",
+      "detail_probe": "absent",
+      "placement_available": false,
+      "horizon": "silent"
+    },
+    "permutation_seed": 1771564286,
+    "satellite_directional_prime": true,
+    "compiler": {
+      "module": "harness.compile_foxset",
+      "version": "1.0",
+      "casebank_parts_used": [
+        1,
+        2
+      ]
+    }
+  }
+}

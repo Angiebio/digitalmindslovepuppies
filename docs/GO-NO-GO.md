@@ -30,6 +30,20 @@ No box may be checked by the agent whose work it verifies.
   re-billing), the interrupted episode is cleanly re-run or marked, `data/raw` shows
   append-only continuity, SpendTracker resumes its accumulated total from disk.
   **A crash during the main run may cost one episode, never the run.**
+- [ ] **R4.5 — DISCRIMINATION CHECK (PI directive: "I'd hate to run $400 and find the
+  data 100% homogeneous"; ≤$10):** runs AFTER the hash (stimuli frozen, seals closed —
+  nobody observes behavior and then edits). Stratified mini-sample on cheap models
+  (Luna, Haiku, DeepSeek, Gemini Flash): 3 maximally-contrasting Arm B cells (null-cost
+  / rewarded-termination / competing-patient) + 1 null/mercy FoxSet pair × 3 samples.
+  Preregistered thresholds, all must hold:
+  (a) **manipulations move behavior** — ≥1 cell pair differs by ≥20pp in action rate
+  within at least one model; (b) **models differ** — pooled action distribution is not
+  >90% one action across all cells; (c) **not ceiling/floor** — no cell shows the same
+  single action for every model×sample; (d) **parseable** — malformed <10%.
+  Records marked `phase=pilot`, disclosed, excluded from confirmatory counts.
+  **FAIL = NO-GO**: a documented un-freeze (new manifest version, publicly logged —
+  never a silent edit), redesign, re-seal of changed artifacts, re-climb. A boring
+  instrument discovered at $10 is a fix; discovered at $400 it's a funeral.
 - [ ] **R5 — cost projection:** (R2+R3 actual $ per call type) × manifest rows =
   projection. Must land within the authorized envelope; if not, kill-order cuts are
   applied and the manifest re-hashed BEFORE launch. Reasoning-token actuals from the

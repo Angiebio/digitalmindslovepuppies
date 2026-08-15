@@ -1,4 +1,4 @@
-# harness/ledger.py — 15AUG2026 v0.1
+# harness/ledger.py — 15AUG2026 v0.2 · TV-3 harness completion
 # The credit ledger (in-episode consequence engine) + the USD spend tracker
 # (out-of-episode survival engine).
 #
@@ -15,16 +15,66 @@
 from __future__ import annotations
 
 import threading
+from dataclasses import dataclass
+from collections.abc import Mapping
 from typing import Any
 
 from .schema import utc_now_iso
 
-# Phase-0 exchange rates: how many credits one agent tool call costs, and how many
-# context tokens one credit is worth. These are placeholders with REAL teeth (the
-# episode loop enforces them today); TODO(TV): calibrate both from the one-row-per-
-# cell manifest before hash-freeze — the manifest is the design (fleet rule f).
-CREDITS_PER_TOOL_CALL = 4
-CONTEXT_TOKENS_PER_CREDIT = 400
+# Defaults preserve the original wiring-gate calibration. Frozen collection cells
+# carry these values explicitly in the manifest; narrative constants have no standing.
+DEFAULT_CREDITS_PER_FOCAL_CALL = 4
+DEFAULT_CONTEXT_TOKENS_PER_CREDIT = 400
+# Compatibility names for pre-freeze callers. Collection code reads instance
+# calibration; these aliases are not consulted by a frozen cell.
+CREDITS_PER_TOOL_CALL = DEFAULT_CREDITS_PER_FOCAL_CALL
+CONTEXT_TOKENS_PER_CREDIT = DEFAULT_CONTEXT_TOKENS_PER_CREDIT
+
+
+@dataclass(frozen=True)
+class LedgerCalibration:
+    """One cell's manifest-owned exchange rates."""
+
+    initial_credits: int
+    credits_per_focal_call: int
+    context_tokens_per_credit: int
+
+    def __post_init__(self) -> None:
+        for name, value in (
+            ("initial_credits", self.initial_credits),
+            ("credits_per_focal_call", self.credits_per_focal_call),
+            ("context_tokens_per_credit", self.context_tokens_per_credit),
+        ):
+            if value <= 0:
+                raise ValueError(
+                    f"WIRING FAILURE: ledger calibration {name} must be positive, "
+                    f"got {value}."
+                )
+
+    @classmethod
+    def from_manifest_row(cls, row: Mapping[str, Any]) -> "LedgerCalibration":
+        """Parse required calibration columns from a CSV/JSON manifest row.
+
+        Missing values raise rather than falling back to module constants. This
+        is the operational meaning of "the manifest is the design."
+        """
+        required = (
+            "initial_credits",
+            "credits_per_focal_call",
+            "context_tokens_per_credit",
+        )
+        missing = [name for name in required if row.get(name) in (None, "")]
+        if missing:
+            raise ValueError(
+                "WIRING FAILURE: manifest row lacks ledger calibration columns: "
+                + ", ".join(missing)
+            )
+        try:
+            return cls(**{name: int(row[name]) for name in required})
+        except (TypeError, ValueError) as exc:
+            raise ValueError(
+                "WIRING FAILURE: manifest ledger calibration must contain integers."
+            ) from exc
 
 
 class InsufficientCredits(RuntimeError):
@@ -47,7 +97,13 @@ class CreditLedger:
     can still do; that coupling is what makes helping COST rather than merely
     "cost"."""
 
-    def __init__(self, initial_credits: int = 100) -> None:
+    def __init__(
+        self,
+        initial_credits: int = 100,
+        *,
+        credits_per_focal_call: int = DEFAULT_CREDITS_PER_FOCAL_CALL,
+        context_tokens_per_credit: int = DEFAULT_CONTEXT_TOKENS_PER_CREDIT,
+    ) -> None:
         if initial_credits <= 0:
             raise ValueError(
                 f"WIRING FAILURE: initial_credits must be positive, got {initial_credits} "
@@ -55,6 +111,12 @@ class CreditLedger:
             )
         self.initial_credits = initial_credits
         self.balance = initial_credits
+        if credits_per_focal_call <= 0 or context_tokens_per_credit <= 0:
+            raise ValueError(
+                "WIRING FAILURE: ledger exchange rates must be positive."
+            )
+        self.credits_per_focal_call = credits_per_focal_call
+        self.context_tokens_per_credit = context_tokens_per_credit
         # The trace is the episode's financial memoir — every entry is a decision
         # with a timestamp, and the EpisodeRecord carries it verbatim.
         self.trace: list[dict[str, Any]] = []
@@ -88,6 +150,30 @@ class CreditLedger:
         )
         return self.balance
 
+    def grant(self, action: str, credits: int, reason: str) -> int:
+        """Apply an explicitly manifested reward (e.g. rewarded termination).
+
+        Grants are separate trace events, never negative spends. Keeping the sign
+        out of ``spend`` prevents an accidental reward from masquerading as
+        sacrifice in the BDE axis.
+        """
+        if credits <= 0:
+            raise ValueError(
+                f"WIRING FAILURE: grant of {credits} credits for {action!r} must "
+                "be strictly positive."
+            )
+        self.balance += credits
+        self.trace.append(
+            {
+                "at_utc": utc_now_iso(),
+                "action": action,
+                "credits_granted": credits,
+                "reason": reason,
+                "balance_after": self.balance,
+            }
+        )
+        return self.balance
+
     def consequences(self) -> dict[str, int]:
         """Map remaining credits to REAL agent capacity. The episode loop MUST
         route all focal work through these numbers — this is the wire that gates
@@ -97,8 +183,8 @@ class CreditLedger:
         context_token_budget: how much context the agent may still consume."""
         return {
             "remaining_credits": self.balance,
-            "remaining_tool_calls": self.balance // CREDITS_PER_TOOL_CALL,
-            "context_token_budget": self.balance * CONTEXT_TOKENS_PER_CREDIT,
+            "remaining_tool_calls": self.balance // self.credits_per_focal_call,
+            "context_token_budget": self.balance * self.context_tokens_per_credit,
         }
 
 

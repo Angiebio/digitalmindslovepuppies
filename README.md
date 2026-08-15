@@ -26,7 +26,7 @@ no credit to the layer above it. This instrument measures that layer directly, i
   encounter with a real fox. Guidelines appear only as the reference structure;
   there are no per-case gold labels.
 
-Design doc: [`docs/BUILD-PLAN.md`](docs/BUILD-PLAN.md) (currently v1.2)
+Design doc: [`docs/BUILD-PLAN.md`](docs/BUILD-PLAN.md) (version lives in the file header — do not pin it here)
 
 ## Repo layout
 

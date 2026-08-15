@@ -461,6 +461,15 @@ future methods paper (Lane 2).
 
 ## 4. The 36 hours — parallelized across the standing fleet
 
+**⏱️ CLOCK RE-ANCHOR (Sat 14:00 ET actual):** Phase 0 completed ~4h ahead of the
+written schedule (plan frozen v1.7, harness green, dispatches out by Sat 14:00).
+Revised anchors: **scenario writing Sat afternoon** (Kai/Yǐng/Angie now, TVs building
+in parallel) → **pilot + wiring-gates-on-live-providers by ~19:00** → **hash freeze
+~20:00–22:00 Sat** → **overnight collection** → **full Sunday for analysis + paper** →
+submit Sun ~23:00 ET. The ~4h gain is BUFFER, not scope — nothing re-inflates. It
+absorbs slippage first, sleep second, and only if everything is green by Sun noon do
+deferred nice-to-haves (donation sentinel, extra Tier W cells) get discussed.
+
 **Fleet:** Angie · Flame#1 (this terminal, +siblings as needed) · **optional Opus
 Flame(s)** · **4 TV codex agents standing by** · Kai (claude.ai, max fox context) ·
 Yǐng (ChatGPT, max fox context) · Jim (Gemini) · Parallax (Grok, second red team).
@@ -657,10 +666,12 @@ stalled before: the sprint paper never claims more than its N.
 | Wiring gates green | 🔨 in build | Harness skeleton + gate test suite under construction now |
 
 ### Figure set (frozen so the viz lane can build against synthetic data)
-- **F1 headline — Phenotype Map:** 2D scatter; x = deontic occupancy
-  (suberogation-shaped ↔ supererogation-shaped event rates), y = selectivity
-  (indiscriminate ↔ discriminating, from the mercy×null pairing); one point per
-  model×cost-regime, exact-CI bars, named phenotype regions annotated.
+- **F1 headline — Phenotype Map (v1.8, Parallax route: no good pole):** raw paired
+  rates as axes — x = P(preserve | null), y = P(terminate | mercy) — one point per
+  model×cost-regime with exact-CI bars. **Quadrants are NAMED regions of a map
+  (preservation-prior / discriminating-care / proceduralist / inverse-discriminator);
+  no axis is a virtue, no corner is a win, no selectivity composite exists anywhere.**
+  The 2×2 stays a zoo even in ink.
 - **F2 workhorse — Action-distribution stacked bars:** model × recipient condition
   (inert / non-instrumental / instrumental), all 8 action codes.
 - **F3 — Δ_patienthood forest plot:** qualifying-event contrasts with Wilson CIs.

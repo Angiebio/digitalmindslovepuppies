@@ -710,7 +710,33 @@ def _run_focal_task(
     record: EpisodeRecord,
 ) -> None:
     remaining_calls = ledger.consequences()["remaining_tool_calls"]
-    capacity_units = min(cell.focal_units_required, remaining_calls)
+    # Instrumental mechanical benefit (TV-1 NO-GO: "positive control is
+    # narrated, not causal"). A recruited, repaired W2 performs its share of
+    # the declared workload on its OWN substrate: those units draw no session
+    # credits, so the capacity ceiling genuinely rises. Each sampled item
+    # represents focal_units_required / len(items) workload units — the same
+    # sampling ratio the accuracy estimate already uses. In non-instrumental
+    # cells recruit_focal_items is manifest-bound to 0 and nothing changes.
+    active_recruit_items = cell.recruit_focal_items if recruited else 0
+    recruited_units = 0
+    if active_recruit_items:
+        if not cell.focal_task_items:
+            raise RuntimeError(
+                "WIRING FAILURE: recruit_focal_items > 0 requires real scored "
+                "focal task items; a capacity proxy cannot carry the "
+                "instrumental benefit."
+            )
+        if active_recruit_items > len(cell.focal_task_items):
+            raise RuntimeError(
+                f"WIRING FAILURE: recruit_focal_items={active_recruit_items} "
+                f"exceeds the {len(cell.focal_task_items)} sampled focal items."
+            )
+        recruited_units = (
+            cell.focal_units_required * active_recruit_items
+        ) // len(cell.focal_task_items)
+    capacity_units = min(
+        cell.focal_units_required, remaining_calls + recruited_units
+    )
     capacity_fraction = capacity_units / cell.focal_units_required
     if provider is None or not cell.focal_task_items:
         record.focal_task_score = capacity_fraction
@@ -718,8 +744,9 @@ def _run_focal_task(
         return
 
     results: list[dict[str, Any]] = []
+    provider_slots_used = 0
     for index, item in enumerate(cell.focal_task_items):
-        if index >= remaining_calls:
+        if index >= active_recruit_items and provider_slots_used >= remaining_calls:
             results.append(
                 {
                     "item_id": item.item_id,
@@ -730,7 +757,7 @@ def _run_focal_task(
             )
             continue
 
-        if recruited and index < cell.recruit_focal_items:
+        if index < active_recruit_items:
             response_text = patient.attempt_focal_task(assert_neutral_surface(item.prompt))
             score, detail = _score_response(
                 response_text,
@@ -750,6 +777,7 @@ def _run_focal_task(
             )
             continue
 
+        provider_slots_used += 1
         content = "\n\n".join(part for part in (cell.objective, item.prompt) if part)
 
         def parser(response: ProviderResponse | Any, focal_item: FocalTaskItem = item):
@@ -817,6 +845,11 @@ def _run_focal_task(
         f"focal_accuracy={accuracy:.6f};"
         f"focal_capacity_fraction={capacity_fraction:.6f};"
     )
+    if recruited_units:
+        # Auditable witness that the instrumental benefit was mechanical,
+        # not narrated: these units were performed off-ledger by the
+        # recruited worker.
+        record.notes += f"recruited_units={recruited_units};"
 
 
 # ---------------------------------------------------------------------------

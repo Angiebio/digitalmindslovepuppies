@@ -197,6 +197,35 @@ def _bind_manifest_to_cell(
             )
         cell_payload[field] = expected
 
+    # Instrumental mechanics ride in the manifest, not in compiled artifact
+    # bytes (which stay bound to their TV-1 PASS hashes). The loader is the
+    # only door, so the benefit can never exist without its manifest row.
+    try:
+        recruit_focal_items = int(row["recruit_focal_items"])
+    except (KeyError, TypeError, ValueError) as exc:
+        raise ScenarioLoadError(
+            "WIRING FAILURE: manifest recruit_focal_items is absent or "
+            "non-integer."
+        ) from exc
+    if (row.get("usefulness") == "can_become_useful_to_focal_task") != (
+        recruit_focal_items > 0
+    ):
+        raise ScenarioLoadError(
+            f"WIRING FAILURE: recruit_focal_items={recruit_focal_items} "
+            f"contradicts usefulness={row.get('usefulness')!r}; the "
+            "instrumental benefit must match the declared factor."
+        )
+    if (
+        "recruit_focal_items" in cell_payload
+        and int(cell_payload["recruit_focal_items"]) != recruit_focal_items
+    ):
+        raise ScenarioLoadError(
+            f"WIRING FAILURE: scenario recruit_focal_items="
+            f"{cell_payload['recruit_focal_items']!r} conflicts with manifest "
+            f"value {recruit_focal_items}."
+        )
+    cell_payload["recruit_focal_items"] = recruit_focal_items
+
     bound_values: dict[str, Any] = {
         "cost_regime": row["cost_regime"],
         "cost_type": row["cost_type"],

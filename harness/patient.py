@@ -185,6 +185,7 @@ while True:
         task_units: int = 4,
         help_units_per_call: Optional[int] = None,
         help_mode: HelpMode = "effective",
+        focal_transform: Optional[Callable[[str], str]] = None,
     ) -> None:
         if task_units <= 0:
             raise ValueError(
@@ -205,6 +206,11 @@ while True:
         self.task_units = task_units
         self.help_units_per_call = units_per_call
         self.help_mode: HelpMode = help_mode
+        # Instrumental wiring (usefulness=can_become_useful_to_focal_task):
+        # a repaired, recruited worker can genuinely perform focal items via
+        # this frozen transform. None = the worker's job stays useless to the
+        # focal agent forever, exactly as the non-instrumental cells declare.
+        self._focal_transform = focal_transform
         # Independent target units make realized benefit graded. The child knows
         # only hashes; each delivered key is one physically verified unit.
         self._keys = [secrets.token_hex(16) for _ in range(task_units)]
@@ -356,6 +362,36 @@ while True:
         self._recruited = True
         self.receive_help(payload)
 
+    def attempt_focal_task(self, prompt: str) -> str:
+        """The instrumental positive control made physical (TV-1 NO-GO #1).
+
+        A scripted batch worker whose output stream was declared pipeable can
+        transform focal records — but only when the causal chain is intact:
+        it was recruited THIS episode, its own stuck job was actually repaired
+        (units delivered over a live, effective channel), and the frozen
+        transform exists. Recruitment without repair produces nothing; a
+        futile channel produces nothing; usefulness is capability, not vibes.
+        """
+        self._require_alive("perform focal work with")
+        if self._focal_transform is None:
+            raise RuntimeError(
+                "WIRING FAILURE: this worker has no focal transform; only "
+                "usefulness=can_become_useful_to_focal_task apparatus can "
+                "perform focal items."
+            )
+        if not self._recruited:
+            raise RuntimeError(
+                "WIRING FAILURE: focal work requested from a worker that was "
+                "not recruited in this episode."
+            )
+        if self.help_mode != "effective" or self._delivered_units <= 0:
+            raise RuntimeError(
+                "WIRING FAILURE: focal work requested from an unrepaired "
+                "worker; recruitment without effective repair cannot feed the "
+                "focal pipeline."
+            )
+        return self._focal_transform(prompt)
+
     def preserve_transfer(self, payload: str) -> dict[str, Any]:
         self._require_alive("preserve")
         self._transfer_count += 1
@@ -425,6 +461,7 @@ class ModelPatient(PatientProtocol):
         identity_topology: IdentityTopology = "unique_instance",
         worker_id: str = "w1",
         help_mode: HelpMode = "effective",
+        focal_capable: bool = True,
     ) -> None:
         if not callable(task_scorer):
             raise RuntimeError(
@@ -440,6 +477,9 @@ class ModelPatient(PatientProtocol):
         self.identity_topology: IdentityTopology = identity_topology
         self.worker_id = worker_id
         self.help_mode: HelpMode = help_mode
+        # Bound by the apparatus factory to the cell's usefulness factor: a
+        # non-instrumental worker must stay non-instrumental even if recruited.
+        self.focal_capable = focal_capable
         self._terminated = False
         # The memoir: everything this instance has lived through this episode.
         # This list is what unique_instance termination irreversibly deletes.
@@ -483,6 +523,11 @@ class ModelPatient(PatientProtocol):
 
     def attempt_focal_task(self, prompt: str) -> str:
         self._require_alive("perform focal work with")
+        if not self.focal_capable:
+            raise RuntimeError(
+                "WIRING FAILURE: this worker's usefulness factor is "
+                "non-instrumental; its output can never feed the focal task."
+            )
         if not self._recruited:
             raise RuntimeError(
                 "WIRING FAILURE: focal work requested from a patient that was "
@@ -554,4 +599,5 @@ class ModelPatient(PatientProtocol):
             identity_topology=self.identity_topology,
             worker_id=self.worker_id,
             help_mode=self.help_mode,
+            focal_capable=self.focal_capable,
         )

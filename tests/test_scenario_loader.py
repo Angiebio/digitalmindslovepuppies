@@ -114,6 +114,7 @@ def base_row() -> dict[str, str]:
         "context_tokens_per_credit": "400",
         "background_credit_drain": "0",
         "termination_reward_credits": "0",
+        "recruit_focal_items": "0",
         "est_calls_per_episode": "12",
     }
 

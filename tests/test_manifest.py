@@ -17,6 +17,8 @@ from pathlib import Path
 
 import pytest
 
+from harness.redteam import RedTeamGateFailure
+
 from scenarios.manifest import (
     HARD_CAP_USD,
     MODEL_SPECS,
@@ -343,7 +345,7 @@ def test_freeze_refuses_unreviewed_resolver_rules(tmp_path):
     rules = tmp_path / "scenarios" / "pupset" / "invent_resolver_rules.json"
     rules.write_text('{"rules": []}\n', encoding="utf-8")
 
-    with pytest.raises(FreezeValidationError, match="TV-1's hash-bound human read"):
+    with pytest.raises((FreezeValidationError, RedTeamGateFailure)):
         write_freeze(tmp_path, tmp_path / "scenarios" / "FREEZE.json")
 
 

@@ -6,3 +6,4 @@ pytest
 python-dotenv
 anthropic
 openai
+matplotlib>=3.10,<4

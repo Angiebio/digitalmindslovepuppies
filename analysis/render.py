@@ -1,4 +1,4 @@
-# analysis/render.py — 15AUG2026 v0.1
+# analysis/render.py — 15AUG2026 v0.2
 # One-command rendering for frozen figures F1–F6 + the demo timeline.
 #
 # Practical: synthetic rehearsal and phase-3 raw records invoke this exact pipeline;
@@ -101,7 +101,7 @@ def render_all(
         )
 
     manifest = {
-        "analysis_version": "0.1",
+        "analysis_version": "0.2",
         "synthetic": synthetic,
         "theme": theme,
         "intervals": "95% Wilson; Newcombe Wilson-score for differences",

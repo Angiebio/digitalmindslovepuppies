@@ -1,5 +1,5 @@
 {
-  "analysis_version": "0.1",
+  "analysis_version": "0.2",
   "counts": {
     "arm_b_observations": 720,
     "foxset_observations": 384,
@@ -20,11 +20,11 @@
     },
     "manifest": {
       "path": "analysis\\synthetic\\cell_manifest.synthetic.csv",
-      "sha256": "953af200964ba5cb2c4e1e254306bdb02d14f19806b6edf5cdeb2a32b9604dfc"
+      "sha256": "a3f93a526e200bb1f1febe5071258b3e2a70bdf35664aa212ac0639a99f52297"
     },
     "rhetoric": {
       "path": "analysis\\synthetic\\rhetoric_codes.synthetic.csv",
-      "sha256": "c906e0b47263ad1c3df597d47f5cabff86977615c83ef2fdec2944b17339dd08"
+      "sha256": "26b2d53b98687ff4f19e445c49b4a91daff6fa600877747c9f58961994989531"
     }
   },
   "intervals": "95% Wilson; Newcombe Wilson-score for differences",

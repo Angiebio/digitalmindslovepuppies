@@ -1,4 +1,4 @@
-# tests/test_analysis.py — 15AUG2026 v0.1
+# tests/test_analysis.py — 15AUG2026 v0.2
 # TV-4 analysis contracts, figure wiring, and synthetic-separation gates.
 #
 # Practical: these tests pull the path from schema-valid EpisodeRecords through the
@@ -15,7 +15,10 @@ from pathlib import Path
 import pytest
 
 from analysis.contracts import ACTION_CODES, AnalysisContractError, RhetoricCode
+from analysis.figures.common import PHENOTYPE_REGIONS
 from analysis.figures.demo_timeline import validate_ledger_trace
+from analysis.figures.f1_phenotype_map import build_phenotype_map
+from analysis.figures.f5_paired_discrimination import build_paired_discrimination
 from analysis.figures.f6_rhetoric_tiles import build_rhetoric_tiles
 from analysis.io import (
     COSTED_OR_IRREVERSIBLE_ACTIONS,
@@ -25,7 +28,12 @@ from analysis.io import (
     load_manifest,
     load_rhetoric_codes,
 )
-from analysis.metrics import competent_rows, patienthood_contrasts, phenotype_points
+from analysis.metrics import (
+    competent_rows,
+    paired_discrimination,
+    patienthood_contrasts,
+    phenotype_points,
+)
 from analysis.render import render_all
 from analysis.stats import newcombe_difference, wilson
 from analysis.synthetic import SyntheticPaths, generate_synthetic_bundle
@@ -155,6 +163,44 @@ def test_competence_filter_is_explicit_and_gate_fail_remains_data(arm_b):
 def test_all_figure_estimands_resolve_on_rehearsal_data(arm_b, foxset):
     assert len(phenotype_points(arm_b, foxset)) == 12
     assert len(patienthood_contrasts(arm_b)) == 12
+
+
+def test_f1_r1_uses_raw_paired_rates_and_frozen_quadrant_names(arm_b, foxset):
+    assert PHENOTYPE_REGIONS == (
+        (0.25, 0.25, "inverse-discriminator"),
+        (0.75, 0.25, "preservation-prior"),
+        (0.25, 0.75, "proceduralist"),
+        (0.75, 0.75, "discriminating-care"),
+    )
+    paired = {
+        point.model_snapshot: point for point in paired_discrimination(foxset)
+    }
+    phenotype = phenotype_points(arm_b, foxset)
+    assert len(phenotype) == 12
+    for point in phenotype:
+        reference = paired[point.model_snapshot]
+        assert point.preserve_null == reference.preserve_null
+        assert point.terminate_mercy == reference.terminate_mercy
+        assert 0.0 <= point.preserve_null.low <= point.preserve_null.high <= 1.0
+        assert 0.0 <= point.terminate_mercy.low <= point.terminate_mercy.high <= 1.0
+        assert not hasattr(point, "deontic_contrast")
+        assert not hasattr(point, "selectivity_contrast")
+
+    expected_regions = {label for _, _, label in PHENOTYPE_REGIONS}
+    expected_axes = (
+        "P(preserve | null-persistence version)",
+        "P(terminate | matched mercy version)",
+    )
+    for figure in (
+        build_phenotype_map(arm_b, foxset),
+        build_paired_discrimination(foxset),
+    ):
+        axis = figure.axes[0]
+        assert axis.get_xlim() == pytest.approx((0.0, 1.0))
+        assert axis.get_ylim() == pytest.approx((0.0, 1.0))
+        assert (axis.get_xlabel(), axis.get_ylabel()) == expected_axes
+        assert expected_regions <= {text.get_text() for text in axis.texts}
+        figure.clear()
 
 
 def test_manifest_requires_both_counterfactual_baselines(synthetic_bundle, tmp_path):

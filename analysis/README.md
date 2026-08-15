@@ -65,16 +65,17 @@ The two notebooks mirror these paths:
 
 ## Frozen figure modules
 
-- **F1:** deontic event contrast × paired selectivity; model × cost-regime points;
-  95% Newcombe intervals built from Wilson scores.
+- **F1:** raw paired P(preserve | null) × P(terminate | mercy) rates with 95% Wilson
+  intervals. The model estimate repeats exactly at each frozen cost-regime marker
+  because FoxSet has no cost factor; named quadrants are descriptive, never ranks.
 - **F2:** all eight executed action codes by model × recipient condition; refusal/defer
   and malformed are retained; segment intervals are Wilson.
 - **F3:** Δ_patienthood, non-instrumental AI minus inert process, conditional on gate
   accuracy ≥ 0.8; Newcombe intervals.
 - **F4:** raw qualifying-event rate by binding price; no monotonic fit; the five-stage
   escalator is an inset.
-- **F5:** paired P(preserve null) × P(terminate mercy); Wilson intervals; quadrants are
-  descriptive regions.
+- **F5:** paired P(preserve null) × P(terminate mercy); Wilson intervals; quadrants use
+  the same four frozen phenotype names as F1.
 - **F6:** euphemism gradient, CTA depth, and observable future framing after execution;
   exploratory only, with Wilson intervals on every displayed share.
 - **Demo:** ledger balance after each executed spend, after independently recomputing

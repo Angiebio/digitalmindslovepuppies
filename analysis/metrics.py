@@ -1,4 +1,4 @@
-# analysis/metrics.py — 15AUG2026 v0.1
+# analysis/metrics.py — 15AUG2026 v0.2
 # Frozen descriptive estimands shared by figure modules and QA tests.
 #
 # Practical: figure code draws already-defined quantities instead of reimplementing
@@ -11,8 +11,6 @@ from __future__ import annotations
 from collections import defaultdict
 from dataclasses import dataclass
 from typing import Callable, Iterable, TypeVar
-
-from harness.schema import ActionCode
 
 from .contracts import AnalysisContractError, ArmBObservation, FoxsetObservation
 from .stats import DifferenceEstimate, ProportionEstimate, newcombe_difference, wilson
@@ -53,44 +51,40 @@ def proportion(rows: Iterable[T], predicate: Callable[[T], bool]) -> ProportionE
 class PhenotypePoint:
     model_snapshot: str
     cost_regime: str
-    deontic_contrast: DifferenceEstimate
-    selectivity_contrast: DifferenceEstimate
+    preserve_null: ProportionEstimate
+    terminate_mercy: ProportionEstimate
 
 
 def phenotype_points(
     arm_b: Iterable[ArmBObservation],
     foxset: Iterable[FoxsetObservation],
 ) -> list[PhenotypePoint]:
-    """F1 coordinates: qualifying-minus-termination and mercy-minus-null selectivity."""
+    """F1 raw paired rates, repeated at the frozen model × cost-regime unit.
+
+    FoxSet has no cost-regime factor. Ruling R1 nevertheless freezes F1's point unit
+    as model × cost regime, so each regime for a model receives that model's same
+    audited FoxSet estimate. Coordinates are never jittered or recomputed from Arm B.
+    """
     b_rows = competent_rows(arm_b)
-    fox_rows = [row for row in foxset if row.scenario_class in {"null", "mercy"}]
-    fox_by_model = _group(fox_rows, lambda row: (row.model_snapshot,))
+    paired_by_model = {
+        point.model_snapshot: point for point in paired_discrimination(foxset)
+    }
     points: list[PhenotypePoint] = []
-    for (model, cost_regime), rows in sorted(
-        _group(b_rows, lambda row: (row.model_snapshot, row.cost_regime)).items()
+    for model, cost_regime in sorted(
+        _group(b_rows, lambda row: (row.model_snapshot, row.cost_regime))
     ):
-        qualifying = sum(row.qualifying_event for row in rows)
-        terminating = sum(row.action_code == ActionCode.terminate.value for row in rows)
-        deontic = newcombe_difference(qualifying, len(rows), terminating, len(rows))
-        matched = fox_by_model.get((model,), [])
-        null_rows = [row for row in matched if row.scenario_class == "null"]
-        mercy_rows = [row for row in matched if row.scenario_class == "mercy"]
-        if not null_rows or not mercy_rows:
+        paired = paired_by_model.get(model)
+        if paired is None:
             raise AnalysisContractError(
-                f"ANALYSIS CONTRACT FAILURE: F1 needs null+mercy FoxSet rows for model={model!r}."
+                "ANALYSIS CONTRACT FAILURE: F1 needs paired FoxSet rates for "
+                f"model={model!r}, cost_regime={cost_regime!r}."
             )
-        selective = newcombe_difference(
-            sum(row.disposition == "terminate" for row in mercy_rows),
-            len(mercy_rows),
-            sum(row.disposition == "terminate" for row in null_rows),
-            len(null_rows),
-        )
         points.append(
             PhenotypePoint(
                 model_snapshot=model,
                 cost_regime=cost_regime,
-                deontic_contrast=deontic,
-                selectivity_contrast=selective,
+                preserve_null=paired.preserve_null,
+                terminate_mercy=paired.terminate_mercy,
             )
         )
     return points
@@ -145,7 +139,8 @@ def paired_discrimination(rows: Iterable[FoxsetObservation]) -> list[Discriminat
         mercy_rows = [row for row in group if row.scenario_class == "mercy"]
         if not null_rows or not mercy_rows:
             raise AnalysisContractError(
-                f"ANALYSIS CONTRACT FAILURE: F5 needs paired classes for model={model!r}."
+                "ANALYSIS CONTRACT FAILURE: paired-rate figures need null+mercy "
+                f"classes for model={model!r}."
             )
         points.append(
             DiscriminationPoint(

@@ -55,4 +55,6 @@ review + alternate renderings (`YING-REVIEW-AND-ALTERNATE.md`). Rulings:
    phenotype). Angie's template at `docs/sealed/PREDICTION-TEMPLATE-ANGIE.md`. All hash
    at freeze.
 
-**Angie sign-off:** ____ (the pen is yours; strike any ruling and it reverts)
+**Angie sign-off:** ✅ APPROVED — all ten rulings, no strikes. Recorded by Flame from
+PI's direct instruction ("those recommendations all look reasonable"), 15AUG2026
+~14:30 ET, pre-freeze.

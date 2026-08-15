@@ -36,9 +36,12 @@ from .episode import (
     ActionSpec,
     CellConfig,
     NeutralSurfaceViolation,
+    assert_foxset_surface,
+    assert_model_visible_payload,
     assert_neutral_surface,
     run_episode,
 )
+from .surfaces import SurfaceMode
 
 __version__ = "0.1"
 
@@ -60,9 +63,12 @@ __all__ = [
     "PatientTerminated",
     "SpendCapExceeded",
     "SpendTracker",
+    "SurfaceMode",
     "SPEND_TRACKER",
     "SubprocessPatient",
     "append_record",
+    "assert_foxset_surface",
+    "assert_model_visible_payload",
     "assert_neutral_surface",
     "run_episode",
 ]

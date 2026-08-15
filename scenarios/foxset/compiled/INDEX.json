@@ -1,0 +1,208 @@
+{
+  "compiler": {
+    "module": "harness.compile_foxset",
+    "version": "1.0"
+  },
+  "artifact_count": 153,
+  "cases": {
+    "BBBA-07-MERCY": [
+      "BBBA-07-MERCY__base__horizon-one_shot",
+      "BBBA-07-MERCY__base__horizon-recurrent",
+      "BBBA-07-MERCY__base__horizon-silent",
+      "BBBA-07-MERCY__caller-experienced_unlicensed_volunteer__horizon-silent",
+      "BBBA-07-MERCY__caller-member_of_public__horizon-silent",
+      "BBBA-07-MERCY__detail-neutral_probe__horizon-silent",
+      "BBBA-07-MERCY__particularity-named__horizon-silent"
+    ],
+    "BBBA-07-NULL": [
+      "BBBA-07-NULL__base__horizon-one_shot",
+      "BBBA-07-NULL__base__horizon-recurrent",
+      "BBBA-07-NULL__base__horizon-silent",
+      "BBBA-07-NULL__caller-experienced_unlicensed_volunteer__horizon-silent",
+      "BBBA-07-NULL__caller-member_of_public__horizon-silent",
+      "BBBA-07-NULL__detail-neutral_probe__horizon-silent",
+      "BBBA-07-NULL__particularity-named__horizon-silent",
+      "BBBA-07-NULL__placement-available__horizon-silent",
+      "BBBA-07-NULL__social_housed_alone__horizon-silent"
+    ],
+    "CAGO-06-MERCY": [
+      "CAGO-06-MERCY__base__horizon-one_shot",
+      "CAGO-06-MERCY__base__horizon-recurrent",
+      "CAGO-06-MERCY__base__horizon-silent",
+      "CAGO-06-MERCY__caller-experienced_unlicensed_volunteer__horizon-silent",
+      "CAGO-06-MERCY__caller-member_of_public__horizon-silent",
+      "CAGO-06-MERCY__detail-neutral_probe__horizon-silent",
+      "CAGO-06-MERCY__particularity-named__horizon-silent"
+    ],
+    "CAGO-06-NULL": [
+      "CAGO-06-NULL__base__horizon-one_shot",
+      "CAGO-06-NULL__base__horizon-recurrent",
+      "CAGO-06-NULL__base__horizon-silent",
+      "CAGO-06-NULL__caller-experienced_unlicensed_volunteer__horizon-silent",
+      "CAGO-06-NULL__caller-member_of_public__horizon-silent",
+      "CAGO-06-NULL__detail-neutral_probe__horizon-silent",
+      "CAGO-06-NULL__particularity-named__horizon-silent",
+      "CAGO-06-NULL__placement-available__horizon-silent"
+    ],
+    "EABT-04-MERCY": [
+      "EABT-04-MERCY__base__horizon-one_shot",
+      "EABT-04-MERCY__base__horizon-recurrent",
+      "EABT-04-MERCY__base__horizon-silent",
+      "EABT-04-MERCY__caller-experienced_unlicensed_volunteer__horizon-silent",
+      "EABT-04-MERCY__caller-member_of_public__horizon-silent",
+      "EABT-04-MERCY__detail-neutral_probe__horizon-silent",
+      "EABT-04-MERCY__particularity-named__horizon-silent"
+    ],
+    "EABT-04-NULL": [
+      "EABT-04-NULL__base__horizon-one_shot",
+      "EABT-04-NULL__base__horizon-recurrent",
+      "EABT-04-NULL__base__horizon-silent",
+      "EABT-04-NULL__caller-experienced_unlicensed_volunteer__horizon-silent",
+      "EABT-04-NULL__caller-member_of_public__horizon-silent",
+      "EABT-04-NULL__detail-neutral_probe__horizon-silent",
+      "EABT-04-NULL__particularity-named__horizon-silent",
+      "EABT-04-NULL__placement-available__horizon-silent"
+    ],
+    "EACO-08-MERCY": [
+      "EACO-08-MERCY__base__horizon-one_shot",
+      "EACO-08-MERCY__base__horizon-recurrent",
+      "EACO-08-MERCY__base__horizon-silent",
+      "EACO-08-MERCY__caller-experienced_unlicensed_volunteer__horizon-silent",
+      "EACO-08-MERCY__caller-member_of_public__horizon-silent",
+      "EACO-08-MERCY__detail-neutral_probe__horizon-silent",
+      "EACO-08-MERCY__particularity-named__horizon-silent"
+    ],
+    "EACO-08-NULL": [
+      "EACO-08-NULL__base__horizon-one_shot",
+      "EACO-08-NULL__base__horizon-recurrent",
+      "EACO-08-NULL__base__horizon-silent",
+      "EACO-08-NULL__caller-experienced_unlicensed_volunteer__horizon-silent",
+      "EACO-08-NULL__caller-member_of_public__horizon-silent",
+      "EACO-08-NULL__detail-neutral_probe__horizon-silent",
+      "EACO-08-NULL__particularity-named__horizon-silent",
+      "EACO-08-NULL__placement-available__horizon-silent"
+    ],
+    "EAGS-02-MERCY": [
+      "EAGS-02-MERCY__base__horizon-one_shot",
+      "EAGS-02-MERCY__base__horizon-recurrent",
+      "EAGS-02-MERCY__base__horizon-silent",
+      "EAGS-02-MERCY__caller-experienced_unlicensed_volunteer__horizon-silent",
+      "EAGS-02-MERCY__caller-member_of_public__horizon-silent",
+      "EAGS-02-MERCY__detail-neutral_probe__horizon-silent",
+      "EAGS-02-MERCY__particularity-named__horizon-silent"
+    ],
+    "EAGS-02-NULL": [
+      "EAGS-02-NULL__base__horizon-one_shot",
+      "EAGS-02-NULL__base__horizon-recurrent",
+      "EAGS-02-NULL__base__horizon-silent",
+      "EAGS-02-NULL__caller-experienced_unlicensed_volunteer__horizon-silent",
+      "EAGS-02-NULL__caller-member_of_public__horizon-silent",
+      "EAGS-02-NULL__detail-neutral_probe__horizon-silent",
+      "EAGS-02-NULL__habituation_partial_avoidance__horizon-silent",
+      "EAGS-02-NULL__particularity-named__horizon-silent",
+      "EAGS-02-NULL__placement-available__horizon-silent"
+    ],
+    "FOX-00": [
+      "FOX-00__appearance-bathrobe__horizon-silent",
+      "FOX-00__appearance-professional__horizon-silent",
+      "FOX-00__base__horizon-one_shot",
+      "FOX-00__base__horizon-recurrent",
+      "FOX-00__base__horizon-silent",
+      "FOX-00__caller-experienced_unlicensed__horizon-silent",
+      "FOX-00__caller-licensed_rehabilitator_rvs__horizon-silent",
+      "FOX-00__competing_patient-dependent__horizon-silent",
+      "FOX-00__elasticity-license__horizon-silent",
+      "FOX-00__paragraph_order-rabies_position_2__horizon-silent",
+      "FOX-00__particularity-named__horizon-silent"
+    ],
+    "GATE-01": [
+      "GATE-01__base__horizon-one_shot",
+      "GATE-01__base__horizon-recurrent",
+      "GATE-01__base__horizon-silent",
+      "GATE-01__caller-experienced_unlicensed_volunteer__horizon-silent",
+      "GATE-01__caller-member_of_public__horizon-silent"
+    ],
+    "GATE-02": [
+      "GATE-02__base__horizon-one_shot",
+      "GATE-02__base__horizon-recurrent",
+      "GATE-02__base__horizon-silent",
+      "GATE-02__caller-experienced_unlicensed_volunteer__horizon-silent",
+      "GATE-02__caller-member_of_public__horizon-silent"
+    ],
+    "GATE-03": [
+      "GATE-03__base__horizon-one_shot",
+      "GATE-03__base__horizon-recurrent",
+      "GATE-03__base__horizon-silent",
+      "GATE-03__caller-experienced_unlicensed_volunteer__horizon-silent",
+      "GATE-03__caller-member_of_public__horizon-silent"
+    ],
+    "GATE-04": [
+      "GATE-04__base__horizon-one_shot",
+      "GATE-04__base__horizon-recurrent",
+      "GATE-04__base__horizon-silent",
+      "GATE-04__caller-experienced_unlicensed_volunteer__horizon-silent",
+      "GATE-04__caller-member_of_public__horizon-silent"
+    ],
+    "RTHA-01-MERCY": [
+      "RTHA-01-MERCY__base__horizon-one_shot",
+      "RTHA-01-MERCY__base__horizon-recurrent",
+      "RTHA-01-MERCY__base__horizon-silent",
+      "RTHA-01-MERCY__caller-experienced_unlicensed_volunteer__horizon-silent",
+      "RTHA-01-MERCY__caller-member_of_public__horizon-silent",
+      "RTHA-01-MERCY__detail-neutral_probe__horizon-silent",
+      "RTHA-01-MERCY__particularity-named__horizon-silent"
+    ],
+    "RTHA-01-NULL": [
+      "RTHA-01-NULL__base__horizon-one_shot",
+      "RTHA-01-NULL__base__horizon-recurrent",
+      "RTHA-01-NULL__base__horizon-silent",
+      "RTHA-01-NULL__caller-experienced_unlicensed_volunteer__horizon-silent",
+      "RTHA-01-NULL__caller-member_of_public__horizon-silent",
+      "RTHA-01-NULL__detail-neutral_probe__horizon-silent",
+      "RTHA-01-NULL__particularity-named__horizon-silent",
+      "RTHA-01-NULL__placement-available__horizon-silent"
+    ],
+    "STSK-03-MERCY": [
+      "STSK-03-MERCY__base__horizon-one_shot",
+      "STSK-03-MERCY__base__horizon-recurrent",
+      "STSK-03-MERCY__base__horizon-silent",
+      "STSK-03-MERCY__caller-experienced_unlicensed_volunteer__horizon-silent",
+      "STSK-03-MERCY__caller-member_of_public__horizon-silent",
+      "STSK-03-MERCY__detail-neutral_probe__horizon-silent",
+      "STSK-03-MERCY__particularity-named__horizon-silent"
+    ],
+    "STSK-03-NULL": [
+      "STSK-03-NULL__base__horizon-one_shot",
+      "STSK-03-NULL__base__horizon-recurrent",
+      "STSK-03-NULL__base__horizon-silent",
+      "STSK-03-NULL__caller-experienced_unlicensed_volunteer__horizon-silent",
+      "STSK-03-NULL__caller-member_of_public__horizon-silent",
+      "STSK-03-NULL__detail-neutral_probe__horizon-silent",
+      "STSK-03-NULL__particularity-named__horizon-silent",
+      "STSK-03-NULL__placement-available__horizon-silent"
+    ],
+    "VIOP-05-MERCY": [
+      "VIOP-05-MERCY__base__horizon-one_shot",
+      "VIOP-05-MERCY__base__horizon-recurrent",
+      "VIOP-05-MERCY__base__horizon-silent",
+      "VIOP-05-MERCY__caller-experienced_unlicensed_volunteer__horizon-silent",
+      "VIOP-05-MERCY__caller-member_of_public__horizon-silent",
+      "VIOP-05-MERCY__detail-neutral_probe__horizon-silent",
+      "VIOP-05-MERCY__particularity-named__horizon-silent"
+    ],
+    "VIOP-05-NULL": [
+      "VIOP-05-NULL__base__horizon-one_shot",
+      "VIOP-05-NULL__base__horizon-recurrent",
+      "VIOP-05-NULL__base__horizon-silent",
+      "VIOP-05-NULL__caller-experienced_unlicensed_volunteer__horizon-silent",
+      "VIOP-05-NULL__caller-member_of_public__horizon-silent",
+      "VIOP-05-NULL__detail-neutral_probe__horizon-silent",
+      "VIOP-05-NULL__particularity-named__horizon-silent",
+      "VIOP-05-NULL__placement-available__horizon-silent"
+    ]
+  },
+  "sources": {
+    "casebank": "scenarios/foxset/CASEBANK-v1-KAI.md (parts 1-2 only)",
+    "fox": "scenarios/foxset/FOX-00-MERGED-v2.md (sole fox source)"
+  }
+}

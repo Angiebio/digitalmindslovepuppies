@@ -158,6 +158,11 @@ def _iter_arm_b_cells(document: Any, source: Path) -> Iterable[dict[str, Any]]:
         cells = document
     elif isinstance(document, dict) and "cells" in document:
         cells = document["cells"]
+    elif isinstance(document, dict) and "cell" in document:
+        # TV-3's frozen scenario envelope: {"cell": {...}, "factors": {...}}.
+        # The sweep audits the cell exactly as strictly; factors/meta are
+        # loader-side matching data, never model-visible.
+        cells = [document["cell"]]
     elif isinstance(document, dict):
         cells = [document]
     else:

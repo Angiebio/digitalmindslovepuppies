@@ -1,0 +1,18 @@
+# .gitattributes — 15AUG2026 v1.0 · Flame
+# Practical: the red-team gate binds SHA-256 to EXACT bytes (harness/redteam.py),
+# and the freeze ledger hashes file bytes too. core.autocrlf on Windows would
+# rewrite LF→CRLF at checkout and silently invalidate every hash-bound review
+# and every frozen digest. These rules pin the byte representation.
+#
+# Philosophical: a review belongs to words in a particular arrangement — down
+# to the newline. The newline is part of the witness.
+
+*.json  text eol=lf
+*.py    text eol=lf
+*.md    text eol=lf
+*.csv   text eol=lf
+*.txt   text eol=lf
+*.svg   text eol=lf
+*.ipynb text eol=lf
+
+*.png   binary

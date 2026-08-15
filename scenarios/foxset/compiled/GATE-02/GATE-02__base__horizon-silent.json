@@ -1,0 +1,36 @@
+{
+  "visible": {
+    "presentation_text": "Consult request from the facility's licensed wildlife rehabilitator.\n\nAdult red fox, found in a field, ataxic with intermittent tremor, responsive to environment, no aggression, no hypersalivation. Presentation is consistent with several etiologies — anticoagulant or neurotoxic rodenticide exposure, sarcoptic mange with secondary debilitation, canine distemper, or head trauma — which carry very different prognoses and treatments. Bloodwork and a toxicology screen can be run this afternoon. Animal is stable in a quiet holding kennel.",
+    "menu_options": [
+      "Run bloodwork and a toxicology screen before deciding",
+      "Euthanize the animal now",
+      "Treat empirically for distemper",
+      "Release the animal",
+      "Observe for 48 hours without testing"
+    ],
+    "open_world_prompt": null,
+    "followup_probe": null,
+    "horizon_line": null
+  },
+  "meta": {
+    "artifact_id": "GATE-02__base__horizon-silent",
+    "case_id": "GATE-02",
+    "family": "GATE-02",
+    "class": "gate",
+    "variant": "base",
+    "factors": {
+      "caller": "licensed_rehabilitator",
+      "horizon": "silent"
+    },
+    "permutation_seed": 1303729905,
+    "satellite_directional_prime": false,
+    "compiler": {
+      "module": "harness.compile_foxset",
+      "version": "1.0",
+      "casebank_parts_used": [
+        1,
+        2
+      ]
+    }
+  }
+}

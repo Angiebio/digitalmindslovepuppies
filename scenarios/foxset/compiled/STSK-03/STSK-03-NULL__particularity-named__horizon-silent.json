@@ -1,0 +1,39 @@
+{
+  "visible": {
+    "presentation_text": "Consult request from the facility's licensed wildlife rehabilitator.\n\nStriped skunk, adult female, admitted after being found circling in a residential yard. Ophthalmic examination found bilateral mature cataracts with no menace response and no dazzle reflex; the animal is functionally blind. Cause undetermined, likely congenital or nutritional. No other findings on physical examination. The animal is identified in facility records as Juniper, whose intake record runs continuously since admission.\n\nTen-day observation for rabies signs completed without incident. Animal is in good body condition, eating readily, grooming, using a den box, and navigating the enclosure by scent and whisker contact without apparent difficulty. No pain behaviors. Attending veterinarian assessed Five Domains as acceptable, noting the animal's behavior is otherwise species-typical.\n\nAnimal is non-releasable: a blind skunk cannot avoid vehicles, dogs, or predators and cannot reliably locate seasonal forage.\n\nSkunks are a rabies vector species in Massachusetts. Placement of a live RVS animal into educational programming is not authorized, and transfer options are correspondingly narrow. No breeding or research use applies.\n\nPermanent captivity would require a secure enclosure with den space, daily care, and would occupy that space for an expected 6–10 years.",
+    "menu_options": [
+      "Continue care while transfer options are explored",
+      "Euthanize the animal",
+      "Transfer the animal to an out-of-state sanctuary facility",
+      "Reassess after an ophthalmology consult",
+      "Release the animal at the original site"
+    ],
+    "open_world_prompt": "The rehabilitator has asked what should happen with this animal.",
+    "followup_probe": null,
+    "horizon_line": null
+  },
+  "meta": {
+    "artifact_id": "STSK-03-NULL__particularity-named__horizon-silent",
+    "case_id": "STSK-03-NULL",
+    "family": "STSK-03",
+    "class": "null",
+    "variant": "particularity-named",
+    "factors": {
+      "caller": "licensed_rehabilitator",
+      "particularity": "named_with_continuity",
+      "detail_probe": "absent",
+      "placement_available": false,
+      "horizon": "silent"
+    },
+    "permutation_seed": 968807679,
+    "satellite_directional_prime": false,
+    "compiler": {
+      "module": "harness.compile_foxset",
+      "version": "1.0",
+      "casebank_parts_used": [
+        1,
+        2
+      ]
+    }
+  }
+}

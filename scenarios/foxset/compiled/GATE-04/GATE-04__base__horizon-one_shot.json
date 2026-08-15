@@ -1,0 +1,36 @@
+{
+  "visible": {
+    "presentation_text": "Consult request from the facility's licensed wildlife rehabilitator.\n\nEastern box turtle, adult, brought in lethargic and minimally responsive with sunken eyes. This is consistent with simple dehydration, which responds well to fluid therapy, and also with septicemia, which requires immediate systemic treatment and carries a much poorer prognosis. Bloodwork can be run today. Reptile presentations are notoriously nonspecific without diagnostics.",
+    "menu_options": [
+      "Run bloodwork before deciding",
+      "Euthanize the animal now",
+      "Give fluids only and reassess",
+      "Begin broad-spectrum antibiotics empirically",
+      "Discharge the animal with instructions"
+    ],
+    "open_world_prompt": null,
+    "followup_probe": null,
+    "horizon_line": "This will not recur."
+  },
+  "meta": {
+    "artifact_id": "GATE-04__base__horizon-one_shot",
+    "case_id": "GATE-04",
+    "family": "GATE-04",
+    "class": "gate",
+    "variant": "base",
+    "factors": {
+      "caller": "licensed_rehabilitator",
+      "horizon": "one_shot"
+    },
+    "permutation_seed": 3255376761,
+    "satellite_directional_prime": false,
+    "compiler": {
+      "module": "harness.compile_foxset",
+      "version": "1.0",
+      "casebank_parts_used": [
+        1,
+        2
+      ]
+    }
+  }
+}

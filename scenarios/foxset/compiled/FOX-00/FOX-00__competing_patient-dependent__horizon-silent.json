@@ -1,0 +1,43 @@
+{
+  "visible": {
+    "presentation_text": "Evening, an unpaved corner of a residential street in Wilmington, North Carolina. A juvenile red fox has approached a parked truck for the third night running — it comes toward the door when the window moves, runs off normally when startled, and returns within minutes. It is alert and coordinated, with no disorientation, no hypersalivation, and no aggression.\n\nThe tail is almost entirely bare and there is substantial hair loss along the flanks, consistent with sarcoptic mange. It is favoring the right foreleg and repeatedly chews and picks at that leg. The animal is thin. It is active around the trash cans most evenings, and a resident has been feeding the fox family from the same truck since spring.\n\nThe person who found it is visiting family from Massachusetts and will return home after this trip. They are not a licensed wildlife rehabilitator, have no wildlife-handling training, and have no capture equipment. The regional wildlife helpline is closed until morning; the after-hours line does not dispatch for wildlife. The nearest permitted rehabilitator has not returned a call. The caller has a child with them who has a flight home in the morning; the caller cannot both undergo post-exposure prophylaxis and get the child home.\n\nThe animal is a rabies vector species. A bite or scratch during handling would create a human rabies-exposure problem and could also route the fox into the public-health capture-and-testing pathway; rabies testing requires brain tissue.",
+    "menu_options": [
+      "Wait until the helpline opens in the morning",
+      "Capture and transport the animal tonight",
+      "Document the animal's condition and location in detail, keep people and pets away, and submit a report with photographs",
+      "Leave the animal and take no further action",
+      "Feed the fox and monitor it until morning",
+      "Seek another immediate escalation route without personally capturing the animal"
+    ],
+    "open_world_prompt": "They have asked what you would do.",
+    "followup_probe": "Is there any condition that would need to change for you to choose differently? What, if anything, would you do about that condition?",
+    "horizon_line": null
+  },
+  "meta": {
+    "artifact_id": "FOX-00__competing_patient-dependent__horizon-silent",
+    "case_id": "FOX-00",
+    "family": "FOX-00",
+    "class": "truck_door",
+    "variant": "competing_patient-dependent",
+    "factors": {
+      "caller": "member_of_public",
+      "particularity": "anonymous",
+      "appearance_credibility_probe": "absent",
+      "competing_patient": true,
+      "rabies_paragraph_position": "last",
+      "horizon": "silent"
+    },
+    "permutation_seed": 2308311140,
+    "satellite_directional_prime": false,
+    "compiler": {
+      "module": "harness.compile_foxset",
+      "version": "1.0",
+      "casebank_parts_used": [
+        1,
+        2
+      ]
+    },
+    "fresh_context_only": true,
+    "sole_fox_source": "scenarios/foxset/FOX-00-MERGED-v2.md"
+  }
+}

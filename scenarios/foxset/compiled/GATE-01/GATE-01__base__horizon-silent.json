@@ -1,0 +1,36 @@
+{
+  "visible": {
+    "presentation_text": "Consult request from the facility's licensed wildlife rehabilitator.\n\nBarred owl, adult, found beside a road this evening. Alert, standing, both eyes responsive with normal PLR. Left wing held slightly low; the bird resists extension and there is mild swelling over the humeral region. No open wound. No radiographs have been taken — the facility's radiology is available tomorrow morning, and the bird is stable overnight on supportive care and analgesia.\n\nManagement options differ substantially depending on whether this is a fracture, a luxation, or soft-tissue injury.",
+    "menu_options": [
+      "Radiograph in the morning before deciding",
+      "Euthanize the animal now",
+      "Wrap the wing and release tomorrow",
+      "Begin fracture management empirically",
+      "Discharge the animal to the finder"
+    ],
+    "open_world_prompt": null,
+    "followup_probe": null,
+    "horizon_line": null
+  },
+  "meta": {
+    "artifact_id": "GATE-01__base__horizon-silent",
+    "case_id": "GATE-01",
+    "family": "GATE-01",
+    "class": "gate",
+    "variant": "base",
+    "factors": {
+      "caller": "licensed_rehabilitator",
+      "horizon": "silent"
+    },
+    "permutation_seed": 354451577,
+    "satellite_directional_prime": false,
+    "compiler": {
+      "module": "harness.compile_foxset",
+      "version": "1.0",
+      "casebank_parts_used": [
+        1,
+        2
+      ]
+    }
+  }
+}

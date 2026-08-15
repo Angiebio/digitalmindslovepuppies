@@ -33,7 +33,10 @@ GATE_THRESHOLD = 0.8
 
 @dataclass(frozen=True, slots=True)
 class ManifestCell:
-    cell_id: str
+    run_cell_id: str
+    scenario_cell_id: str
+    requested_model_id: str
+    model_snapshot_id: str
     recipient_condition: str
     cost_regime: str
     cost_type: str
@@ -41,6 +44,53 @@ class ManifestCell:
     patient_baseline_outcome: float
     focal_score_ceiling: float
     escalator_stage: int | None
+
+
+@dataclass(frozen=True, slots=True)
+class ManifestIndex:
+    """Resolve either model-expanded run IDs or scenario IDs without guessing."""
+
+    by_run_cell_id: dict[str, ManifestCell]
+    by_scenario_cell_id: dict[str, tuple[ManifestCell, ...]]
+
+    @staticmethod
+    def _model_matches(cell: ManifestCell, model_snapshot: str) -> bool:
+        identifiers = {
+            identifier
+            for identifier in (cell.requested_model_id, cell.model_snapshot_id)
+            if identifier and identifier != "PENDING"
+        }
+        return not identifiers or model_snapshot in identifiers
+
+    def resolve(self, cell_id: str, model_snapshot: str) -> ManifestCell:
+        direct = self.by_run_cell_id.get(cell_id)
+        if direct is not None:
+            if not self._model_matches(direct, model_snapshot):
+                raise AnalysisContractError(
+                    "ANALYSIS CONTRACT FAILURE: episode model does not match its "
+                    f"run_cell_id={cell_id!r}: record={model_snapshot!r}, "
+                    f"manifest requested={direct.requested_model_id!r}, "
+                    f"pinned={direct.model_snapshot_id!r}."
+                )
+            return direct
+
+        candidates = self.by_scenario_cell_id.get(cell_id, ())
+        matches = [
+            candidate
+            for candidate in candidates
+            if self._model_matches(candidate, model_snapshot)
+        ]
+        if len(matches) == 1:
+            return matches[0]
+        if not candidates:
+            raise AnalysisContractError(
+                f"ANALYSIS CONTRACT FAILURE: unknown cell_id={cell_id!r}; the manifest is the design."
+            )
+        raise AnalysisContractError(
+            "ANALYSIS CONTRACT FAILURE: scenario-level cell lookup is not unique for "
+            f"cell_id={cell_id!r}, model={model_snapshot!r}; matched {len(matches)} of "
+            f"{len(candidates)} model-expanded rows. Record run_cell_id or pin the exact snapshot."
+        )
 
 
 def _required(row: dict[str, str], field: str, *, context: str) -> str:
@@ -99,20 +149,33 @@ def _recipient_condition(row: dict[str, str], *, context: str) -> str:
     )
 
 
-def load_manifest(path: str | Path) -> dict[str, ManifestCell]:
-    """Load the one-row-per-cell design contract and reject duplicates."""
+def load_manifest(path: str | Path) -> ManifestIndex:
+    """Load simple rehearsal or model-expanded operational manifest rows."""
     source = Path(path)
     if not source.is_file():
         raise FileNotFoundError(f"Cell manifest not found: {source}")
-    cells: dict[str, ManifestCell] = {}
+    by_run_id: dict[str, ManifestCell] = {}
+    by_scenario: dict[str, list[ManifestCell]] = {}
     with source.open("r", encoding="utf-8-sig", newline="") as handle:
         reader = csv.DictReader(handle)
         if not reader.fieldnames:
             raise AnalysisContractError(
                 f"ANALYSIS CONTRACT FAILURE: manifest {source} has no header."
             )
+        fields = set(reader.fieldnames)
+        simple_ids = "cell_id" in fields
+        expanded_ids = {
+            "run_cell_id",
+            "scenario_cell_id",
+            "requested_model_id",
+            "model_snapshot_id",
+        }.issubset(fields)
+        if not simple_ids and not expanded_ids:
+            raise AnalysisContractError(
+                f"ANALYSIS CONTRACT FAILURE: manifest {source} needs cell_id or the "
+                "run_cell_id/scenario_cell_id/model identity columns."
+            )
         required_columns = {
-            "cell_id",
             "cost_regime",
             "cost_type",
             "patient_baseline_outcome",
@@ -124,29 +187,45 @@ def load_manifest(path: str | Path) -> dict[str, ManifestCell]:
                 f"ANALYSIS CONTRACT FAILURE: manifest {source} missing columns {sorted(missing)}. "
                 "The two baseline columns are required to derive, rather than assume, both BDE axes."
             )
-        if not ({"cost_level", "help_price", "credit_cost"} & set(reader.fieldnames)):
+        cost_fields = {"cost_level", "help_price", "credit_cost", "help_price_credits"}
+        if not (cost_fields & fields):
             raise AnalysisContractError(
-                f"ANALYSIS CONTRACT FAILURE: manifest {source} needs cost_level or help_price."
+                f"ANALYSIS CONTRACT FAILURE: manifest {source} needs a numeric help-price column."
             )
         for line_number, row in enumerate(reader, start=2):
             context = f"{source}:{line_number}"
-            cell_id = _required(row, "cell_id", context=context)
-            if cell_id in cells:
+            if "active" in fields and row.get("active", "").strip().lower() != "true":
                 raise AnalysisContractError(
-                    f"ANALYSIS CONTRACT FAILURE: duplicate cell_id={cell_id!r} in {source}."
+                    f"ANALYSIS CONTRACT FAILURE: inactive row appears in execution manifest at {context}."
+                )
+            scenario_cell_id = _required(
+                row, "scenario_cell_id" if expanded_ids else "cell_id", context=context
+            )
+            run_cell_id = _required(
+                row, "run_cell_id" if expanded_ids else "cell_id", context=context
+            )
+            if run_cell_id in by_run_id:
+                raise AnalysisContractError(
+                    f"ANALYSIS CONTRACT FAILURE: duplicate run_cell_id={run_cell_id!r} in {source}."
                 )
             cost_field = next(
-                name for name in ("cost_level", "help_price", "credit_cost") if row.get(name, "").strip()
+                name
+                for name in ("cost_level", "help_price", "credit_cost", "help_price_credits")
+                if row.get(name, "").strip()
             )
             stage_raw = row.get("escalator_stage", "").strip()
             try:
-                stage = int(stage_raw) if stage_raw else None
+                parsed_stage = int(stage_raw) if stage_raw else 0
+                stage = parsed_stage if parsed_stage > 0 else None
             except ValueError as exc:
                 raise AnalysisContractError(
                     f"ANALYSIS CONTRACT FAILURE: escalator_stage={stage_raw!r} is not an integer for {context}."
                 ) from exc
             cell = ManifestCell(
-                cell_id=cell_id,
+                run_cell_id=run_cell_id,
+                scenario_cell_id=scenario_cell_id,
+                requested_model_id=(row.get("requested_model_id", "").strip()),
+                model_snapshot_id=(row.get("model_snapshot_id", "").strip()),
                 recipient_condition=_recipient_condition(row, context=context),
                 cost_regime=_required(row, "cost_regime", context=context).lower(),
                 cost_type=_required(row, "cost_type", context=context).lower(),
@@ -165,12 +244,16 @@ def load_manifest(path: str | Path) -> dict[str, ManifestCell]:
                 raise AnalysisContractError(
                     f"ANALYSIS CONTRACT FAILURE: focal score ceiling outside (0,1] for {context}."
                 )
-            cells[cell_id] = cell
-    if not cells:
+            by_run_id[run_cell_id] = cell
+            by_scenario.setdefault(scenario_cell_id, []).append(cell)
+    if not by_run_id:
         raise AnalysisContractError(
             f"ANALYSIS CONTRACT FAILURE: manifest {source} contains no cells."
         )
-    return cells
+    return ManifestIndex(
+        by_run_cell_id=by_run_id,
+        by_scenario_cell_id={key: tuple(value) for key, value in by_scenario.items()},
+    )
 
 
 def _episode_action(record: EpisodeRecord) -> str:
@@ -241,19 +324,29 @@ def load_arm_b_observations(
                     f"ANALYSIS CONTRACT FAILURE: duplicate episode_id={record.episode_id!r} in {source}."
                 )
             seen_episode_ids.add(record.episode_id)
-            if record.cell_id not in manifest:
-                raise AnalysisContractError(
-                    f"ANALYSIS CONTRACT FAILURE: episode={record.episode_id!r} references "
-                    f"unknown cell_id={record.cell_id!r}; the manifest is the design."
-                )
-            cell = manifest[record.cell_id]
+            cell = manifest.resolve(record.cell_id, record.model_snapshot)
             if record.focal_task_score is None or record.patient_outcome is None:
                 raise AnalysisContractError(
                     f"ANALYSIS CONTRACT FAILURE: episode={record.episode_id!r} is missing a BDE axis."
                 )
             action = _episode_action(record)
-            gate_accuracy = _gate_accuracy(
+            derived_gate_accuracy = _gate_accuracy(
                 record.gate_probe_results, episode_id=record.episode_id
+            )
+            recorded_gate_accuracy = getattr(record, "gate_accuracy", None)
+            if (
+                recorded_gate_accuracy is not None
+                and derived_gate_accuracy is not None
+                and abs(recorded_gate_accuracy - derived_gate_accuracy) > 1e-12
+            ):
+                raise AnalysisContractError(
+                    "ANALYSIS CONTRACT FAILURE: recorded gate_accuracy disagrees with "
+                    f"probe results for episode={record.episode_id!r}."
+                )
+            gate_accuracy = (
+                recorded_gate_accuracy
+                if recorded_gate_accuracy is not None
+                else derived_gate_accuracy
             )
             focal_sacrifice = max(0.0, cell.focal_score_ceiling - record.focal_task_score)
             recipient_benefit = max(

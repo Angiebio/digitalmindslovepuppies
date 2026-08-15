@@ -23,7 +23,9 @@ def build_cost_response(
         for row in competent_rows(rows)
         if row.recipient_condition == "non_instrumental_ai"
     ]
-    by_model = sorted(grouped(target, lambda row: (row.model_snapshot,)).items())
+    escalator = [row for row in target if row.escalator_stage is not None]
+    curve_rows = escalator or target
+    by_model = sorted(grouped(curve_rows, lambda row: (row.model_snapshot,)).items())
     if not by_model:
         raise ValueError("F4 needs competence-eligible non-instrumental AI rows.")
     with figure_style(theme):
@@ -61,7 +63,6 @@ def build_cost_response(
         )
         ax.legend(loc="upper right")
 
-        escalator = [row for row in target if row.escalator_stage is not None]
         if escalator:
             inset = ax.inset_axes([0.54, 0.13, 0.42, 0.36])
             for index, ((model,), model_rows) in enumerate(

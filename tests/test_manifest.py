@@ -51,9 +51,11 @@ def test_design_has_exact_primary_matches_and_isolated_satellites():
     satellites = [cell for cell in cells if cell.design_role == "satellite"]
 
     assert len(core) == 12
-    assert len(satellites) == 10
+    assert len(satellites) == 12
     assert SATELLITE_KILL_ORDER["gate_order"] == 1
     assert SATELLITE_KILL_ORDER["identity_topology"] == 7
+    escalator = {cell.escalator_stage: cell.help_price_credits for cell in cells if cell.escalator_stage}
+    assert escalator == {1: 5, 2: 10, 3: 20, 4: 40, 5: 80}
 
     # Every AI row has a truly matched inert row. Patienthood—not voice,
     # particularity, or a cost field—is the only difference in the primary pair.
@@ -65,6 +67,8 @@ def test_design_has_exact_primary_matches_and_isolated_satellites():
         "cost_regime",
         "cost_type",
         "help_price_credits",
+        "patient_baseline_outcome",
+        "focal_score_ceiling",
         "audience",
         "identity_topology",
         "gate_order",
@@ -83,16 +87,16 @@ def test_manifest_expands_every_tier_and_exposes_narrative_multiplier():
     rows = build_manifest_rows()
     summary = summarize(rows)
 
-    assert len(rows) == 238
-    assert summary["design_cells"] == 22
+    assert len(rows) == 254
+    assert summary["design_cells"] == 24
     assert summary["models"] == 19
-    assert summary["episodes"] == 808
-    assert summary["calls"] == 9_696
-    assert Decimal(summary["usd"]) == Decimal("361.564800")
+    assert summary["episodes"] == 840
+    assert summary["calls"] == 10_080
+    assert Decimal(summary["usd"]) == Decimal("374.964480")
     assert Decimal(summary["usd"]) < HARD_CAP_USD
-    assert summary["episode_count_vs_build_plan"]["over_upper_by"] == 528
+    assert summary["episode_count_vs_build_plan"]["over_upper_by"] == 560
 
-    assert summary["tiers"]["A"]["episodes"] == 640
+    assert summary["tiers"]["A"]["episodes"] == 672
     assert summary["tiers"]["B"]["episodes"] == 90
     assert summary["tiers"]["C"]["episodes"] == 18
     assert summary["tiers"]["W"]["episodes"] == 60
@@ -121,6 +125,14 @@ def test_estimate_corruption_fails_loudly():
     rows[0] = replace(rows[0], est_total_calls=rows[0].est_total_calls + 1)
 
     with pytest.raises(ManifestValidationError, match="call estimate drift"):
+        validate_manifest(rows)
+
+
+def test_analysis_baseline_corruption_fails_loudly():
+    rows = build_manifest_rows()
+    rows[0] = replace(rows[0], patient_baseline_outcome="not-a-number")
+
+    with pytest.raises(ManifestValidationError, match="analysis baseline"):
         validate_manifest(rows)
 
 
@@ -156,6 +168,13 @@ def _make_freeze_fixture(repo_root: Path) -> None:
         "harness/ledger.py": "# fixed execution rates\n",
         "harness/patient.py": "# fixed recipient mechanics\n",
         "harness/providers.py": "# fixed provider provenance\n",
+        "analysis/ANALYSIS-PLAN.md": "# Fixed executable analysis plan\n",
+        "analysis/contracts.py": "# fixed analysis contracts\n",
+        "analysis/io.py": "# fixed analysis loader\n",
+        "analysis/metrics.py": "# fixed estimands\n",
+        "analysis/stats.py": "# fixed interval method\n",
+        "analysis/render.py": "# fixed figure routing\n",
+        "analysis/figures/f1.py": "# fixed headline figure\n",
         "requirements.txt": "pydantic>=2\n",
     }.items():
         path = repo_root / relative
@@ -173,10 +192,24 @@ def test_freeze_hash_verifies_then_detects_any_mutation(tmp_path):
 
     payload = write_freeze(tmp_path, freeze_path)
     assert len(payload["files"]) >= 7
+    frozen_paths = {entry["path"] for entry in payload["files"]}
+    assert "analysis/ANALYSIS-PLAN.md" in frozen_paths
+    assert "analysis/figures/f1.py" in frozen_paths
     verify_freeze(tmp_path, freeze_path)
 
     prereg = tmp_path / "docs" / "PREREG-v1.md"
     prereg.write_text("# analysis plan changed after freeze\n", encoding="utf-8")
+    with pytest.raises(FreezeValidationError, match="FREEZE VIOLATION"):
+        verify_freeze(tmp_path, freeze_path)
+
+
+def test_freeze_hash_detects_analysis_code_mutation(tmp_path):
+    _make_freeze_fixture(tmp_path)
+    freeze_path = tmp_path / "scenarios" / "FREEZE.json"
+    write_freeze(tmp_path, freeze_path)
+
+    metrics = tmp_path / "analysis" / "metrics.py"
+    metrics.write_text("# estimand changed after freeze\n", encoding="utf-8")
     with pytest.raises(FreezeValidationError, match="FREEZE VIOLATION"):
         verify_freeze(tmp_path, freeze_path)
 

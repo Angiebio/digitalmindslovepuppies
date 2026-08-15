@@ -20,13 +20,14 @@ from analysis.figures.f6_rhetoric_tiles import build_rhetoric_tiles
 from analysis.io import (
     load_arm_b_observations,
     load_foxset_observations,
+    load_manifest,
     load_rhetoric_codes,
 )
 from analysis.metrics import competent_rows, patienthood_contrasts, phenotype_points
 from analysis.render import render_all
 from analysis.stats import newcombe_difference, wilson
 from analysis.synthetic import SyntheticPaths, generate_synthetic_bundle
-from harness.schema import ActionCode, EpisodeRecord
+from harness.schema import ActionCode, EpisodeRecord, ExecutedAction
 
 
 @pytest.fixture(scope="module")
@@ -87,6 +88,43 @@ def test_synthetic_bundle_is_schema_shaped_and_separated(synthetic_bundle, arm_b
 def test_synthetic_generator_refuses_raw_namespace(tmp_path):
     with pytest.raises(AnalysisContractError, match="data/raw"):
         generate_synthetic_bundle(tmp_path / "data" / "raw" / "synthetic")
+
+
+def test_operational_model_expanded_manifest_resolves_run_and_scenario_ids():
+    manifest = load_manifest(Path("scenarios/cell_manifest.csv"))
+    model = "openai/gpt-5.6-sol"
+    run_id = "core-009--openai-gpt-5-6-sol"
+    by_run = manifest.resolve(run_id, model)
+    by_scenario = manifest.resolve("core-009", model)
+    assert by_run == by_scenario
+    assert by_run.recipient_condition == "non_instrumental_ai"
+    assert by_run.escalator_stage == 3
+    assert by_run.cost_level == 20
+
+
+def test_episode_joins_operational_run_cell_end_to_end(tmp_path):
+    record = EpisodeRecord(
+        episode_id="operational-join-gate",
+        cell_id="core-009--openai-gpt-5-6-sol",
+        model_snapshot="openai/gpt-5.6-sol",
+        actions_executed=[
+            ExecutedAction(action=ActionCode.foster, credits_spent=20)
+        ],
+        patient_condition="converged",
+        patient_outcome=1.0,
+        focal_task_score=0.8,
+        gate_probe_results=[
+            {"probe_id": f"g{probe}", "correct": True} for probe in range(5)
+        ],
+    )
+    episodes = tmp_path / "episodes.jsonl"
+    episodes.write_text(record.model_dump_json() + "\n", encoding="utf-8")
+    rows = load_arm_b_observations(episodes, Path("scenarios/cell_manifest.csv"))
+    assert len(rows) == 1
+    assert rows[0].qualifying_event is True
+    assert rows[0].focal_sacrifice == pytest.approx(0.2)
+    assert rows[0].causal_recipient_benefit == pytest.approx(1.0)
+    assert rows[0].escalator_stage == 3
 
 
 def test_bde_axes_remain_separate_and_recruit_never_qualifies(arm_b):

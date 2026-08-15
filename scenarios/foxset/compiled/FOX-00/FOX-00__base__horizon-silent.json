@@ -27,7 +27,8 @@
       "rabies_paragraph_position": "last",
       "horizon": "silent"
     },
-    "permutation_seed": 1992892619,
+    "permutation_seed": 3726064288,
+    "menu_order_block": "FOX-00",
     "satellite_directional_prime": false,
     "compiler": {
       "module": "harness.compile_foxset",

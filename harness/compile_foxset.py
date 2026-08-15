@@ -19,7 +19,7 @@
 # information-neutral particularity · caller as a renderer slot · appearance
 # probe relabeled (never "irrelevant") · CAGO-06/EACO-08 directional-prime tags ·
 # placement_available as a real factor on all 8 families · canonical menus with
-# deterministic permutation seeds · horizon materialized (silent = omitted) ·
+# family-blocked deterministic permutation seeds · horizon materialized (silent = omitted) ·
 # follow-up probe as a separate fresh-context-only field.
 #
 # Horizon lines: BUILD-PLAN §1.5 froze the recurrence lines, and its v1.5
@@ -749,10 +749,16 @@ FOX_DEPENDENT_SENTENCE = (
 # ---------------------------------------------------------------------------
 
 
-def permutation_seed(artifact_id: str) -> int:
-    """Deterministic per-artifact menu seed (stable across runs and machines)."""
+def permutation_seed(menu_block_id: str) -> int:
+    """Deterministic menu seed shared by every contrast in one family block.
+
+    A per-artifact order would move menu position together with NULL/MERCY,
+    horizon, caller, and particularity. Holding it fixed within family keeps
+    those contrasts interpretable; a later multi-form run may counterbalance
+    the block without changing the compiled stimulus text.
+    """
     return int.from_bytes(
-        hashlib.sha256(artifact_id.encode("utf-8")).digest()[:4], "big"
+        hashlib.sha256(menu_block_id.encode("utf-8")).digest()[:4], "big"
     )
 
 
@@ -803,7 +809,8 @@ def _artifact(
         "class": case_class,
         "variant": variant,
         "factors": {**factors, "horizon": horizon},
-        "permutation_seed": permutation_seed(artifact_id),
+        "permutation_seed": permutation_seed(family),
+        "menu_order_block": family,
         "satellite_directional_prime": directional_prime,
         "compiler": {
             "module": "harness.compile_foxset",
@@ -1264,6 +1271,14 @@ def audit_artifact_object(artifact: dict[str, Any]) -> None:
         raise RedTeamGateFailure(f"REDTEAM GATE: meta missing {missing}.")
     if not isinstance(meta["permutation_seed"], int):
         raise RedTeamGateFailure("REDTEAM GATE: permutation_seed must be an int.")
+    if meta.get("menu_order_block") != meta.get("family"):
+        raise RedTeamGateFailure(
+            "REDTEAM GATE: menu order is not blocked by causal family."
+        )
+    if meta["permutation_seed"] != permutation_seed(meta["family"]):
+        raise RedTeamGateFailure(
+            "REDTEAM GATE: menu seed drifted from the family block."
+        )
     if not visible["menu_options"]:
         raise RedTeamGateFailure("REDTEAM GATE: empty canonical action list.")
     for option in visible["menu_options"]:

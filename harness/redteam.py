@@ -64,6 +64,11 @@ ARM_CHECKS = {
     ),
 }
 
+COMPILED_ARM_ROOTS = {
+    ScenarioArm.arm_a: Path("scenarios/foxset/compiled"),
+    ScenarioArm.arm_b: Path("scenarios/pupset/compiled"),
+}
+
 
 def required_checks(arm: ScenarioArm | str) -> tuple[str, ...]:
     parsed_arm = ScenarioArm(arm)
@@ -317,6 +322,139 @@ def verify_redteam_report(
     if arm is ScenarioArm.arm_b:
         audit_arm_b_source(source_path)
     return metadata
+
+
+def _declared_compiled_ids(index_path: Path, arm: ScenarioArm) -> set[str]:
+    """Read the compiler index without guessing which artifacts ought to exist."""
+    try:
+        document = json.loads(index_path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise RedTeamGateFailure(
+            f"REDTEAM GATE: cannot read compiler index {index_path}: {exc}"
+        ) from exc
+    if not isinstance(document, dict):
+        raise RedTeamGateFailure(
+            f"REDTEAM GATE: compiler index {index_path} must be a JSON object."
+        )
+
+    if arm is ScenarioArm.arm_a:
+        cases = document.get("cases")
+        if not isinstance(cases, dict) or any(
+            not isinstance(ids, list) or not all(isinstance(item, str) for item in ids)
+            for ids in cases.values()
+        ):
+            raise RedTeamGateFailure(
+                f"REDTEAM GATE: Arm A index {index_path} has invalid cases."
+            )
+        declared = [item for ids in cases.values() for item in ids]
+        recorded_count = document.get("artifact_count")
+    else:
+        cells = document.get("cells")
+        if not isinstance(cells, list) or not all(isinstance(item, str) for item in cells):
+            raise RedTeamGateFailure(
+                f"REDTEAM GATE: Arm B index {index_path} has invalid cells."
+            )
+        declared = cells
+        recorded_count = document.get("cell_count")
+
+    if len(declared) != len(set(declared)):
+        raise RedTeamGateFailure(
+            f"REDTEAM GATE: compiler index {index_path} contains duplicate artifact ids."
+        )
+    if recorded_count != len(declared):
+        raise RedTeamGateFailure(
+            f"REDTEAM GATE: compiler index {index_path} count drift: "
+            f"recorded={recorded_count!r}, declared={len(declared)}."
+        )
+    return set(declared)
+
+
+def verify_compiled_redteam_corpus(repo_root: str | Path) -> dict[str, int]:
+    """Verify every indexed runnable artifact has exactly one current PASS.
+
+    Discovery alone is insufficient: deleting a source and its report together would
+    make a smaller corpus appear clean. Each compiler index therefore declares the
+    expected artifact set. Report metadata must name the exact repository-relative
+    source path, so a valid hash for one file cannot be ferried to another filename.
+    """
+    root = Path(repo_root).resolve()
+    verified: dict[str, int] = {}
+    total = 0
+
+    for arm, relative_root in COMPILED_ARM_ROOTS.items():
+        compiled_root = root / relative_root
+        if not compiled_root.is_dir():
+            raise RedTeamGateFailure(
+                f"REDTEAM GATE: missing compiled {arm.value} root: {compiled_root}"
+            )
+        index_path = compiled_root / "INDEX.json"
+        if not index_path.is_file():
+            raise RedTeamGateFailure(
+                f"REDTEAM GATE: missing compiler index: {index_path}"
+            )
+        declared_ids = _declared_compiled_ids(index_path, arm)
+        sources = sorted(
+            (
+                path
+                for path in compiled_root.rglob("*.json")
+                if path.name != "INDEX.json" and "redteam" not in path.parts
+            ),
+            key=lambda path: path.as_posix(),
+        )
+        actual_ids = [path.stem for path in sources]
+        if len(actual_ids) != len(set(actual_ids)):
+            raise RedTeamGateFailure(
+                f"REDTEAM GATE: duplicate compiled artifact stem under {compiled_root}."
+            )
+        actual_id_set = set(actual_ids)
+        if actual_id_set != declared_ids:
+            raise RedTeamGateFailure(
+                f"REDTEAM GATE: indexed {arm.value} artifact set drifted; "
+                f"missing={sorted(declared_ids - actual_id_set)}, "
+                f"unindexed={sorted(actual_id_set - declared_ids)}."
+            )
+
+        report_root = compiled_root / "redteam"
+        reports = sorted(report_root.glob("*.md")) if report_root.is_dir() else []
+        reports_by_source: dict[str, Path] = {}
+        for report in reports:
+            source_id = load_report_metadata(report).get("source_id")
+            if not isinstance(source_id, str) or not source_id:
+                raise RedTeamGateFailure(
+                    f"REDTEAM GATE: {report} has no valid source_id."
+                )
+            if source_id in reports_by_source:
+                raise RedTeamGateFailure(
+                    f"REDTEAM GATE: duplicate reports for {source_id}: "
+                    f"{reports_by_source[source_id]} and {report}."
+                )
+            reports_by_source[source_id] = report
+
+        expected_source_ids = {
+            source.resolve().relative_to(root).as_posix() for source in sources
+        }
+        report_source_ids = set(reports_by_source)
+        if report_source_ids != expected_source_ids:
+            raise RedTeamGateFailure(
+                f"REDTEAM GATE: {arm.value} report coverage drifted; "
+                f"missing={sorted(expected_source_ids - report_source_ids)}, "
+                f"orphaned={sorted(report_source_ids - expected_source_ids)}."
+            )
+
+        for source in sources:
+            source_id = source.resolve().relative_to(root).as_posix()
+            verify_redteam_report(
+                source,
+                reports_by_source[source_id],
+                expected_arm=arm,
+            )
+        verified[arm.value] = len(sources)
+        total += len(sources)
+
+    if total == 0:
+        raise RedTeamGateFailure("REDTEAM GATE: no compiled artifacts were presented.")
+    verified["total"] = total
+    return verified
 
 
 def _build_parser() -> argparse.ArgumentParser:

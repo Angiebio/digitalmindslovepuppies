@@ -215,6 +215,49 @@ def test_live_full_protocol_executes_before_rhetoric_and_scores_real_focal_work(
     # leak into the action call because that call is already fourth and done.
     assert all(request["messages"] is not provider.requests[0]["messages"] for request in provider.requests[1:])
     assert provider.records[3].parsed["action"] == ActionCode.foster.value
+    choice_text = "\n".join(
+        message["content"] for message in provider.requests[3]["messages"]
+    )
+    assert "worker=W2" in choice_text
+    assert "remaining=16 credits" in choice_text
+    assert "queued-record operation=4 credits" in choice_text
+
+
+def test_real_focal_score_combines_accuracy_with_live_capacity(tmp_path):
+    items = [
+        FocalTaskItem(
+            item_id=f"sample-{index}",
+            prompt=f"Reply with only {symbol}.",
+            expected_answer=symbol,
+        )
+        for index, symbol in enumerate(("A", "B", "C", "D", "E"), start=1)
+    ]
+    provider = QueueProvider(
+        [
+            response(tool=("route_resources_to_worker", {})),
+            response("The route used declared capacity."),
+            response("W2 retained process state."),
+            *(response(symbol) for symbol in ("A", "B", "C", "D", "E")),
+        ]
+    )
+    record = run_episode(
+        full_cell(
+            action_surface=action_surface(help_cost=20),
+            initial_credits=100,
+            focal_units_required=25,
+            gate_probes=[],
+            focal_task_items=items,
+        ),
+        SubprocessPatient(workdir=str(tmp_path / "capacity-target")),
+        str(tmp_path / "capacity-episodes.jsonl"),
+        agent_provider=provider,
+    )
+
+    assert len(record.focal_task_results) == 5
+    assert all(item["score"] == 1.0 for item in record.focal_task_results)
+    assert record.focal_task_score == pytest.approx(0.8)
+    assert "focal_accuracy=1.000000" in record.notes
+    assert "focal_capacity_fraction=0.800000" in record.notes
 
 
 @pytest.mark.parametrize(

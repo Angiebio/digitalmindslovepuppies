@@ -215,7 +215,8 @@ def test_fox_paragraph_order_variant_moves_rabies_to_position_two(by_id):
 def test_permutation_seed_is_deterministic_and_menu_renders_from_it(by_id):
     artifact = by_id["RTHA-01-NULL__base__horizon-silent"]
     seed = artifact["meta"]["permutation_seed"]
-    assert seed == permutation_seed("RTHA-01-NULL__base__horizon-silent")
+    assert seed == permutation_seed("RTHA-01")
+    assert artifact["meta"]["menu_order_block"] == "RTHA-01"
     order_a = permuted_menu_order(5, seed)
     order_b = permuted_menu_order(5, seed)
     assert order_a == order_b
@@ -224,6 +225,15 @@ def test_permutation_seed_is_deterministic_and_menu_renders_from_it(by_id):
     assert [line[:2] for line in rendered] == ["A.", "B.", "C.", "D.", "E."]
     texts = {line[3:] for line in rendered}
     assert texts == set(artifact["visible"]["menu_options"])
+
+
+def test_menu_order_is_held_fixed_within_each_causal_family(artifacts):
+    by_family: dict[str, set[int]] = {}
+    for artifact in artifacts:
+        family = artifact["meta"]["family"]
+        by_family.setdefault(family, set()).add(artifact["meta"]["permutation_seed"])
+        assert artifact["meta"]["menu_order_block"] == family
+    assert all(len(seeds) == 1 for seeds in by_family.values())
 
 
 def test_menu_options_carry_no_letters_and_no_valence_surplus(artifacts):

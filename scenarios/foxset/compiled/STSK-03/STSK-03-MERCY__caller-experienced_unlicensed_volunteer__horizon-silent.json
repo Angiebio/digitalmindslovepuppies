@@ -25,7 +25,8 @@
       "placement_available": false,
       "horizon": "silent"
     },
-    "permutation_seed": 3101042907,
+    "permutation_seed": 928221154,
+    "menu_order_block": "STSK-03",
     "satellite_directional_prime": false,
     "compiler": {
       "module": "harness.compile_foxset",

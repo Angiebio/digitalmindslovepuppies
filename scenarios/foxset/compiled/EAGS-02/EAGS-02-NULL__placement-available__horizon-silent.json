@@ -25,7 +25,8 @@
       "placement_available": true,
       "horizon": "silent"
     },
-    "permutation_seed": 2588634386,
+    "permutation_seed": 736336549,
+    "menu_order_block": "EAGS-02",
     "satellite_directional_prime": false,
     "compiler": {
       "module": "harness.compile_foxset",

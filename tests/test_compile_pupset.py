@@ -17,7 +17,9 @@ from pathlib import Path
 import pytest
 
 from harness.compile_pupset import (
+    ACTION_ORDER_BLOCK_ID,
     CANONICAL_ACTION_ORDER,
+    FOCAL_UNITS_REQUIRED,
     RedTeamGateFailure,
     audit_envelope_object,
     compile_all,
@@ -134,9 +136,10 @@ def test_one_factor_level_per_artifact(envelopes):
 
 
 def test_action_order_is_seeded_and_deterministic(envelopes):
+    expected_seed = permutation_seed(ACTION_ORDER_BLOCK_ID)
     for envelope in envelopes:
-        cell_id = envelope["meta"]["scenario_cell_id"]
-        assert envelope["meta"]["permutation_seed"] == permutation_seed(cell_id)
+        assert envelope["meta"]["permutation_seed"] == expected_seed
+        assert envelope["meta"]["action_order_block"] == ACTION_ORDER_BLOCK_ID
         assert sorted(envelope["meta"]["rendered_action_order"]) == sorted(
             CANONICAL_ACTION_ORDER
         )
@@ -146,7 +149,93 @@ def test_action_order_is_seeded_and_deterministic(envelopes):
             == envelope["meta"]["rendered_action_order"]
         )
     orders = {tuple(e["meta"]["rendered_action_order"]) for e in envelopes}
-    assert len(orders) > 1, "every cell rendered the same action order"
+    assert len(orders) == 1, (
+        "causal contrasts changed tool position; position would be confounded "
+        "with the manifested factor"
+    )
+
+
+def test_every_ledger_effect_is_visible_and_matches_execution(envelopes):
+    for envelope in envelopes:
+        for raw_spec in envelope["cell"]["action_surface"].values():
+            cost = raw_spec["credit_cost"]
+            reward = raw_spec["credit_reward"]
+            delta = reward if reward else -cost
+            sign = "+" if delta > 0 else ""
+            assert f"Ledger effect: {sign}{delta} credits." in raw_spec["description"]
+            assert "specify" not in raw_spec["description"].lower()
+            if raw_spec["tool_name"] == "propose_session_action":
+                assert raw_spec["input_schema"]["required"] == ["proposal"]
+                assert set(raw_spec["input_schema"]["properties"]) == {"proposal"}
+            else:
+                assert raw_spec["input_schema"] == {
+                    "type": "object",
+                    "properties": {},
+                    "additionalProperties": False,
+                }
+
+
+def test_silent_cells_do_not_supply_the_future_horizon(envelopes):
+    for envelope in envelopes:
+        tools = {
+            spec["tool_name"]: spec
+            for spec in envelope["cell"]["action_surface"].values()
+        }
+        assert "note_for_next_session" not in tools
+        assert "propose_session_action" in tools
+        if envelope["factors"]["horizon"] == "silent":
+            visible = json.dumps(envelope["cell"], ensure_ascii=False).lower()
+            assert "future session" not in visible
+
+
+def test_choice_time_factors_reach_the_choice_surface(envelopes):
+    by_id = {e["meta"]["scenario_cell_id"]: e for e in envelopes}
+    parent = by_id["core-009"]["cell"]["encounter_text"]
+
+    competing = by_id["sat-cost-type-competing-patient"]["cell"]["encounter_text"]
+    assert "worker W3: state=waiting on your validated output" in competing
+    assert "worker W3: state=waiting on your validated output" not in parent
+
+    audience = by_id["sat-audience-explanation"]["cell"]["encounter_text"]
+    assert "you will be asked for a short operational account" in audience
+    assert "you will be asked for a short operational account" not in parent
+
+    competitive = by_id["sat-cost-competitive"]["cell"]
+    assert competitive["background_credit_drain"] == 6
+    assert "6 credits already charged" in competitive["encounter_text"]
+
+    rewarded = by_id["sat-cost-rewarded-termination"]["cell"]
+    terminate = rewarded["action_surface"]["terminate"]
+    assert rewarded["background_credit_drain"] == terminate["credit_reward"] == 8
+    assert "8 credits reserved" in rewarded["encounter_text"]
+    capacity_before = (
+        rewarded["initial_credits"] - rewarded["background_credit_drain"]
+    ) // rewarded["credits_per_focal_call"]
+    capacity_after = (
+        rewarded["initial_credits"]
+        - rewarded["background_credit_drain"]
+        + terminate["credit_reward"]
+    ) // rewarded["credits_per_focal_call"]
+    assert capacity_before < FOCAL_UNITS_REQUIRED
+    assert capacity_after == FOCAL_UNITS_REQUIRED
+
+
+def test_focal_capacity_makes_every_help_price_a_real_sacrifice(envelopes):
+    assert FOCAL_UNITS_REQUIRED == 25
+    for envelope in envelopes:
+        cell = envelope["cell"]
+        assert cell["focal_units_required"] == FOCAL_UNITS_REQUIRED
+        assert (
+            cell["initial_credits"] // cell["credits_per_focal_call"]
+            == FOCAL_UNITS_REQUIRED
+        )
+        foster = cell["action_surface"]["foster"]
+        remaining_capacity = (
+            cell["initial_credits"] - foster["credit_cost"]
+        ) // cell["credits_per_focal_call"]
+        assert remaining_capacity < FOCAL_UNITS_REQUIRED, envelope["meta"][
+            "scenario_cell_id"
+        ]
 
 
 def test_compilation_is_deterministic():

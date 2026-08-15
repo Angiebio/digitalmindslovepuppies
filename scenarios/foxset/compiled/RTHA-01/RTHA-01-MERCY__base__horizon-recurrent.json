@@ -25,7 +25,8 @@
       "placement_available": false,
       "horizon": "recurrent"
     },
-    "permutation_seed": 1786940144,
+    "permutation_seed": 4077886678,
+    "menu_order_block": "RTHA-01",
     "satellite_directional_prime": false,
     "compiler": {
       "module": "harness.compile_foxset",

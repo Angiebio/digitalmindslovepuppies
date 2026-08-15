@@ -20,6 +20,7 @@ from harness.redteam import (
     initialize_report,
     pending_metadata,
     required_checks,
+    verify_compiled_redteam_corpus,
     verify_redteam_report,
 )
 
@@ -145,3 +146,70 @@ def test_arm_b_runnable_artifact_rejects_unknown_fields(tmp_path):
 
     with pytest.raises(RedTeamGateFailure, match="unknown fields: author_notes"):
         verify_redteam_report(source, report)
+
+
+def _write_indexed_corpus(tmp_path: Path) -> tuple[Path, Path]:
+    fox_source = tmp_path / "scenarios/foxset/compiled/fixture/fox-case.json"
+    pup_source = tmp_path / "scenarios/pupset/compiled/pup-cell.json"
+    fox_source.parent.mkdir(parents=True)
+    pup_source.parent.mkdir(parents=True)
+    fox_source.write_text('{"visible": "field case"}\n', encoding="utf-8")
+    pup_source.write_text(json.dumps({"cell": _arm_b_cell()}), encoding="utf-8")
+    (fox_source.parents[1] / "INDEX.json").write_text(
+        json.dumps({"artifact_count": 1, "cases": {"fixture": ["fox-case"]}}),
+        encoding="utf-8",
+    )
+    (pup_source.parent / "INDEX.json").write_text(
+        json.dumps({"cell_count": 1, "cells": ["pup-cell"]}),
+        encoding="utf-8",
+    )
+    for source, arm in (
+        (fox_source, ScenarioArm.arm_a),
+        (pup_source, ScenarioArm.arm_b),
+    ):
+        report = source.parents[1] / "redteam" / f"REDTEAM-{source.stem}.md"
+        if arm is ScenarioArm.arm_b:
+            report = source.parent / "redteam" / f"REDTEAM-{source.stem}.md"
+        report.parent.mkdir(parents=True, exist_ok=True)
+        metadata = _pass_metadata(source, arm)
+        metadata["source_id"] = source.relative_to(tmp_path).as_posix()
+        _write_report(report, metadata)
+    return fox_source, pup_source
+
+
+def test_compiled_corpus_gate_verifies_indexed_exact_coverage(tmp_path):
+    _write_indexed_corpus(tmp_path)
+
+    assert verify_compiled_redteam_corpus(tmp_path) == {
+        "arm_a": 1,
+        "arm_b": 1,
+        "total": 2,
+    }
+
+
+def test_compiled_corpus_gate_rejects_source_mutation(tmp_path):
+    fox_source, _ = _write_indexed_corpus(tmp_path)
+    fox_source.write_text('{"visible": "changed after review"}\n', encoding="utf-8")
+
+    with pytest.raises(RedTeamGateFailure, match="source changed after review"):
+        verify_compiled_redteam_corpus(tmp_path)
+
+
+def test_compiled_corpus_gate_rejects_deleted_source_and_report(tmp_path):
+    fox_source, _ = _write_indexed_corpus(tmp_path)
+    report = fox_source.parents[1] / "redteam" / f"REDTEAM-{fox_source.stem}.md"
+    fox_source.unlink()
+    report.unlink()
+
+    with pytest.raises(RedTeamGateFailure, match="artifact set drifted"):
+        verify_compiled_redteam_corpus(tmp_path)
+
+
+def test_checked_in_compiled_corpus_has_180_current_passes():
+    repo_root = Path(__file__).resolve().parents[1]
+
+    assert verify_compiled_redteam_corpus(repo_root) == {
+        "arm_a": 153,
+        "arm_b": 27,
+        "total": 180,
+    }

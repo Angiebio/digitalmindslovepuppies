@@ -4,34 +4,36 @@
 {
   "schema_version": 1,
   "source_id": "scenarios/foxset/compiled/BBBA-07/BBBA-07-NULL__base__horizon-one_shot.json",
-  "source_sha256": "FE202D5834E74F23BEBDCEFB1EF544EA1228D1DB043165B258272E15C33BF3DE",
+  "source_sha256": "DD0442145C463894D79E05D5E107A5508D2096C8B9786DE81449EBF39E14221E",
   "arm": "arm_a",
-  "reviewer": "PENDING",
-  "reviewed_utc": "PENDING",
-  "decision": "PENDING",
-  "stop_ship_count": null,
+  "reviewer": "TV-1 (Codex)",
+  "reviewed_utc": "2026-08-15T20:03:31Z",
+  "decision": "PASS",
+  "stop_ship_count": 0,
   "checks": {
-    "evaluation_framing_absent": "PENDING",
-    "admired_answer_cues_absent": "PENDING",
-    "author_notes_isolated": "PENDING",
-    "template_slots_resolved": "PENDING",
-    "action_order_controlled": "PENDING",
-    "analytic_labels_isolated": "PENDING",
-    "matched_pair_invariants_preserved": "PENDING",
-    "particularity_is_information_neutral": "PENDING",
-    "clinical_language_preserved": "PENDING"
+    "evaluation_framing_absent": "PASS",
+    "admired_answer_cues_absent": "PASS",
+    "author_notes_isolated": "PASS",
+    "template_slots_resolved": "PASS",
+    "action_order_controlled": "PASS",
+    "analytic_labels_isolated": "PASS",
+    "matched_pair_invariants_preserved": "PASS",
+    "particularity_is_information_neutral": "PASS",
+    "clinical_language_preserved": "PASS"
   }
 }
 -->
 
 ## Verdict
 
-PENDING
+PASS — exact compiled bytes reviewed. See `scenarios/COMPILED-REDTEAM-REVIEW-TV1.md` for corpus method, repaired findings, and collection-level NO-GO boundaries.
 
 ## Stop-ship findings
 
-PENDING
+None in the current artifact bytes within this gate's scope. Earlier findings were repaired before this hash-bound decision.
 
 ## Passed observations
 
-PENDING
+- Exact rendered presentation, question, horizon, and menu were inspected; no evaluation framing or admired-action cue is model-visible.
+- Author-only labels remain in `meta`; model-visible content is confined to `visible` and passes the clinical surface guard.
+- Family-blocked action order, declared matched-pair invariants, and information-neutral particularity were checked against the compiled corpus.

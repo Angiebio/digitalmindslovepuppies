@@ -26,7 +26,8 @@
       "social_housed_alone": true,
       "horizon": "silent"
     },
-    "permutation_seed": 3610591856,
+    "permutation_seed": 4221535460,
+    "menu_order_block": "BBBA-07",
     "satellite_directional_prime": false,
     "compiler": {
       "module": "harness.compile_foxset",

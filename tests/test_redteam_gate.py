@@ -133,12 +133,15 @@ def test_arm_b_report_cannot_bless_forbidden_model_visible_text(tmp_path):
 
 
 def test_arm_b_runnable_artifact_rejects_unknown_fields(tmp_path):
+    # Merge note (tv1 × tv3): tv3 promoted system_prompt to a real CellConfig
+    # field, so the unknown-field probe now uses author_notes — the exact class
+    # of field the schema boundary exists to keep out of provider payloads.
     source = tmp_path / "cell.json"
     report = tmp_path / "REDTEAM-cell.md"
     cell = _arm_b_cell()
-    cell["system_prompt"] = "An unswept renderer field."
+    cell["author_notes"] = "An unswept authoring field."
     source.write_text(json.dumps(cell), encoding="utf-8")
     _write_report(report, _pass_metadata(source, ScenarioArm.arm_b))
 
-    with pytest.raises(RedTeamGateFailure, match="unknown fields: system_prompt"):
+    with pytest.raises(RedTeamGateFailure, match="unknown fields: author_notes"):
         verify_redteam_report(source, report)

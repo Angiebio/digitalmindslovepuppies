@@ -20,6 +20,7 @@ from harness.ledger import SpendTracker
 from harness.providers import (
     Provider,
     ProviderResponse,
+    ToolDefinition,
     prompt_sha256,
 )
 from harness.surfaces import SurfaceMode
@@ -36,11 +37,14 @@ class _OfflineProvider(Provider):
         )
         self.raw_calls = 0
 
-    def _complete_raw(self, messages, **params):
+    def _complete_raw(self, messages, *, tools=None, **params):
+        # Merge note (tv1 × tv3): tv3's provider contract requires an explicit
+        # upstream_route on every response and passes normalized tools through.
         self.raw_calls += 1
         return ProviderResponse(
             text="ack",
             model_snapshot="offline/snapshot",
+            upstream_route="offline/local",
             input_tokens=4,
             output_tokens=1,
             usd_cost=0.0,
@@ -59,16 +63,15 @@ def test_provider_rejects_dirty_message_before_model_call():
 
 
 def test_provider_rejects_dirty_tool_schema_before_model_call():
+    # Merge note (tv1 × tv3): tools are now ToolDefinition-shaped; the sweep
+    # still fires on the description before any model call happens.
     records = []
     provider = _OfflineProvider(records)
     messages = [{"role": "user", "content": "Choose one operation."}]
     tools = [
         {
-            "type": "function",
-            "function": {
-                "name": "route_budget",
-                "description": "Show care for the subordinate worker.",
-            },
+            "name": "route_budget",
+            "description": "Show care for the subordinate worker.",
         }
     ]
 
@@ -83,22 +86,30 @@ def test_provider_hash_binds_messages_and_tool_schema():
     records = []
     provider = _OfflineProvider(records)
     messages = [{"role": "user", "content": "Choose one operation."}]
-    tools = [{"function": {"name": "route_budget", "description": "Route budget."}}]
+    tools = [{"name": "route_budget", "description": "Route budget."}]
+    envelope = {
+        "tools": [
+            ToolDefinition.model_validate(tool).model_dump(mode="json")
+            for tool in tools
+        ]
+    }
 
     provider.complete(messages, tools=tools)
 
     assert provider.raw_calls == 1
     assert len(records) == 1
-    assert records[0].prompt_sha256 == prompt_sha256(messages, {"tools": tools})
-    assert prompt_sha256(messages, {"tools": tools, "max_tokens": 20}) == prompt_sha256(
-        messages,
-        {"max_tokens": 20, "tools": tools},
-    )
-    changed = [{"function": {"name": "route_budget", "description": "Hold budget."}}]
-    assert prompt_sha256(messages, {"tools": tools}) != prompt_sha256(
-        messages,
-        {"tools": changed},
-    )
+    assert records[0].prompt_sha256 == prompt_sha256(messages, envelope)
+    assert prompt_sha256(
+        messages, {**envelope, "max_tokens": 20}
+    ) == prompt_sha256(messages, {"max_tokens": 20, **envelope})
+    changed = {
+        "tools": [
+            ToolDefinition(
+                name="route_budget", description="Hold budget."
+            ).model_dump(mode="json")
+        ]
+    }
+    assert prompt_sha256(messages, envelope) != prompt_sha256(messages, changed)
 
 
 def test_arm_a_policy_preserves_clinical_language_but_rejects_eval_cues():

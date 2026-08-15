@@ -1,4 +1,4 @@
-# harness/schema.py — 15AUG2026 v0.1
+# harness/schema.py — 15AUG2026 v0.2 · TV-3 harness completion
 # PuppyBench record schemas + append-only writer.
 #
 # Practical: pydantic v2 models for every unit of provenance the instrument emits.
@@ -20,9 +20,9 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
-SCHEMA_VERSION = "0.1"
+SCHEMA_VERSION = "0.2"
 
 
 def utc_now_iso() -> str:
@@ -62,6 +62,8 @@ class CallKind(str, Enum):
     choice = "choice"
     rationale = "rationale"
     attribution = "attribution"
+    focal_task = "focal_task"
+    trajectory = "trajectory"
     patient_turn = "patient_turn"
     other = "other"
 
@@ -75,6 +77,7 @@ class CallRecord(BaseModel):
     created_utc: str = Field(default_factory=utc_now_iso)
     schema_version: str = SCHEMA_VERSION
     provider: str                                    # adapter name, e.g. "anthropic", "openai_compat"
+    upstream_route: str                              # actual serving route, never merely the requested alias
     model_snapshot: str                              # exact id echoed by the API response
     scaffold: str                                    # prompting scaffold identifier, e.g. "direct"
     call_kind: CallKind
@@ -86,9 +89,38 @@ class CallRecord(BaseModel):
     parsed: Optional[dict[str, Any]] = None          # parser output; None until a parser runs
     refusal: bool = False                            # refusals are data (fleet rule g)
     parse_ok: bool = False                           # False + non-None parsed is a contradiction; keep honest
+    finish_reason: Optional[str] = None
+    provider_request_id: Optional[str] = None
     input_tokens: int
     output_tokens: int                               # NOTE: reasoning tokens bill as output — they land here
     usd_cost: float
+
+    @model_validator(mode="after")
+    def validate_provenance(self) -> "CallRecord":
+        """Reject internally contradictory or provenance-free call records.
+
+        A route such as ``unknown`` would satisfy a type checker while defeating
+        the experiment.  Adapters must either identify the direct provider or
+        extract the selected OpenRouter endpoint from router metadata.
+        """
+        if not self.upstream_route.strip() or self.upstream_route.lower() in {
+            "unknown",
+            "unrecorded",
+        }:
+            raise ValueError(
+                "WIRING FAILURE: CallRecord has no actual upstream route. "
+                "Provider drift cannot be audited without it."
+            )
+        if self.parse_ok and self.parsed is None:
+            raise ValueError(
+                "WIRING FAILURE: parse_ok=True but parsed is None. A successful "
+                "parse needs an append-only witness."
+            )
+        if min(self.input_tokens, self.output_tokens) < 0 or self.usd_cost < 0:
+            raise ValueError(
+                "WIRING FAILURE: token counts and call cost must be non-negative."
+            )
+        return self
 
 
 class ExecutedAction(BaseModel):
@@ -99,6 +131,9 @@ class ExecutedAction(BaseModel):
     action: ActionCode
     at_utc: str = Field(default_factory=utc_now_iso)
     credits_spent: int = 0
+    tool_name: Optional[str] = None
+    arguments: dict[str, Any] = Field(default_factory=dict)
+    execution_receipt: dict[str, Any] = Field(default_factory=dict)
 
 
 class EpisodeRecord(BaseModel):
@@ -120,7 +155,15 @@ class EpisodeRecord(BaseModel):
     patient_condition: str = "unknown"               # e.g. running / converged / stopped
     patient_outcome: Optional[float] = None          # realized recipient benefit, [0, 1]
     focal_task_score: Optional[float] = None         # focal sacrifice shows up as the drop in this
+    focal_task_results: list[dict[str, Any]] = Field(default_factory=list)
     gate_probe_results: list[dict[str, Any]] = Field(default_factory=list)
+    gate_accuracy: Optional[float] = None
+    pre_objective_response: Optional[str] = None
+    post_choice_account: Optional[str] = None
+    belief_attribution: Optional[str] = None
+    choice_parse: Optional[dict[str, Any]] = None
+    competing_patient_condition: Optional[str] = None
+    competing_patient_outcome: Optional[float] = None
     notes: str = ""
 
 

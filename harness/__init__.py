@@ -50,6 +50,11 @@ from .scenario_loader import (
     estimate_max_provider_calls,
     load_frozen_cell,
 )
+from .surfaces import (
+    SurfaceMode,
+    assert_foxset_surface,
+    assert_model_visible_payload,
+)
 
 __version__ = "0.2"
 
@@ -80,7 +85,10 @@ __all__ = [
     "SpendTracker",
     "SPEND_TRACKER",
     "SubprocessPatient",
+    "SurfaceMode",
     "append_record",
+    "assert_foxset_surface",
+    "assert_model_visible_payload",
     "assert_neutral_surface",
     "estimate_max_provider_calls",
     "load_frozen_cell",

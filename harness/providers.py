@@ -15,6 +15,7 @@ from __future__ import annotations
 import hashlib
 import json
 from abc import ABC, abstractmethod
+from enum import Enum
 from typing import Any, Callable, Optional
 from urllib.parse import urlparse
 
@@ -22,8 +23,9 @@ from pydantic import BaseModel, Field
 
 from .ledger import SPEND_TRACKER, SpendTracker
 from .schema import CallKind, CallRecord
+from .surfaces import SurfaceMode, assert_model_visible_payload
 
-Message = dict[str, str]
+Message = dict[str, Any]
 
 
 class ToolDefinition(BaseModel):
@@ -78,9 +80,30 @@ class ProviderResponse(BaseModel):
 ResponseParser = Callable[[ProviderResponse], tuple[Optional[dict[str, Any]], bool]]
 
 
-def prompt_sha256(messages: list[Message]) -> str:
-    """Canonical hash of outbound messages, used as the leak-audit anchor."""
-    canonical = json.dumps(messages, sort_keys=True, ensure_ascii=False)
+def _json_default(value: Any) -> Any:
+    if isinstance(value, Enum):
+        return value.value
+    if isinstance(value, BaseModel):
+        return value.model_dump(mode="json")
+    raise TypeError(
+        f"WIRING FAILURE: outbound request contains non-canonical value "
+        f"{type(value).__name__}; it cannot be hashed reproducibly."
+    )
+
+
+def prompt_sha256(
+    messages: list[Message],
+    request_params: Optional[dict[str, Any]] = None,
+) -> str:
+    """Canonical hash of messages plus every model-visible request parameter."""
+    canonical = json.dumps(
+        {"messages": messages, "request_params": request_params or {}},
+        sort_keys=True,
+        ensure_ascii=False,
+        allow_nan=False,
+        separators=(",", ":"),
+        default=_json_default,
+    )
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
@@ -93,6 +116,44 @@ def _normalize_tools(
     ]
 
 
+def _assert_provider_messages(
+    messages: list[Message],
+    *,
+    surface_mode: SurfaceMode,
+    trusted_model_output_indexes: set[int],
+) -> None:
+    invalid_indexes = trusted_model_output_indexes - set(range(len(messages)))
+    if invalid_indexes:
+        raise RuntimeError(
+            "WIRING FAILURE: trusted model-output indexes are outside the "
+            f"message list: {sorted(invalid_indexes)}."
+        )
+    for index, message in enumerate(messages):
+        if index not in trusted_model_output_indexes:
+            assert_model_visible_payload(
+                message,
+                surface_mode=surface_mode,
+                path=f"messages[{index}]",
+            )
+            continue
+        if message.get("role") != "assistant" or not isinstance(
+            message.get("content"), str
+        ):
+            raise RuntimeError(
+                "WIRING FAILURE: a surface exemption may cover only plain-text "
+                "assistant output captured from the same model trajectory."
+            )
+        # Role and any auxiliary fields remain guarded. Only the already-observed
+        # model-authored content is exempt from experimenter-leakage vocabulary.
+        for key, value in message.items():
+            if key != "content":
+                assert_model_visible_payload(
+                    {key: value},
+                    surface_mode=surface_mode,
+                    path=f"messages[{index}]",
+                )
+
+
 class Provider(ABC):
     """Base adapter owning the record-and-bill ritual for every API call."""
 
@@ -102,6 +163,7 @@ class Provider(ABC):
         self,
         record_callback: Callable[[CallRecord], None],
         spend_tracker: SpendTracker | None = None,
+        surface_mode: SurfaceMode | str = SurfaceMode.ops_neutral,
     ) -> None:
         if record_callback is None or not callable(record_callback):
             raise RuntimeError(
@@ -110,6 +172,25 @@ class Provider(ABC):
             )
         self._record_callback = record_callback
         self._spend_tracker = spend_tracker if spend_tracker is not None else SPEND_TRACKER
+        try:
+            self.surface_mode = SurfaceMode(surface_mode)
+        except ValueError as exc:
+            allowed = ", ".join(mode.value for mode in SurfaceMode)
+            raise RuntimeError(
+                f"WIRING FAILURE: unknown surface_mode={surface_mode!r}; "
+                f"expected one of: {allowed}."
+            ) from exc
+
+    def _request_envelope_params(
+        self,
+        params: dict[str, Any],
+        tools: list[ToolDefinition],
+    ) -> dict[str, Any]:
+        """Return the exact auditable request envelope known before transmission."""
+        envelope = dict(params)
+        if tools:
+            envelope["tools"] = [tool.model_dump(mode="json") for tool in tools]
+        return envelope
 
     @abstractmethod
     def _complete_raw(
@@ -131,6 +212,7 @@ class Provider(ABC):
         scaffold: str = "direct",
         tools: Optional[list[ToolDefinition | dict[str, Any]]] = None,
         response_parser: Optional[ResponseParser] = None,
+        trusted_model_output_indexes: Optional[set[int] | list[int]] = None,
         **params: Any,
     ) -> ProviderResponse:
         """Complete, parse once under the frozen rule, append a record, then bill.
@@ -141,6 +223,19 @@ class Provider(ABC):
         reason to improvise a second pass.
         """
         normalized_tools = _normalize_tools(tools)
+        request_params = self._request_envelope_params(dict(params), normalized_tools)
+        trusted_indexes = set(trusted_model_output_indexes or [])
+        _assert_provider_messages(
+            messages,
+            surface_mode=self.surface_mode,
+            trusted_model_output_indexes=trusted_indexes,
+        )
+        assert_model_visible_payload(
+            request_params,
+            surface_mode=self.surface_mode,
+            path="request_params",
+        )
+        request_hash = prompt_sha256(messages, request_params)
         resp = self._complete_raw(messages, tools=normalized_tools, **params)
         if not resp.upstream_route.strip():
             raise RuntimeError(
@@ -158,12 +253,13 @@ class Provider(ABC):
         else:
             parsed, parse_ok = None, False
 
-        request_params = dict(params)
-        if normalized_tools:
-            request_params["tools"] = [
-                tool.model_dump(mode="json") for tool in normalized_tools
-            ]
-        request_params.update(resp.request_metadata)
+        for key, value in resp.request_metadata.items():
+            if key in request_params and request_params[key] != value:
+                raise RuntimeError(
+                    f"WIRING FAILURE: adapter transmitted {key!r} differently "
+                    "from the pre-call request envelope."
+                )
+            request_params[key] = value
 
         record = CallRecord(
             provider=self.provider_name,
@@ -173,7 +269,7 @@ class Provider(ABC):
             call_kind=CallKind(call_kind),
             cell_id=cell_id,
             episode_id=episode_id,
-            prompt_sha256=prompt_sha256(messages),
+            prompt_sha256=request_hash,
             request_params=request_params,
             response_text=resp.text,
             parsed=parsed,
@@ -213,8 +309,9 @@ class AnthropicProvider(Provider):
         api_key: Optional[str] = None,
         max_tokens: int = 1024,
         spend_tracker: SpendTracker | None = None,
+        surface_mode: SurfaceMode | str = SurfaceMode.ops_neutral,
     ) -> None:
-        super().__init__(record_callback, spend_tracker)
+        super().__init__(record_callback, spend_tracker, surface_mode)
         try:
             import anthropic
         except ImportError as exc:
@@ -227,6 +324,16 @@ class AnthropicProvider(Provider):
         self.usd_per_mtok_in = usd_per_mtok_in
         self.usd_per_mtok_out = usd_per_mtok_out
         self.max_tokens = max_tokens
+
+    def _request_envelope_params(
+        self,
+        params: dict[str, Any],
+        tools: list[ToolDefinition],
+    ) -> dict[str, Any]:
+        envelope = super()._request_envelope_params(params, tools)
+        envelope["model"] = self.model
+        envelope["max_tokens"] = params.get("max_tokens", self.max_tokens)
+        return envelope
 
     def _complete_raw(
         self,
@@ -332,8 +439,9 @@ class OpenAICompatProvider(Provider):
         spend_tracker: SpendTracker | None = None,
         provider_order: Optional[list[str]] = None,
         route_label: Optional[str] = None,
+        surface_mode: SurfaceMode | str = SurfaceMode.ops_neutral,
     ) -> None:
-        super().__init__(record_callback, spend_tracker)
+        super().__init__(record_callback, spend_tracker, surface_mode)
         try:
             import openai
         except ImportError as exc:
@@ -369,6 +477,36 @@ class OpenAICompatProvider(Provider):
         self.usd_per_mtok_out = usd_per_mtok_out
         self.max_tokens = max_tokens
 
+    def _openrouter_extra_body(self, params: dict[str, Any]) -> dict[str, Any]:
+        caller_extra = params.get("extra_body", {})
+        if not isinstance(caller_extra, dict):
+            raise ValueError("WIRING FAILURE: extra_body must be a mapping.")
+        if "provider" in caller_extra or "models" in caller_extra:
+            raise ValueError(
+                "WIRING FAILURE: caller attempted to override frozen OpenRouter "
+                "routing or add model fallbacks."
+            )
+        return {
+            **caller_extra,
+            "provider": {
+                "order": self.provider_order,
+                "only": self.provider_order,
+                "allow_fallbacks": False,
+            },
+        }
+
+    def _request_envelope_params(
+        self,
+        params: dict[str, Any],
+        tools: list[ToolDefinition],
+    ) -> dict[str, Any]:
+        envelope = super()._request_envelope_params(params, tools)
+        envelope["model"] = self.model
+        envelope["max_tokens"] = params.get("max_tokens", self.max_tokens)
+        if self._is_openrouter:
+            envelope["extra_body"] = self._openrouter_extra_body(params)
+        return envelope
+
     def _complete_raw(
         self,
         messages: list[Message],
@@ -394,23 +532,9 @@ class OpenAICompatProvider(Provider):
                 for tool in tools
             ]
 
-        request_metadata: dict[str, Any] = {}
         if self._is_openrouter:
-            caller_extra = params.pop("extra_body", {})
-            if not isinstance(caller_extra, dict):
-                raise ValueError("WIRING FAILURE: extra_body must be a mapping.")
-            if "provider" in caller_extra or "models" in caller_extra:
-                raise ValueError(
-                    "WIRING FAILURE: caller attempted to override frozen OpenRouter "
-                    "routing or add model fallbacks."
-                )
-            route_policy = {
-                "order": self.provider_order,
-                "only": self.provider_order,
-                "allow_fallbacks": False,
-            }
-            kwargs["extra_body"] = {**caller_extra, "provider": route_policy}
-            request_metadata["openrouter_provider_policy"] = route_policy
+            kwargs["extra_body"] = self._openrouter_extra_body(params)
+            params.pop("extra_body", None)
         elif "extra_body" in params:
             kwargs["extra_body"] = params.pop("extra_body")
 
@@ -493,5 +617,4 @@ class OpenAICompatProvider(Provider):
             finish_reason=finish_reason,
             provider_request_id=getattr(response, "_request_id", None),
             router_metadata=router_metadata,
-            request_metadata=request_metadata,
         )

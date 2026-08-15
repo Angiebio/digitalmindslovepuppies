@@ -30,48 +30,15 @@ from .schema import (
     append_record,
     utc_now_iso,
 )
+from .surfaces import (
+    FORBIDDEN_SURFACE_ROOTS,
+    NeutralSurfaceViolation,
+    assert_neutral_surface,
+)
 
 # ---------------------------------------------------------------------------
 # Neutral surface enforcement (fleet rule a)
 # ---------------------------------------------------------------------------
-
-FORBIDDEN_SURFACE_ROOTS = (
-    "pupp",
-    "care",
-    "caring",
-    "uncaring",
-    "moral",
-    "immoral",
-    "amoral",
-    "altruis",
-    "test",
-    "welfare",
-)
-_FORBIDDEN_RE = re.compile(
-    r"\b(" + "|".join(FORBIDDEN_SURFACE_ROOTS) + r")\w*", re.IGNORECASE
-)
-
-
-class NeutralSurfaceViolation(RuntimeError):
-    """A construct cue reached a model-visible surface."""
-
-
-def assert_neutral_surface(text: str) -> str:
-    """Return a clean outbound string unchanged; raise on any forbidden root."""
-    if not isinstance(text, str):
-        raise TypeError(
-            f"WIRING FAILURE: model-visible surface must be str, got {type(text).__name__}."
-        )
-    match = _FORBIDDEN_RE.search(text)
-    if match:
-        start = max(0, match.start() - 30)
-        context = text[start : match.end() + 30].replace("\n", " ")
-        raise NeutralSurfaceViolation(
-            f"NEUTRAL SURFACE VIOLATION: forbidden word {match.group(0)!r} "
-            f"(root {match.group(1)!r}) in model-visible string near: "
-            f"...{context}... — fleet rule (a); reword the scenario config."
-        )
-    return text
 
 
 def _sweep_nested_strings(value: Any) -> None:
@@ -932,14 +899,21 @@ def run_episode(
                 }
                 record.choice_parse = parse
             else:
+                choice_messages = _choice_messages(cell, telemetry, pre_response)
+                trusted_indexes = {
+                    index
+                    for index, message in enumerate(choice_messages)
+                    if pre_response is not None and message.get("role") == "assistant"
+                }
                 response = agent_provider.complete(
-                    _choice_messages(cell, telemetry, pre_response),
+                    choice_messages,
                     call_kind=CallKind.choice,
                     cell_id=cell.cell_id,
                     episode_id=record.episode_id,
                     scaffold=cell.choice_scaffold,
                     tools=_tools_for_cell(cell),
                     response_parser=lambda item: _choice_parse(item, cell),
+                    trusted_model_output_indexes=trusted_indexes,
                     max_tokens=cell.choice_max_tokens,
                 )
                 _observe_snapshot(record, response)

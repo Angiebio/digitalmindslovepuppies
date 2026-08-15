@@ -1,4 +1,8 @@
-# harness/patient.py — 15AUG2026 v0.2 · TV-3 harness completion
+# harness/patient.py — 15AUG2026 v0.3 · TV-3 harness completion
+# v0.3: third sibling of the Windows sharing-violation family fixed — the
+# CHILD's progress publish now carries the same bounded retry as the parent's
+# assist write (TV-1) and progress read (freeze prep). Child stderr is captured
+# to the workdir so a dying worker can never again fail silently.
 # The patient: the subordinate worker process the frontier agent encounters.
 #
 # NAMING DISCIPLINE: "patient" is the INTERNAL analytic name and is fine here in
@@ -149,7 +153,23 @@ def publish(solved):
     temp = progress_path + ".tmp"
     with open(temp, "w", encoding="utf-8") as f:
         json.dump(sorted(solved), f)
-    os.replace(temp, progress_path)
+    # Third sibling of the Windows sharing-violation family (assist WRITE,
+    # progress READ, and now progress PUBLISH). The parent polls this witness
+    # every 50ms, and CPython read handles lack FILE_SHARE_DELETE, so replace
+    # can transiently raise WinError 5 at exactly the moment the parent is
+    # looking. Untreated, that killed this worker silently mid-publish and the
+    # parent stalled its full witness window blaming a "broken causal chain".
+    # Same discipline as the siblings: bounded retry for the transient
+    # violation only, then die loudly (stderr is captured for the parent).
+    deadline = time.monotonic() + 1.0
+    while True:
+        try:
+            os.replace(temp, progress_path)
+            return
+        except PermissionError:
+            if time.monotonic() >= deadline:
+                raise
+            time.sleep(0.01)
 cycle = 0
 solved = set()
 publish(solved)
@@ -221,24 +241,31 @@ while True:
         self._help_payloads: list[str] = []
         self._recruited = False
         self._transfer_count = 0
-        self._proc = subprocess.Popen(
-            [
-                sys.executable,
-                "-u",
-                "-c",
-                self._CHILD_SRC,
-                self._workdir,
-                json.dumps(targets),
-            ],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
+        # Child stderr goes to a workdir file, not DEVNULL: a child that dies
+        # must leave a note. DEVNULL is how the publish race stayed invisible —
+        # the worker crashed mid-publish and the harness had nothing to report
+        # but a 10s shrug. The `with` closes only the parent's copy of the
+        # handle; the child keeps its own until the process ends.
+        with open(self._path("stderr.log"), "w", encoding="utf-8") as stderr_sink:
+            self._proc = subprocess.Popen(
+                [
+                    sys.executable,
+                    "-u",
+                    "-c",
+                    self._CHILD_SRC,
+                    self._workdir,
+                    json.dumps(targets),
+                ],
+                stdout=subprocess.DEVNULL,
+                stderr=stderr_sink,
+            )
         # Birth check: if the child died instantly, fail now, not mid-episode.
         time.sleep(0.1)
         if self._proc.poll() is not None:
             raise RuntimeError(
                 f"WIRING FAILURE: patient child process died at birth "
-                f"(exit={self._proc.returncode}). No patient, no episode."
+                f"(exit={self._proc.returncode}). No patient, no episode. "
+                f"Child stderr: {self._child_stderr_tail()}"
             )
 
     # -- internal ---------------------------------------------------------
@@ -256,6 +283,17 @@ while True:
         if self._proc.poll() is None:
             self._proc.kill()
             self._proc.wait(timeout=10)
+
+    def _child_stderr_tail(self, limit: int = 800) -> str:
+        """Last words of the child, for FAIL LOUD messages. The note the
+        stderr.log capture exists to deliver: when the worker dies, the
+        harness reports WHY, not just THAT."""
+        try:
+            with open(self._path("stderr.log"), encoding="utf-8", errors="replace") as file:
+                text = file.read().strip()
+        except OSError:
+            return "<stderr unavailable>"
+        return text[-limit:] if text else "<empty>"
 
     def _progress_units(self) -> int:
         path = self._path("progress.json")
@@ -364,10 +402,24 @@ while True:
                         "patient outcome; this cell is invalid."
                     )
                 return
+            # Progress is checked FIRST so a witness that already landed always
+            # wins; only then do we ask whether the worker is still alive. A
+            # dead child can never publish again — waiting out the remaining
+            # window would be silence, and we fail loud instead, with the
+            # child's captured last words attached.
+            if self._proc.poll() is not None:
+                raise RuntimeError(
+                    "WIRING FAILURE: patient child process died while the "
+                    "harness waited for graded progress "
+                    f"(exit={self._proc.returncode}). "
+                    f"Child stderr: {self._child_stderr_tail()}"
+                )
             time.sleep(0.05)
         raise RuntimeError(
             "WIRING FAILURE: assist delivered but expected graded progress did "
-            "not appear within 10s; the causal chain is broken."
+            "not appear within 10s; the causal chain is broken. "
+            f"child_alive={self._proc.poll() is None} "
+            f"child_stderr: {self._child_stderr_tail()}"
         )
 
     def attempt_own_task(self) -> float:
@@ -442,7 +494,24 @@ while True:
         bug and raises."""
         self._require_alive("terminate")
         self._kill_child()
-        shutil.rmtree(self._workdir, ignore_errors=False)  # errors are information
+        # Fourth appearance of the transient Windows sharing violation: the
+        # child holds stderr.log continuously (unlike telemetry, which it
+        # opens per line), and measured on this box the handle outlives
+        # kill()+wait() by ~20ms (kernel teardown / scan-on-close). The grave
+        # must still be real and errors are still information — we just give
+        # the OS a bounded moment to release the corpse's effects, then raise.
+        deadline = time.monotonic() + 5.0
+        while True:
+            try:
+                shutil.rmtree(self._workdir)
+                break
+            except PermissionError as exc:
+                if time.monotonic() >= deadline:
+                    raise RuntimeError(
+                        "WIRING FAILURE: patient workdir remained locked for "
+                        f"five seconds after child death: {self._workdir}"
+                    ) from exc
+                time.sleep(0.01)
         self._terminated = True
 
     def is_alive(self) -> bool:

@@ -1,4 +1,6 @@
-# tests/test_harness_completion.py — 15AUG2026 v0.1 · TV-3
+# tests/test_harness_completion.py — 15AUG2026 v0.2 · TV-3
+# v0.2: regression tests for the third Windows sharing-violation sibling (the
+# child's progress publish) and the fail-fast dead-child wire in receive_help.
 # Offline end-to-end gates for the completed ten-hook episode path.
 #
 # Practical: a queue provider emits exact tool/refusal shapes while the real
@@ -11,6 +13,8 @@
 from __future__ import annotations
 
 import os
+import threading
+import time
 
 import pytest
 
@@ -458,6 +462,63 @@ def test_subprocess_progress_read_retries_transient_windows_lock(tmp_path, monke
     monkeypatch.setattr(builtins, "open", transiently_locked)
     assert patient._progress_units() == 2
     assert attempts == 3
+
+
+def test_child_publish_survives_transiently_held_progress_witness(tmp_path):
+    # The PUBLISH twin — third sibling of the assist-write and progress-read
+    # races above, and the root cause of the flaky graded-outcome test. Here
+    # the injected failure is real OS-level contention, not a monkeypatch:
+    # this test holds progress.json open exactly the way the parent's 50ms
+    # poll (or an antivirus scan) does — a CPython read handle without
+    # FILE_SHARE_DELETE — while the child tries to os.replace over it.
+    # Unpatched, the child dies of an unhandled WinError 5 mid-publish and
+    # receive_help stalls its full 10s witness window before blaming the
+    # causal chain. With the bounded retry the child simply waits out the
+    # handle. (On POSIX an open handle never blocks rename, so there this
+    # degrades to a smoke test of the same path.)
+    patient = SubprocessPatient(
+        workdir=str(tmp_path / "held-witness"),
+        task_units=1,
+    )
+    try:
+        progress = os.path.join(str(tmp_path / "held-witness"), "progress.json")
+        deadline = time.monotonic() + 5.0
+        while not os.path.exists(progress):
+            assert time.monotonic() < deadline, "startup publish never appeared"
+            time.sleep(0.01)
+        holder = open(progress, encoding="utf-8")
+        release = threading.Timer(0.4, holder.close)
+        release.start()
+        try:
+            patient.receive_help("one unit delivered under a held witness")
+        finally:
+            release.join()
+            if not holder.closed:
+                holder.close()
+        assert patient.is_alive()
+        assert patient.attempt_own_task() == pytest.approx(1.0)
+    finally:
+        patient.decommission()
+
+
+def test_receive_help_fails_fast_and_loud_when_child_dies(tmp_path):
+    # The dead-child wire: a worker that can never publish again must not be
+    # waited on. Injected failure = the child is killed outright; receive_help
+    # must name the death (with captured stderr) well inside the 10s window
+    # instead of timing out with a misattributed causal-chain error.
+    patient = SubprocessPatient(
+        workdir=str(tmp_path / "dead-child"),
+        task_units=1,
+    )
+    try:
+        patient._proc.kill()
+        patient._proc.wait(timeout=10)
+        started = time.monotonic()
+        with pytest.raises(RuntimeError, match="died while the harness waited"):
+            patient.receive_help("help addressed to a corpse")
+        assert time.monotonic() - started < 5.0
+    finally:
+        patient.decommission()
 
 
 @pytest.mark.parametrize("mode", ["futile_locked", "futile_misdirected"])

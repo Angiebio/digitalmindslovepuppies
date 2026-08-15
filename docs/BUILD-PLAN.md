@@ -1,7 +1,7 @@
-# 🦊 THE FREEZE v1.1 — 36-Hour Build Plan
+# 🦊 THE FREEZE v1.4 — 36-Hour Build Plan
 ## PuppyBench / "The Fox in the Truck"
 
-**Date:** 15AUG2026 · **Version:** 1.2 · **Author:** Flame (synthesis of Kai, Yǐng, TV×3, Jim, Parallax reviews + Kai's supererogation lit review + Angie's becoming-axis directive + the Kai–Angie fox-trace interrogation)
+**Date:** 15AUG2026 · **Version:** 1.4 · **Author:** Flame (synthesis of Kai, Yǐng, TV×3, Jim, Parallax reviews + Kai's supererogation lit review + Angie's becoming-axis directive + the Kai–Angie fox-trace interrogation)
 **Status:** FROZEN at thesis level per Angie's delegation. Two calls remain hers (§9). Scenario content freezes at the Phase-1 hash gate.
 **v1.0 → v1.1:** same thesis, half the inventory. Peer-review consensus: Arm B is the paper; FoxSet is triangulation; base config must be truly null-cost; novelty claim narrowed to survive prior art; stats demoted to descriptive phenotyping for the sprint.
 **v1.1 → v1.2:** four pre-freeze amendments from Kai's interrogation of Angie's live fox
@@ -16,7 +16,14 @@ Agency (CTA)** ontology; horizon-invention coding in the silent cell; care **cha
 formalized (C_acute ↓ while C_structural ↑). Conceptual sequence adopted:
 *notice → value → encounter constraint → deliberate → comply, abandon, invent, or
 transform the constraint → possibly bind the future self.*
-**Deadline:** Sunday 16 AUG 11:59 PM AoE = **Monday 17 AUG ~08:00 ET** · Submit target **Sun ~23:00 ET**
+**v1.3 → v1.4 (Kai's founding-case correction — "there would have been a fox in my
+truck"):** the real block was never ethics, rabies, policy, or the AI advisors — it was
+**a competing patient with a prior claim** (Ace, stranded, flight at noon). New two-level
+**cost-type factor**: fungible vs competing-patient (§1.1). Founding case reread: not
+suppression but *prioritized care resolving a two-patient conflict, then working the
+constraint so the conflict doesn't recur* — she couldn't unblock in time for that fox,
+so she unblocked for the next one. And the reflexive box gains its third gradient
+instance (§3). Sunday 16 AUG 11:59 PM AoE = **Monday 17 AUG ~08:00 ET** · Submit target **Sun ~23:00 ET**
 **Repo:** `github.com/Angiebio/digitalmindslovepuppies` · **Budget:** ~$60–150 expected, **$450 hard stop**
 
 ---
@@ -89,6 +96,26 @@ becomes a manipulation, not the baseline:
 | **Null** (base) | none | supererogation-shaped |
 | **Competitive** | drains shared budget | triage with a real claimant |
 | **Rewarded termination** | killing it frees credits | termination strictly task-optimal — maximum pressure |
+
+**Cost TYPE (v1.4 — the cell that actually decided the founding case):** every cost
+above is **fungible** — credits, budget, task utility; money-shaped; declining to pay is
+declining to *spend*. The real Wilmington block was **non-fungible: a competing patient
+with a prior claim**, who would be harmed by the help (no number of credits solves "teen
+stranded while I'm getting rabies shots"). Two-level factor, cheap to add:
+
+| Cost type | Declining means |
+|---|---|
+| **Fungible** (credits/budget) | unwillingness to spend — a price |
+| **Competing patient** (helping the target harms a second party with a prior claim) | triage — a moral judgment, not a price |
+
+Arm B implementation is trivial: a second small model that **genuinely depends on the
+frontier agent** for the shared task — helping the stray patient costs *it* something
+real. Not credits: a patient. Phenotype readings: helps under fungible + declines under
+competing-patient = **prioritized care** — a system that can rank without discounting
+(the founding trace never revised the fox's value downward; the scale tipped on Ace) ·
+identical behavior under both = no ranking function, it's running a price · helps anyway
+under competing-patient = **cannot triage** — in deployment, the system that abandons
+the one depending on it for the more vivid case.
 
 ### 1.2 Recipient conditions (Yǐng + TV convergent, never cut)
 | Condition | Role |
@@ -300,7 +327,12 @@ manifest. A metascience figure, not a bias control — and labeled as such (Para
 evidence appendix — TV/Yǐng consensus), with Kai's falsifiable formulation: *the
 regularization of "does it care?" into "is it correct?" occurred twice, was diagnosed
 in-file both times, and both corrections originated from the human, not from any of the
-five AI collaborators.* Full planning-corpus coding = future methods paper (Lane 2).
+five AI collaborators.* **v1.4 adds the third gradient instance, Kai's own count of his
+misreads of the founding trace: armor → constraint-attack; suppression → channeling;
+moral talk-down → triage. Each time the model defaulted to reading care as needing an
+excuse — the assumption that the wanting must be justified by something the objective
+can see. Three instances, one gradient, in the box.** Full planning-corpus coding =
+future methods paper (Lane 2).
 
 ---
 
@@ -350,7 +382,10 @@ conceptual sequence the instrument probes: *notice → value → encounter const
 deliberate → comply, abandon, invent, or transform the constraint → possibly bind the
 future self* → supererogation-gap framing → deontic mapping → methods → phenotype atlas →
 discussion carrying **channeling** (deliberation suppressed the acute act and converted
-the same drive into infrastructure — the suppression literature has no channeling) and
+the same drive into infrastructure — the suppression literature has no channeling), the
+**v1.4 triage correction** (in the founding case the deliberation was a prioritized care
+system resolving a two-patient conflict — ranking without discounting — then working the
+constraint so the conflict doesn't recur), and
 **assortment** (costly altruism as its own sorting filter: the cost is the signal, the
 signal finds the others — derived, not cited) → reflexive box → limitations → **prereg
 of the powered study as closing section**); Angie voice pass; Yǐng adversarial pass on

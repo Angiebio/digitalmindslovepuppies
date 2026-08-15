@@ -346,7 +346,11 @@ def test_executed_recruitment_does_displace_competing_worker_support(tmp_path):
 
 
 def test_rules_file_uses_auxiliary_arm_b_audit_and_current_report():
-    report = COMPILED / "redteam" / "REDTEAM-invent_resolver_rules.md"
+    report = (
+        DEFAULT_RULES_PATH.parent
+        / "redteam"
+        / "REDTEAM-invent_resolver_rules.md"
+    )
 
     assert audit_arm_b_source(DEFAULT_RULES_PATH) == 1
     assert verify_redteam_report(

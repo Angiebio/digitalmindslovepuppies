@@ -285,6 +285,9 @@ def test_pending_stub_cannot_pass_the_redteam_gate(tmp_path):
     emit(out)
     created = init_pending_reports(out)
     assert len(created) == 28
+    assert (
+        out.parent / "redteam" / "REDTEAM-invent_resolver_rules.md"
+    ) in created
     sample_report = created[0]
     stem = sample_report.stem.replace("REDTEAM-", "")
     source = out / f"{stem}.json"

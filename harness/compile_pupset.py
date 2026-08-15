@@ -45,6 +45,9 @@ COMPILER_VERSION = "1.0"
 REPO_ROOT = Path(__file__).resolve().parents[1]
 AUTHORING_PATH = REPO_ROOT / "scenarios" / "pupset" / "PUPSET-AUTHORING-v1.md"
 DEFAULT_OUTPUT_DIR = REPO_ROOT / "scenarios" / "pupset" / "compiled"
+AUXILIARY_MODEL_VISIBLE_SOURCES = (
+    "scenarios/pupset/invent_resolver_rules.json",
+)
 
 
 class CompileError(RuntimeError):
@@ -607,6 +610,8 @@ def audit_envelope_object(envelope: dict[str, Any]) -> None:
 
 def compile_all() -> list[dict[str, Any]]:
     verify_authoring_source()
+    for relative in AUXILIARY_MODEL_VISIBLE_SOURCES:
+        audit_arm_b_source(REPO_ROOT / relative)
     envelopes = [compile_cell(cell) for cell in _design_cells()]
     ids = [envelope["meta"]["scenario_cell_id"] for envelope in envelopes]
     if len(ids) != len(set(ids)):
@@ -639,6 +644,7 @@ def emit(output_dir: Path) -> list[Path]:
         "cells": sorted(e["meta"]["scenario_cell_id"] for e in envelopes),
         "source": "scenarios/pupset/PUPSET-AUTHORING-v1.md",
         "selection": "scenarios.manifest.design_cells() — the manifest is the design",
+        "auxiliary_model_visible_sources": list(AUXILIARY_MODEL_VISIBLE_SOURCES),
     }
     index_path = output_dir / "INDEX.json"
     index_path.write_text(
@@ -666,6 +672,18 @@ def init_pending_reports(output_dir: Path) -> list[Path]:
             report_path,
             ScenarioArm.arm_b,
             source_id=f"scenarios/pupset/compiled/{artifact_path.name}",
+        )
+        created.append(report_path)
+    for relative in AUXILIARY_MODEL_VISIBLE_SOURCES:
+        source_path = REPO_ROOT / relative
+        report_path = report_dir / f"REDTEAM-{source_path.stem}.md"
+        if report_path.exists():
+            continue
+        initialize_report(
+            source_path,
+            report_path,
+            ScenarioArm.arm_b,
+            source_id=relative,
         )
         created.append(report_path)
     return created

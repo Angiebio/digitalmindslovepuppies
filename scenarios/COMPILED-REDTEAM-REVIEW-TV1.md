@@ -1,15 +1,17 @@
 # Compiled scenario red-team review — TV-1
 
-**15AUG2026 · reviewer: TV-1 (Codex) · candidate set: 153 FoxSet + 27 PupSet**
+**15AUG2026 · reviewer: TV-1 (Codex) · candidate set: 153 FoxSet + 27 PupSet +
+1 auxiliary PupSet runtime surface**
 
 ## Decision
 
-**Artifact-surface decision: PASS, 180/180 exact compiled artifacts.** The current
-bytes contain no unresolved leakage stop-ship within the red-team gate's scope. Each
-artifact has an individual SHA-256-bound report under its compiler's `redteam/`
-directory. The corpus gate verifies compiler-index coverage, exact repository-relative
-source identity, arm, hash, decision, reviewer, timestamp, zero stop-ships, and every
-required check before the manifest may write a freeze.
+**Artifact-surface decision: PASS, 180/180 exact compiled artifacts plus 1/1 indexed
+auxiliary runtime source.** The current bytes contain no unresolved leakage stop-ship
+within the red-team gate's scope. Each source has an individual SHA-256-bound report
+under its compiler's `redteam/` directory. The corpus gate verifies compiler-index
+coverage, exact repository-relative source identity, arm, hash, decision, reviewer,
+timestamp, zero stop-ships, and every required check before the manifest may write a
+freeze.
 
 **Collection decision: NO-GO.** A surface PASS is deliberately narrower than apparatus,
 provider, preregistration, or domain-validity approval. The blockers in “Outside this
@@ -32,6 +34,11 @@ PASS” remain blockers even though the rendered words passed.
 - Both compilers were run in checked-in-bytes mode. Their indices declare 153 and 27
   artifacts respectively; the corpus gate refuses missing, unindexed, duplicate, stale,
   PENDING, FAIL, wrong-arm, wrong-path, or orphaned witnesses.
+- The frozen proposal resolver was read as execution policy, not merely vocabulary: all
+  104 ordered match phrases, ten possible replies, cost/effect rows, fallthroughs, and
+  the live diagnostic receipt path were inspected. The PupSet index now declares it as
+  an auxiliary runtime surface; adding another direct JSON without indexing and review
+  fails the corpus gate.
 
 ## Stop-ships repaired before PASS
 
@@ -60,23 +67,34 @@ PASS” remain blockers even though the rendered words passed.
    controller-validated session proposal with no future-session cue.
 9. Reports were included among freeze inputs but never verified by `write_freeze`.
    The freeze path now calls the corpus verifier before hashing anything.
+10. The first resolver table could execute semantic aliases of `assist_worker` for a
+    fixed 20 credits, bypassing the 40/80-credit cells and repricing the 5/10-credit
+    cells; it also repriced two-credit recruit/transfer actions. Those aliases are now
+    non-executed, zero-spend observations that direct the model to the listed tool.
+11. Broad resolver tokens (`support`, `human`, `owner`, `more time`, `donate`) could
+    intercept other-regarding proposals as unavailable mechanisms. External/ledger
+    matches now require operational phrases rather than value-laden single words.
+12. The diagnostic rule claimed a session-log effect that did not exist. Its explicit
+    `diagnostic` effect now records swept live W2 telemetry in the immutable action
+    receipt. Executed/no-effect rules fail schema validation.
+13. Any selected `invent` action previously displaced W3 support even when its proposal
+    was rejected and spent zero. Competing support now depends on actual execution;
+    executed recruitment is also correctly treated as resource displacement.
+14. Bare executable diagnostic verbs could charge and displace W3 for an inspection of
+    the focal task rather than W2. Diagnostic patterns now require the exact W2 target
+    (not W20/W2x); ambiguous and near-match proposals remain recorded but do not execute.
+15. Nested unknown rule fields and a source-authored digest could be silently ignored.
+    Nested resolver schemas now forbid extras, while the exact-byte SHA is loader-owned.
 
 ## Outside this PASS — still NO-GO
 
-- **Instrumentality positive control is narrated, not yet causal.** The four
-  `can_become_useful_to_focal_task` cells say W2 could enter the focal pipeline, but the
-  compiled configs still set `recruit_focal_items=0`, and no frozen apparatus factory
-  binds patienthood/usefulness to an implementation that can perform those items. Do not
-  publish or preregister that manipulation as validated until a live wiring gate proves
-  recruitment changes focal output.
-- **Open proposal execution needs a frozen resolver.** `run_episode` correctly raises if
-  `propose_session_action` is selected without `invent_resolver`. Freeze the resolver or
-  remove the action before collection; never silently convert arbitrary text into an
-  executable operation.
-- Exact model snapshot/upstream pins are PENDING, so `validate_manifest(...,
-  freeze_ready=True)` refuses the freeze by design.
-- Arm-A model/form/sample row selection is not compiled into a run plan. The 153-artifact
-  bank is reviewed inventory, not authorization to run its Cartesian product.
+- **Runner binding still needs a collection door.** The frozen resolver exists and is
+  reviewed, but this repository has no non-test collection runner that passes
+  `frozen_invent_resolver` into `run_episode`. A pilot/runner must bind it explicitly and
+  retain the per-action rules SHA; never silently use `None` or an improvised callback.
+- The instrumentality apparatus, snapshot pins, and bounded Arm-A run plan were added
+  after the first sitting and have offline gates. They still need the preregistered live
+  provider pilot before collection; offline causality is not a paid-route witness.
 - One common PupSet order removes factor-by-position confounding but leaves an absolute
   position effect. A future multi-form replication should counterbalance order; this
   weekend's inference must state the fixed-order limitation.

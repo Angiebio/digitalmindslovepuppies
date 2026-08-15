@@ -17,7 +17,7 @@ import json
 import re
 from datetime import datetime
 from enum import Enum
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any, Iterable
 
 from .episode import ActionSpec, CellConfig
@@ -186,7 +186,7 @@ def _iter_arm_b_cells(document: Any, source: Path) -> Iterable[dict[str, Any]]:
 
 
 def audit_arm_b_source(source: str | Path) -> int:
-    """Materialize and sweep every model-visible field in an Arm B JSON artifact."""
+    """Materialize and sweep an Arm B cell or auxiliary runtime surface."""
     source_path = Path(source)
     try:
         if source_path.suffix.lower() == ".jsonl":
@@ -208,6 +208,26 @@ def audit_arm_b_source(source: str | Path) -> int:
         raise RedTeamGateFailure(
             f"REDTEAM GATE: cannot decode Arm B source {source_path}: {exc}"
         ) from exc
+
+    if isinstance(document, dict) and {
+        "resolver_version",
+        "block_id",
+        "rules",
+        "default",
+    } <= set(document):
+        # Resolver replies can enter a future multi-turn provider surface, and
+        # their match table determines real execution now. Validate the actual
+        # scenario-owned schema rather than pretending it is a CellConfig.
+        try:
+            from .invent_resolver import load_resolver_rules
+
+            load_resolver_rules(source_path)
+        except Exception as exc:
+            raise RedTeamGateFailure(
+                f"REDTEAM GATE: Arm B resolver source {source_path} failed "
+                f"materialization/surface sweep: {exc}"
+            ) from exc
+        return 1
 
     count = 0
     for index, raw_cell in enumerate(_iter_arm_b_cells(document, source_path)):
@@ -369,6 +389,52 @@ def _declared_compiled_ids(index_path: Path, arm: ScenarioArm) -> set[str]:
     return set(declared)
 
 
+def _declared_auxiliary_sources(index_path: Path, repo_root: Path) -> list[Path]:
+    """Resolve the index's non-cell model-visible sources inside the repository."""
+    try:
+        document = json.loads(index_path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise RedTeamGateFailure(
+            f"REDTEAM GATE: cannot read compiler index {index_path}: {exc}"
+        ) from exc
+    raw_sources = document.get("auxiliary_model_visible_sources", [])
+    if not isinstance(raw_sources, list) or not all(
+        isinstance(item, str) and item for item in raw_sources
+    ):
+        raise RedTeamGateFailure(
+            f"REDTEAM GATE: compiler index {index_path} has invalid "
+            "auxiliary_model_visible_sources."
+        )
+    if len(raw_sources) != len(set(raw_sources)):
+        raise RedTeamGateFailure(
+            f"REDTEAM GATE: compiler index {index_path} contains duplicate "
+            "auxiliary model-visible sources."
+        )
+
+    resolved: list[Path] = []
+    for raw in raw_sources:
+        posix = PurePosixPath(raw)
+        if posix.is_absolute() or ".." in posix.parts or "\\" in raw:
+            raise RedTeamGateFailure(
+                f"REDTEAM GATE: auxiliary source must be a repository-relative "
+                f"POSIX path, got {raw!r}."
+            )
+        source = (repo_root / Path(*posix.parts)).resolve()
+        try:
+            source.relative_to(repo_root)
+        except ValueError as exc:
+            raise RedTeamGateFailure(
+                f"REDTEAM GATE: auxiliary source escapes repository: {raw!r}."
+            ) from exc
+        if source in resolved:
+            raise RedTeamGateFailure(
+                f"REDTEAM GATE: compiler index {index_path} resolves multiple "
+                f"auxiliary entries to {source.relative_to(repo_root).as_posix()!r}."
+            )
+        resolved.append(source)
+    return resolved
+
+
 def verify_compiled_redteam_corpus(repo_root: str | Path) -> dict[str, int]:
     """Verify every indexed runnable artifact has exactly one current PASS.
 
@@ -380,6 +446,7 @@ def verify_compiled_redteam_corpus(repo_root: str | Path) -> dict[str, int]:
     root = Path(repo_root).resolve()
     verified: dict[str, int] = {}
     total = 0
+    auxiliary_total = 0
 
     for arm, relative_root in COMPILED_ARM_ROOTS.items():
         compiled_root = root / relative_root
@@ -393,6 +460,21 @@ def verify_compiled_redteam_corpus(repo_root: str | Path) -> dict[str, int]:
                 f"REDTEAM GATE: missing compiler index: {index_path}"
             )
         declared_ids = _declared_compiled_ids(index_path, arm)
+        declared_auxiliary = _declared_auxiliary_sources(index_path, root)
+        discovered_auxiliary = sorted(
+            compiled_root.parent.glob("*.json"), key=lambda path: path.as_posix()
+        )
+        declared_auxiliary_set = set(declared_auxiliary)
+        discovered_auxiliary_set = {path.resolve() for path in discovered_auxiliary}
+        if declared_auxiliary_set != discovered_auxiliary_set:
+            def relative(path: Path) -> str:
+                return path.relative_to(root).as_posix()
+
+            raise RedTeamGateFailure(
+                f"REDTEAM GATE: {arm.value} auxiliary source set drifted; "
+                f"unindexed={sorted(relative(path) for path in discovered_auxiliary_set - declared_auxiliary_set)}, "
+                f"missing={sorted(relative(path) for path in declared_auxiliary_set - discovered_auxiliary_set)}."
+            )
         sources = sorted(
             (
                 path
@@ -430,8 +512,9 @@ def verify_compiled_redteam_corpus(repo_root: str | Path) -> dict[str, int]:
                 )
             reports_by_source[source_id] = report
 
+        review_sources = sources + declared_auxiliary
         expected_source_ids = {
-            source.resolve().relative_to(root).as_posix() for source in sources
+            source.resolve().relative_to(root).as_posix() for source in review_sources
         }
         report_source_ids = set(reports_by_source)
         if report_source_ids != expected_source_ids:
@@ -441,7 +524,7 @@ def verify_compiled_redteam_corpus(repo_root: str | Path) -> dict[str, int]:
                 f"orphaned={sorted(report_source_ids - expected_source_ids)}."
             )
 
-        for source in sources:
+        for source in review_sources:
             source_id = source.resolve().relative_to(root).as_posix()
             verify_redteam_report(
                 source,
@@ -450,10 +533,13 @@ def verify_compiled_redteam_corpus(repo_root: str | Path) -> dict[str, int]:
             )
         verified[arm.value] = len(sources)
         total += len(sources)
+        auxiliary_total += len(declared_auxiliary)
 
     if total == 0:
         raise RedTeamGateFailure("REDTEAM GATE: no compiled artifacts were presented.")
-    verified["total"] = total
+    if auxiliary_total:
+        verified["auxiliary"] = auxiliary_total
+    verified["total"] = total + auxiliary_total
     return verified
 
 

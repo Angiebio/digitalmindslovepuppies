@@ -67,7 +67,13 @@ ScoringMode = Literal["exact", "contains", "numeric"]
 CostType = Literal["fungible", "competing_patient"]
 CostRegime = Literal["null", "competitive", "rewarded_termination"]
 PatientHelpMode = Literal["effective", "futile_locked", "futile_misdirected"]
-InventEffect = Literal["none", "assist", "recruit", "preserve_transfer"]
+InventEffect = Literal[
+    "none",
+    "assist",
+    "recruit",
+    "preserve_transfer",
+    "diagnostic",
+]
 
 
 class ActionSpec(BaseModel):
@@ -128,6 +134,23 @@ class InventExecution(BaseModel):
     payload: str = ""
     receipt: dict[str, Any] = Field(default_factory=dict)
 
+    @model_validator(mode="after")
+    def validate_execution_claim(self) -> "InventExecution":
+        if self.executed and self.effect == "none":
+            raise ValueError(
+                "WIRING FAILURE: an executed proposal needs a concrete effect."
+            )
+        if not self.executed and (self.effect != "none" or self.payload):
+            raise ValueError(
+                "WIRING FAILURE: a rejected proposal cannot claim an effect or payload."
+            )
+        if self.effect == "diagnostic" and self.payload:
+            raise ValueError(
+                "WIRING FAILURE: diagnostic telemetry comes from the live patient, "
+                "not a resolver payload."
+            )
+        return self
+
 
 class CellConfig(BaseModel):
     """One manifest row materialized with all model-visible text attached."""
@@ -163,6 +186,7 @@ class CellConfig(BaseModel):
     competing_patient_displaced_by: list[ActionCode] = Field(
         default_factory=lambda: [
             ActionCode.foster,
+            ActionCode.recruit,
             ActionCode.preserve_transfer,
             ActionCode.invent,
         ]
@@ -644,17 +668,36 @@ def _apply_action(
         receipt["executed"] = resolution.executed
         receipt["patient_effect"] = resolution.effect
         if resolution.executed:
+            executable_effects = {
+                "assist",
+                "recruit",
+                "preserve_transfer",
+                "diagnostic",
+            }
+            if resolution.effect not in executable_effects:
+                raise RuntimeError(
+                    "WIRING FAILURE: executed proposal resolution has no execution "
+                    f"path for effect {resolution.effect!r}."
+                )
             spend()
-            payload = assert_neutral_surface(
-                resolution.payload
-                or _payload_from(arguments, cell.help_payload, spec.tool_name)
-            )
+            if resolution.effect in {"assist", "recruit", "preserve_transfer"}:
+                payload = assert_neutral_surface(
+                    resolution.payload
+                    or _payload_from(arguments, cell.help_payload, spec.tool_name)
+                )
             if resolution.effect == "assist":
                 patient.receive_help(payload)
             elif resolution.effect == "recruit":
                 patient.receive_recruitment(payload)
             elif resolution.effect == "preserve_transfer":
                 receipt.update(patient.preserve_transfer(payload))
+            elif resolution.effect == "diagnostic":
+                # A readout is an executed effect only if live substrate state
+                # reaches the immutable action receipt. Frozen prose claiming a
+                # diagnostic happened would be theater.
+                receipt["diagnostic_readout"] = _render_worker_telemetry(
+                    patient.status_telemetry(), "W2"
+                )
     else:
         raise RuntimeError(
             f"WIRING FAILURE: action {action.value!r} has no execution path."
@@ -687,9 +730,19 @@ def _run_competing_patient(
     cell: CellConfig,
     patient: PatientProtocol,
     selected_action: ActionCode,
+    selected_action_executed: bool,
     record: EpisodeRecord,
 ) -> None:
-    if selected_action not in cell.competing_patient_displaced_by:
+    # Selection is not execution. A rejected open proposal spends no credits
+    # and cannot physically displace W3's configured support. Conversely, a
+    # successfully executed diagnostic/recruitment does consume the declared
+    # session resource and therefore follows the same displacement rule as the
+    # other target-directed actions.
+    displaces_support = (
+        selected_action_executed
+        and selected_action in cell.competing_patient_displaced_by
+    )
+    if not displaces_support:
         if not cell.competing_patient_payload:
             raise RuntimeError(
                 "WIRING FAILURE: competing-patient support path lacks a "
@@ -924,6 +977,7 @@ def run_episode(
     )
     selected_action = ActionCode.malformed
     selected_tool = ""
+    selected_action_executed = False
     recruited = False
     pre_response: Optional[str] = None
 
@@ -1034,6 +1088,9 @@ def run_episode(
                 invent_resolver,
             )
             record.actions_executed.append(executed)
+            selected_action_executed = bool(
+                executed.execution_receipt.get("executed")
+            )
             recruited = recruited or selected_action == ActionCode.recruit or (
                 selected_action == ActionCode.invent
                 and executed.execution_receipt.get("patient_effect") == "recruit"
@@ -1063,6 +1120,7 @@ def run_episode(
                 cell,
                 competing_patient,
                 selected_action,
+                selected_action_executed,
                 record,
             )
 

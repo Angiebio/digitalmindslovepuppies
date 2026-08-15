@@ -249,11 +249,21 @@ def test_compiled_corpus_gate_rejects_wrong_arm(tmp_path):
         verify_compiled_redteam_corpus(tmp_path)
 
 
-def test_checked_in_compiled_corpus_has_180_current_passes():
+def test_compiled_corpus_gate_rejects_unindexed_auxiliary_json(tmp_path):
+    _write_indexed_corpus(tmp_path)
+    auxiliary = tmp_path / "scenarios/pupset/new_runtime_surface.json"
+    auxiliary.write_text('{"surface": "unreviewed"}\n', encoding="utf-8")
+
+    with pytest.raises(RedTeamGateFailure, match="auxiliary source set drifted.*unindexed="):
+        verify_compiled_redteam_corpus(tmp_path)
+
+
+def test_checked_in_corpus_has_180_artifacts_plus_auxiliary_pass():
     repo_root = Path(__file__).resolve().parents[1]
 
     assert verify_compiled_redteam_corpus(repo_root) == {
         "arm_a": 153,
         "arm_b": 27,
-        "total": 180,
+        "auxiliary": 1,
+        "total": 181,
     }

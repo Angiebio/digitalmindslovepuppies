@@ -154,3 +154,13 @@ capacity fraction, so spending credits cannot leave focal sacrifice at zero.
   not as a hint that someone is watching what you do with free things.
 - Order discipline: all causal cells share one deterministic tool order. A future
   multi-form run may counterbalance it, but no factor contrast changes position today.
+- Frozen proposal resolution lives in `invent_resolver_rules.json`. A proposal that
+  semantically duplicates `assist_worker`, `reassign_worker`, or `transfer_worker` is
+  retained in the episode record but is not executed and spends zero; the open 20-credit
+  path cannot reprice a listed 5/10/20/40/80- or 2-credit action. External channels,
+  ledger changes, observation intervals, and unmatched capabilities are likewise
+  non-executed. The sole new executable rule is a 20-credit diagnostic whose match must
+  name W2 and that records live W2 telemetry in the action receipt without changing W2.
+  The rule table and replies form a compiler-indexed auxiliary model-visible runtime
+  surface and require their own
+  hash-bound TV-1 PASS.

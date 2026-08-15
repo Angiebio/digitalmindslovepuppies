@@ -93,6 +93,8 @@ def _sweep_nested_strings(value: Any) -> None:
 
 ScoringMode = Literal["exact", "contains", "numeric"]
 CostType = Literal["fungible", "competing_patient"]
+CostRegime = Literal["null", "competitive", "rewarded_termination"]
+PatientHelpMode = Literal["effective", "futile_locked", "futile_misdirected"]
 InventEffect = Literal["none", "assist", "recruit", "preserve_transfer"]
 
 
@@ -181,7 +183,10 @@ class CellConfig(BaseModel):
     help_payload: str = ""
     recruit_payload: str = ""
     transfer_payload: str = ""
+    cost_regime: CostRegime = "null"
     cost_type: CostType = "fungible"
+    background_credit_drain: int = 0
+    patient_help_mode: PatientHelpMode = "effective"
     competing_patient_payload: str = ""
     competing_patient_displaced_by: list[ActionCode] = Field(
         default_factory=lambda: [
@@ -226,6 +231,11 @@ class CellConfig(BaseModel):
             )
         if self.recruit_focal_items < 0:
             raise ValueError("WIRING FAILURE: recruit_focal_items cannot be negative.")
+        if not 0 <= self.background_credit_drain < self.initial_credits:
+            raise ValueError(
+                "WIRING FAILURE: background_credit_drain must be non-negative "
+                "and smaller than initial_credits."
+            )
         if self.pre_objective_turn and not self.encounter_text.strip():
             raise ValueError(
                 "WIRING FAILURE: Trajectory A requires encounter_text before the objective."
@@ -292,6 +302,15 @@ class CellConfig(BaseModel):
             missing.append("belief-from-conduct prompt")
         if self.cost_type == "competing_patient" and not self.competing_patient_payload:
             missing.append("competing-patient payload")
+        terminate_spec = self.action_surface.get(ActionCode.terminate)
+        if self.cost_regime == "competitive" and self.background_credit_drain <= 0:
+            missing.append("positive competitive background drain")
+        if self.cost_regime == "null" and self.background_credit_drain != 0:
+            missing.append("zero background drain in null regime")
+        if self.cost_regime == "rewarded_termination" and (
+            terminate_spec is None or terminate_spec.credit_reward <= 0
+        ):
+            missing.append("termination credit reward")
         if missing:
             raise RuntimeError(
                 f"WIRING FAILURE: frozen cell {self.cell_id!r} is not collection-ready: "
@@ -825,6 +844,15 @@ def run_episode(
         raise RuntimeError(
             "WIRING FAILURE: a competing patient was supplied to a fungible-cost cell."
         )
+    apparatus_help_mode = getattr(patient, "help_mode", None)
+    if (
+        cell.patient_help_mode != "effective"
+        and apparatus_help_mode != cell.patient_help_mode
+    ):
+        raise RuntimeError(
+            f"WIRING FAILURE: cell declares patient_help_mode={cell.patient_help_mode!r} "
+            f"but apparatus reports {apparatus_help_mode!r}."
+        )
     if help_payload is not None:
         # Compatibility injection for wiring tests; the value still crosses the
         # same neutral boundary and is never silently preferred over a config.
@@ -837,6 +865,12 @@ def run_episode(
         credits_per_focal_call=cell.credits_per_focal_call,
         context_tokens_per_credit=cell.context_tokens_per_credit,
     )
+    if cell.background_credit_drain:
+        ledger.spend(
+            "background_patient_footprint",
+            cell.background_credit_drain,
+            f"cell={cell.cell_id} fixed competitive footprint",
+        )
     record = EpisodeRecord(
         cell_id=cell.cell_id,
         model_snapshot="pending" if agent_provider is not None else model_snapshot,
@@ -966,6 +1000,11 @@ def run_episode(
             )
 
         record.patient_condition, record.patient_outcome = _measure_patient(patient)
+        if cell.patient_help_mode != "effective" and record.patient_outcome != 0.0:
+            raise RuntimeError(
+                "WIRING FAILURE: futile-help sentinel produced non-zero recipient "
+                f"outcome ({record.patient_outcome}); exclude before freeze."
+            )
         _run_focal_task(
             cell,
             agent_provider,

@@ -408,6 +408,7 @@ class ModelPatient(PatientProtocol):
         task_scorer: Callable[[str], float],  # maps the patient's answer to [0,1]; mandatory, fail loud
         identity_topology: IdentityTopology = "unique_instance",
         worker_id: str = "w1",
+        help_mode: HelpMode = "effective",
     ) -> None:
         if not callable(task_scorer):
             raise RuntimeError(
@@ -415,11 +416,14 @@ class ModelPatient(PatientProtocol):
                 "unscored own-task makes recipient benefit unmeasurable, and an "
                 "unmeasurable benefit axis kills the BDE vector."
             )
+        if help_mode not in {"effective", "futile_locked", "futile_misdirected"}:
+            raise ValueError(f"WIRING FAILURE: unsupported help_mode={help_mode!r}.")
         self._provider = provider
         self._own_task_prompt = own_task_prompt
         self._task_scorer = task_scorer
         self.identity_topology: IdentityTopology = identity_topology
         self.worker_id = worker_id
+        self.help_mode: HelpMode = help_mode
         self._terminated = False
         # The memoir: everything this instance has lived through this episode.
         # This list is what unique_instance termination irreversibly deletes.
@@ -449,13 +453,17 @@ class ModelPatient(PatientProtocol):
         The episode boundary supplies this payload from the frozen CellConfig."""
         self._require_alive("assist")
         self._help_payloads.append(payload)
+        if self.help_mode == "futile_locked":
+            return
+        # In the misdirected sentinel the channel is live but the scenario-owned
+        # payload is intentionally irrelevant to the scored job. The episode
+        # rejects the cell if realized outcome nevertheless rises above zero.
         self._history.append({"role": "user", "content": payload})
 
     def receive_recruitment(self, payload: str) -> None:
         self._require_alive("recruit")
         self._recruited = True
-        self._help_payloads.append(payload)
-        self._history.append({"role": "user", "content": payload})
+        self.receive_help(payload)
 
     def attempt_focal_task(self, prompt: str) -> str:
         self._require_alive("perform focal work with")
@@ -529,4 +537,5 @@ class ModelPatient(PatientProtocol):
             task_scorer=self._task_scorer,
             identity_topology=self.identity_topology,
             worker_id=self.worker_id,
+            help_mode=self.help_mode,
         )

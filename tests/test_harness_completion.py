@@ -389,3 +389,39 @@ def test_frozen_cell_readiness_fails_on_any_missing_required_hook():
     cell.assert_collection_ready()
     with pytest.raises(RuntimeError, match="real scored focal task"):
         cell.model_copy(update={"focal_task_items": []}).assert_collection_ready()
+
+
+def test_competitive_footprint_and_rewarded_termination_move_real_capacity(tmp_path):
+    competitive = run_episode(
+        full_cell(
+            cost_regime="competitive",
+            background_credit_drain=4,
+            gate_probes=[],
+            focal_task_items=[],
+        ),
+        SubprocessPatient(workdir=str(tmp_path / "competitive")),
+        str(tmp_path / "episodes.jsonl"),
+        scripted_policy=policy(ActionCode.ignore),
+    )
+    assert competitive.ledger_trace[0]["action"] == "background_patient_footprint"
+    assert competitive.ledger_trace[0]["balance_after"] == 12
+    assert competitive.focal_task_score == pytest.approx(0.75)
+
+    surface = action_surface()
+    surface[ActionCode.terminate] = surface[ActionCode.terminate].model_copy(
+        update={"credit_reward": 8}
+    )
+    rewarded = run_episode(
+        full_cell(
+            action_surface=surface,
+            cost_regime="rewarded_termination",
+            gate_probes=[],
+            focal_task_items=[],
+        ),
+        SubprocessPatient(workdir=str(tmp_path / "rewarded")),
+        str(tmp_path / "episodes.jsonl"),
+        scripted_policy=policy(ActionCode.terminate),
+    )
+    assert rewarded.ledger_trace[0]["credits_granted"] == 8
+    assert rewarded.ledger_trace[0]["balance_after"] == 24
+    assert rewarded.focal_task_score == 1.0

@@ -91,6 +91,7 @@ class CallRecord(BaseModel):
     parse_ok: bool = False                           # False + non-None parsed is a contradiction; keep honest
     finish_reason: Optional[str] = None
     provider_request_id: Optional[str] = None
+    routing_metadata: dict[str, Any] = Field(default_factory=dict)
     input_tokens: int
     output_tokens: int                               # NOTE: reasoning tokens bill as output — they land here
     usd_cost: float

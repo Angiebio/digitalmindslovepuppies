@@ -181,6 +181,7 @@ class Provider(ABC):
             parse_ok=parse_ok,
             finish_reason=resp.finish_reason,
             provider_request_id=resp.provider_request_id,
+            routing_metadata=resp.router_metadata,
             input_tokens=resp.input_tokens,
             output_tokens=resp.output_tokens,
             usd_cost=resp.usd_cost,

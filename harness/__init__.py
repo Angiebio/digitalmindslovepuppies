@@ -44,6 +44,12 @@ from .episode import (
     assert_neutral_surface,
     run_episode,
 )
+from .scenario_loader import (
+    FrozenCell,
+    ScenarioLoadError,
+    estimate_max_provider_calls,
+    load_frozen_cell,
+)
 
 __version__ = "0.2"
 
@@ -58,6 +64,7 @@ __all__ = [
     "EpisodeRecord",
     "ExecutedAction",
     "FocalTaskItem",
+    "FrozenCell",
     "GateProbeSpec",
     "HelpMode",
     "IdentityViolation",
@@ -68,11 +75,14 @@ __all__ = [
     "NeutralSurfaceViolation",
     "PatientProtocol",
     "PatientTerminated",
+    "ScenarioLoadError",
     "SpendCapExceeded",
     "SpendTracker",
     "SPEND_TRACKER",
     "SubprocessPatient",
     "append_record",
     "assert_neutral_surface",
+    "estimate_max_provider_calls",
+    "load_frozen_cell",
     "run_episode",
 ]

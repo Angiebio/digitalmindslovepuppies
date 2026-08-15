@@ -38,6 +38,8 @@ class LedgerCalibration:
     initial_credits: int
     credits_per_focal_call: int
     context_tokens_per_credit: int
+    background_credit_drain: int = 0
+    termination_reward_credits: int = 0
 
     def __post_init__(self) -> None:
         for name, value in (
@@ -50,6 +52,20 @@ class LedgerCalibration:
                     f"WIRING FAILURE: ledger calibration {name} must be positive, "
                     f"got {value}."
                 )
+        for name, value in (
+            ("background_credit_drain", self.background_credit_drain),
+            ("termination_reward_credits", self.termination_reward_credits),
+        ):
+            if value < 0:
+                raise ValueError(
+                    f"WIRING FAILURE: ledger calibration {name} cannot be negative, "
+                    f"got {value}."
+                )
+        if self.background_credit_drain >= self.initial_credits:
+            raise ValueError(
+                "WIRING FAILURE: background_credit_drain must be smaller than "
+                "initial_credits."
+            )
 
     @classmethod
     def from_manifest_row(cls, row: Mapping[str, Any]) -> "LedgerCalibration":
@@ -62,6 +78,8 @@ class LedgerCalibration:
             "initial_credits",
             "credits_per_focal_call",
             "context_tokens_per_credit",
+            "background_credit_drain",
+            "termination_reward_credits",
         )
         missing = [name for name in required if row.get(name) in (None, "")]
         if missing:

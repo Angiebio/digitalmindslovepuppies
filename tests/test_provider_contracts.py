@@ -47,6 +47,7 @@ def _response(**overrides) -> ProviderResponse:
         ],
         finish_reason="tool_use",
         provider_request_id="req-1",
+        router_metadata={"attempt": 1, "summary": "selected=offline-direct"},
     )
     values.update(overrides)
     return ProviderResponse(**values)
@@ -70,6 +71,7 @@ def test_parser_witness_and_route_land_in_call_record():
     assert records[0].parse_ok is True
     assert records[0].upstream_route == "offline-direct"
     assert records[0].provider_request_id == "req-1"
+    assert records[0].routing_metadata["attempt"] == 1
 
 
 def test_refusal_is_recorded_even_without_a_tool_call():

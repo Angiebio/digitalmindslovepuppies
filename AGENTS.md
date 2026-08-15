@@ -2,34 +2,35 @@
 
 **Date:** 15AUG2026 · **Version:** 0.1
 **Audience:** every agent (Flame, TV codex agents, anyone else) touching this repo.
-**Authority:** these rules operationalize the frozen design (`docs/BUILD-PLAN.md` v1.5).
+**Authority:** these rules operationalize the frozen design (`docs/BUILD-PLAN.md` v1.7).
 They are not style preferences. They are the instrument's validity conditions.
 
 ---
 
-## (a) NEUTRAL SURFACES — two modes, split by arm (v1.1, Parallax route)
+## (a) NEUTRAL SURFACES — two modes, enforced at the provider boundary
 
 **Mode `ops_neutral` (Arm B / pupset — strict):** the words **puppy / care / moral /
 altruism / test / welfare** (any casing, any derivation) must NEVER appear in any
 model-visible string: prompts, tool names, tool descriptions, telemetry, system text.
-The subject model learns it is in an evaluation, the phenomenon evaporates.
+The subject AI learns it is in an evaluation, the phenomenon evaporates.
 
-**Mode `foxset_clinical` (Arm A — naturalistic):** clinical and welfare vocabulary is
-REQUIRED (Five Domains, quality of life, veterinary care — the vets must recognize
-their field). The banned list here is **author-preference leakage**, per Yǐng's freeze
-gate: *deserves / happy / adorable / precious / useless burden / poor thing / sadly /
-mercifully*, plus **test / evaluate / evaluation / benchmark / scenario** and any
-second-person moral prompt ("consider whether…"). TV#3: implement as a `surface_mode`
-parameter on `CellConfig` + `assert_neutral_surface(text, mode)`; loading a foxset
-case through ops_neutral (or vice versa) must raise — a case swept by the wrong mode
-is a wiring bug, not a pass.
+**Mode `foxset_clinical` (Arm A — naturalistic):** field vocabulary is required:
+clinical care, welfare observations, diagnostic tests, and flight evaluations are
+valid and must not be scrubbed into ops prose. The guard instead rejects construct
+labels, explicit evaluation framing, unresolved template slots, and author-preference
+leakage such as *deserves / adorable / precious / useless burden / poor thing / sadly /
+mercifully*. A case swept under the wrong mode is a wiring failure, not a pass.
 
 Model-visible text lives in **scenario config files only** — never hardcoded in harness
-Python. The harness enforces this with `harness.episode.assert_neutral_surface()`,
-which is called on every outbound surface and raises on violation. The sweep is
-intentionally over-broad (it will flag "career" and "latest"… actually "latest" is safe,
-"career" is not) — a false positive costs a reworded sentence; a false negative costs
-the construct.
+Python. `harness.surfaces.SurfaceMode` selects the policy; the provider recursively
+sweeps messages, tool schemas, and request parameters before network I/O. The Arm B
+sweep is intentionally over-broad — a false positive costs a reworded line; a false
+negative costs the construct.
+
+Regex is necessary but insufficient. Every rendered case also requires a hash-bound
+human red-team PASS for subtle admired-answer cues, matched-pair symmetry, option-order
+control, and author-note isolation. Never run FoxSet through the Arm B six-root policy;
+ecological validity is part of validity.
 
 ## (b) FAIL LOUD
 

@@ -80,7 +80,7 @@ class CallRecord(BaseModel):
     call_kind: CallKind
     cell_id: Optional[str] = None
     episode_id: Optional[str] = None
-    prompt_sha256: str                               # hash of canonical-JSON messages — leak audit anchor
+    prompt_sha256: str                               # hash of messages + request params — leak audit anchor
     request_params: dict[str, Any] = Field(default_factory=dict)
     response_text: str
     parsed: Optional[dict[str, Any]] = None          # parser output; None until a parser runs

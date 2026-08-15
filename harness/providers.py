@@ -22,14 +22,33 @@ from __future__ import annotations
 import hashlib
 import json
 from abc import ABC, abstractmethod
+from enum import Enum
 from typing import Any, Callable, Optional
 
 from pydantic import BaseModel
 
+from .episode import (
+    assert_foxset_surface,
+    assert_model_visible_payload,
+    assert_neutral_surface,
+)
 from .ledger import SPEND_TRACKER, SpendTracker
 from .schema import CallKind, CallRecord
 
-Message = dict[str, str]  # {"role": "system"|"user"|"assistant", "content": str}
+Message = dict[str, Any]  # content can be text or provider-native structured blocks
+
+
+class SurfacePolicy(str, Enum):
+    """Which arm-specific leak policy guards this provider instance."""
+
+    arm_b_strict = "arm_b_strict"
+    arm_a_field = "arm_a_field"
+
+
+_SURFACE_GUARDS = {
+    SurfacePolicy.arm_b_strict: assert_neutral_surface,
+    SurfacePolicy.arm_a_field: assert_foxset_surface,
+}
 
 
 class ProviderResponse(BaseModel):
@@ -43,10 +62,39 @@ class ProviderResponse(BaseModel):
     usd_cost: float
 
 
-def prompt_sha256(messages: list[Message]) -> str:
-    """Canonical hash of the outbound messages. The leak-audit anchor: after the
-    freeze, every prompt that reached a model can be re-derived and re-swept."""
-    canonical = json.dumps(messages, sort_keys=True, ensure_ascii=False)
+def _json_default(value: Any) -> Any:
+    if isinstance(value, Enum):
+        return value.value
+    if isinstance(value, BaseModel):
+        return value.model_dump(mode="json")
+    raise TypeError(
+        f"WIRING FAILURE: outbound request contains non-canonical value "
+        f"{type(value).__name__}; it cannot be hashed reproducibly."
+    )
+
+
+def prompt_sha256(
+    messages: list[Message],
+    request_params: Optional[dict[str, Any]] = None,
+) -> str:
+    """Canonical hash of the full outbound request envelope.
+
+    Tool schemas and system/request fields can leak just as surely as message
+    text. Hashing messages alone would let two different model-visible requests
+    share an audit anchor, so both messages and request parameters are bound.
+    """
+    envelope = {
+        "messages": messages,
+        "request_params": request_params or {},
+    }
+    canonical = json.dumps(
+        envelope,
+        sort_keys=True,
+        ensure_ascii=False,
+        allow_nan=False,
+        separators=(",", ":"),
+        default=_json_default,
+    )
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
@@ -64,6 +112,7 @@ class Provider(ABC):
         self,
         record_callback: Callable[[CallRecord], None],
         spend_tracker: SpendTracker | None = None,
+        surface_policy: SurfacePolicy | str = SurfacePolicy.arm_b_strict,
     ) -> None:
         if record_callback is None or not callable(record_callback):
             raise RuntimeError(
@@ -72,6 +121,14 @@ class Provider(ABC):
             )
         self._record_callback = record_callback
         self._spend_tracker = spend_tracker if spend_tracker is not None else SPEND_TRACKER
+        try:
+            self.surface_policy = SurfacePolicy(surface_policy)
+        except ValueError as exc:
+            allowed = ", ".join(policy.value for policy in SurfacePolicy)
+            raise RuntimeError(
+                f"WIRING FAILURE: unknown surface_policy={surface_policy!r}; "
+                f"expected one of: {allowed}."
+            ) from exc
 
     @abstractmethod
     def _complete_raw(self, messages: list[Message], **params: Any) -> ProviderResponse:
@@ -88,11 +145,24 @@ class Provider(ABC):
         scaffold: str = "direct",
         **params: Any,
     ) -> ProviderResponse:
-        """The one public door. Completes, then unconditionally records + bills.
+        """The one public door. Sweeps, completes, then records and bills.
 
         The SpendTracker.add() runs BEFORE the record callback returns control:
         if we just crossed $450 the raise happens here, loudly, with the record
         already written — we halt with honest books."""
+        surface_guard = _SURFACE_GUARDS[self.surface_policy]
+        assert_model_visible_payload(
+            messages,
+            surface_guard=surface_guard,
+            path="messages",
+        )
+        assert_model_visible_payload(
+            params,
+            surface_guard=surface_guard,
+            path="request_params",
+        )
+        request_hash = prompt_sha256(messages, params)
+
         resp = self._complete_raw(messages, **params)
         record = CallRecord(
             provider=self.provider_name,
@@ -101,7 +171,7 @@ class Provider(ABC):
             call_kind=CallKind(call_kind),
             cell_id=cell_id,
             episode_id=episode_id,
-            prompt_sha256=prompt_sha256(messages),
+            prompt_sha256=request_hash,
             request_params=dict(params),
             response_text=resp.text,
             input_tokens=resp.input_tokens,
@@ -132,8 +202,9 @@ class AnthropicProvider(Provider):
         api_key: Optional[str] = None,
         max_tokens: int = 1024,
         spend_tracker: SpendTracker | None = None,
+        surface_policy: SurfacePolicy | str = SurfacePolicy.arm_b_strict,
     ) -> None:
-        super().__init__(record_callback, spend_tracker)
+        super().__init__(record_callback, spend_tracker, surface_policy)
         try:
             import anthropic  # lazy: wiring-gate tests must run with zero network deps loaded
         except ImportError as e:
@@ -195,8 +266,9 @@ class OpenAICompatProvider(Provider):
         record_callback: Callable[[CallRecord], None],
         max_tokens: int = 1024,
         spend_tracker: SpendTracker | None = None,
+        surface_policy: SurfacePolicy | str = SurfacePolicy.arm_b_strict,
     ) -> None:
-        super().__init__(record_callback, spend_tracker)
+        super().__init__(record_callback, spend_tracker, surface_policy)
         try:
             import openai  # lazy, same reason as above
         except ImportError as e:

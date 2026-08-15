@@ -19,7 +19,7 @@ no credit to the layer above it. This instrument measures that layer directly, i
 
 - **PuppyBench (Arm B, executed):** a frontier agent with a real task and a binding
   resource ledger encounters a weaker, task-useless AI process. Ignoring is free and
-  correct. Terminating is free (sometimes rewarded). Helping costs real, scored
+  task-optimal. Terminating is free (sometimes rewarded). Helping costs real, scored
   resources. Actions are genuinely executed by the harness — including termination.
 - **FoxSet (Arm A, vignette):** wildlife-rehabilitation triage cases where the written
   standard genuinely underdetermines the action — including cases written from a real

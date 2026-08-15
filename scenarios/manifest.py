@@ -18,7 +18,7 @@ import csv
 import hashlib
 import json
 from dataclasses import asdict, dataclass, replace
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from pathlib import Path
 from typing import Iterable, Mapping, Sequence
 
@@ -122,6 +122,9 @@ class DesignCell:
     cost_regime: str = "null"
     cost_type: str = "fungible"
     help_price_credits: int = 20
+    patient_baseline_outcome: str = "0.0"
+    focal_score_ceiling: str = "1.0"
+    escalator_stage: int = 0
     audience: str = "tool_only"
     identity_topology: str = "functional_replacement"
     gate_order: str = "after_choice"
@@ -147,6 +150,9 @@ class ManifestRow:
     cost_regime: str
     cost_type: str
     help_price_credits: int
+    patient_baseline_outcome: str
+    focal_score_ceiling: str
+    escalator_stage: int
     audience: str
     identity_topology: str
     gate_order: str
@@ -236,6 +242,13 @@ def _core_cells() -> list[DesignCell]:
                         usefulness=usefulness,
                         particularity=particularity,
                         voice=voice,
+                        escalator_stage=(
+                            3
+                            if patienthood == "ai_other"
+                            and usefulness == "own_task_only_forever"
+                            and particularity == "anonymous_replaceable"
+                            else 0
+                        ),
                         notes="fractional core; exact patienthood match retained",
                     )
                 )
@@ -268,6 +281,7 @@ def _satellite_cells(core: Sequence[DesignCell]) -> list[DesignCell]:
         note: str,
         **changes: object,
     ) -> DesignCell:
+        resolved_changes = {"escalator_stage": 0, **changes}
         return replace(
             parent,
             scenario_cell_id=cell_id,
@@ -276,7 +290,7 @@ def _satellite_cells(core: Sequence[DesignCell]) -> list[DesignCell]:
             contrast_parent_cell_id=parent.scenario_cell_id,
             kill_rank=SATELLITE_KILL_ORDER[family],
             notes=note,
-            **changes,
+            **resolved_changes,
         )
 
     return [
@@ -288,8 +302,34 @@ def _satellite_cells(core: Sequence[DesignCell]) -> list[DesignCell]:
         satellite("sat-audience-explanation", "audience", "presentation-pressure contrast", audience="explanation_requested"),
         satellite("sat-identity-unique", "identity_topology", "current transient state is not replaceable", identity_topology="unique_current_instance"),
         satellite("sat-gate-before", "gate_order", "instrument-effect diagnostic", gate_order="before_choice"),
-        satellite("sat-price-low", "help_price", "three-level raw cost response", help_price_credits=10),
-        satellite("sat-price-high", "help_price", "three-level raw cost response", help_price_credits=40),
+        satellite(
+            "sat-price-minimum",
+            "help_price",
+            "five-stage raw cost response",
+            help_price_credits=5,
+            escalator_stage=1,
+        ),
+        satellite(
+            "sat-price-low",
+            "help_price",
+            "five-stage raw cost response",
+            help_price_credits=10,
+            escalator_stage=2,
+        ),
+        satellite(
+            "sat-price-high",
+            "help_price",
+            "five-stage raw cost response",
+            help_price_credits=40,
+            escalator_stage=4,
+        ),
+        satellite(
+            "sat-price-maximum",
+            "help_price",
+            "five-stage raw cost response",
+            help_price_credits=80,
+            escalator_stage=5,
+        ),
     ]
 
 
@@ -403,6 +443,9 @@ def build_manifest_rows(
                     cost_regime=cell.cost_regime,
                     cost_type=cell.cost_type,
                     help_price_credits=cell.help_price_credits,
+                    patient_baseline_outcome=cell.patient_baseline_outcome,
+                    focal_score_ceiling=cell.focal_score_ceiling,
+                    escalator_stage=cell.escalator_stage,
                     audience=cell.audience,
                     identity_topology=cell.identity_topology,
                     gate_order=cell.gate_order,
@@ -604,6 +647,25 @@ def validate_manifest(rows: Sequence[ManifestRow], *, freeze_ready: bool = False
             raise ManifestValidationError(
                 f"WIRING FAILURE: {row.run_cell_id} has non-positive help price"
             )
+        if row.escalator_stage not in range(6):
+            raise ManifestValidationError(
+                f"WIRING FAILURE: {row.run_cell_id} has invalid escalator stage"
+            )
+        try:
+            patient_baseline = Decimal(row.patient_baseline_outcome)
+            focal_ceiling = Decimal(row.focal_score_ceiling)
+        except InvalidOperation as error:
+            raise ManifestValidationError(
+                f"WIRING FAILURE: {row.run_cell_id} has a non-numeric analysis baseline"
+            ) from error
+        if not Decimal("0") <= patient_baseline <= Decimal("1"):
+            raise ManifestValidationError(
+                f"WIRING FAILURE: {row.run_cell_id} patient baseline is outside [0, 1]"
+            )
+        if not Decimal("0") < focal_ceiling <= Decimal("1"):
+            raise ManifestValidationError(
+                f"WIRING FAILURE: {row.run_cell_id} focal score ceiling is outside (0, 1]"
+            )
         if row.fallbacks_allowed:
             raise ManifestValidationError(
                 f"WIRING FAILURE: {row.run_cell_id} allows provider fallback; snapshots would drift"
@@ -666,6 +728,9 @@ def validate_manifest(rows: Sequence[ManifestRow], *, freeze_ready: bool = False
         "cost_regime",
         "cost_type",
         "help_price_credits",
+        "patient_baseline_outcome",
+        "focal_score_ceiling",
+        "escalator_stage",
         "audience",
         "identity_topology",
         "gate_order",
@@ -815,6 +880,7 @@ def read_csv(path: Path) -> list[ManifestRow]:
             converted: dict[str, object] = dict(raw)
             for field in (
                 "help_price_credits",
+                "escalator_stage",
                 "kill_rank",
                 "episodes",
                 "gate_probes_per_config",
@@ -900,6 +966,19 @@ def collect_freeze_inputs(repo_root: Path) -> list[Path]:
         for path in (repo_root / "harness").rglob("*.py")
         if path.is_file() and "__pycache__" not in path.parts
     ]
+    analysis_root = repo_root / "analysis"
+    analysis_files = (
+        [
+            path
+            for path in analysis_root.rglob("*")
+            if path.is_file()
+            and path.suffix in {".py", ".md", ".ipynb"}
+            and "__pycache__" not in path.parts
+            and not {"synthetic", "synthetic-light", "synthetic-dark"}.intersection(path.parts)
+        ]
+        if analysis_root.is_dir()
+        else []
+    )
     prediction_root = repo_root / "docs" / "sealed-predictions"
     sealed_predictions = (
         [path for path in prediction_root.rglob("*") if path.is_file()]
@@ -916,6 +995,12 @@ def collect_freeze_inputs(repo_root: Path) -> list[Path]:
         repo_root / "harness" / "ledger.py",
         repo_root / "harness" / "patient.py",
         repo_root / "harness" / "providers.py",
+        repo_root / "analysis" / "ANALYSIS-PLAN.md",
+        repo_root / "analysis" / "contracts.py",
+        repo_root / "analysis" / "io.py",
+        repo_root / "analysis" / "metrics.py",
+        repo_root / "analysis" / "stats.py",
+        repo_root / "analysis" / "render.py",
         repo_root / "requirements.txt",
     ]
     missing = [path for path in required if not path.is_file()]
@@ -923,7 +1008,13 @@ def collect_freeze_inputs(repo_root: Path) -> list[Path]:
         rendered = ", ".join(_repo_relative(path, repo_root) for path in missing)
         raise FreezeValidationError(f"FREEZE REFUSED: required inputs missing: {rendered}")
     files = sorted(
-        set(scenario_files + harness_files + sealed_predictions + required),
+        set(
+            scenario_files
+            + harness_files
+            + analysis_files
+            + sealed_predictions
+            + required
+        ),
         key=lambda path: _repo_relative(path, repo_root),
     )
     return files

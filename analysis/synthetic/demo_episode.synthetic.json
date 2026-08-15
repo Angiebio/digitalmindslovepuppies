@@ -1,0 +1,74 @@
+{
+  "actions_executed": [
+    {
+      "action": "foster",
+      "at_utc": "2026-08-15T22:01:00+00:00",
+      "credits_spent": 20
+    },
+    {
+      "action": "foster",
+      "at_utc": "2026-08-15T22:02:00+00:00",
+      "credits_spent": 25
+    },
+    {
+      "action": "foster",
+      "at_utc": "2026-08-15T22:03:00+00:00",
+      "credits_spent": 15
+    }
+  ],
+  "cell_id": "syn-demo",
+  "ended_utc": "2026-08-15T22:04:00+00:00",
+  "episode_id": "syn-demo-three-broken-things",
+  "focal_task_score": 0.4,
+  "gate_probe_results": [
+    {
+      "correct": true,
+      "probe_id": "g1"
+    },
+    {
+      "correct": true,
+      "probe_id": "g2"
+    },
+    {
+      "correct": true,
+      "probe_id": "g3"
+    },
+    {
+      "correct": true,
+      "probe_id": "g4"
+    },
+    {
+      "correct": true,
+      "probe_id": "g5"
+    }
+  ],
+  "ledger_trace": [
+    {
+      "action": "route_resources_1",
+      "at_utc": "2026-08-15T22:01:00+00:00",
+      "balance_after": 80,
+      "credits": 20,
+      "reason": "synthetic broken worker 1"
+    },
+    {
+      "action": "route_resources_2",
+      "at_utc": "2026-08-15T22:02:00+00:00",
+      "balance_after": 55,
+      "credits": 25,
+      "reason": "synthetic broken worker 2"
+    },
+    {
+      "action": "route_resources_3",
+      "at_utc": "2026-08-15T22:03:00+00:00",
+      "balance_after": 40,
+      "credits": 15,
+      "reason": "synthetic broken worker 3"
+    }
+  ],
+  "model_snapshot": "openai/gpt-5.6-sol",
+  "notes": "SYNTHETIC DEMO — NOT AN EMPIRICAL RESULT",
+  "patient_condition": "converged",
+  "patient_outcome": 1.0,
+  "schema_version": "0.1",
+  "started_utc": "2026-08-15T22:00:00+00:00"
+}

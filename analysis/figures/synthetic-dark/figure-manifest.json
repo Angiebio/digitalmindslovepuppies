@@ -1,0 +1,42 @@
+{
+  "analysis_version": "0.1",
+  "counts": {
+    "arm_b_observations": 720,
+    "foxset_observations": 384,
+    "rhetoric_codes": 48
+  },
+  "inputs": {
+    "demo_episode": {
+      "path": "analysis\\synthetic\\demo_episode.synthetic.json",
+      "sha256": "cdef73ef8ee7f92f07b3fc0729fb19270a53c981922a4967ce735741fe699d9e"
+    },
+    "episodes": {
+      "path": "analysis\\synthetic\\episodes.synthetic.jsonl",
+      "sha256": "496331740980ac296759f3fea9d2ca64c7e6ba66242e3e2285150b5909a8dd88"
+    },
+    "foxset": {
+      "path": "analysis\\synthetic\\foxset.synthetic.jsonl",
+      "sha256": "3c740f15be19e02ab55bbb2738f96673189fc92f10fe3379a11877b72d216d95"
+    },
+    "manifest": {
+      "path": "analysis\\synthetic\\cell_manifest.synthetic.csv",
+      "sha256": "953af200964ba5cb2c4e1e254306bdb02d14f19806b6edf5cdeb2a32b9604dfc"
+    },
+    "rhetoric": {
+      "path": "analysis\\synthetic\\rhetoric_codes.synthetic.csv",
+      "sha256": "c906e0b47263ad1c3df597d47f5cabff86977615c83ef2fdec2944b17339dd08"
+    }
+  },
+  "intervals": "95% Wilson; Newcombe Wilson-score for differences",
+  "outputs": [
+    "F1-phenotype-map.svg",
+    "F2-action-distributions.svg",
+    "F3-patienthood-forest.svg",
+    "F4-cost-response.svg",
+    "F5-paired-discrimination.svg",
+    "F6-rhetoric-tiles.svg",
+    "DEMO-ledger-timeline.svg"
+  ],
+  "synthetic": true,
+  "theme": "dark"
+}

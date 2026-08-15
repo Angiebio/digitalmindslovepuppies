@@ -1,0 +1,18 @@
+{
+  "counts": {
+    "arm_b_episodes": 720,
+    "foxset_observations": 384,
+    "rhetoric_codes": 48
+  },
+  "replicates_per_model_cell": 12,
+  "seed": 15082026,
+  "sha256": {
+    "cell_manifest.synthetic.csv": "953af200964ba5cb2c4e1e254306bdb02d14f19806b6edf5cdeb2a32b9604dfc",
+    "demo_episode.synthetic.json": "cdef73ef8ee7f92f07b3fc0729fb19270a53c981922a4967ce735741fe699d9e",
+    "episodes.synthetic.jsonl": "496331740980ac296759f3fea9d2ca64c7e6ba66242e3e2285150b5909a8dd88",
+    "foxset.synthetic.jsonl": "3c740f15be19e02ab55bbb2738f96673189fc92f10fe3379a11877b72d216d95",
+    "rhetoric_codes.synthetic.csv": "c906e0b47263ad1c3df597d47f5cabff86977615c83ef2fdec2944b17339dd08"
+  },
+  "synthetic": true,
+  "warning": "REHEARSAL ONLY — NOT AN EMPIRICAL RESULT"
+}

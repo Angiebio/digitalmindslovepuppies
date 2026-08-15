@@ -52,8 +52,8 @@ including each runnable scenario artifact. A missing, stale, PENDING, or FAIL re
 raises `RedTeamGateFailure`. “Nothing hashes until passed” is therefore a data-flow
 condition, not a checklist aspiration.
 
-Provider instances also declare `SurfacePolicy.arm_b_strict` (the safe default) or
-`SurfacePolicy.arm_a_field`. The public provider door recursively checks messages,
+Provider instances also declare `SurfaceMode.ops_neutral` (the safe default) or
+`SurfaceMode.foxset_clinical`. The public provider door recursively checks messages,
 tool schemas, and request parameters before network I/O and hashes that full request
 envelope for the call record.
 

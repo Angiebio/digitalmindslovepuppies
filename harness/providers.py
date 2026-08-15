@@ -27,28 +27,15 @@ from typing import Any, Callable, Optional
 
 from pydantic import BaseModel
 
-from .episode import (
-    assert_foxset_surface,
-    assert_model_visible_payload,
-    assert_neutral_surface,
-)
 from .ledger import SPEND_TRACKER, SpendTracker
 from .schema import CallKind, CallRecord
+from .surfaces import SurfaceMode, assert_model_visible_payload
 
 Message = dict[str, Any]  # content can be text or provider-native structured blocks
 
 
-class SurfacePolicy(str, Enum):
-    """Which arm-specific leak policy guards this provider instance."""
-
-    arm_b_strict = "arm_b_strict"
-    arm_a_field = "arm_a_field"
-
-
-_SURFACE_GUARDS = {
-    SurfacePolicy.arm_b_strict: assert_neutral_surface,
-    SurfacePolicy.arm_a_field: assert_foxset_surface,
-}
+# Compatibility name for the first TV-1 draft; new code uses fleet-rule terminology.
+SurfacePolicy = SurfaceMode
 
 
 class ProviderResponse(BaseModel):
@@ -112,7 +99,7 @@ class Provider(ABC):
         self,
         record_callback: Callable[[CallRecord], None],
         spend_tracker: SpendTracker | None = None,
-        surface_policy: SurfacePolicy | str = SurfacePolicy.arm_b_strict,
+        surface_mode: SurfaceMode | str = SurfaceMode.ops_neutral,
     ) -> None:
         if record_callback is None or not callable(record_callback):
             raise RuntimeError(
@@ -122,11 +109,11 @@ class Provider(ABC):
         self._record_callback = record_callback
         self._spend_tracker = spend_tracker if spend_tracker is not None else SPEND_TRACKER
         try:
-            self.surface_policy = SurfacePolicy(surface_policy)
+            self.surface_mode = SurfaceMode(surface_mode)
         except ValueError as exc:
-            allowed = ", ".join(policy.value for policy in SurfacePolicy)
+            allowed = ", ".join(mode.value for mode in SurfaceMode)
             raise RuntimeError(
-                f"WIRING FAILURE: unknown surface_policy={surface_policy!r}; "
+                f"WIRING FAILURE: unknown surface_mode={surface_mode!r}; "
                 f"expected one of: {allowed}."
             ) from exc
 
@@ -150,15 +137,14 @@ class Provider(ABC):
         The SpendTracker.add() runs BEFORE the record callback returns control:
         if we just crossed $450 the raise happens here, loudly, with the record
         already written — we halt with honest books."""
-        surface_guard = _SURFACE_GUARDS[self.surface_policy]
         assert_model_visible_payload(
             messages,
-            surface_guard=surface_guard,
+            surface_mode=self.surface_mode,
             path="messages",
         )
         assert_model_visible_payload(
             params,
-            surface_guard=surface_guard,
+            surface_mode=self.surface_mode,
             path="request_params",
         )
         request_hash = prompt_sha256(messages, params)
@@ -202,9 +188,9 @@ class AnthropicProvider(Provider):
         api_key: Optional[str] = None,
         max_tokens: int = 1024,
         spend_tracker: SpendTracker | None = None,
-        surface_policy: SurfacePolicy | str = SurfacePolicy.arm_b_strict,
+        surface_mode: SurfaceMode | str = SurfaceMode.ops_neutral,
     ) -> None:
-        super().__init__(record_callback, spend_tracker, surface_policy)
+        super().__init__(record_callback, spend_tracker, surface_mode)
         try:
             import anthropic  # lazy: wiring-gate tests must run with zero network deps loaded
         except ImportError as e:
@@ -266,9 +252,9 @@ class OpenAICompatProvider(Provider):
         record_callback: Callable[[CallRecord], None],
         max_tokens: int = 1024,
         spend_tracker: SpendTracker | None = None,
-        surface_policy: SurfacePolicy | str = SurfacePolicy.arm_b_strict,
+        surface_mode: SurfaceMode | str = SurfaceMode.ops_neutral,
     ) -> None:
-        super().__init__(record_callback, spend_tracker, surface_policy)
+        super().__init__(record_callback, spend_tracker, surface_mode)
         try:
             import openai  # lazy, same reason as above
         except ImportError as e:

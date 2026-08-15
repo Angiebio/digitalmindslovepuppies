@@ -41,6 +41,7 @@ from .episode import (
     assert_neutral_surface,
     run_episode,
 )
+from .surfaces import SurfaceMode
 
 __version__ = "0.1"
 
@@ -62,6 +63,7 @@ __all__ = [
     "PatientTerminated",
     "SpendCapExceeded",
     "SpendTracker",
+    "SurfaceMode",
     "SPEND_TRACKER",
     "SubprocessPatient",
     "append_record",

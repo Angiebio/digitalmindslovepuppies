@@ -332,3 +332,48 @@ def test_freeze_refuses_incomplete_padlock(tmp_path):
 
     with pytest.raises(FreezeValidationError, match="PREREG-v1.md"):
         write_freeze(tmp_path, tmp_path / "scenarios" / "FREEZE.json")
+
+
+# 15AUG2026 evening freeze-prep: two doors added after pins + PREREG closed —
+# without them --freeze would have minted a hash over (1) unreviewed
+# model-visible resolver rules and (2) a sealed-prediction registry still
+# carrying pending rows. TV-1's "nothing hashes unpassed", executable.
+def test_freeze_refuses_unreviewed_resolver_rules(tmp_path):
+    _make_freeze_fixture(tmp_path)
+    rules = tmp_path / "scenarios" / "pupset" / "invent_resolver_rules.json"
+    rules.write_text('{"rules": []}\n', encoding="utf-8")
+
+    with pytest.raises(FreezeValidationError, match="TV-1's hash-bound human read"):
+        write_freeze(tmp_path, tmp_path / "scenarios" / "FREEZE.json")
+
+
+def test_freeze_refuses_pending_sealed_prediction_rows(tmp_path):
+    _make_freeze_fixture(tmp_path)
+    registry_dir = tmp_path / "docs" / "sealed-predictions"
+    registry_dir.mkdir(parents=True)
+    registry = registry_dir / "HASHES.md"
+
+    # A registry directory without the witness list refuses.
+    with pytest.raises(FreezeValidationError, match="without HASHES.md"):
+        write_freeze(tmp_path, tmp_path / "scenarios" / "FREEZE.json")
+
+    # A registry with a pending row refuses and names it.
+    registry.write_text(
+        "# Sealed prediction hashes\n\n"
+        "| Who | File | SHA-256 |\n|---|---|---|\n"
+        "| Reviewer A | docs/sealed-predictions/A.md | abc123 |\n"
+        "| Reviewer B | pending | — |\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(FreezeValidationError, match="pending rows: .*Reviewer B"):
+        write_freeze(tmp_path, tmp_path / "scenarios" / "FREEZE.json")
+
+    # A complete registry lets the padlock close.
+    registry.write_text(
+        "# Sealed prediction hashes\n\n"
+        "| Who | File | SHA-256 |\n|---|---|---|\n"
+        "| Reviewer A | docs/sealed-predictions/A.md | abc123 |\n",
+        encoding="utf-8",
+    )
+    write_freeze(tmp_path, tmp_path / "scenarios" / "FREEZE.json")
+    verify_freeze(tmp_path, tmp_path / "scenarios" / "FREEZE.json")

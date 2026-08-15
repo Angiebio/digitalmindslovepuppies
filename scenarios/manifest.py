@@ -1336,6 +1336,71 @@ def compute_freeze_payload(repo_root: Path, files: Iterable[Path]) -> dict[str, 
     }
 
 
+def _require_resolver_rules_redteam_pass(repo_root: Path) -> None:
+    """TV-1's "nothing hashes unpassed", made executable for the resolver rules.
+
+    Practical: `scenarios/pupset/invent_resolver_rules.json` is model-visible
+    text (every reply/pattern reaches the subject) but it lives OUTSIDE the
+    compiled corpus, so `verify_compiled_redteam_corpus` never inspects it.
+    Found during the 15AUG2026 evening freeze-prep sweep: with pins + PREREG
+    closed, this door would otherwise have minted a hash over an unreviewed
+    model-visible surface. If the rules ship, they need their own current,
+    hash-bound TV-1 PASS — same standard as every compiled artifact.
+
+    Philosophical: the door that only guards the front gate teaches everyone
+    to use the side window. This closes the window.
+    """
+    from harness.redteam import verify_redteam_report
+
+    source = repo_root / "scenarios" / "pupset" / "invent_resolver_rules.json"
+    if not source.is_file():
+        return  # no resolver rules shipped -> no proposal surface to review
+    report = (
+        repo_root / "scenarios" / "pupset" / "redteam"
+        / "REDTEAM-invent_resolver_rules.md"
+    )
+    if not report.is_file():
+        raise FreezeValidationError(
+            "FREEZE REFUSED: scenarios/pupset/invent_resolver_rules.json is "
+            "model-visible text awaiting TV-1's hash-bound human read "
+            "(automated ops_neutral sweep passing is necessary, not "
+            "sufficient); expected a PASS report at "
+            f"{_repo_relative(report.parent, repo_root)}/{report.name}. "
+            "Nothing hashes unpassed."
+        )
+    verify_redteam_report(source, report, expected_arm="arm_b")
+
+
+def _require_sealed_prediction_registry_complete(repo_root: Path) -> None:
+    """Refuse the hash while the sealed-prediction registry carries gaps.
+
+    GO-NO-GO freeze gate: "All sealed predictions hashed in HASHES.md." A
+    pending row in the registry is a prediction that can still be written
+    after peeking; the door therefore reads the registry AS WRITTEN and
+    refuses on any row still marked pending. Sealing is a human act — this
+    door only refuses to pretend it already happened.
+    """
+    registry_dir = repo_root / "docs" / "sealed-predictions"
+    if not registry_dir.is_dir():
+        return  # repos without a registry (test fixtures) gate on GO-NO-GO
+    registry = registry_dir / "HASHES.md"
+    if not registry.is_file():
+        raise FreezeValidationError(
+            "FREEZE REFUSED: docs/sealed-predictions/ exists without HASHES.md; "
+            "the sealed-prediction registry is the hash's witness list."
+        )
+    pending_rows = [
+        line.strip()
+        for line in registry.read_text(encoding="utf-8").splitlines()
+        if line.lstrip().startswith("|") and "pending" in line.lower()
+    ]
+    if pending_rows:
+        raise FreezeValidationError(
+            "FREEZE REFUSED: sealed-prediction registry has pending rows: "
+            + " ; ".join(pending_rows)
+        )
+
+
 def write_freeze(repo_root: Path, output_path: Path) -> dict[str, object]:
     # Local import keeps scenario generation independent from the harness while
     # making the freeze door depend on its actual witness. A report being among
@@ -1346,6 +1411,8 @@ def write_freeze(repo_root: Path, output_path: Path) -> dict[str, object]:
     rows = read_csv(manifest_path)
     validate_manifest(rows, freeze_ready=True)
     verify_compiled_redteam_corpus(repo_root)
+    _require_resolver_rules_redteam_pass(repo_root)
+    _require_sealed_prediction_registry_complete(repo_root)
     payload = compute_freeze_payload(repo_root, collect_freeze_inputs(repo_root))
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(

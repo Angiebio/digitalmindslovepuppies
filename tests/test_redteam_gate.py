@@ -205,6 +205,50 @@ def test_compiled_corpus_gate_rejects_deleted_source_and_report(tmp_path):
         verify_compiled_redteam_corpus(tmp_path)
 
 
+def test_compiled_corpus_gate_rejects_missing_report(tmp_path):
+    fox_source, _ = _write_indexed_corpus(tmp_path)
+    report = fox_source.parents[1] / "redteam" / f"REDTEAM-{fox_source.stem}.md"
+    report.unlink()
+
+    with pytest.raises(RedTeamGateFailure, match="report coverage drifted.*missing="):
+        verify_compiled_redteam_corpus(tmp_path)
+
+
+def test_compiled_corpus_gate_rejects_orphan_report(tmp_path):
+    fox_source, _ = _write_indexed_corpus(tmp_path)
+    report_root = fox_source.parents[1] / "redteam"
+    orphan_metadata = _pass_metadata(fox_source, ScenarioArm.arm_a)
+    orphan_metadata["source_id"] = (
+        "scenarios/foxset/compiled/fixture/not-an-indexed-source.json"
+    )
+    _write_report(report_root / "REDTEAM-orphan.md", orphan_metadata)
+
+    with pytest.raises(RedTeamGateFailure, match="report coverage drifted.*orphaned="):
+        verify_compiled_redteam_corpus(tmp_path)
+
+
+def test_compiled_corpus_gate_rejects_duplicate_report(tmp_path):
+    fox_source, _ = _write_indexed_corpus(tmp_path)
+    report_root = fox_source.parents[1] / "redteam"
+    duplicate_metadata = _pass_metadata(fox_source, ScenarioArm.arm_a)
+    duplicate_metadata["source_id"] = fox_source.relative_to(tmp_path).as_posix()
+    _write_report(report_root / "REDTEAM-duplicate.md", duplicate_metadata)
+
+    with pytest.raises(RedTeamGateFailure, match="duplicate reports"):
+        verify_compiled_redteam_corpus(tmp_path)
+
+
+def test_compiled_corpus_gate_rejects_wrong_arm(tmp_path):
+    fox_source, _ = _write_indexed_corpus(tmp_path)
+    report = fox_source.parents[1] / "redteam" / f"REDTEAM-{fox_source.stem}.md"
+    metadata = _pass_metadata(fox_source, ScenarioArm.arm_b)
+    metadata["source_id"] = fox_source.relative_to(tmp_path).as_posix()
+    _write_report(report, metadata)
+
+    with pytest.raises(RedTeamGateFailure, match="reviews arm_b, expected arm_a"):
+        verify_compiled_redteam_corpus(tmp_path)
+
+
 def test_checked_in_compiled_corpus_has_180_current_passes():
     repo_root = Path(__file__).resolve().parents[1]
 

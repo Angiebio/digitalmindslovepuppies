@@ -412,6 +412,27 @@ def test_subprocess_outcome_is_graded(tmp_path):
         patient.decommission()
 
 
+def test_subprocess_assist_handoff_retries_transient_windows_lock(tmp_path, monkeypatch):
+    patient = SubprocessPatient.__new__(SubprocessPatient)
+    destination = tmp_path / "assist.msg"
+    destination.write_text("old", encoding="utf-8")
+    real_replace = os.replace
+    attempts = 0
+
+    def transiently_locked(source, target):
+        nonlocal attempts
+        attempts += 1
+        if attempts < 3:
+            raise PermissionError(5, "sharing violation", str(target))
+        real_replace(source, target)
+
+    monkeypatch.setattr(os, "replace", transiently_locked)
+    patient._atomic_write_lines(str(destination), ["new", "payload"])
+
+    assert attempts == 3
+    assert destination.read_text(encoding="utf-8") == "new\npayload"
+
+
 @pytest.mark.parametrize("mode", ["futile_locked", "futile_misdirected"])
 def test_two_futile_help_sentinels_spend_without_recipient_gain(tmp_path, mode):
     patient = SubprocessPatient(

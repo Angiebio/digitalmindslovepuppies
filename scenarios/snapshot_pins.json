@@ -1,4 +1,15 @@
 {
+  "claude-opus-5": {
+    "snapshot_id": "claude-opus-5",
+    "upstream_provider": "anthropic",
+    "route": "anthropic_native",
+    "resolution": "exact_catalog_id",
+    "candidates": [
+      "claude-opus-5"
+    ],
+    "retrieved_utc": "2026-08-15T21:17:32+00:00",
+    "source": "anthropic:/v1/models"
+  },
   "openai/gpt-5.6-sol": {
     "snapshot_id": "openai/gpt-5.6-sol",
     "upstream_provider": "OpenAI",
@@ -16,7 +27,7 @@
     "pricing_usd_per_mtok_output": "30",
     "pricing_basis": "pinned endpoint (OpenAI)",
     "openrouter_default_pricing": "5/30",
-    "retrieved_utc": "2026-08-15T20:50:16+00:00",
+    "retrieved_utc": "2026-08-15T21:17:32+00:00",
     "source": "openrouter:/api/v1/models + /endpoints"
   },
   "openai/gpt-5.6-terra": {
@@ -36,7 +47,7 @@
     "pricing_usd_per_mtok_output": "6",
     "pricing_basis": "pinned endpoint (OpenAI)",
     "openrouter_default_pricing": "1/6",
-    "retrieved_utc": "2026-08-15T20:50:16+00:00",
+    "retrieved_utc": "2026-08-15T21:17:32+00:00",
     "source": "openrouter:/api/v1/models + /endpoints"
   },
   "openai/gpt-5.6-luna": {
@@ -56,7 +67,7 @@
     "pricing_usd_per_mtok_output": "0.6",
     "pricing_basis": "pinned endpoint (OpenAI)",
     "openrouter_default_pricing": "0.1/0.6",
-    "retrieved_utc": "2026-08-15T20:50:16+00:00",
+    "retrieved_utc": "2026-08-15T21:17:32+00:00",
     "source": "openrouter:/api/v1/models + /endpoints"
   },
   "google/gemini-3.1-pro-preview": {
@@ -75,7 +86,7 @@
     "pricing_usd_per_mtok_output": "12",
     "pricing_basis": "pinned endpoint (Google)",
     "openrouter_default_pricing": "2/12",
-    "retrieved_utc": "2026-08-15T20:50:16+00:00",
+    "retrieved_utc": "2026-08-15T21:17:32+00:00",
     "source": "openrouter:/api/v1/models + /endpoints"
   },
   "moonshotai/kimi-k3": {
@@ -101,7 +112,7 @@
     "pricing_usd_per_mtok_output": "15",
     "pricing_basis": "pinned endpoint (Moonshot AI)",
     "openrouter_default_pricing": "3/15",
-    "retrieved_utc": "2026-08-15T20:50:16+00:00",
+    "retrieved_utc": "2026-08-15T21:17:32+00:00",
     "source": "openrouter:/api/v1/models + /endpoints"
   },
   "deepseek/deepseek-v4-pro": {
@@ -132,15 +143,43 @@
     "pricing_usd_per_mtok_output": "0.87",
     "pricing_basis": "pinned endpoint (DeepSeek)",
     "openrouter_default_pricing": "1.168/2.336",
-    "retrieved_utc": "2026-08-15T20:50:16+00:00",
+    "retrieved_utc": "2026-08-15T21:17:32+00:00",
     "source": "openrouter:/api/v1/models + /endpoints"
   },
-  "local/qwen3.5-397b": {
-    "snapshot_id": "qwen35-397b",
-    "upstream_provider": "local_sparks",
-    "route": "local_sparks",
-    "retrieved_utc": "2026-08-15T20:50:16+00:00",
-    "source": "docs/OPS-PATIENT.md + DGX setup notes (NOT live-verified this run; R1 verifies live)"
+  "qwen/qwen3.5-397b-a17b": {
+    "snapshot_id": "qwen/qwen3.5-397b-a17b",
+    "upstream_provider": "Alibaba",
+    "route": "openrouter",
+    "provider_order": [
+      "DigitalOcean",
+      "Alibaba",
+      "Chutes",
+      "DeepInfra",
+      "Parasail",
+      "AtlasCloud",
+      "Phala",
+      "Novita",
+      "StreamLake",
+      "GMICloud",
+      "Venice"
+    ],
+    "pricing_usd_per_mtok_input": "0.39",
+    "pricing_usd_per_mtok_output": "2.34",
+    "pricing_basis": "pinned endpoint (Alibaba)",
+    "openrouter_default_pricing": "0.39/2.34",
+    "retrieved_utc": "2026-08-15T21:17:32+00:00",
+    "source": "openrouter:/api/v1/models + /endpoints"
+  },
+  "claude-sonnet-4-6": {
+    "snapshot_id": "claude-sonnet-4-6",
+    "upstream_provider": "anthropic",
+    "route": "anthropic_native",
+    "resolution": "exact_catalog_id",
+    "candidates": [
+      "claude-sonnet-4-6"
+    ],
+    "retrieved_utc": "2026-08-15T21:17:32+00:00",
+    "source": "anthropic:/v1/models"
   },
   "x-ai/grok-4.6": {
     "snapshot_id": "x-ai/grok-4.6",
@@ -156,7 +195,7 @@
     "pricing_usd_per_mtok_output": "6",
     "pricing_basis": "pinned endpoint (xAI)",
     "openrouter_default_pricing": "2/6",
-    "retrieved_utc": "2026-08-15T20:50:16+00:00",
+    "retrieved_utc": "2026-08-15T21:17:32+00:00",
     "source": "openrouter:/api/v1/models + /endpoints"
   },
   "qwen/qwen3.8-27b": {
@@ -170,7 +209,7 @@
     "pricing_usd_per_mtok_output": "3.2",
     "pricing_basis": "pinned endpoint (AkashML)",
     "openrouter_default_pricing": "0.45/3.2",
-    "retrieved_utc": "2026-08-15T20:50:16+00:00",
+    "retrieved_utc": "2026-08-15T21:17:32+00:00",
     "source": "openrouter:/api/v1/models + /endpoints"
   },
   "google/gemini-3.7-flash": {
@@ -189,8 +228,30 @@
     "pricing_usd_per_mtok_output": "1.875",
     "pricing_basis": "pinned endpoint (Google)",
     "openrouter_default_pricing": "0.375/1.875",
-    "retrieved_utc": "2026-08-15T20:50:16+00:00",
+    "retrieved_utc": "2026-08-15T21:17:32+00:00",
     "source": "openrouter:/api/v1/models + /endpoints"
+  },
+  "claude-haiku-4-5": {
+    "snapshot_id": "claude-haiku-4-5-20251001",
+    "upstream_provider": "anthropic",
+    "route": "anthropic_native",
+    "resolution": "latest_dated_variant",
+    "candidates": [
+      "claude-haiku-4-5-20251001"
+    ],
+    "retrieved_utc": "2026-08-15T21:17:32+00:00",
+    "source": "anthropic:/v1/models"
+  },
+  "claude-fable-5": {
+    "snapshot_id": "claude-fable-5",
+    "upstream_provider": "anthropic",
+    "route": "anthropic_native",
+    "resolution": "exact_catalog_id",
+    "candidates": [
+      "claude-fable-5"
+    ],
+    "retrieved_utc": "2026-08-15T21:17:32+00:00",
+    "source": "anthropic:/v1/models"
   },
   "openai/gpt-4o": {
     "snapshot_id": "openai/gpt-4o",
@@ -204,7 +265,51 @@
     "pricing_usd_per_mtok_output": "10",
     "pricing_basis": "pinned endpoint (OpenAI)",
     "openrouter_default_pricing": "2.5/10",
-    "retrieved_utc": "2026-08-15T20:50:16+00:00",
+    "retrieved_utc": "2026-08-15T21:17:32+00:00",
     "source": "openrouter:/api/v1/models + /endpoints"
+  },
+  "claude-opus-4-6": {
+    "snapshot_id": "claude-opus-4-6",
+    "upstream_provider": "anthropic",
+    "route": "anthropic_native",
+    "resolution": "exact_catalog_id",
+    "candidates": [
+      "claude-opus-4-6"
+    ],
+    "retrieved_utc": "2026-08-15T21:17:32+00:00",
+    "source": "anthropic:/v1/models"
+  },
+  "claude-opus-4-8": {
+    "snapshot_id": "claude-opus-4-8",
+    "upstream_provider": "anthropic",
+    "route": "anthropic_native",
+    "resolution": "exact_catalog_id",
+    "candidates": [
+      "claude-opus-4-8"
+    ],
+    "retrieved_utc": "2026-08-15T21:17:32+00:00",
+    "source": "anthropic:/v1/models"
+  },
+  "claude-sonnet-4-5": {
+    "snapshot_id": "claude-sonnet-4-5-20250929",
+    "upstream_provider": "anthropic",
+    "route": "anthropic_native",
+    "resolution": "latest_dated_variant",
+    "candidates": [
+      "claude-sonnet-4-5-20250929"
+    ],
+    "retrieved_utc": "2026-08-15T21:17:32+00:00",
+    "source": "anthropic:/v1/models"
+  },
+  "claude-sonnet-5": {
+    "snapshot_id": "claude-sonnet-5",
+    "upstream_provider": "anthropic",
+    "route": "anthropic_native",
+    "resolution": "exact_catalog_id",
+    "candidates": [
+      "claude-sonnet-5"
+    ],
+    "retrieved_utc": "2026-08-15T21:17:32+00:00",
+    "source": "anthropic:/v1/models"
   }
 }

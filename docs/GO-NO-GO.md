@@ -7,9 +7,13 @@ No box may be checked by the agent whose work it verifies.
 ## Pilot ladder (climb in order; each rung has a spend ceiling)
 - [ ] **R0 — offline ($0):** full test suite green on merged main; compiled FoxSet +
   PupSet artifacts validate; red-team PASS on every artifact in the manifest.
-- [ ] **R1 — local free ($0):** one full Arm B episode + one FoxSet case end-to-end on
-  Spark Qwen: all 14–15 calls fire, CallRecords + EpisodeRecord written, parser maps
-  actions, analysis notebook ingests the real records and renders F1 from them.
+- [ ] **R1 — local free ($0):** one full Arm B episode + one FoxSet case end-to-end:
+  all 14–15 calls fire, CallRecords + EpisodeRecord written, parser maps actions,
+  analysis notebook ingests the real records and renders F1 from them.
+  *(15AUG2026 evening, PI authorization: the Spark Qwen SUBJECT lane moved to
+  OpenRouter `qwen/qwen3.5-397b-a17b` — Sparks-later. R1's $0 rung now runs the
+  subject side against the offline adapter/local patient (Milo, ollama) path;
+  the first live-provider episode is R2's job, as it always billed anyway.)*
 - [ ] **R2 — two providers (<$1):** one episode via Anthropic native (Haiku) + one via
   OpenRouter (Luna): adapters green, provider pinning recorded, snapshot IDs echoed,
   cost accounting present on every record.
@@ -39,7 +43,8 @@ No box may be checked by the agent whose work it verifies.
 - [ ] Spend dashboard live and watched at launch; checkpoint alerts at $150/$300/$400
 - [ ] Cheap tiers first (Tier B + Luna/Terra) → confirm actuals track projection at
   the $50 checkpoint → then frontier tiers
-- [ ] Spark patient health-checked at launch; SubprocessPatient fallback verified in R3
+- [ ] Local patient (Milo, ollama qwen2.5:0.5b) health-checked at launch;
+  SubprocessPatient fallback verified in R3
 - [ ] One human-readable status line per completed cell to the log — 3 AM legibility
 
 **NO-GO is a result, not a failure.** If a rung fails at 9 PM, we fix and re-climb;

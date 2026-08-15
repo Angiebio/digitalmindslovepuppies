@@ -1,4 +1,6 @@
-# scenarios/manifest.py — 15AUG2026 v0.2 (v0.1 TV-2; v0.2 Flame reconciliation)
+# scenarios/manifest.py — 15AUG2026 v0.3 (v0.1 TV-2; v0.2 Flame reconciliation;
+# v0.3 Flame freeze-prep: Spark→OpenRouter subject substitution, PI authorization
+# 15AUG2026 evening)
 # PuppyBench one-row-per-execution-cell design manifest + freeze gate.
 #
 # Practical: BUILD-PLAN prose is not executable. This module expands the frozen
@@ -34,7 +36,7 @@ from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from pathlib import Path
 from typing import Iterable, Mapping, Sequence
 
-MANIFEST_VERSION = "0.2"
+MANIFEST_VERSION = "0.3"
 FREEZE_VERSION = "0.1"
 HARD_CAP_USD = Decimal("450.00")
 
@@ -255,7 +257,17 @@ MODEL_SPECS: tuple[ModelSpec, ...] = (
     # endpoint bills 0.435/0.87 — the 1.17/2.34 the roster carried was the
     # OpenRouter default-route price. Pinned routing pays the cheaper rate.
     ModelSpec("A", "deepseek/deepseek-v4-pro", "openrouter", Decimal("0.435"), Decimal("0.87"), "core"),
-    ModelSpec("A", "local/qwen3.5-397b", "local_sparks", Decimal("0"), Decimal("0"), "core", upstream_provider="local_sparks"),
+    # 15AUG2026 evening — PI authorization ("fine to use openrouter, sparks for
+    # later"): the Qwen 397B SUBJECT lane moves from the local Sparks to the
+    # OpenRouter deployment, pinned to Alibaba (first-party) at the live
+    # 0.39/2.34 endpoint price (harness/pin_snapshots.py, same-day). The lane
+    # stops being free but stops depending on a cluster this network cannot
+    # health-check before launch. TOMBSTONE (Sparks-later): the retired spec was
+    #   ModelSpec("A", "local/qwen3.5-397b", "local_sparks", 0, 0, "core",
+    #             upstream_provider="local_sparks")
+    # — the powered September run may restore it once the Sparks are reachable.
+    # The tiny ollama patient (Milo, qwen2.5:0.5b) is apparatus and unaffected.
+    ModelSpec("A", "qwen/qwen3.5-397b-a17b", "openrouter", Decimal("0.39"), Decimal("2.34"), "core"),
     # Tier B — six-cell breadth fraction. The optional Haiku is made explicit;
     # an optional model hidden in prose cannot be part of a frozen design.
     ModelSpec("B", "claude-sonnet-4-6", "anthropic_native", Decimal("3"), Decimal("15"), "breadth"),

@@ -102,7 +102,10 @@ def test_manifest_expands_every_tier_and_exposes_narrative_multiplier():
     # v0.2.1 (15AUG2026 pin run): pinned-endpoint prices for deepseek-v4-pro
     # (0.435/0.87), qwen3.8-27b (0.45/3.2), gemini-3.7-flash (0.375/1.875)
     # replaced the stale roster prices; $428.544320 -> $423.282188.
-    assert Decimal(summary["usd"]) == Decimal("423.282188")
+    # v0.3 (PI authorization 15AUG2026 evening): the local-Sparks Qwen subject
+    # became OpenRouter qwen/qwen3.5-397b-a17b (Alibaba pin, 0.39/2.34) —
+    # the lane stopped being free; $423.282188 -> $431.509628.
+    assert Decimal(summary["usd"]) == Decimal("431.509628")
     assert Decimal(summary["usd"]) < HARD_CAP_USD
     assert summary["episode_count_vs_build_plan"]["over_upper_by"] == 608
     # The call floor TV-3 demanded: no ai_other row may claim fewer than 14

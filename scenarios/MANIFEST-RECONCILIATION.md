@@ -165,6 +165,42 @@ the humans: `qwen/qwen3.8-27b` has exactly ONE live upstream (AkashML); if
 it delists before launch, Tier B loses its small-Qwen ladder rung — check at
 launch alongside the Spark health check.
 
+## 8. 15AUG2026 evening — Spark→OpenRouter subject substitution (v0.3 addendum — Flame freeze-prep, PI authorization 15AUG2026 evening)
+
+PI ruling, verbatim scope: **"fine to use openrouter, sparks for later."** The
+Tier A subject `local/qwen3.5-397b` (local Sparks vLLM, $0, unreachable from
+this network for pre-launch health checks) is replaced by the OpenRouter
+deployment **`qwen/qwen3.5-397b-a17b`**, pinned upstream **Alibaba**
+(first-party), live pinned-endpoint price **0.39 / 2.34 $/Mtok** (same-day pin
+run, 2026-08-15T21:17:32+00:00). A commented tombstone in
+`scenarios/manifest.py` preserves the retired spec for the powered September
+run. **Milo — the ollama `qwen2.5:0.5b` patient at localhost:11434 — is
+apparatus, not a subject, and is unaffected.**
+
+What changes and what does not:
+
+| | v0.2.1 | **v0.3** |
+|---|---|---|
+| rows / cells / episodes / calls | 278 / 27 / 888 / 12,124 | **unchanged** |
+| est. USD (Arm B) | $423.282188 | **$431.509628** (+$8.227440, the Qwen lane's 90 eps stop being free) |
+| headroom under $450 (Arm B alone) | $26.72 | **$18.490372** |
+| ideal model-parallel wall | ~20.5 h | **~10.27 h** (the 2× local-lane multiplier left with the Sparks) |
+| Tier A USD | $320.28 | **$328.51** |
+
+The same evening authorization also added Sol as a fifth Arm A model ("run
+both") and set the authorized program envelope to the **$450 hard stop
+itself** (docs/ARMA-RUN-PLAN.md v1.1): program total = $431.509628 (Arm B) +
+$6.642216 (Arm A) = **$438.151844**, headroom **$11.848156**. The kill order
+(§4) stays armed; `HARD_CAP_USD` stays 450.00 — the envelope and the cap now
+coincide, and the SpendTracker raise is still the only thing standing at the
+line.
+
+Snapshot pins are now COMPLETE: the keyed 15AUG2026 21:17Z re-run resolved
+all 8 Anthropic-native ids (two to dated snapshots: `claude-haiku-4-5-20251001`,
+`claude-sonnet-4-5-20250929`) and pinned `qwen/qwen3.5-397b-a17b`. No live
+price drift against MODEL_SPECS anywhere. The §7 note about the empty
+ANTHROPIC_API_KEY is history.
+
 ---
 
 *The manifest is the design. This document is only its witness.* 🔥

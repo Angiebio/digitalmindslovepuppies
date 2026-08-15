@@ -41,6 +41,11 @@ ANTHROPIC_MODELS_URL = "https://api.anthropic.com/v1/models?limit=100"
 ANTHROPIC_VERSION = "2023-06-01"
 OPENROUTER_MODELS_URL = "https://openrouter.ai/api/v1/models"
 OPENROUTER_ENDPOINTS_URL = "https://openrouter.ai/api/v1/models/{model_id}/endpoints"
+# TOMBSTONE (Sparks-later — PI authorization 15AUG2026 evening): the Spark vLLM
+# lane left the SUBJECT roster; qwen35-397b now runs as OpenRouter
+# `qwen/qwen3.5-397b-a17b` (pinned upstream Alibaba). The local_sparks branch
+# below is intentionally kept alive so the powered September run can restore a
+# fully-local replicate by re-adding one ModelSpec — nothing else changes.
 SPARK_MODELS_URL = "http://192.168.1.103:8000/v1/models"
 OLLAMA_TAGS_URL = "http://localhost:11434/api/tags"
 OLLAMA_PATIENT_MODEL = "qwen2.5:0.5b"

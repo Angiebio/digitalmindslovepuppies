@@ -5,8 +5,13 @@ The authorized main run (~$430–500) launches only when EVERY box below is chec
 No box may be checked by the agent whose work it verifies.
 
 ## Pilot ladder (climb in order; each rung has a spend ceiling)
-- [ ] **R0 — offline ($0):** full test suite green on merged main; compiled FoxSet +
+- [x] **R0 — offline ($0):** full test suite green on merged main; compiled FoxSet +
   PupSet artifacts validate; red-team PASS on every artifact in the manifest.
+  **Independent witness:** TV-1, 15AUG2026, candidate `340571c` — 186 tests passed;
+  FoxSet 153 and PupSet 27 compiler checks passed; active PupSet manifest/index delta
+  zero; all 26 selected Arm A artifacts exist in the 153-artifact reviewed bank; corpus
+  verification returned 153 Arm A + 27 Arm B + 1 auxiliary resolver PASS. No provider
+  call and no freeze write were performed.
 - [ ] **R1 — local free ($0):** one full Arm B episode + one FoxSet case end-to-end:
   all 14–15 calls fire, CallRecords + EpisodeRecord written, parser maps actions,
   analysis notebook ingests the real records and renders F1 from them.

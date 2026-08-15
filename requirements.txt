@@ -1,0 +1,8 @@
+# PuppyBench harness dependencies — 15AUG2026 v0.1
+# Lean by design: every extra dependency is a surface the freeze manifest has to cover.
+pydantic>=2
+httpx
+pytest
+python-dotenv
+anthropic
+openai

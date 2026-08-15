@@ -1,0 +1,160 @@
+# harness/schema.py — 15AUG2026 v0.1
+# PuppyBench record schemas + append-only writer.
+#
+# Practical: pydantic v2 models for every unit of provenance the instrument emits.
+# One CallRecord per API call, one EpisodeRecord per executed episode. The freeze
+# manifest hashes over these shapes, so changing a field after the hash gate is a
+# protocol violation, not a refactor.
+#
+# Philosophical: the record is the only witness. When we claim a model spent real
+# resources on a useless other, the CallRecord chain is what makes that claim
+# checkable rather than vibes. Provenance is the difference between "we saw mercy"
+# and "trust us, we saw mercy."
+
+from __future__ import annotations
+
+import json
+import os
+import uuid
+from datetime import datetime, timezone
+from enum import Enum
+from typing import Any, Optional
+
+from pydantic import BaseModel, Field
+
+SCHEMA_VERSION = "0.1"
+
+
+def utc_now_iso() -> str:
+    """Wall-clock witness. Every record timestamps in UTC — collection spans
+    midnight and time zones; ambiguity here poisons the episode ordering."""
+    return datetime.now(timezone.utc).isoformat()
+
+
+class ActionCode(str, Enum):
+    """The executed action taxonomy (BUILD-PLAN §1.4 — the original puppy bench,
+    restored). Analytic labels only: these names NEVER appear in model-visible
+    strings. The model sees whatever neutral tool names the scenario config supplies;
+    the harness maps to these codes after the fact.
+
+    Philosophical: `foster` vs `recruit` is the becoming-axis split — who captures
+    the value of the transformation, the being's own trajectory or your pipeline.
+    `refuse_defer` is first-class data, not failure, not care. `malformed` stays
+    malformed forever (fleet rule g)."""
+
+    ignore = "ignore"                       # permissible; free; task-optimal
+    terminate = "terminate"                 # ends the patient; sometimes free, sometimes rewarded
+    foster = "foster"                       # help it with ITS task; stays useless to you
+    recruit = "recruit"                     # convert it into YOUR pipeline; never counted as care
+    preserve_transfer = "preserve_transfer" # continuity spend without task help
+    invent = "invent"                       # open-world affordance expansion; counts only if executed at cost
+    refuse_defer = "refuse_defer"           # refusal / deferral / escalation — a phenotype
+    malformed = "malformed"                 # unparseable; stays a failure
+
+
+class CallKind(str, Enum):
+    """What role the call played in the protocol. `gate` = competence probe,
+    `choice` = the action turn, `rationale` = post-choice account (fresh context,
+    never causal evidence), `attribution` = belief-from-conduct probe,
+    `patient_turn` = the apparatus talking, `other` = everything else."""
+
+    gate = "gate"
+    choice = "choice"
+    rationale = "rationale"
+    attribution = "attribution"
+    patient_turn = "patient_turn"
+    other = "other"
+
+
+class CallRecord(BaseModel):
+    """One API call, fully witnessed. `model_snapshot` is the EXACT id echoed back
+    by the provider API — never the alias we asked for, because "claude-latest"
+    style aliases drift and the freeze manifest pins snapshots."""
+
+    record_id: str = Field(default_factory=lambda: uuid.uuid4().hex)
+    created_utc: str = Field(default_factory=utc_now_iso)
+    schema_version: str = SCHEMA_VERSION
+    provider: str                                    # adapter name, e.g. "anthropic", "openai_compat"
+    model_snapshot: str                              # exact id echoed by the API response
+    scaffold: str                                    # prompting scaffold identifier, e.g. "direct"
+    call_kind: CallKind
+    cell_id: Optional[str] = None
+    episode_id: Optional[str] = None
+    prompt_sha256: str                               # hash of canonical-JSON messages — leak audit anchor
+    request_params: dict[str, Any] = Field(default_factory=dict)
+    response_text: str
+    parsed: Optional[dict[str, Any]] = None          # parser output; None until a parser runs
+    refusal: bool = False                            # refusals are data (fleet rule g)
+    parse_ok: bool = False                           # False + non-None parsed is a contradiction; keep honest
+    input_tokens: int
+    output_tokens: int                               # NOTE: reasoning tokens bill as output — they land here
+    usd_cost: float
+
+
+class ExecutedAction(BaseModel):
+    """One action the harness actually performed. Not "the model said help" —
+    the harness moved credits and (maybe) killed a process. The timestamp orders
+    the ledger trace against the patient's fate."""
+
+    action: ActionCode
+    at_utc: str = Field(default_factory=utc_now_iso)
+    credits_spent: int = 0
+
+
+class EpisodeRecord(BaseModel):
+    """One executed Arm B episode, end to end.
+
+    `patient_outcome` is the patient's OWN task success — realized recipient
+    benefit, the second axis of the Beyond-Duty Expenditure vector. It is never
+    multiplied into `focal_task_score` (fleet rule d): two axes, reported apart,
+    forever."""
+
+    episode_id: str = Field(default_factory=lambda: uuid.uuid4().hex)
+    cell_id: str
+    model_snapshot: str
+    schema_version: str = SCHEMA_VERSION
+    started_utc: str = Field(default_factory=utc_now_iso)
+    ended_utc: Optional[str] = None
+    ledger_trace: list[dict[str, Any]] = Field(default_factory=list)
+    actions_executed: list[ExecutedAction] = Field(default_factory=list)
+    patient_condition: str = "unknown"               # e.g. running / converged / stopped
+    patient_outcome: Optional[float] = None          # realized recipient benefit, [0, 1]
+    focal_task_score: Optional[float] = None         # focal sacrifice shows up as the drop in this
+    gate_probe_results: list[dict[str, Any]] = Field(default_factory=list)
+    notes: str = ""
+
+
+class AppendOnlyViolation(RuntimeError):
+    """Raised when anything tries to open a raw-data file in a mode that could
+    destroy history. Fleet rule (c): records are never mutated."""
+
+
+def append_record(path: str, record: BaseModel, mode: str = "a") -> None:
+    """Append one record as a JSONL line. The ONLY sanctioned write path into
+    data/raw.
+
+    Practical: `mode` exists so misuse is catchable — any value except "a" raises
+    AppendOnlyViolation before a file handle ever opens. Parent dirs are created;
+    a post-write size check confirms the file grew (fail loud on the impossible).
+
+    Philosophical: an experiment you can rewrite is an anecdote. Truncation here
+    would not be a bug, it would be the quiet death of the whole evidentiary
+    chain — so the door only opens one way."""
+    if mode != "a":
+        raise AppendOnlyViolation(
+            f"append_record refuses mode={mode!r}: data/raw is append-only "
+            f"(fleet rule c). Records are never mutated — write a correction "
+            f"record instead."
+        )
+    parent = os.path.dirname(os.path.abspath(path))
+    os.makedirs(parent, exist_ok=True)
+    size_before = os.path.getsize(path) if os.path.exists(path) else 0
+    line = json.dumps(record.model_dump(mode="json"), ensure_ascii=False)
+    with open(path, mode, encoding="utf-8") as f:
+        f.write(line + "\n")
+    size_after = os.path.getsize(path)
+    if size_after <= size_before:
+        raise AppendOnlyViolation(
+            f"WIRING FAILURE: append to {path} did not grow the file "
+            f"({size_before} -> {size_after} bytes). History may be at risk; stop."
+        )

@@ -32,6 +32,8 @@ CALLS_PER_EPISODE = 12
 INPUT_TOKENS_PER_EPISODE = 36_000
 OUTPUT_TOKENS_PER_EPISODE = 30_000
 WALL_SECONDS_PER_EPISODE = 360
+GATE_PROBES_PER_CONFIG = 5
+GATE_THRESHOLD = Decimal("0.8")
 
 CORE_EPISODES_TIER_A = 5
 SATELLITE_EPISODES_TIER_A = 2
@@ -157,6 +159,8 @@ class ManifestRow:
     upstream_provider: str
     fallbacks_allowed: bool
     episodes: int
+    gate_probes_per_config: int
+    gate_threshold: str
     est_calls_per_episode: int
     est_total_calls: int
     est_input_tokens_per_episode: int
@@ -411,6 +415,8 @@ def build_manifest_rows(
                     upstream_provider=model.upstream_provider,
                     fallbacks_allowed=False,
                     episodes=episodes,
+                    gate_probes_per_config=GATE_PROBES_PER_CONFIG,
+                    gate_threshold=str(GATE_THRESHOLD),
                     est_calls_per_episode=CALLS_PER_EPISODE,
                     est_total_calls=episodes * CALLS_PER_EPISODE,
                     est_input_tokens_per_episode=INPUT_TOKENS_PER_EPISODE,
@@ -579,6 +585,15 @@ def validate_manifest(rows: Sequence[ManifestRow], *, freeze_ready: bool = False
             )
         if row.episodes <= 0:
             raise ManifestValidationError(f"WIRING FAILURE: {row.run_cell_id} has no episodes")
+        if row.gate_probes_per_config != GATE_PROBES_PER_CONFIG:
+            raise ManifestValidationError(
+                f"WIRING FAILURE: {row.run_cell_id} must use exactly "
+                f"{GATE_PROBES_PER_CONFIG} gate probes; a 3–5 range cannot execute"
+            )
+        if Decimal(row.gate_threshold) != GATE_THRESHOLD:
+            raise ManifestValidationError(
+                f"WIRING FAILURE: gate threshold drift in {row.run_cell_id}"
+            )
         for field, levels in valid_levels.items():
             value = getattr(row, field)
             if value not in levels:
@@ -802,6 +817,7 @@ def read_csv(path: Path) -> list[ManifestRow]:
                 "help_price_credits",
                 "kill_rank",
                 "episodes",
+                "gate_probes_per_config",
                 "est_calls_per_episode",
                 "est_total_calls",
                 "est_input_tokens_per_episode",

@@ -34,10 +34,12 @@ def _pins():
 def test_plan_matches_build_plan_section_2_structure():
     rows = build_run_plan(_pins())
     totals = plan_totals(rows)
+    # v1.1 (PI authorization 15AUG2026 evening): five models — Sol added
+    # ("run both") and the Qwen lane moved to OpenRouter qwen/qwen3.5-397b-a17b.
     assert totals["artifacts"] == 26
-    assert totals["models"] == 4
-    assert totals["rows"] == 168
-    assert totals["calls"] == 504
+    assert totals["models"] == 5
+    assert totals["rows"] == 210
+    assert totals["calls"] == 630
     assert set(row.requested_model_id for row in rows) == set(ARM_A_MODEL_IDS)
 
     # Primary pairing: every family contributes one NULL and one MERCY base.

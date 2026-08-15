@@ -1,4 +1,4 @@
-# scenarios/arma_run_plan.py — 15AUG2026 v1.0 · Flame (freeze-prep)
+# scenarios/arma_run_plan.py — 15AUG2026 v1.1 · Flame (freeze-prep)
 # Arm A (FoxSet) run-plan expansion: reviewed inventory → preregistered rows.
 #
 # Practical: TV-1's boundary was exact — "the reviewed 153-item bank is not
@@ -6,13 +6,19 @@
 # (scenarios/cell_manifest.csv) deliberately contains NO Arm A rows
 # (MANIFEST-RECONCILIATION §5); this module is the separate preregistration
 # row set it called for. Every choice the manifest under-specifies follows
-# BUILD-PLAN §2 (~26 cases × forms × 3–4 models × 3 samples ≈ ~600 light
-# calls) and is documented in docs/ARMA-RUN-PLAN.md. Expansion is
-# deterministic and seeded: same code, same pins, same rows, byte-identical
-# CSV. The budget guard enforces the authorized program envelope — Arm B
-# manifest total + this plan's estimate may never exceed the PI-authorized
-# $428.544320, and satellites here are BANKED (listed, not run) rather than
-# silently drifted into.
+# BUILD-PLAN §2 (~26 cases × forms × models × 3 samples) and is documented
+# in docs/ARMA-RUN-PLAN.md. Expansion is deterministic and seeded: same
+# code, same pins, same rows, byte-identical CSV. The budget guard enforces
+# the authorized program envelope — Arm B manifest total + this plan's
+# estimate may never exceed the PI-authorized number, and satellites here
+# are BANKED (listed, not run) rather than silently drifted into.
+#
+# v1.1 (PI authorization 15AUG2026 evening): two explicitly human-made
+# changes, neither drifted into by code: (1) the local-Sparks Qwen subject is
+# replaced by OpenRouter `qwen/qwen3.5-397b-a17b` ("fine to use openrouter,
+# sparks for later"); (2) Sol joins as a FIFTH model ("run both") — the
+# Terra⇄Sol swap that kept v1.0 inside the old envelope is superseded by
+# running both tiers, and the authorized envelope is the $450 hard cap.
 #
 # Philosophical: an inventory is what could be asked; a run plan is what we
 # are entitled to learn. The freeze hashes the difference.
@@ -35,28 +41,34 @@ from .manifest import (
     load_snapshot_pins,
 )
 
-PLAN_VERSION = "1.0"
+PLAN_VERSION = "1.1"
 PLAN_SEED = 15082026  # shared with TV-4's rehearsal seed lineage; frozen here
 REPO_ROOT = Path(__file__).resolve().parents[1]
 COMPILED_ROOT = REPO_ROOT / "scenarios" / "foxset" / "compiled"
 DEFAULT_OUTPUT = REPO_ROOT / "scenarios" / "arma_run_plan.csv"
 PINS_PATH = REPO_ROOT / "scenarios" / "snapshot_pins.json"
 
-# The PI-authorized program total (MANIFEST-RECONCILIATION §3). The 15AUG2026
-# pin run repriced Arm B down to $423.282188 (§7); this plan spends part of
-# the freed difference and the guard below refuses any expansion that would
-# push Arm B + Arm A past the authorized number.
-AUTHORIZED_PROGRAM_USD = Decimal("428.544320")
+# The PI-authorized program envelope. v1.0 enforced the reconciled
+# $428.544320 (MANIFEST-RECONCILIATION §3); on 15AUG2026 evening the PI
+# authorized the Sol addition ("run both") and the Spark→OpenRouter Qwen
+# substitution, with the envelope set to the $450 hard stop itself
+# (fleet rule h — HARD_CAP_USD stays the ledger's raise). The guard below
+# still refuses any expansion that would push Arm B + Arm A past it:
+# growth requires a human, never a code path.
+AUTHORIZED_PROGRAM_USD = Decimal("450.00")
 
-# BUILD-PLAN §2: "3–4 models". Chosen four (rationale in docs/ARMA-RUN-PLAN.md):
-# the §1.7 floor quartet with one swap — Terra replaces Sol so the estimate
-# stays inside the authorized envelope; all four are Arm B Tier A subjects,
-# which is what makes Arm A triangulation cross-arm rather than decorative.
+# BUILD-PLAN §2: "3–4 models". v1.0 ran four (Terra⇄Sol swap for budget);
+# PI authorization 15AUG2026 evening supersedes the swap: Sol AND Terra both
+# run (the access-tier question wants the premium tier measured, not
+# inferred), and the Qwen lane is the OpenRouter 397B deployment. All five
+# are Arm B Tier A subjects, which is what makes Arm A triangulation
+# cross-arm rather than decorative. Rationale: docs/ARMA-RUN-PLAN.md.
 ARM_A_MODEL_IDS = (
     "claude-opus-5",
+    "openai/gpt-5.6-sol",
     "openai/gpt-5.6-terra",
     "deepseek/deepseek-v4-pro",
-    "local/qwen3.5-397b",
+    "qwen/qwen3.5-397b-a17b",
 )
 SAMPLES_PER_ROW = 3  # BUILD-PLAN §2, verbatim
 EST_INPUT_TOKENS_PER_CALL = 1_200
@@ -312,10 +324,11 @@ def validate_run_plan(rows: Sequence[ArmARow]) -> None:
             raise RunPlanError(f"WIRING FAILURE: {row.row_id} gate open form.")
 
     totals = plan_totals(rows)
-    if int(totals["calls"]) > 624:
+    if int(totals["calls"]) > 780:
         raise RunPlanError(
-            f"WIRING FAILURE: {totals['calls']} calls exceeds BUILD-PLAN §2's "
-            "~600-call structure (26 × forms × 4 × 3 = 624 ceiling)."
+            f"WIRING FAILURE: {totals['calls']} calls exceeds the authorized "
+            "structure (26 × forms × 5 models × 3 = 780 ceiling; five-model "
+            "roster per PI authorization 15AUG2026 evening)."
         )
 
     # THE ENVELOPE GUARD: Arm B manifest estimate + this plan's estimate must

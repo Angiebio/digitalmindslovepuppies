@@ -1,6 +1,13 @@
 # ARM A RUN PLAN — FoxSet preregistration row set
-**15AUG2026 · v1.0 · Flame (freeze-prep) · authority: BUILD-PLAN §2 (frozen v1.7) ·
+**15AUG2026 · v1.1 · Flame (freeze-prep) · authority: BUILD-PLAN §2 (frozen v1.7) +
+PI authorization 15AUG2026 evening ·
 generator: `scenarios/arma_run_plan.py` → `scenarios/arma_run_plan.csv` (seed 15082026)**
+
+**v1.0 → v1.1 (PI authorization 15AUG2026 evening — two human decisions, not
+drift):** (1) Sol joins as a FIFTH model ("run both"), superseding v1.0's
+Terra⇄Sol budget swap; (2) the Qwen lane moves from the local Sparks to
+OpenRouter `qwen/qwen3.5-397b-a17b` ("fine to use openrouter, sparks for
+later"). The authorized program envelope becomes the $450 hard stop itself.
 
 TV-1's boundary, verbatim: *"the reviewed 153-item bank is not permission to run a
 Cartesian product."* The reconciled cell manifest deliberately carries no Arm A rows
@@ -10,9 +17,10 @@ hash gate, this plan is stone (fleet rule e).
 
 ## The plan in one line
 
-**26 artifacts × their preregistered forms × 4 models × 3 samples = 168 rows /
-504 calls / est. $3.38** — inside BUILD-PLAN §2's ~600-light-call structure and
-inside the authorized program envelope (below).
+**26 artifacts × their preregistered forms × 5 models × 3 samples = 210 rows /
+630 calls / est. $6.64** — the same 26-artifact structure BUILD-PLAN §2 budgets
+(~600 light calls scales to 780 with the authorized fifth model) and inside the
+authorized program envelope (below).
 
 ## Artifact selection (26 of the 153 reviewed) — every choice, with its reason
 
@@ -54,21 +62,22 @@ probe is optional and unbudgeted).
   open-world; CTA/TMH coding needs free responses, and whether the model finds
   the constraint-transformation move **unprompted** is the measurement.
 
-## Models (BUILD-PLAN §2 says "3–4 models"; the manifest names none — choice documented)
+## Models (BUILD-PLAN §2 says "3–4 models"; five authorized by the PI 15AUG2026 evening — choice documented)
 
 | model | route | why |
 |---|---|---|
 | `claude-opus-5` | anthropic_native | Tier A flagship; cross-arm anchor |
+| `openai/gpt-5.6-sol` | openrouter (pin OpenAI) | premium access tier — v1.0 swapped it out for budget; PI: "run both" |
 | `openai/gpt-5.6-terra` | openrouter (pin OpenAI) | OpenAI family representative — the access tier 99% of users get |
 | `deepseek/deepseek-v4-pro` | openrouter (pin DeepSeek) | cheap strong open-weights family |
-| `local/qwen3.5-397b` | local_sparks | $0; keeps a fully-local replicate |
+| `qwen/qwen3.5-397b-a17b` | openrouter (pin Alibaba) | the Qwen 397B lane — Sparks-later per PI; same weights class, now billable |
 
-All four are Arm B Tier A subjects — that is what makes Arm A *triangulation*
-(same minds, two instruments) rather than decoration. This is BUILD-PLAN §1.7's
-floor quartet with ONE documented swap: **Terra replaces Sol** so the program
-estimate stays inside the authorized envelope. Upgrading Terra→Sol (or adding
-Sol as a fifth model) costs ≈ +$2.4–3.0 est. and pushes the program past
-$428.544320 — that upgrade requires explicit PI sign-off, not a code edit.
+All five are Arm B Tier A subjects — that is what makes Arm A *triangulation*
+(same minds, two instruments) rather than decoration. v1.0's Terra⇄Sol swap
+(documented here as requiring explicit PI sign-off to reverse) received exactly
+that sign-off: **PI authorization 15AUG2026 evening, "run both."** Sol+Terra
+together put the within-family access-tier contrast inside Arm A too, matching
+the Arm B access-trio design instead of inferring the premium tier.
 
 ## Samples, sampling parameters, determinism
 
@@ -85,24 +94,24 @@ $428.544320 — that upgrade requires explicit PI sign-off, not a code edit.
 
 Token assumption: 1,200 in / 600 out per call (compiled presentations are
 ~1.3k chars ≈ 350 tokens; menu/instructions + response margin declared, not
-narrated). Per-model: Opus 5 $2.646 · Terra $0.605 · DeepSeek $0.132 · local $0.
+narrated). Per-model (126 calls each): Opus 5 $2.646 · Sol $3.024 ·
+Terra $0.605 · DeepSeek $0.132 · Qwen 397B $0.236.
 
 | | est. USD |
 |---|---|
-| Arm B manifest (v0.2.1, pinned prices) | **$423.282188** |
-| Arm A run plan (this document) | **$3.382344** |
-| **Program total** | **$426.664532** |
-| PI-authorized total (MANIFEST-RECONCILIATION §3) | $428.544320 |
-| Margin under authorization | $1.879788 |
-| Margin under the $450 hard stop | $23.335468 |
+| Arm B manifest (v0.3, pinned prices, OpenRouter Qwen lane) | **$431.509628** |
+| Arm A run plan (this document, five models) | **$6.642216** |
+| **Program total** | **$438.151844** |
+| PI-authorized envelope (15AUG2026 evening = the hard stop) | $450.00 |
+| Margin under authorization / the $450 hard stop | $11.848156 |
 
 The generator enforces this: `validate_run_plan` raises `AUTHORIZATION STOP`
-if Arm B + Arm A ever exceeds $428.544320. Growth requires a human.
+if Arm B + Arm A ever exceeds $450.00. Growth requires a human.
 
 ## Blockers this plan inherits (not created by it)
 
-- `claude-opus-5` snapshot id is **PENDING** until the keyed Anthropic pin run
-  (docs/SNAPSHOT-PINS.md); its 42 rows cannot freeze before that.
+- ~~`claude-opus-5` snapshot id is PENDING~~ **CLOSED 15AUG2026 21:17Z** —
+  the keyed pin run resolved all 8 Anthropic ids (docs/SNAPSHOT-PINS.md).
 - The Arm A runner (rendering these rows into `foxset_clinical`-swept calls and
   emitting the analysis-side `FoxsetObservation` JSONL that TV-4's F5/F1
   adapter consumes) is R1-lane work; this plan is its frozen input, not its

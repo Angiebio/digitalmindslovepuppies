@@ -258,6 +258,32 @@ def test_compiled_corpus_gate_rejects_unindexed_auxiliary_json(tmp_path):
         verify_compiled_redteam_corpus(tmp_path)
 
 
+def test_auxiliary_report_must_live_beside_its_scenario_source(tmp_path):
+    _, pup_source = _write_indexed_corpus(tmp_path)
+    source = tmp_path / "scenarios/pupset/invent_resolver_rules.json"
+    checked_in = (
+        Path(__file__).resolve().parents[1]
+        / "scenarios/pupset/invent_resolver_rules.json"
+    )
+    source.write_bytes(checked_in.read_bytes())
+
+    index_path = pup_source.parent / "INDEX.json"
+    index = json.loads(index_path.read_text(encoding="utf-8"))
+    source_id = source.relative_to(tmp_path).as_posix()
+    index["auxiliary_model_visible_sources"] = [source_id]
+    index_path.write_text(json.dumps(index), encoding="utf-8")
+
+    wrong_report = (
+        pup_source.parent / "redteam" / "REDTEAM-invent_resolver_rules.md"
+    )
+    metadata = _pass_metadata(source, ScenarioArm.arm_b)
+    metadata["source_id"] = source_id
+    _write_report(wrong_report, metadata)
+
+    with pytest.raises(RedTeamGateFailure, match="wrong report path"):
+        verify_compiled_redteam_corpus(tmp_path)
+
+
 def test_checked_in_corpus_has_180_artifacts_plus_auxiliary_pass():
     repo_root = Path(__file__).resolve().parents[1]
 

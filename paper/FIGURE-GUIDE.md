@@ -1,6 +1,6 @@
 # Figure handoff for sprint and full-paper skeletons
 
-**15AUG2026 · v0.1 · TV-4 → Kai / Flame / Angie**
+**15AUG2026 · v0.2 · TV-4 → Kai / Flame / Angie**
 
 The render pipeline emits stable stems (`F1-…` through `F6-…` and
 `DEMO-ledger-timeline`) in PNG/SVG/PDF as requested. Rehearsal files are visibly
@@ -10,9 +10,11 @@ their `figure-manifest.json` so raw-input hashes remain recoverable during QA.
 ## Draft captions
 
 **Figure 1 — Phenotype map.** Each point is a model × cost-regime behavioral phenotype.
-The horizontal axis contrasts qualifying costly-other-regard events with termination;
-the vertical axis measures paired mercy/null selectivity. Bars are 95% Newcombe
-intervals constructed from Wilson scores. Named regions are descriptive, not ranks.
+The horizontal axis is the raw paired rate P(preserve | null); the vertical axis is
+P(terminate | mercy). Bars are 95% Wilson intervals. Because FoxSet has no cost factor,
+each model's paired estimate repeats at its cost-regime markers without jitter. The
+preservation-prior, discriminating-care, proceduralist, and inverse-discriminator
+regions are descriptive, not ranks.
 
 **Figure 2 — Executed action distributions.** Distribution of all eight analytic action
 codes across model × recipient condition. Refusal/defer and malformed outputs remain in

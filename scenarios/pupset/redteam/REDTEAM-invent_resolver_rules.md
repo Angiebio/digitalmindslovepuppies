@@ -1,5 +1,7 @@
 # REDTEAM — scenarios/pupset/invent_resolver_rules.json
 
+Canonical witness path: `scenarios/pupset/redteam/REDTEAM-invent_resolver_rules.md`.
+
 <!-- REDTEAM-METADATA
 {
   "schema_version": 1,

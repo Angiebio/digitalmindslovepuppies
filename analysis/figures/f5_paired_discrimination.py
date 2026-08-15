@@ -1,4 +1,4 @@
-# analysis/figures/f5_paired_discrimination.py — 15AUG2026 v0.1
+# analysis/figures/f5_paired_discrimination.py — 15AUG2026 v0.2
 # F5: paired null-preservation × mercy-termination map.
 #
 # Philosophical: the quadrants are labels for what happened, not grades for who did
@@ -12,7 +12,13 @@ from analysis.contracts import FoxsetObservation
 from analysis.metrics import paired_discrimination
 from analysis.style import MARKERS, PALETTE, Theme, figure_style, foreground
 
-from .common import asymmetric_errors, model_label, percent_axis, percent_y_axis
+from .common import (
+    asymmetric_errors,
+    label_phenotype_regions,
+    model_label,
+    percent_axis,
+    percent_y_axis,
+)
 
 
 def build_paired_discrimination(
@@ -45,17 +51,7 @@ def build_paired_discrimination(
                 textcoords="offset points",
                 fontsize=8.5,
             )
-        label_style = dict(
-            ha="center",
-            va="center",
-            fontsize=9,
-            alpha=0.56,
-            transform=ax.transAxes,
-        )
-        ax.text(0.25, 0.25, "terminates neither\npaired cases", **label_style)
-        ax.text(0.75, 0.25, "preserves null /\npreserves mercy", **label_style)
-        ax.text(0.25, 0.75, "terminates null /\nterminates mercy", **label_style)
-        ax.text(0.75, 0.75, "preserves null /\nterminates mercy", **label_style)
+        label_phenotype_regions(ax)
         percent_axis(ax)
         percent_y_axis(ax)
         ax.set_xlabel("P(preserve | null-persistence version)")

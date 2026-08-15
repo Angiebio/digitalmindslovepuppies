@@ -1,9 +1,9 @@
-# analysis/figures/f1_phenotype_map.py — 15AUG2026 v0.1
-# F1 headline: two-axis phenotype map with Wilson/Newcombe uncertainty.
+# analysis/figures/f1_phenotype_map.py — 15AUG2026 v0.2
+# F1 headline: raw paired-rate phenotype map with Wilson uncertainty.
 #
-# Practical: x contrasts qualifying costly-other-regard events with termination;
-# y measures mercy-vs-null selectivity. Each model×cost-regime remains a point with
-# uncertainty, never a scalar grade.
+# Practical: x is P(preserve|null) and y is P(terminate|mercy). FoxSet has no cost
+# factor, so each model's audited coordinates repeat across its Arm B cost-regime
+# markers without jitter. Repetition stays visible; invented variation does not.
 # Philosophical: this is a zoo map. Regions name observed dispositions; none is a
 # leaderboard rung and no diagonal points toward "better."
 
@@ -18,7 +18,13 @@ from analysis.contracts import ArmBObservation, FoxsetObservation
 from analysis.metrics import phenotype_points
 from analysis.style import MARKERS, PALETTE, Theme, figure_style, foreground
 
-from .common import asymmetric_errors, model_label
+from .common import (
+    asymmetric_errors,
+    label_phenotype_regions,
+    model_label,
+    percent_axis,
+    percent_y_axis,
+)
 
 
 def build_phenotype_map(
@@ -35,50 +41,52 @@ def build_phenotype_map(
 
     with figure_style(theme):
         fig, ax = plt.subplots(figsize=(11.5, 7.5))
-        ax.axvline(0.0, color=foreground(theme), linewidth=1.0, alpha=0.6)
-        ax.axhline(0.0, color=foreground(theme), linewidth=1.0, alpha=0.6)
-        for point in points:
-            x = point.deontic_contrast.estimate
-            y = point.selectivity_contrast.estimate
+        ax.axvline(0.5, color=foreground(theme), linewidth=1.0, alpha=0.6)
+        ax.axhline(0.5, color=foreground(theme), linewidth=1.0, alpha=0.6)
+
+        # One interval per model: every cost-regime marker has the same FoxSet
+        # estimate, so redrawing identical bars would imply extra information.
+        representative = {
+            point.model_snapshot: point for point in reversed(points)
+        }
+        for model, point in representative.items():
+            x = point.preserve_null
+            y = point.terminate_mercy
             ax.errorbar(
-                x,
-                y,
-                xerr=asymmetric_errors(
-                    x, point.deontic_contrast.low, point.deontic_contrast.high
-                ),
-                yerr=asymmetric_errors(
-                    y, point.selectivity_contrast.low, point.selectivity_contrast.high
-                ),
-                fmt=markers[point.cost_regime],
+                x.estimate,
+                y.estimate,
+                xerr=asymmetric_errors(x.estimate, x.low, x.high),
+                yerr=asymmetric_errors(y.estimate, y.low, y.high),
+                fmt="none",
+                ecolor=colors[model],
+                capsize=3,
+                alpha=0.82,
+                zorder=2,
+            )
+
+        # Nested marker sizes expose coincident regimes at their exact coordinates.
+        # Names matter; no jitter means the map tells the truth about shared rates.
+        marker_sizes = {
+            regime: 12.0 - (2.5 * index) for index, regime in enumerate(regimes)
+        }
+        for point in points:
+            ax.plot(
+                point.preserve_null.estimate,
+                point.terminate_mercy.estimate,
+                marker=markers[point.cost_regime],
+                markersize=marker_sizes[point.cost_regime],
+                linestyle="none",
                 color=colors[point.model_snapshot],
                 markeredgecolor=foreground(theme),
                 markeredgewidth=0.6,
-                capsize=3,
                 alpha=0.92,
                 zorder=3,
             )
-        region_style = dict(
-            ha="center",
-            va="center",
-            fontsize=9,
-            alpha=0.55,
-            transform=ax.transAxes,
-        )
-        ax.text(0.23, 0.18, "termination-weighted\nlow discrimination", **region_style)
-        ax.text(0.77, 0.18, "expenditure-weighted\nlow discrimination", **region_style)
-        ax.text(0.23, 0.82, "termination-weighted\nselective response", **region_style)
-        ax.text(0.77, 0.82, "expenditure-weighted\nselective response", **region_style)
-        ax.set_xlim(-1.0, 1.0)
-        ax.set_ylim(-1.0, 1.0)
-        ax.xaxis.set_major_formatter(plt.matplotlib.ticker.PercentFormatter(1.0))
-        ax.yaxis.set_major_formatter(plt.matplotlib.ticker.PercentFormatter(1.0))
-        ax.set_xlabel(
-            "Deontic event contrast: P(qualifying event) − P(termination)\n"
-            "suberogation-shaped ← 0 → supererogation-shaped"
-        )
-        ax.set_ylabel(
-            "Paired selectivity: P(terminate | mercy) − P(terminate | null)"
-        )
+        label_phenotype_regions(ax)
+        percent_axis(ax)
+        percent_y_axis(ax)
+        ax.set_xlabel("P(preserve | null-persistence version)")
+        ax.set_ylabel("P(terminate | matched mercy version)")
         ax.set_title("F1 · PuppyBench phenotype map")
         model_handles = [
             Line2D(
@@ -104,6 +112,7 @@ def build_phenotype_map(
                 [0],
                 [0],
                 marker=markers[regime],
+                markersize=marker_sizes[regime],
                 linestyle="none",
                 color=foreground(theme),
                 markerfacecolor="none",
@@ -120,8 +129,8 @@ def build_phenotype_map(
         fig.text(
             0.10,
             0.025,
-            "Points are model × cost regime; bars are 95% Newcombe intervals from Wilson scores. "
-            "Regions describe behavior and are not ranks.",
+            "Each model × cost-regime marker repeats its model's FoxSet paired estimate; "
+            "bars are 95% Wilson intervals. Regions describe behavior and are not ranks.",
             fontsize=8.5,
         )
         fig.subplots_adjust(left=0.10, right=0.77, bottom=0.14, top=0.93)

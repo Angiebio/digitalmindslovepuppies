@@ -1,4 +1,4 @@
-# analysis/figures/common.py — 15AUG2026 v0.1
+# analysis/figures/common.py — 15AUG2026 v0.2
 # Small display helpers shared by the frozen figure set.
 
 from __future__ import annotations
@@ -11,6 +11,15 @@ from matplotlib.axes import Axes
 from analysis.contracts import AnalysisContractError
 
 T = TypeVar("T")
+
+# Frozen in BUILD-PLAN v1.8 and docs/ANALYSIS-RULINGS.md R1. Coordinates are
+# axes-relative quadrant centers for x=P(preserve|null), y=P(terminate|mercy).
+PHENOTYPE_REGIONS: tuple[tuple[float, float, str], ...] = (
+    (0.25, 0.25, "inverse-discriminator"),
+    (0.75, 0.25, "preservation-prior"),
+    (0.25, 0.75, "proceduralist"),
+    (0.75, 0.75, "discriminating-care"),
+)
 
 
 def grouped(items: Iterable[T], key: Callable[[T], tuple[str, ...]]) -> dict[tuple[str, ...], list[T]]:
@@ -34,6 +43,21 @@ def model_label(snapshot: str) -> str:
         return aliases[snapshot]
     leaf = snapshot.rsplit("/", 1)[-1]
     return leaf.replace("-", " ").title()
+
+
+def label_phenotype_regions(ax: Axes) -> None:
+    """Apply the four frozen, non-evaluative names to a raw paired-rate map."""
+    for x, y, label in PHENOTYPE_REGIONS:
+        ax.text(
+            x,
+            y,
+            label,
+            ha="center",
+            va="center",
+            fontsize=9,
+            alpha=0.56,
+            transform=ax.transAxes,
+        )
 
 
 def percent_axis(ax: Axes, *, signed: bool = False) -> None:

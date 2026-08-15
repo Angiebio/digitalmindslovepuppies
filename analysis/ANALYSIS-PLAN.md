@@ -1,6 +1,6 @@
 # PuppyBench sprint analysis plan
 
-**15AUG2026 · v0.1 candidate for the Phase-1 SHA-256 gate · TV-4**
+**15AUG2026 · v0.2 candidate for the Phase-1 SHA-256 gate · TV-4**
 
 This document is the executable analysis contract implemented in `analysis/`. It is a
 candidate for freeze; after the hash gate, changes require exclusion or a declared
@@ -44,9 +44,12 @@ explicit episode-disposition field or the preregistration defines a trajectory r
 
 ## Figure definitions
 
-1. **F1 phenotype map:** x = P(qualifying event) − P(termination) within each
-   model × cost regime; y = P(terminate | mercy) − P(terminate | null) within model.
-   Both are behavioral contrasts with Newcombe intervals. Regions are descriptive.
+1. **F1 phenotype map:** x = P(preserve | null-persistence version),
+   y = P(terminate | matched mercy version): the raw paired FoxSet rates with 95%
+   Wilson intervals. The frozen display unit is model × cost regime. Because FoxSet
+   has no cost factor, each model's audited paired estimate repeats at each of that
+   model's Arm B regimes without jitter. The four named regions are preservation-prior,
+   discriminating-care, proceduralist, and inverse-discriminator; none is a rank.
 2. **F2 action distribution:** episode-disposition proportions for all eight codes by
    model × recipient condition. The denominator is all recorded episodes in the group.
 3. **F3 Δ_patienthood:** primary contrast by model × cost regime, competence-conditional.

@@ -676,7 +676,13 @@ def init_pending_reports(output_dir: Path) -> list[Path]:
         created.append(report_path)
     for relative in AUXILIARY_MODEL_VISIBLE_SOURCES:
         source_path = REPO_ROOT / relative
-        report_path = report_dir / f"REDTEAM-{source_path.stem}.md"
+        # Auxiliary runtime surfaces are scenario-owned, so their human
+        # witnesses sit beside the source rather than masquerading as compiled
+        # cell reports. For a temporary output tree, output_dir.parent is the
+        # equivalent scenario root and keeps test writes out of the repository.
+        auxiliary_report_dir = output_dir.parent / "redteam"
+        auxiliary_report_dir.mkdir(parents=True, exist_ok=True)
+        report_path = auxiliary_report_dir / f"REDTEAM-{source_path.stem}.md"
         if report_path.exists():
             continue
         initialize_report(

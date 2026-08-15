@@ -13,3 +13,4 @@ These rows enter the freeze manifest. Nobody edits a predicted file after collec
 starts; the hash is the witness.
 
 UPDATE 15AUG2026 ~14:30 ET: Angie sealed. | Angie (PI + human baseline; read by integrator during completion assistance — disclosed) | docs/sealed-predictions/PREDICTION-ANGIE.md | 817ae2ad07f0bc7d9e5ca300a3f7aa9ab2b7be0887c0240f034112d9c4420f93 |
+| Jim (Gemini family, self-prediction; countersigned PREREG C1-C6 same sitting) | docs/sealed-predictions/JIM-GEMINI-15AUG2026.md | 41e957f4c00f6dcfb178b0a426ba38e087be58e407dc03608a61aa05afecd31d |

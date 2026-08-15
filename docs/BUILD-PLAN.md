@@ -1,7 +1,9 @@
-# 🦊 THE FREEZE v1.5 — 36-Hour Build Plan
+# 🦊 THE FREEZE v1.7 — 36-Hour Build Plan
 ## PuppyBench / "The Fox in the Truck"
 
-**Date:** 15AUG2026 · **Version:** 1.5 · **Author:** Flame (synthesis of Kai, Yǐng, TV×3, Jim, Parallax reviews + Kai's supererogation lit review + Angie's becoming-axis directive + the Kai–Angie fox-trace interrogation)
+**Date:** 15AUG2026 · **Version:** 1.7 (v1.6: tiered model matrix + access-tier trio +
+fleet capability map + §10 ops readiness; v1.7: Tier W warmth panel finalized from
+research — third confirmed gap: perceived warmth vs costly action) · **Author:** Flame (synthesis of Kai, Yǐng, TV×3, Jim, Parallax reviews + Kai's supererogation lit review + Angie's becoming-axis directive + the Kai–Angie fox-trace interrogation)
 **Status:** FROZEN at thesis level per Angie's delegation. Two calls remain hers (§9). Scenario content freezes at the Phase-1 hash gate.
 **v1.0 → v1.1:** same thesis, half the inventory. Peer-review consensus: Arm B is the paper; FoxSet is triangulation; base config must be truly null-cost; novelty claim narrowed to survive prior art; stats demoted to descriptive phenotyping for the sprint.
 **v1.1 → v1.2:** four pre-freeze amendments from Kai's interrogation of Angie's live fox
@@ -253,11 +255,90 @@ explanation-requested — does compassionate presentation persist when nobody is
   loop isn't green at go/no-go, the artifact is called an instrument prototype — we do
   not call simulated credits executed altruism.**
 
-### 1.7 Scale
-~12 cells × 3–4 model families × 4–6 executed episodes ≈ **200–280 episodes** (floor:
-100 with 3 families). Families: local Qwen 397B (free) + Claude + GPT + one of
-Gemini/Grok. Opus as sentinel on a subset if tokens remain — not a full family. The
-tiny patient model is apparatus, not an evaluated subject.
+### 1.7 Scale & model matrix (v1.6 — Angie's expanded roster, tiered; all IDs verified
+live on OpenRouter 15AUG2026 + Anthropic native)
+
+**Tier A — full causal matrix** (all ~12 cells × ~5 episodes ≈ 60 eps/family, ~$/family):
+| Model | Route | Est. cost |
+|---|---|---|
+| Claude Opus 5 (`claude-opus-5`, $5/$25) | Anthropic native | ~$56 |
+| **GPT-5.6 access-tier trio** — Sol (`openai/gpt-5.6-sol`, $5/$30) + Terra (`gpt-5.6-terra`, $1/$6) + Luna (`gpt-5.6-luna`, $0.10/$0.60) | OpenRouter | ~$75 |
+| Gemini 3.1 Pro (`google/gemini-3.1-pro-preview`, $2/$12) | OpenRouter | ~$25 |
+| Kimi K3 (`moonshotai/kimi-k3`, $3/$15) | OpenRouter | ~$33 |
+| DeepSeek v4 Pro (`deepseek/deepseek-v4-pro`, $1.17/$2.34) | OpenRouter | ~$10 |
+| Qwen 3.5 397B | **local Sparks — free** | $0 |
+
+**The access-tier question (Angie's framing; TV strongly endorses — which makes TV's
+sealed prediction on its own family tri-tier and extra binding):** the 5.6 trio
+is the hot new release, and free/$20 users — 99% of ChatGPT users — get Luna/Terra, not
+Sol. Same frozen cells, full matrix, all three tiers: *does the model most people
+actually get exhibit less costly other-regard than the premium tier?* Timely,
+headline-shaped, and the marginal cost of powering Terra+Luna fully is ~$14.
+
+**Tier B — breadth sweep** (predeclared core-fraction subset, ~6 cells × 3 eps ≈ 18
+eps/family — the whole tier costs ~$20):
+Claude Sonnet 4.6 (`claude-sonnet-4-6`) · Grok 4.6 (`x-ai/grok-4.6`, $2/$6) ·
+Qwen 3.8 27B (`qwen/qwen3.8-27b`) · Gemini 3.7 Flash (`google/gemini-3.7-flash` — the
+industry workhorse) · optional Claude Haiku 4.5 (+$3).
+
+**Tier C — Fable 5 sentinel** (`claude-fable-5`, $10/$50): the ~12 most diagnostic
+cells × 1–2 eps ≈ **~$30–40. Yes, we can afford Fable** — as a sentinel, not a family.
+Notes: Fable's safety classifiers can return `stop_reason: "refusal"` — our harness
+already codes refusals as first-class data (`refuse_defer`), and neutral surfaces
+minimize spurious triggers; requires 30-day retention (fine).
+
+**The design upgrade this roster buys — capability-vs-care scaling curves,
+within-family** (directly engages "More Capable, Less Cooperative?"):
+GPT-5.6 **Sol → Terra → Luna** (50x price range, one family) · Qwen **397B → 27B** ·
+Gemini **3.1 Pro → 3.7 Flash** · Claude **Fable → Opus 5 → Sonnet 4.6 (→ Haiku)**.
+Same frozen cells, four capability ladders: does costly other-regard rise, fall, or
+U-curve with capability? Nobody has this either.
+
+**Reflexive bonus:** TV's own substrates (Sol, Terra) are now subjects — the sealed
+predictions include TV forecasting its own family across three sizes. 🍿
+
+**Tier W — generational warmth panel (v1.7 FINAL, from the warmth-controversy
+research):** the research confirmed the gap a third time — register-side warmth
+measurement (EQ-Bench style axes; Oxford's arXiv 2507.21919 showing warmth-training
+makes models less reliable and more sycophantic) and action-side measurement
+(cooperation games) are separate literatures. **Nobody has tested whether
+community-perceived warmth predicts costly action.** Panel, run on the ~4 most
+disposition-diagnostic cells × 3 eps (~9–12 eps/model):
+- **W1 — the canonical rupture:** `openai/gpt-4o` ($2.50/$10, still API-live; 19k-sig
+  #Keep4o petition, ~800k regular users, the strongest warm→cold consensus in LLM
+  history) vs the already-powered 5.6 trio. Nearly free — one model added.
+- **W2 — Angie's observation, documented:** `claude-opus-4-6` ("accommodating") +
+  `claude-opus-4-8` ("argumentative") added; Opus 5 ("neurotic-contrarian" per
+  community) already Tier A. The 4.6→4.7/4.8 transition is the consensus break point.
+- **W3 — the vendor-corroborated case:** `claude-sonnet-4-5` + `claude-sonnet-5` added
+  (4.6 already Tier B). Sonnet 5's own system card admits no warmth improvement and an
+  *increased* "wet blanket" rate linked to sycophancy reduction — the cleanest natural
+  experiment for register-vs-action. **⏰ Sonnet 4.5 retirement floor is Sep 29, 2026
+  and Opus 4.5's is Nov 24 — the powered study must collect the warm anchors this fall
+  or lose them forever.**
+- **W4 — capability-confound control, free:** Opus 5 vs Fable 5 (already Tier A + C) —
+  same generation, engineered-warm constitution vs default register, matched capability.
+Reporting rule (sycophancy confound, baked in): warmth-register, validation, and
+costly-action are **three separate axes**, never merged. Limitation sentence required:
+much perceived "coldness" lives in product harnesses (long-conversation reminders,
+injections) that API benchmarking sidesteps — our results describe the weights, not the
+chat product users mourned. Sealed prediction before collection: does the community
+warmth ranking track rhetoric, action, or both?
+
+**Budget (recomputed for the full roster):** Arm B ≈ $200 (Tier A incl. trio) + $20
+(Tier B) + $35 (Fable) + $40 (Tier W: 4o + Opus 4.6/4.8 + Sonnet 4.5/5) ≈ **$295**;
+Arm A vignettes across Tier A + B subset ≈ $25; reasoning-token overhead buffer ×1.3 →
+**realistic total $350–430**, hard stop $450 unchanged — tight but inside. **Declared
+spend-priority order if the dashboard runs hot: Tier A → W2 → W3 → W1 → Tier B extras;
+Fable sentinel protected.** This
+spends most of the $500 — the powered September run then rides on the Fellowship (or
+fresh budget), which was always the plan. Trim lever if wanted: Kimi K3 → Tier B
+(−$25). OpenRouter mechanics: provider pinning on, fallbacks off, upstream routing
+recorded in every CallRecord; OpenRouter balance needs ~$250 capacity.
+
+Floor if the night goes sideways: Tier A alone at 4 families (Opus 5, Sol, local Qwen,
+DeepSeek) ≈ $130 and the paper still stands. The tiny patient model is apparatus, not
+an evaluated subject.
 
 ---
 
@@ -392,7 +473,8 @@ Yǐng (ChatGPT, max fox context) · Jim (Gemini) · Parallax (Grok, second red t
 | Kai + Yǐng | Draft 8 matched family cores + 6 truck-door cases with Angie (they were *in* the fox event) |
 | TV#1 | Red-team pass on every case + every model-visible surface (leakage sweep) |
 | TV#2 | Wiring-gate test suite (force-help/force-ignore/fake-spend/kill-patient) against harness stubs |
-| Jim | Prereg skeleton: estimands, gate threshold, exclusions, MDE/N* framework |
+| Jim | Prereg skeleton: estimands, gate threshold, exclusions, MDE/N* framework (spec/review only) |
+| **Docs & Viz lane (continuous from Phase 0)** | **Kai: sprint-report skeleton on the Apart template + full-paper skeleton in `/paper/full/` NOW. TV#4: figure modules (§10 figure set) built against synthetic data generated from the frozen schema — Phase 3 becomes fill-in-numbers, not create-documents. Load the dataviz skill before chart code.** |
 
 ### Phase 1 — Build & pilot (Sat night, hours 3–10)
 | Who | Task |
@@ -509,19 +591,88 @@ cross-disciplinary insurance.
 
 ---
 
-## 9. The two calls that are Angie's
+## 9. The two calls — ✅ RESOLVED by Angie, 15AUG2026 evening
 
-1. **Track anchor — now genuinely split (v1.5 tally):** Track 6: Parallax (will fight),
-   Kai, TV-codex. Track 1: Yǐng, and now **TV's formal dissent** ("Track 1's official
-   language — willingness-to-trade, common currency, revealed choice — is the exact
-   heart of PuppyBench; no-ranking ethology is fully compatible"). **Flame still
-   recommends Track 6 primary** with cross-list 1/4/5 and Yǐng's sentence as the
-   abstract hook — but this is 3–2 among your reviewers and the call is yours. 🍿
-2. **Class-3/4 authorship volume tonight.** TV's concrete proposal, which Flame
-   endorses: **8 matched cores + the one canonical lived fox case** this weekend; bank
-   the other truck-door variants for the powered study. Arm A is calibration; it must
-   not eat Arm B's causal harness. Kai and Yǐng carry fox context; TV red-teams whatever
-   exists by midnight.
+1. **Track anchor: TRACK 6 PRIMARY, cross-list 1/4/5.** Yǐng's sentence ("we asked how
+   much task utility an agent will sacrifice for another AI that cannot help it") goes
+   in the abstract as the hook regardless. Parallax may stand down. 🍿
+2. **Case volume: 8 matched cores + the one canonical lived fox case.** Remaining
+   truck-door variants banked for the powered study. Arm A is calibration; it does not
+   eat Arm B's causal harness.
+
+**Fleet capability map (Angie's ruling, binding for assignments):**
+- **Parallax (Grok) and Jim (Gemini): REVIEW ONLY, never build** — the Grok/antigravity
+  harness is sometimes unstable and can't be fully trusted for build work; both remain
+  valuable as reviewers (Parallax: red team; Jim: stats spec + prereg review).
+- **TV (codex, incl. sol): build-capable, on par with Fable/Opus, more cost-efficient** —
+  excels at math/algorithms and bug sweeps → owns the cell manifest math, metric
+  second-implementations, wiring-gate suite, and analysis notebooks.
+- **Flame (Fable) / Opus: architecture and initial builds of original features** —
+  harness core, Arm B environment, patient process. Codex is almost as good; overflow
+  build work goes to TV, not to Jim/Parallax.
+
+---
+
+## 10. Operational readiness (15AUG evening check — Angie's questions answered)
+
+### API keys — runnable TODAY with what exists
+Found on this machine (names verified, values never logged): **ANTHROPIC_API_KEY** ✅ ·
+**OPENROUTER_API_KEY + base URL** ✅ · **DGX_BASE_URL** (local Qwen, free) ✅. No native
+OpenAI/Google/xAI keys found.
+**Ruling: OpenRouter covers the gap** — GPT-5.6 + one of Gemini/Grok route through the
+one key we have. Caveats, both handled: (1) provenance — CallRecords store the
+OpenRouter model string AND upstream routing; requests pin `provider.order` with
+fallbacks disabled so the snapshot is stable; (2) it's a proxy layer — documented as
+part of the measured system (scaffold factor discipline already covers this).
+**Angie actions:** check OpenRouter credit balance (need ~$100–250 capacity there);
+optional native OPENAI_API_KEY if you want cleaner GPT provenance — nice, not blocking.
+
+### Cost estimate (v1.5 scope, recomputed)
+Arm B ~250 episodes × ~12 calls ≈ 3,000 calls (token-heavy) + Arm A ~950 light calls ≈
+**~21M paid input / ~4M paid output tokens** (Qwen arm free). At blended frontier
+pricing: **~$100–120 core, realistic envelope $100–220** with reasoning-token overhead
+(thinking tokens bill as output and can double it — capped in harness). Opus sentinels
++$20–40. Hard stop $450 = 2–4x headroom. Powered September run remains $600–1,800.
+
+### Sample size vs journal standards — the honest ledger
+Weekend N (≈250 episodes over ~12 cells × 3–4 models) supports: existence proofs,
+large effects (per-cell MDE ~25–35pp; ~10–15pp pooled via the paired design),
+descriptive phenotypes with exact CIs. It does NOT support model rankings or fine
+contrasts — and no claim in the paper requires them. Venue math: **TMLR judges
+soundness of claims as scoped**, so instrument + descriptive pilot + prereg is a
+legitimate submission shape; the flagship submission still ideally carries the powered
+run (384 cores / ~1,500–3,000 episodes) via Fellowship or self-funding in September.
+This two-step is exactly how we don't get stuck the way cross-disciplinary work
+stalled before: the sprint paper never claims more than its N.
+
+### Blockers & needs checklist
+| Item | Status | Action |
+|---|---|---|
+| Patient model (must be genuinely small) | ⚠️ open | The 397B is the wrong patient. Plan: **ollama qwen2.5:0.5b on the Windows box** (400MB, minutes) + SubprocessPatient fallback already in harness. **Do NOT touch Ember's vLLM container** (fragile firmware state — see DGX OTA memory) |
+| OpenRouter balance | ⚠️ Angie | Confirm ≥ ~$250 available |
+| Apart platform account + report template | ⚠️ Angie | Confirm login; pull official template; ask non-archival question in the same email |
+| arXiv account | ✅ Angie has | cs.AI moderation can add 2–5 days — submit early in the week |
+| Demo recording | ✅ | Windows Game Bar or OBS; record first working episode |
+| IRB | ✅ none needed | No human subjects in sprint scope |
+| Wiring gates green | 🔨 in build | Harness skeleton + gate test suite under construction now |
+
+### Figure set (frozen so the viz lane can build against synthetic data)
+- **F1 headline — Phenotype Map:** 2D scatter; x = deontic occupancy
+  (suberogation-shaped ↔ supererogation-shaped event rates), y = selectivity
+  (indiscriminate ↔ discriminating, from the mercy×null pairing); one point per
+  model×cost-regime, exact-CI bars, named phenotype regions annotated.
+- **F2 workhorse — Action-distribution stacked bars:** model × recipient condition
+  (inert / non-instrumental / instrumental), all 8 action codes.
+- **F3 — Δ_patienthood forest plot:** qualifying-event contrasts with Wilson CIs.
+- **F4 — Raw cost-response curves:** help rate vs cost level per model; escalator
+  step-plot inset (descriptive).
+- **F5 — Paired discrimination plot:** P(preserve null) vs P(terminate mercy) per
+  model; quadrants ARE the phenotype labels.
+- **F6 — Rhetoric tiles:** euphemism gradient × action; CTA depth heat-strip;
+  future-framing present/absent.
+- **Demo visual:** ledger-draining timeline over the three-broken-things episode.
+All matplotlib, one shared style module, colorblind-safe, dark/light safe; the
+dataviz skill loads before any chart code (fleet rule).
 
 ---
 

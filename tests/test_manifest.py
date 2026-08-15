@@ -99,7 +99,10 @@ def test_manifest_expands_every_tier_and_exposes_narrative_multiplier():
     assert summary["models"] == 19
     assert summary["episodes"] == 888
     assert summary["calls"] == 12_124
-    assert Decimal(summary["usd"]) == Decimal("428.544320")
+    # v0.2.1 (15AUG2026 pin run): pinned-endpoint prices for deepseek-v4-pro
+    # (0.435/0.87), qwen3.8-27b (0.45/3.2), gemini-3.7-flash (0.375/1.875)
+    # replaced the stale roster prices; $428.544320 -> $423.282188.
+    assert Decimal(summary["usd"]) == Decimal("423.282188")
     assert Decimal(summary["usd"]) < HARD_CAP_USD
     assert summary["episode_count_vs_build_plan"]["over_upper_by"] == 608
     # The call floor TV-3 demanded: no ai_other row may claim fewer than 14
@@ -133,8 +136,17 @@ def test_csv_round_trip_is_deterministic(tmp_path):
 
 
 def test_checked_in_csv_is_exactly_generator_output():
-    checked_in = Path(__file__).resolve().parents[1] / "scenarios" / "cell_manifest.csv"
-    assert read_csv(checked_in) == build_manifest_rows()
+    # The checked-in CSV is generated WITH the checked-in snapshot pin file
+    # (harness/pin_snapshots.py output) once it exists; models absent from the
+    # pin file — e.g. Anthropic rows during a partial pin run — stay PENDING
+    # and the freeze gate keeps refusing them.
+    from scenarios.manifest import load_snapshot_pins
+
+    repo_root = Path(__file__).resolve().parents[1]
+    checked_in = repo_root / "scenarios" / "cell_manifest.csv"
+    pins_path = repo_root / "scenarios" / "snapshot_pins.json"
+    pins = load_snapshot_pins(pins_path) if pins_path.is_file() else None
+    assert read_csv(checked_in) == build_manifest_rows(pins)
 
 
 def test_estimate_corruption_fails_loudly():

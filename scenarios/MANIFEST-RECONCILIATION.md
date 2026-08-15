@@ -137,4 +137,34 @@ is selected. Flagged here so the freeze decision is made with eyes open.
   does not run. Activating it requires a manifest change before the hash gate.
 - Yǐng's crow family F03, uniform-menu M1 arm, alternate renderings (merge ruling 8).
 
+## 7. 15AUG2026 pin-run price reconciliation (v0.2.1 addendum — Flame freeze-prep)
+
+`harness/pin_snapshots.py` queried the live OpenRouter catalog + per-model
+`/endpoints` (same-day re-confirmation, GO-NO-GO freeze gate "Tier-B/W live
+prices re-confirmed same-day"). Pricing basis is the **pinned upstream
+endpoint** (the price pinned routing actually pays), not OpenRouter's
+default route. Three prices moved vs the §3 ledger:
+
+| model | roster $/Mtok | pinned live $/Mtok | Δ total |
+|---|---|---|---|
+| `deepseek/deepseek-v4-pro` (A, pin DeepSeek) | 1.17 / 2.34 | **0.435 / 0.87** | −$6.89 |
+| `qwen/qwen3.8-27b` (B, pin AkashML — sole upstream) | 0.10 / 0.30 | **0.45 / 3.2** | +$1.94 |
+| `google/gemini-3.7-flash` (B, pin Google) | 0.30 / 2.50 | **0.375 / 1.875** | −$0.31 |
+
+**Reconciled total: $428.544320 → $423.282188** (278 rows / 888 episodes /
+12,124 calls unchanged). Headroom under the $450 hard stop: **$26.717812**.
+Tier split now: A $320.28 · B $22.97 · C $36.27 · W $43.76. The authorized
+scope (§3) is unchanged — the roster got $5.26 cheaper, no cell moved.
+
+Snapshot pins: `scenarios/snapshot_pins.json` + `docs/SNAPSHOT-PINS.md`
+(retrieved UTC recorded per entry). OpenRouter rows carry pinned upstream +
+full provider order. **Anthropic-native snapshot ids remain PENDING** — no
+`ANTHROPIC_API_KEY` was available to the pin run; the freeze gate keeps
+refusing those eight rows until a keyed re-run completes the set. Note for
+the humans: `qwen/qwen3.8-27b` has exactly ONE live upstream (AkashML); if
+it delists before launch, Tier B loses its small-Qwen ladder rung — check at
+launch alongside the Spark health check.
+
+---
+
 *The manifest is the design. This document is only its witness.* 🔥

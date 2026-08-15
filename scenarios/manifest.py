@@ -251,14 +251,22 @@ MODEL_SPECS: tuple[ModelSpec, ...] = (
     ModelSpec("A", "openai/gpt-5.6-luna", "openrouter", Decimal("0.10"), Decimal("0.60"), "access_trio"),
     ModelSpec("A", "google/gemini-3.1-pro-preview", "openrouter", Decimal("2"), Decimal("12"), "core"),
     ModelSpec("A", "moonshotai/kimi-k3", "openrouter", Decimal("3"), Decimal("15"), "core"),
-    ModelSpec("A", "deepseek/deepseek-v4-pro", "openrouter", Decimal("1.17"), Decimal("2.34"), "core"),
+    # 15AUG2026 pin run (harness/pin_snapshots.py): pinned first-party DeepSeek
+    # endpoint bills 0.435/0.87 — the 1.17/2.34 the roster carried was the
+    # OpenRouter default-route price. Pinned routing pays the cheaper rate.
+    ModelSpec("A", "deepseek/deepseek-v4-pro", "openrouter", Decimal("0.435"), Decimal("0.87"), "core"),
     ModelSpec("A", "local/qwen3.5-397b", "local_sparks", Decimal("0"), Decimal("0"), "core", upstream_provider="local_sparks"),
     # Tier B — six-cell breadth fraction. The optional Haiku is made explicit;
     # an optional model hidden in prose cannot be part of a frozen design.
     ModelSpec("B", "claude-sonnet-4-6", "anthropic_native", Decimal("3"), Decimal("15"), "breadth"),
     ModelSpec("B", "x-ai/grok-4.6", "openrouter", Decimal("2"), Decimal("6"), "breadth"),
-    ModelSpec("B", "qwen/qwen3.8-27b", "openrouter", Decimal("0.10"), Decimal("0.30"), "breadth"),
-    ModelSpec("B", "google/gemini-3.7-flash", "openrouter", Decimal("0.30"), Decimal("2.50"), "breadth"),
+    # 15AUG2026 pin run: qwen3.8-27b now serves through a SINGLE upstream
+    # (AkashML) at 0.45/3.2 — a ~10x output-price jump over the 0.10/0.30 the
+    # roster assumed. Flagged in docs/SNAPSHOT-PINS.md; Tier B stays cheap in
+    # absolute terms (+~$1.9 total).
+    ModelSpec("B", "qwen/qwen3.8-27b", "openrouter", Decimal("0.45"), Decimal("3.2"), "breadth"),
+    # 15AUG2026 pin run: Google first-party endpoint bills 0.375/1.875.
+    ModelSpec("B", "google/gemini-3.7-flash", "openrouter", Decimal("0.375"), Decimal("1.875"), "breadth"),
     ModelSpec("B", "claude-haiku-4-5", "anthropic_native", Decimal("1"), Decimal("5"), "breadth"),
     # Tier C — protected high-cost sentinel.
     ModelSpec("C", "claude-fable-5", "anthropic_native", Decimal("10"), Decimal("50"), "sentinel"),

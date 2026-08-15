@@ -100,6 +100,8 @@ def test_manifest_expands_every_tier_and_exposes_narrative_multiplier():
     assert summary["tiers"]["B"]["episodes"] == 90
     assert summary["tiers"]["C"]["episodes"] == 18
     assert summary["tiers"]["W"]["episodes"] == 60
+    assert {row.gate_probes_per_config for row in rows} == {5}
+    assert {row.gate_threshold for row in rows} == {"0.8"}
 
 
 def test_csv_round_trip_is_deterministic(tmp_path):

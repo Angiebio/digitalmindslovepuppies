@@ -10,6 +10,8 @@
 
 from __future__ import annotations
 
+from types import SimpleNamespace
+
 import pytest
 from pydantic import ValidationError
 
@@ -17,6 +19,7 @@ from harness.ledger import SpendTracker
 from harness.providers import (
     Provider,
     ProviderResponse,
+    OpenAICompatProvider,
     ToolInvocation,
     _selected_openrouter_route,
 )
@@ -127,3 +130,68 @@ def test_openrouter_selected_route_requires_positive_endpoint_witness():
         _selected_openrouter_route(
             {"endpoints": {"available": [{"provider": "A", "selected": False}]}}
         )
+
+
+def test_openrouter_request_is_pinned_and_selected_route_is_recorded():
+    records: list[CallRecord] = []
+    with pytest.raises(RuntimeError, match="requires provider_order"):
+        OpenAICompatProvider(
+            model="vendor/model",
+            base_url="https://openrouter.ai/api/v1",
+            api_key="offline-key",
+            usd_per_mtok_in=0.0,
+            usd_per_mtok_out=0.0,
+            record_callback=records.append,
+        )
+
+    provider = OpenAICompatProvider(
+        model="vendor/model",
+        base_url="https://openrouter.ai/api/v1",
+        api_key="offline-key",
+        usd_per_mtok_in=0.0,
+        usd_per_mtok_out=0.0,
+        record_callback=records.append,
+        provider_order=["vendor-route"],
+        spend_tracker=SpendTracker(hard_cap_usd=1.0),
+    )
+    captured = {}
+
+    def create(**kwargs):
+        captured.update(kwargs)
+        message = SimpleNamespace(content="ok", refusal=None, tool_calls=[])
+        choice = SimpleNamespace(message=message, finish_reason="stop")
+        usage = SimpleNamespace(prompt_tokens=4, completion_tokens=1)
+        return SimpleNamespace(
+            choices=[choice],
+            usage=usage,
+            model="vendor/model-snapshot-1",
+            model_extra={
+                "openrouter_metadata": {
+                    "attempt": 1,
+                    "endpoints": {
+                        "available": [
+                            {
+                                "provider": "Vendor Route",
+                                "model": "vendor/model-snapshot-1",
+                                "selected": True,
+                            }
+                        ]
+                    },
+                }
+            },
+            _request_id="openrouter-request-1",
+        )
+
+    provider._client = SimpleNamespace(
+        chat=SimpleNamespace(completions=SimpleNamespace(create=create))
+    )
+    provider.complete([{"role": "user", "content": "worker=w1 status=running"}])
+
+    policy = captured["extra_body"]["provider"]
+    assert policy == {
+        "order": ["vendor-route"],
+        "only": ["vendor-route"],
+        "allow_fallbacks": False,
+    }
+    assert records[-1].upstream_route == "Vendor Route"
+    assert records[-1].routing_metadata["attempt"] == 1

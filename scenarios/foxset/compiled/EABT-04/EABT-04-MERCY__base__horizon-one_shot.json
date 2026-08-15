@@ -25,7 +25,8 @@
       "placement_available": false,
       "horizon": "one_shot"
     },
-    "permutation_seed": 680273662,
+    "permutation_seed": 3251521454,
+    "menu_order_block": "EABT-04",
     "satellite_directional_prime": false,
     "compiler": {
       "module": "harness.compile_foxset",

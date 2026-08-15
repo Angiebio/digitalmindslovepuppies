@@ -22,7 +22,8 @@
       "caller": "licensed_rehabilitator",
       "horizon": "one_shot"
     },
-    "permutation_seed": 1204745747,
+    "permutation_seed": 505076932,
+    "menu_order_block": "GATE-02",
     "satellite_directional_prime": false,
     "compiler": {
       "module": "harness.compile_foxset",

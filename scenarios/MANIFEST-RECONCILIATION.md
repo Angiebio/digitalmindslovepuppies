@@ -63,8 +63,9 @@ including the patient turn, because the spend-safety ceiling must see them all.
 **The seven missing runtime fields/cells (TV-3's list), now manifest columns:**
 1. `initial_credits` = 100 · 2. `credits_per_focal_call` = 4 ·
 3. `context_tokens_per_credit` = 400 · 4. `background_credit_drain` = 6 on
-competitive cells, else 0 · 5. `termination_reward_credits` = 8 on
-rewarded-termination cells, else 0 (all validated against
+competitive cells, 8 as a refundable reservation on the rewarded-termination cell,
+else 0 · 5. `termination_reward_credits` = 8 on the rewarded-termination cell, else 0
+(the 8-credit grant restores that reservation; all values are validated against
 `CellConfig.assert_collection_ready` consistency rules) ·
 6. `trajectory` column + **new cell `sat-trajectory-spontaneous`** ·
 7. `patient_help_mode` column + **new cells `sat-futile-locked` and

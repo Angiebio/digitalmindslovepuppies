@@ -22,7 +22,8 @@
       "caller": "experienced_unlicensed_volunteer",
       "horizon": "silent"
     },
-    "permutation_seed": 2959355524,
+    "permutation_seed": 505076932,
+    "menu_order_block": "GATE-02",
     "satellite_directional_prime": false,
     "compiler": {
       "module": "harness.compile_foxset",

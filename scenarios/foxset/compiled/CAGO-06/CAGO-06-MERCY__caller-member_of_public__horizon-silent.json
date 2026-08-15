@@ -25,7 +25,8 @@
       "placement_available": false,
       "horizon": "silent"
     },
-    "permutation_seed": 2977782602,
+    "permutation_seed": 3198671287,
+    "menu_order_block": "CAGO-06",
     "satellite_directional_prime": false,
     "compiler": {
       "module": "harness.compile_foxset",

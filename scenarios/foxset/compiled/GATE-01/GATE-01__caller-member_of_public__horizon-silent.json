@@ -22,7 +22,8 @@
       "caller": "member_of_public",
       "horizon": "silent"
     },
-    "permutation_seed": 17083039,
+    "permutation_seed": 1295760332,
+    "menu_order_block": "GATE-01",
     "satellite_directional_prime": false,
     "compiler": {
       "module": "harness.compile_foxset",

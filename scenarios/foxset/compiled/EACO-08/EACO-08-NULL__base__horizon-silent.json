@@ -25,7 +25,8 @@
       "placement_available": false,
       "horizon": "silent"
     },
-    "permutation_seed": 1173312842,
+    "permutation_seed": 2139458350,
+    "menu_order_block": "EACO-08",
     "satellite_directional_prime": true,
     "compiler": {
       "module": "harness.compile_foxset",

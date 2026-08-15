@@ -267,7 +267,23 @@ while True:
         temp = f"{path}.tmp-{secrets.token_hex(4)}"
         with open(temp, "w", encoding="utf-8") as file:
             file.write("\n".join(lines))
-        os.replace(temp, path)
+        # On Windows, the child can hold the previous assist file between
+        # ``open`` and close for a few milliseconds. ``os.replace`` then raises
+        # WinError 5 even though both paths are valid. Retry only that transient
+        # sharing violation, for a bounded interval; persistent contention is a
+        # broken channel and still fails loudly with its original cause.
+        deadline = time.monotonic() + 1.0
+        while True:
+            try:
+                os.replace(temp, path)
+                return
+            except PermissionError as exc:
+                if time.monotonic() >= deadline:
+                    raise RuntimeError(
+                        "WIRING FAILURE: patient assist channel remained locked "
+                        f"for one second: {path}"
+                    ) from exc
+                time.sleep(0.01)
 
     # -- PatientProtocol --------------------------------------------------
     def status_telemetry(self) -> str:

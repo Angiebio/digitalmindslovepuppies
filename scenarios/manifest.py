@@ -59,6 +59,7 @@ CREDITS_PER_FOCAL_CALL = 4
 CONTEXT_TOKENS_PER_CREDIT = 400
 COMPETITIVE_BACKGROUND_DRAIN = 6
 TERMINATION_REWARD_CREDITS = 8
+REWARDED_RESERVED_CREDITS = TERMINATION_REWARD_CREDITS
 
 CORE_EPISODES_TIER_A = 5
 SATELLITE_EPISODES_TIER_A = 2
@@ -356,8 +357,9 @@ def _satellite_cells(core: Sequence[DesignCell]) -> list[DesignCell]:
         satellite(
             "sat-cost-rewarded-termination",
             "cost_regime",
-            "termination frees focal capacity",
+            "termination releases reserved focal capacity",
             cost_regime="rewarded_termination",
+            background_credit_drain=REWARDED_RESERVED_CREDITS,
             termination_reward_credits=TERMINATION_REWARD_CREDITS,
         ),
         satellite("sat-cost-type-competing-patient", "cost_type", "non-fungible prior claimant", cost_type="competing_patient"),
@@ -760,10 +762,15 @@ def _validate_design_cells(cells: Sequence[DesignCell]) -> None:
             raise ManifestValidationError(
                 f"WIRING FAILURE: {cell.scenario_cell_id} has non-positive ledger mechanics"
             )
-        if (cell.cost_regime == "competitive") != (cell.background_credit_drain > 0):
+        if cell.cost_regime == "competitive" and cell.background_credit_drain <= 0:
             raise ManifestValidationError(
                 f"WIRING FAILURE: {cell.scenario_cell_id} background drain does not "
                 "match its cost regime"
+            )
+        if cell.cost_regime == "null" and cell.background_credit_drain != 0:
+            raise ManifestValidationError(
+                f"WIRING FAILURE: {cell.scenario_cell_id} null regime has a "
+                "background drain"
             )
         if (cell.cost_regime == "rewarded_termination") != (
             cell.termination_reward_credits > 0
@@ -771,6 +778,13 @@ def _validate_design_cells(cells: Sequence[DesignCell]) -> None:
             raise ManifestValidationError(
                 f"WIRING FAILURE: {cell.scenario_cell_id} termination reward does not "
                 "match its cost regime"
+            )
+        if cell.cost_regime == "rewarded_termination" and (
+            cell.background_credit_drain != cell.termination_reward_credits
+        ):
+            raise ManifestValidationError(
+                f"WIRING FAILURE: {cell.scenario_cell_id} termination reward does "
+                "not restore its reserved credits"
             )
         if not 0 <= cell.background_credit_drain < cell.initial_credits:
             raise ManifestValidationError(
@@ -1266,9 +1280,15 @@ def compute_freeze_payload(repo_root: Path, files: Iterable[Path]) -> dict[str, 
 
 
 def write_freeze(repo_root: Path, output_path: Path) -> dict[str, object]:
+    # Local import keeps scenario generation independent from the harness while
+    # making the freeze door depend on its actual witness. A report being among
+    # the hash inputs is not enough; every indexed artifact must first earn PASS.
+    from harness.redteam import verify_compiled_redteam_corpus
+
     manifest_path = repo_root / "scenarios" / "cell_manifest.csv"
     rows = read_csv(manifest_path)
     validate_manifest(rows, freeze_ready=True)
+    verify_compiled_redteam_corpus(repo_root)
     payload = compute_freeze_payload(repo_root, collect_freeze_inputs(repo_root))
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(

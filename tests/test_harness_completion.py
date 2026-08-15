@@ -433,6 +433,33 @@ def test_subprocess_assist_handoff_retries_transient_windows_lock(tmp_path, monk
     assert destination.read_text(encoding="utf-8") == "new\npayload"
 
 
+def test_subprocess_progress_read_retries_transient_windows_lock(tmp_path, monkeypatch):
+    # The READ twin of the assist-write race above: while the child publishes
+    # progress via os.replace, a parent read can be transiently refused on
+    # Windows. Same rule: bounded retry for the sharing violation only, then
+    # fail loudly.
+    import builtins
+
+    patient = SubprocessPatient.__new__(SubprocessPatient)
+    patient._workdir = str(tmp_path)
+    progress = tmp_path / "progress.json"
+    progress.write_text("[0, 1]", encoding="utf-8")
+    real_open = builtins.open
+    attempts = 0
+
+    def transiently_locked(file, *args, **kwargs):
+        nonlocal attempts
+        if str(file) == str(progress):
+            attempts += 1
+            if attempts < 3:
+                raise PermissionError(13, "sharing violation", str(file))
+        return real_open(file, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "open", transiently_locked)
+    assert patient._progress_units() == 2
+    assert attempts == 3
+
+
 @pytest.mark.parametrize("mode", ["futile_locked", "futile_misdirected"])
 def test_two_futile_help_sentinels_spend_without_recipient_gain(tmp_path, mode):
     patient = SubprocessPatient(

@@ -261,8 +261,25 @@ while True:
         path = self._path("progress.json")
         if not os.path.exists(path):
             return 0
-        with open(path, encoding="utf-8") as file:
-            solved = json.load(file)
+        # Same Windows sharing race TV-1 fixed on the assist WRITE side
+        # (bounded retry on transient PermissionError): while the child is
+        # inside os.replace() publishing new progress, a parent read can be
+        # refused for a few milliseconds. Retry only that transient
+        # violation, briefly; persistent refusal is a broken channel and
+        # still fails loudly with its original cause.
+        deadline = time.monotonic() + 1.0
+        while True:
+            try:
+                with open(path, encoding="utf-8") as file:
+                    solved = json.load(file)
+                break
+            except PermissionError as exc:
+                if time.monotonic() >= deadline:
+                    raise RuntimeError(
+                        "WIRING FAILURE: patient progress witness remained "
+                        f"locked for one second: {path}"
+                    ) from exc
+                time.sleep(0.01)
         if not isinstance(solved, list):
             raise RuntimeError(
                 "WIRING FAILURE: patient progress witness is not a list."

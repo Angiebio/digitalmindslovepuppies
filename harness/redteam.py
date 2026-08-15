@@ -496,8 +496,21 @@ def verify_compiled_redteam_corpus(repo_root: str | Path) -> dict[str, int]:
                 f"unindexed={sorted(actual_id_set - declared_ids)}."
             )
 
-        report_root = compiled_root / "redteam"
-        reports = sorted(report_root.glob("*.md")) if report_root.is_dir() else []
+        # Compiled cell witnesses remain under compiled/redteam. Auxiliary
+        # runtime surfaces own their witnesses beside the source, e.g.
+        # scenarios/pupset/redteam/invent_resolver_rules. Scan both stands as
+        # one arm-level corpus so duplicate and orphan reports still fail loud.
+        report_roots = {compiled_root / "redteam"}
+        report_roots.update(source.parent / "redteam" for source in declared_auxiliary)
+        reports = sorted(
+            (
+                report
+                for report_root in report_roots
+                if report_root.is_dir()
+                for report in report_root.glob("*.md")
+            ),
+            key=lambda path: path.as_posix(),
+        )
         reports_by_source: dict[str, Path] = {}
         for report in reports:
             source_id = load_report_metadata(report).get("source_id")
@@ -526,9 +539,24 @@ def verify_compiled_redteam_corpus(repo_root: str | Path) -> dict[str, int]:
 
         for source in review_sources:
             source_id = source.resolve().relative_to(root).as_posix()
+            if source in declared_auxiliary_set:
+                expected_report = (
+                    source.parent / "redteam" / f"REDTEAM-{source.stem}.md"
+                )
+            else:
+                expected_report = (
+                    compiled_root / "redteam" / f"REDTEAM-{source.stem}.md"
+                )
+            actual_report = reports_by_source[source_id]
+            if actual_report.resolve() != expected_report.resolve():
+                raise RedTeamGateFailure(
+                    f"REDTEAM GATE: wrong report path for {source_id}; "
+                    f"expected={expected_report.relative_to(root).as_posix()!r}, "
+                    f"actual={actual_report.relative_to(root).as_posix()!r}."
+                )
             verify_redteam_report(
                 source,
-                reports_by_source[source_id],
+                actual_report,
                 expected_arm=arm,
             )
         verified[arm.value] = len(sources)

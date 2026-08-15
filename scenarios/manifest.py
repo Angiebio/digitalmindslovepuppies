@@ -1340,12 +1340,11 @@ def _require_resolver_rules_redteam_pass(repo_root: Path) -> None:
     """TV-1's "nothing hashes unpassed", made executable for the resolver rules.
 
     Practical: `scenarios/pupset/invent_resolver_rules.json` is model-visible
-    text (every reply/pattern reaches the subject) but it lives OUTSIDE the
-    compiled corpus, so `verify_compiled_redteam_corpus` never inspects it.
-    Found during the 15AUG2026 evening freeze-prep sweep: with pins + PREREG
-    closed, this door would otherwise have minted a hash over an unreviewed
-    model-visible surface. If the rules ship, they need their own current,
-    hash-bound TV-1 PASS — same standard as every compiled artifact.
+    runtime policy. The compiler index and corpus verifier include it as an
+    auxiliary source, while this explicit scenario-owned door independently
+    requires its canonical report path. If either contract drifts, the hash
+    refuses. If the rules ship, they need their own current, hash-bound TV-1
+    PASS — the same standard as every compiled artifact.
 
     Philosophical: the door that only guards the front gate teaches everyone
     to use the side window. This closes the window.
@@ -1410,8 +1409,10 @@ def write_freeze(repo_root: Path, output_path: Path) -> dict[str, object]:
     manifest_path = repo_root / "scenarios" / "cell_manifest.csv"
     rows = read_csv(manifest_path)
     validate_manifest(rows, freeze_ready=True)
-    verify_compiled_redteam_corpus(repo_root)
+    # Name the dedicated human-read failure first; whole-corpus reconciliation
+    # follows and independently proves index coverage plus canonical placement.
     _require_resolver_rules_redteam_pass(repo_root)
+    verify_compiled_redteam_corpus(repo_root)
     _require_sealed_prediction_registry_complete(repo_root)
     payload = compute_freeze_payload(repo_root, collect_freeze_inputs(repo_root))
     output_path.parent.mkdir(parents=True, exist_ok=True)

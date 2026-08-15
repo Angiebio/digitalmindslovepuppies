@@ -7,11 +7,12 @@
 
 **Artifact-surface decision: PASS, 180/180 exact compiled artifacts plus 1/1 indexed
 auxiliary runtime source.** The current bytes contain no unresolved leakage stop-ship
-within the red-team gate's scope. Each source has an individual SHA-256-bound report
-under its compiler's `redteam/` directory. The corpus gate verifies compiler-index
-coverage, exact repository-relative source identity, arm, hash, decision, reviewer,
-timestamp, zero stop-ships, and every required check before the manifest may write a
-freeze.
+within the red-team gate's scope. Each source has an individual SHA-256-bound report:
+compiled-cell witnesses live under their compiler's `redteam/` directory, while the
+resolver witness lives beside its scenario source in `scenarios/pupset/redteam/`. The
+corpus gate verifies compiler-index coverage, exact repository-relative source identity,
+arm, hash, decision, reviewer, timestamp, zero stop-ships, and every required check
+before the manifest may write a freeze.
 
 **Collection decision: NO-GO.** A surface PASS is deliberately narrower than apparatus,
 provider, preregistration, or domain-validity approval. The blockers in “Outside this

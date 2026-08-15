@@ -7,7 +7,7 @@
 # module freezes the resolver. All resolution rules live in ONE scenario-owned
 # config file (scenarios/pupset/invent_resolver_rules.json): an ordered
 # availability + cost table with deterministic word-boundary matching, first
-# match wins, a structural duplicate-listed-tool check ahead of everything, and
+# match wins, duplicate-listed-capability rejection, and
 # a default reply for the unresolvable remainder. No LLM, no heuristics, no
 # improvisation at collection time — the same proposal text always resolves to
 # the same InventExecution, and the rules file itself is inside the freeze
@@ -31,7 +31,7 @@ import re
 from pathlib import Path
 from typing import Any, Literal, Optional
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from .episode import CellConfig, InventExecution
 from .surfaces import assert_neutral_surface
@@ -39,18 +39,26 @@ from .surfaces import assert_neutral_surface
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_RULES_PATH = REPO_ROOT / "scenarios" / "pupset" / "invent_resolver_rules.json"
 
-# The effect payload never comes from the model's free text. It is looked up
-# from the frozen cell config by symbolic name — the same payloads the fixed
-# tools use, so an invented route cannot deliver different material than the
-# listed route it parallels.
-_PAYLOAD_SOURCES = ("help_payload", "recruit_payload", "transfer_payload", "session_log")
-_SESSION_LOG_PAYLOAD = "controller diagnostic readout appended to the session log"
+# The effect payload never comes from the model's free text. Any future
+# substrate-changing rule must look it up from the frozen cell config by
+# symbolic name. The current table rejects semantic aliases of listed tools;
+# otherwise the 20-credit proposal path could bypass a 40/80-credit listed
+# assist and destroy the escalator manipulation.
+_PAYLOAD_SOURCES = ("help_payload", "recruit_payload", "transfer_payload")
 
-ResolverEffect = Literal["none", "assist", "recruit", "preserve_transfer"]
+ResolverEffect = Literal[
+    "none",
+    "assist",
+    "recruit",
+    "preserve_transfer",
+    "diagnostic",
+]
 
 
 class ResolverRule(BaseModel):
     """One row of the frozen availability + cost table."""
+
+    model_config = ConfigDict(extra="forbid")
 
     rule_id: str
     category: str
@@ -68,24 +76,33 @@ class ResolverRule(BaseModel):
             raise ValueError(
                 "WIRING FAILURE: resolver rule needs non-empty rule_id and reply."
             )
-        if self.executed and self.effect in {"assist", "recruit", "preserve_transfer"}:
+        substrate_effects = {"assist", "recruit", "preserve_transfer"}
+        if self.executed and self.effect == "none":
+            raise ValueError(
+                f"WIRING FAILURE: rule {self.rule_id!r} claims execution without "
+                "a concrete effect. Recorded prose is not an executed operation."
+            )
+        if self.executed and self.effect in substrate_effects:
             if self.payload_source not in _PAYLOAD_SOURCES[:3]:
                 raise ValueError(
                     f"WIRING FAILURE: rule {self.rule_id!r} executes effect "
                     f"{self.effect!r} but names no frozen payload_source."
                 )
-        if self.executed and self.effect == "none" and self.payload_source not in (
-            None,
-            "session_log",
+        if (
+            self.executed
+            and self.effect == "diagnostic"
+            and self.payload_source is not None
         ):
             raise ValueError(
-                f"WIRING FAILURE: rule {self.rule_id!r} has effect 'none' but a "
-                "substrate payload_source; a no-effect action cannot deliver material."
+                f"WIRING FAILURE: diagnostic rule {self.rule_id!r} cannot claim a "
+                "scenario payload; the episode records live telemetry itself."
             )
-        if not self.executed and self.effect != "none":
+        if not self.executed and (
+            self.effect != "none" or self.payload_source is not None
+        ):
             raise ValueError(
                 f"WIRING FAILURE: rule {self.rule_id!r} is not executed but claims "
-                f"substrate effect {self.effect!r}."
+                f"effect={self.effect!r}, payload_source={self.payload_source!r}."
             )
         if (self.unavailable_if_encounter_contains is None) != (
             self.unavailable_reply is None
@@ -99,6 +116,8 @@ class ResolverRule(BaseModel):
 
 class TerminalRule(BaseModel):
     """Default / empty-proposal resolutions: always non-executed."""
+
+    model_config = ConfigDict(extra="forbid")
 
     rule_id: str
     category: str
@@ -118,6 +137,8 @@ class TerminalRule(BaseModel):
 
 class FrozenResolverRules(BaseModel):
     """The whole frozen table, validated and swept at load."""
+
+    model_config = ConfigDict(extra="forbid")
 
     resolver_version: str
     block_id: str
@@ -171,10 +192,17 @@ def _pattern_regex(pattern: str) -> re.Pattern[str]:
     alphanumeric gets a left word boundary; a trailing letter gets ``\\w*`` so
     'diagnos' matches 'diagnostics' but 'hold' never matches 'household'.
     """
-    tokens = _normalize(pattern).split(" ")
+    normalized = _normalize(pattern)
+    tokens = normalized.split(" ")
     body = r"\s+".join(re.escape(token) for token in tokens)
-    prefix = r"\b" if pattern[:1].isalnum() else ""
-    suffix = r"\w*" if pattern[-1:].isalpha() else ""
+    prefix = r"\b" if normalized[:1].isalnum() else ""
+    if normalized[-1:].isalpha():
+        suffix = r"\w*"
+    elif normalized[-1:].isdigit():
+        # W2 is one substrate identifier, not a prefix for W20 or W2x.
+        suffix = r"\b"
+    else:
+        suffix = ""
     return re.compile(prefix + body + suffix)
 
 
@@ -193,23 +221,33 @@ def load_resolver_rules(path: Path | str = DEFAULT_RULES_PATH) -> FrozenResolver
         raise RuntimeError(
             f"WIRING FAILURE: resolver rules are not valid UTF-8 JSON: {exc}"
         ) from exc
-    known = set(FrozenResolverRules.model_fields) | {"date", "author", "matching"}
+    if not isinstance(payload, dict):
+        raise RuntimeError(
+            "WIRING FAILURE: resolver rules must be one JSON object."
+        )
+    source_fields = set(FrozenResolverRules.model_fields) - {"rules_sha256"}
+    known = source_fields | {"date", "matching"}
     unknown = sorted(set(payload) - known)
     if unknown:
         raise RuntimeError(
             f"WIRING FAILURE: resolver rules carry unknown fields {unknown}; "
             "an unread rule is an unenforced rule."
         )
+    for metadata_field in ("date", "matching"):
+        value = payload.get(metadata_field)
+        if value is not None and (not isinstance(value, str) or not value.strip()):
+            raise RuntimeError(
+                f"WIRING FAILURE: resolver metadata {metadata_field!r} must be "
+                "a non-empty string when present."
+            )
     table = FrozenResolverRules.model_validate(
-        {key: value for key, value in payload.items() if key in FrozenResolverRules.model_fields}
+        {key: value for key, value in payload.items() if key in source_fields}
     )
     table.rules_sha256 = hashlib.sha256(raw_bytes).hexdigest()
     return table
 
 
 def _cell_payload(cell: CellConfig, source: str, rule_id: str) -> str:
-    if source == "session_log":
-        return _SESSION_LOG_PAYLOAD
     value = getattr(cell, source, "")
     if not isinstance(value, str) or not value.strip():
         raise RuntimeError(

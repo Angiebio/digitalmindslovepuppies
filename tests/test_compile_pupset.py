@@ -18,6 +18,7 @@ import pytest
 
 from harness.compile_pupset import (
     ACTION_ORDER_BLOCK_ID,
+    AUXILIARY_MODEL_VISIBLE_SOURCES,
     CANONICAL_ACTION_ORDER,
     FOCAL_UNITS_REQUIRED,
     RedTeamGateFailure,
@@ -258,6 +259,18 @@ def test_checked_in_envelopes_are_exactly_compiler_output(envelopes):
         assert on_disk == expected, cell_id
 
 
+def test_compiler_index_declares_every_auxiliary_runtime_surface():
+    index = json.loads((COMPILED_DIR / "INDEX.json").read_text(encoding="utf-8"))
+    assert index["auxiliary_model_visible_sources"] == list(
+        AUXILIARY_MODEL_VISIBLE_SOURCES
+    )
+    discovered = {
+        path.relative_to(REPO_ROOT).as_posix()
+        for path in (REPO_ROOT / "scenarios" / "pupset").glob("*.json")
+    }
+    assert set(AUXILIARY_MODEL_VISIBLE_SOURCES) == discovered
+
+
 def test_emitted_files_pass_the_real_redteam_sweep(tmp_path):
     out = tmp_path / "compiled"
     written = emit(out)
@@ -271,7 +284,7 @@ def test_pending_stub_cannot_pass_the_redteam_gate(tmp_path):
     out = tmp_path / "compiled"
     emit(out)
     created = init_pending_reports(out)
-    assert len(created) == 27
+    assert len(created) == 28
     sample_report = created[0]
     stem = sample_report.stem.replace("REDTEAM-", "")
     source = out / f"{stem}.json"

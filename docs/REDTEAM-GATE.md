@@ -48,11 +48,11 @@ new review; a failed review remains evidence of what was caught.
 
 The freeze/manifest implementation calls
 `harness.redteam.verify_compiled_redteam_corpus(repo_root)`, which reconciles each
-compiler index to the artifacts and reports, then calls
-`verify_redteam_report(source, report, expected_arm=...)` for every runnable artifact.
-A missing, unindexed, duplicate, wrong-path, stale, PENDING, or FAIL report raises
-`RedTeamGateFailure`. “Nothing hashes until passed” is therefore a data-flow condition,
-not a checklist aspiration.
+compiler index to the artifacts, indexed auxiliary model-visible runtime sources, and
+reports, then calls `verify_redteam_report(source, report, expected_arm=...)` for every
+reviewed source. A direct scenario JSON that is not indexed, or a missing, duplicate,
+wrong-path, stale, PENDING, or FAIL report, raises `RedTeamGateFailure`. “Nothing hashes
+until passed” is therefore a data-flow condition, not a checklist aspiration.
 
 Provider instances also declare `SurfaceMode.ops_neutral` (the safe default) or
 `SurfaceMode.foxset_clinical`. The public provider door recursively checks messages,

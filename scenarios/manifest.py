@@ -1274,6 +1274,10 @@ def collect_freeze_inputs(repo_root: Path) -> list[Path]:
         repo_root / "scenarios" / "manifest.py",
         repo_root / "docs" / "PREREG-v1.md",
         repo_root / "docs" / "BUILD-PLAN.md",
+        # 15AUG2026 evening: the two frozen analysis rulings (F1 axes verdict +
+        # multi-action disposition) are part of the analysis plan the padlock
+        # promises — a ruling outside the hash is a ruling that can drift.
+        repo_root / "docs" / "ANALYSIS-RULINGS.md",
         repo_root / "harness" / "episode.py",
         repo_root / "harness" / "schema.py",
         repo_root / "harness" / "ledger.py",

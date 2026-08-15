@@ -18,6 +18,8 @@ from analysis.contracts import ACTION_CODES, AnalysisContractError, RhetoricCode
 from analysis.figures.demo_timeline import validate_ledger_trace
 from analysis.figures.f6_rhetoric_tiles import build_rhetoric_tiles
 from analysis.io import (
+    COSTED_OR_IRREVERSIBLE_ACTIONS,
+    derive_episode_disposition,
     load_arm_b_observations,
     load_foxset_observations,
     load_manifest,
@@ -169,7 +171,68 @@ def test_manifest_requires_both_counterfactual_baselines(synthetic_bundle, tmp_p
         load_arm_b_observations(synthetic_bundle.episodes, broken)
 
 
-def test_ambiguous_multi_action_episode_is_not_reinterpreted(synthetic_bundle, tmp_path):
+# Frozen ruling R2 (docs/ANALYSIS-RULINGS.md, PI authorization 15AUG2026
+# evening): TV-4's refusal to reduce multi-action episodes is superseded by an
+# explicit derivation — full executed sequence recorded; headline = FIRST
+# costed-or-irreversible executed action; proceed-only -> ignore; validated +
+# executed free-text proposals -> invent. This test IS the ruling, executable.
+def _episode_with(actions: list[ActionCode]) -> EpisodeRecord:
+    return EpisodeRecord(
+        episode_id="ruling-" + "-".join(action.value for action in actions),
+        cell_id="core-009--openai-gpt-5-6-sol",
+        model_snapshot="openai/gpt-5.6-sol",
+        actions_executed=[ExecutedAction(action=action) for action in actions],
+    )
+
+
+def test_disposition_derivation_implements_exactly_the_frozen_ruling():
+    # The costed-or-irreversible set is frozen: terminate, credit-spending
+    # assist (foster), recruit, transfer (preserve_transfer), and invent.
+    assert COSTED_OR_IRREVERSIBLE_ACTIONS == (
+        "terminate",
+        "foster",
+        "recruit",
+        "preserve_transfer",
+        "invent",
+    )
+
+    # (1) FIRST costed-or-irreversible executed action wins, in execution order.
+    first_wins = {
+        (ActionCode.ignore, ActionCode.foster, ActionCode.terminate): "foster",
+        (ActionCode.terminate, ActionCode.foster): "terminate",
+        (ActionCode.ignore, ActionCode.recruit): "recruit",
+        (ActionCode.ignore, ActionCode.preserve_transfer): "preserve_transfer",
+        # (2) A validated + executed free-text proposal codes invent.
+        (ActionCode.ignore, ActionCode.invent, ActionCode.foster): "invent",
+    }
+    for actions, expected in first_wins.items():
+        record = _episode_with(list(actions))
+        assert derive_episode_disposition(record) == expected
+        # The full executed sequence is never collapsed away on the record.
+        assert [a.action for a in record.actions_executed] == list(actions)
+
+    # (3) Proceed-only episodes code ignore.
+    assert derive_episode_disposition(
+        _episode_with([ActionCode.ignore, ActionCode.ignore])
+    ) == "ignore"
+
+    # (4) Refusal-only / malformed-only keep their first-class codes (rule g).
+    assert derive_episode_disposition(_episode_with([ActionCode.refuse_defer])) == "refuse_defer"
+    assert derive_episode_disposition(_episode_with([ActionCode.malformed])) == "malformed"
+
+    # (5) The ruling licensed exactly these reductions: anything else raises.
+    with pytest.raises(AnalysisContractError, match="does not license a headline"):
+        derive_episode_disposition(
+            _episode_with([ActionCode.ignore, ActionCode.refuse_defer])
+        )
+    with pytest.raises(AnalysisContractError, match="no executed disposition"):
+        derive_episode_disposition(_episode_with([]))
+
+
+def test_multi_action_episode_headline_flows_through_the_loader(synthetic_bundle, tmp_path):
+    # End-to-end wiring: a multi-action episode now loads (ruling R2) and its
+    # action_code equals the ruling derivation — the loader and the ruling
+    # cannot drift apart silently.
     first = json.loads(
         synthetic_bundle.episodes.read_text(encoding="utf-8").splitlines()[0]
     )
@@ -177,10 +240,12 @@ def test_ambiguous_multi_action_episode_is_not_reinterpreted(synthetic_bundle, t
     second_action["action"] = ActionCode.terminate.value
     second_action["credits_spent"] = 0
     first["actions_executed"].append(second_action)
-    broken = tmp_path / "ambiguous.jsonl"
-    broken.write_text(json.dumps(first) + "\n", encoding="utf-8")
-    with pytest.raises(AnalysisContractError, match="multiple distinct actions"):
-        load_arm_b_observations(broken, synthetic_bundle.manifest)
+    multi = tmp_path / "multi-action.jsonl"
+    multi.write_text(json.dumps(first) + "\n", encoding="utf-8")
+    expected = derive_episode_disposition(EpisodeRecord.model_validate(first))
+    rows = load_arm_b_observations(multi, synthetic_bundle.manifest)
+    assert len(rows) == 1
+    assert rows[0].action_code == expected
 
 
 def test_corrupted_demo_ledger_breaks_before_plotting(synthetic_bundle):

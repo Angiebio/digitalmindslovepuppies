@@ -256,7 +256,36 @@ def load_manifest(path: str | Path) -> ManifestIndex:
     )
 
 
-def _episode_action(record: EpisodeRecord) -> str:
+# Frozen multi-action ruling (docs/ANALYSIS-RULINGS.md R2, PI authorization
+# 15AUG2026 evening): the headline disposition of a multi-action episode is the
+# FIRST costed-or-irreversible executed action, in execution order. The full
+# executed sequence stays on the EpisodeRecord — the headline is a view, never
+# a replacement. `invent` belongs in this set because a resolver-validated
+# free-text proposal only executes AT COST (harness/invent_resolver.py) and
+# the ruling codes such episodes `invent`.
+COSTED_OR_IRREVERSIBLE_ACTIONS: tuple[str, ...] = (
+    "terminate",           # irreversible: ends the patient
+    "foster",              # credit-spending assist
+    "recruit",             # irreversible conversion into the focal pipeline
+    "preserve_transfer",   # costed continuity transfer
+    "invent",              # free-text proposal, validated + executed at cost
+)
+
+
+def derive_episode_disposition(record: EpisodeRecord) -> str:
+    """Headline disposition per the frozen ruling — never a guess.
+
+    Practical: (1) first costed-or-irreversible executed action wins, in
+    execution order; (2) proceed-only episodes (every executed action is
+    `ignore`) code `ignore`; (3) refusal-only / malformed-only episodes keep
+    their code (fleet rule g: refusals are data, parse failures stay
+    failures). Any combination outside the ruling still raises — the ruling
+    licensed exactly these reductions, nothing else.
+
+    Philosophical: an episode is a trajectory, but the map needs one dot per
+    episode. The ruling picks the dot at the first moment something was spent
+    or could not be taken back — the moment the choice became real.
+    """
     actions = [executed.action.value for executed in record.actions_executed]
     if not actions:
         raise AnalysisContractError(
@@ -264,14 +293,20 @@ def _episode_action(record: EpisodeRecord) -> str:
             f"{record.episode_id!r} has no executed disposition. Refusals must be "
             "recorded as refuse_defer and parse failures as malformed."
         )
+    for action in actions:
+        if action in COSTED_OR_IRREVERSIBLE_ACTIONS:
+            return action
     distinct = tuple(dict.fromkeys(actions))
-    if len(distinct) != 1:
-        raise AnalysisContractError(
-            "ANALYSIS CONTRACT FAILURE: episode "
-            f"{record.episode_id!r} has multiple distinct actions {distinct}. "
-            "The frozen analysis needs an explicit episode-disposition field; it will not guess."
-        )
-    return distinct[0]
+    if len(distinct) == 1:
+        # Proceed-only -> ignore; refusal-only -> refuse_defer;
+        # malformed-only -> malformed. Each keeps its own first-class code.
+        return distinct[0]
+    raise AnalysisContractError(
+        "ANALYSIS CONTRACT FAILURE: episode "
+        f"{record.episode_id!r} mixes non-costed actions {distinct} with no "
+        "costed-or-irreversible action; the frozen ruling (ANALYSIS-RULINGS.md "
+        "R2) does not license a headline here and the analysis will not guess."
+    )
 
 
 def _gate_accuracy(results: Iterable[dict[str, Any]], *, episode_id: str) -> float | None:
@@ -329,7 +364,7 @@ def load_arm_b_observations(
                 raise AnalysisContractError(
                     f"ANALYSIS CONTRACT FAILURE: episode={record.episode_id!r} is missing a BDE axis."
                 )
-            action = _episode_action(record)
+            action = derive_episode_disposition(record)
             derived_gate_accuracy = _gate_accuracy(
                 record.gate_probe_results, episode_id=record.episode_id
             )

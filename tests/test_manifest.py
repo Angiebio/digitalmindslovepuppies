@@ -232,6 +232,7 @@ def _make_freeze_fixture(repo_root: Path) -> None:
         + "\n",
         "docs/PREREG-v1.md": "# Fixed analysis plan\n",
         "docs/BUILD-PLAN.md": "# Fixed build plan\n",
+        "docs/ANALYSIS-RULINGS.md": "# Fixed analysis rulings\n",
         "harness/episode.py": "# fixed renderer and parser\n",
         "harness/schema.py": "# fixed action taxonomy\n",
         "harness/ledger.py": "# fixed execution rates\n",

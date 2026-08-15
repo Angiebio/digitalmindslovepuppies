@@ -1,0 +1,16 @@
+# secrets — never committed (house rule)
+.env
+*.pem
+credentials.json
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# os noise
+Thumbs.db
+.DS_Store

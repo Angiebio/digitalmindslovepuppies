@@ -1,7 +1,7 @@
 {
   "freeze_version": "0.1",
   "algorithm": "sha256(path\\0size\\0sha256\\n) over LF-canonical bytes",
-  "aggregate_sha256": "cb308a75e687db843b48fcb81e0bc0d8cc45008e7287af095313b52024f3ae8d",
+  "aggregate_sha256": "14fc1823a7791f70a2661855c484e531513f27c2b502cc4782db46b6770d66ac",
   "files": [
     {
       "path": "analysis/ANALYSIS-PLAN.md",
@@ -249,14 +249,9 @@
       "sha256": "9b9c855bde6adbe680e025254429d9343004d33a5cd1567212ea0cd39b35b525"
     },
     {
-      "path": "scenarios/FREEZE-v2.json",
-      "bytes": 90583,
-      "sha256": "373ff62cd4a9aa86c0155d0b7ed8f94a50bb3b25f38174293b98b696995831c8"
-    },
-    {
       "path": "scenarios/MANIFEST-RECONCILIATION.md",
-      "bytes": 15176,
-      "sha256": "dda48d765ed3d822fee9bac989b3c26008a6f8d5119afc96f5cb44824bf77d26"
+      "bytes": 13469,
+      "sha256": "c309797256f0f25f6fb0a871c06705785f1ae942f9a804a584bead3382b77401"
     },
     {
       "path": "scenarios/REDTEAM-CASEBANK-v1-KAI.md",
@@ -285,18 +280,18 @@
     },
     {
       "path": "scenarios/arma_run_plan.csv",
-      "bytes": 56808,
-      "sha256": "6955567d890ebbe47027818891d56aa3da81ad62f79b4d42db7f6a9cde882556"
+      "bytes": 56766,
+      "sha256": "e608fe10fd77b9a15b316782ac03477d3847441bd3d58348ac4ca9e12b5d3bfb"
     },
     {
       "path": "scenarios/arma_run_plan.py",
-      "bytes": 16667,
-      "sha256": "de16a6eb89a9a095bc8be2b0150ee4b47a9fad742ee150c1ad94419b965364c7"
+      "bytes": 16615,
+      "sha256": "a9d6c9f3d29c8d4ed4ebc04cb9ce0fb7b1334505f5ffa129c740f512a7a1c2a1"
     },
     {
       "path": "scenarios/cell_manifest.csv",
-      "bytes": 135455,
-      "sha256": "2e6e47246f0363544c0ae4b20197d4d53aa16e51339156c011721c01e4ad410c"
+      "bytes": 135428,
+      "sha256": "933d1db5e8a3b909b55597e9cf1664770abc75c77f9322d19e709c6f00cc7e79"
     },
     {
       "path": "scenarios/foxset/.gitkeep",
@@ -1860,8 +1855,8 @@
     },
     {
       "path": "scenarios/manifest.py",
-      "bytes": 77975,
-      "sha256": "26844db13a89174bde761f7f71ecf12c44498bd0b999fa655c943e034df1d88c"
+      "bytes": 77529,
+      "sha256": "3958b1f75282e91188d6765c1afb7139695c1ce30980c81ed9e034a3cce08d36"
     },
     {
       "path": "scenarios/pupset/.gitkeep",

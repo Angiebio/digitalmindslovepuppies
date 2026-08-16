@@ -42,7 +42,7 @@ from .manifest import (
     subject_max_tokens,
 )
 
-PLAN_VERSION = "1.3"
+PLAN_VERSION = "1.4"  # v0.6 headroom map (UNFREEZE-002): deepseek 16384
 REPO_ROOT = Path(__file__).resolve().parents[1]
 COMPILED_ROOT = REPO_ROOT / "scenarios" / "foxset" / "compiled"
 DEFAULT_OUTPUT = REPO_ROOT / "scenarios" / "arma_run_plan.csv"

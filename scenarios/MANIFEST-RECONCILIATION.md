@@ -243,3 +243,31 @@ $6.642216; program $438.151844, headroom $11.848156). Scope was
 token-budget parameters only: zero stimulus bytes changed, every hash-bound
 red-team PASS carries forward. No kill-order cut was needed at the estimate
 stage; R5 re-projects from post-hash actuals before launch.
+
+## 11. 16AUG2026 — UNFREEZE-002 DeepSeek choice-surface headroom (v0.6; PI word "run it full")
+
+R4.5-v2 FAILED thresholds (c)/(d) (docs/R45-VERDICT-2.md): DeepSeek was
+still mute on the Arm B choice surface at 4096 (reasoning consumed the
+whole budget, empty visible text, 3/3) while speaking cleanly on Arm A
+closed. Per docs/UNFREEZE-002.md (Option A of the decision memo, PI word
+"run it full" ~07:15 ET):
+`MODEL_SUBJECT_MAX_TOKENS["deepseek/deepseek-v4-pro"]` **4096 → 16384**
+(manifest v0.6, Arm A plan v1.4). The enforcement mechanism is per-lane —
+every call kind on the DeepSeek lane carries the 16384 ceiling in the
+hashed envelope and the wire request identically. A preregistered
+kill-order rides with it: if the R4.5-v3 diag pair (`core-001`
+ep003/ep004, rung `R4.5-v3-diag`) is not 2/2 parseable at 16384, the
+DeepSeek Arm B lanes drop from the confirmatory run and its Arm A lanes
+stay. FREEZE.json (14fc1823) → FREEZE-v2.json archived; new seal minted
+through the preflight door.
+
+Rows / cells / episodes / calls and the expected-token estimate remain
+**278 / 27 / 888 / 12,124 / $431.509628** (Arm A: 210 rows / 630 calls /
+$6.642216; program $438.151844, headroom $11.848156). A cap is a ceiling,
+not consumption; R5 re-projects from post-hash pilot actuals — including
+the DeepSeek 16384 diag actuals — before any confirmatory dollar moves.
+UNFREEZE-002 also amends the R4.5 threshold (c) stratification (a
+POST-DATA amendment, PI-authorized, disclosed verbatim in the paper) and
+fixes the v2 fox-sampling collector bug; those are check-side changes and
+live in docs/UNFREEZE-002.md — zero stimulus bytes changed here either,
+every hash-bound red-team PASS carries forward.

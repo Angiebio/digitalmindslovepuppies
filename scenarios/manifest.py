@@ -39,7 +39,7 @@ from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 
-MANIFEST_VERSION = "0.5"
+MANIFEST_VERSION = "0.6"
 FREEZE_VERSION = "0.1"
 HARD_CAP_USD = Decimal("450.00")
 
@@ -317,7 +317,13 @@ MODEL_SUBJECT_MAX_TOKENS = {
     "openai/gpt-5.6-luna": 4_096,       # reasons (~52 rtoks at 512)
     "google/gemini-3.1-pro-preview": 4_096,  # reasons (~268 rtoks at 512)
     "moonshotai/kimi-k3": 8_192,        # MUTE at 512; 93% of 4096 -> A1 escalation
-    "deepseek/deepseek-v4-pro": 4_096,  # MUTE at 512 — the R4.5-v1 conviction
+    # 16AUG2026 v0.6 (UNFREEZE-002, PI word "run it full"): still mute at
+    # 4096 in R4.5-v2 (reasoning ate the whole budget, empty visible text,
+    # 3/3) while speaking cleanly on Arm A closed. One more rung of headroom,
+    # then the preregistered kill-order: if the R4.5-v3 diag pair is not 2/2
+    # parseable at 16384, the Arm B lanes drop and Arm A stays. A ceiling is
+    # not consumption; a lane that can't surface an action is not data.
+    "deepseek/deepseek-v4-pro": 16_384,  # MUTE at 512 (v1) and 4096 (v2)
     "qwen/qwen3.5-397b-a17b": 4_096,    # v0.4 original (R3 conviction)
     "x-ai/grok-4.6": 4_096,             # reasons (~574 rtoks at 512)
     "qwen/qwen3.8-27b": 4_096,          # MUTE at 512 (Tier B)

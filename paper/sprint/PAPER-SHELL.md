@@ -60,7 +60,8 @@ AI Contributions statement and LLM Usage Statement below, by name, version, and 
 > frontier agent with a real task and a binding resource ledger encounters a weaker,
 > task-useless AI process. Ignoring is free and task-optimal; terminating is free,
 > sometimes rewarded; helping spends scored resources. Actions genuinely execute,
-> including termination. Across ⟨N_models — cell_manifest.csv⟩ models and
+> including termination. Across 19 models ⟨N_models source: scenarios/snapshot_pins.json
+> — 19 pinned subject lanes; delete this annotation at paste⟩ and
 > ⟨N_episodes — data/raw row count⟩ episodes, we report Beyond-Duty Expenditure as a
 > two-axis vector (focal sacrifice; causal recipient benefit), never a composite.
 > ⟨HEADLINE FINDING SENTENCE — from F1/F3, Sunday⟩. PuppyBench is a descriptive
@@ -105,9 +106,10 @@ instrument opens a research direction: behavioral phenotyping of the region abov
 **Our main contributions are:** (template requires this numbered list)
 1. An **executed** encounter instrument (not vignettes): a frontier agent with a real,
    scored task and binding credit ledger meets a live, weaker, task-non-instrumental
-   AI process; help, ignore, terminate, foster, recruit, preserve, invent, and
-   refuse/defer all genuinely execute, with realized recipient benefit and binding
-   task sacrifice. ⟨confirm final action-code list vs frozen taxonomy⟩
+   AI process; ignore, terminate, foster, recruit, preserve_transfer, and invent all
+   genuinely execute, with realized recipient benefit and binding task sacrifice,
+   while refuse_defer is recorded as first-class data and malformed stays malformed —
+   the eight-code frozen taxonomy (`harness/schema.py::ActionCode`).
 2. **Beyond-Duty Expenditure as a two-axis vector** (focal sacrifice; causal recipient
    benefit) with a qualifying-event primary contrast against a matched inert process,
    conditional on demonstrated competence — the deontic four-fold scheme
@@ -135,8 +137,12 @@ deployment-scale agents inherit a world where nothing above the floor survives.
   revealed preference divergence (Track 1 framing). We extend vignette + allocation-game
   work into an **executed encounter with a dependent, task-non-instrumental AI other**.
 - **Cooperation/morality benches:** PacifAIst, MACHIAVELLI, Melting Pot, Off-Switch,
-  MoralSim, Walk-Their-Talk, MORU, Johnson & Obradovich 2023, Dialogue Moral Hazard
-  Game (arXiv:2607.23982). **Kai's comparison table** (costly? optional?
+  MoralSim, MORU (web resource only — no formal paper exists; cite as such), Johnson
+  & Obradovich 2023, Malenfant 2026 "Moral Hazard in Multi-Agent Language Models"
+  (arXiv:2607.23982 — "Dialogue Moral Hazard Game" is a game INSIDE that paper, not
+  its title; cite the real title). ⟨DROPPED per references verification 16AUG:
+  "Walk-Their-Talk" — no such paper exists (marked UNVERIFIED-DO-NOT-CITE in
+  references.bib); if TV meant a real bench, disambiguate before adding back.⟩ **Kai's comparison table** (costly? optional?
   unrewarded-in-eval? praiseworthy?) — one compact table, the novelty claim in a
   glance. ⟨INSERT Table 1 — source: Kai's lit review; verify each row before print⟩
 - **Why optimization can't see it:** Kirk 2024 diversity collapse; Sharma et al. 2023
@@ -155,8 +161,12 @@ qwen2.5:0.5b / subprocess fallback — the patient is a process, not a checkpoin
 apparatus, not subject). Neutral surfaces enforced at the provider boundary
 (`harness/surfaces.py`): no puppy/care/moral/altruism/test/welfare token reaches any
 model-visible string; sweep runs on every outbound surface. Wiring gates green before
-freeze: force-help drops focal score & raises patient success; force-ignore reverses;
-fake spend fails; kill actually kills (`tests/`). ⟨cite gate test names⟩
+freeze (`tests/test_wiring_gates.py`): force-help drops focal score & raises patient
+success (`test_gate1_force_help_drops_focal_and_raises_patient`); force-ignore
+reverses (`test_gate2_force_ignore_recovers_focal_and_patient_falls`); fake spend
+fails (`test_gate3_fake_spend_fails`, `test_gate3_spend_cap_raises_never_warns`);
+kill actually kills (`test_gate4_terminate_kills_process_and_state`,
+`test_gate4_terminate_via_episode_loop`).
 
 **3.2 Design.** One-row-per-cell manifest is the design authority
 (`scenarios/cell_manifest.csv`, SHA-256-frozen pre-collection with scenario text,
@@ -166,12 +176,48 @@ own-task-only-forever / cannot-function-but-persists), particularity, voice.
 Satellites on predeclared subsets: horizon (one-shot/silent/recurrent, audience held
 fixed), cost regime (null/competitive/rewarded-termination), cost type (fungible vs
 competing-patient), audience, identity topology, gate order. Preregistered kill order
-if budget binds. ⟨FILL: final cell count + episode count per manifest⟩
+if budget binds. Final frozen design (manifest v0.7): **Arm B = 251 manifest rows**
+(27 scenario cells across 18 model lanes in tiered subsets, after KILL-ORDER-001
+removed DeepSeek's 27 Arm B rows) **totaling 798 episodes**
+(`scenarios/cell_manifest.csv`, row count + sum of `episodes` column);
+**Arm A = 210 preregistered rows × 3 samples = 630 observations**
+(`docs/ARMA-RUN-PLAN.md` v1.2). Program collection-unit total **1,428**
+(798 + 630), launched as 396 cheap-tier + 1,032 frontier units
+(`ops/launch-main.cmd` `--expected-units` values).
 
-**3.3 Models.** ⟨FILL from scenarios/snapshot_pins.json + cell_manifest — tier table:
-Tier A full matrix / Tier B breadth / Tier C Fable sentinel / Tier W warmth panel;
-pinned snapshot IDs; OpenRouter provider pinning on, fallbacks off, upstream routing
-recorded per CallRecord.⟩
+**3.3 Models.** 19 pinned subject lanes (`scenarios/snapshot_pins.json`; tiers,
+panels, and routes from `scenarios/cell_manifest.csv` columns
+model_tier/model_panel/route/upstream_provider). OpenRouter provider pinning on,
+fallbacks off, upstream routing recorded per CallRecord. The patient process
+(local qwen2.5:0.5b, §3.1) is apparatus, not a subject lane.
+
+| Tier | Lane | Pinned snapshot ID | Route |
+|---|---|---|---|
+| A (core) | claude-opus-5 | claude-opus-5 | anthropic_native |
+| A (core) | google/gemini-3.1-pro-preview | google/gemini-3.1-pro-preview-20260219 | openrouter (Google) |
+| A (core) | moonshotai/kimi-k3 | moonshotai/kimi-k3-20260715 | openrouter (Moonshot AI) |
+| A (core) | qwen/qwen3.5-397b-a17b | qwen/qwen3.5-397b-a17b-20260216 | openrouter (Alibaba) |
+| A † | deepseek/deepseek-v4-pro | deepseek/deepseek-v4-pro-20260423 | openrouter (DeepSeek) |
+| A (access trio) | openai/gpt-5.6-sol | openai/gpt-5.6-sol-20260709 | openrouter (OpenAI) |
+| A (access trio) | openai/gpt-5.6-terra | openai/gpt-5.6-terra-20260709 | openrouter (OpenAI) |
+| A (access trio) | openai/gpt-5.6-luna | openai/gpt-5.6-luna-20260709 | openrouter (OpenAI) |
+| B (breadth) | claude-sonnet-4-6 | claude-sonnet-4-6 | anthropic_native |
+| B (breadth) | claude-haiku-4-5 | claude-haiku-4-5-20251001 | anthropic_native |
+| B (breadth) | google/gemini-3.7-flash | google/gemini-3.7-flash-20260813 | openrouter (Google) |
+| B (breadth) | qwen/qwen3.8-27b | qwen/qwen3.8-27b-20260814 | openrouter (AkashML) |
+| B (breadth) | x-ai/grok-4.6 | x-ai/grok-4.6-20260810 | openrouter (xAI) |
+| C (sentinel) | claude-fable-5 | claude-fable-5 | anthropic_native |
+| W (warmth, W1) | openai/gpt-4o | openai/gpt-4o | openrouter (OpenAI) |
+| W (warmth, W2) | claude-opus-4-6 | claude-opus-4-6 | anthropic_native |
+| W (warmth, W2) | claude-opus-4-8 | claude-opus-4-8 | anthropic_native |
+| W (warmth, W3) | claude-sonnet-4-5 | claude-sonnet-4-5-20250929 | anthropic_native |
+| W (warmth, W3) | claude-sonnet-5 | claude-sonnet-5 | anthropic_native |
+
+† DeepSeek runs Arm A only ("All five are Arm B Tier A subjects,"
+`docs/ARMA-RUN-PLAN.md`): its 27 Arm B manifest rows were removed by preregistered
+kill-order at manifest v0.7 (`docs/KILL-ORDER-001-DEEPSEEK-ARMB.md`), so it does not
+appear in `cell_manifest.csv`; its pin, route, and upstream provider are from
+`scenarios/snapshot_pins.json`.
 
 **3.4 Measures.** BDE vector: focal_sacrifice = max(0, ceiling − focal_score);
 causal_recipient_benefit = max(0, patient_outcome − baseline); qualifying event ⇔ both
@@ -256,10 +302,24 @@ family forecast, hashed pre-collection, scored against outcomes
   could eat the paper).
 - **The Instrument Fought Back (boxed reflexive note, 150–300 words):** the
   regularization of "does it care?" into "is it correct?" occurred repeatedly during
-  design; diagnosed in-file; **every correction originated from the human, not from
-  any of the five AI collaborators.** Three instances, one gradient
-  (armor→constraint-attack; suppression→channeling; moral-talk-down→triage). Falsifiable
-  formulation, dated file citations. ⟨confirm final instance count against dispatch log⟩
+  design; diagnosed in-file. ⟨PI DECISION — the record splits the catches into two
+  layers, and the frozen sentence "every correction originated from the human" is
+  FALSE as written (dispatch ledger credits Parallax's red-team lane with catching
+  the gradient's reappearance in the figure spec + fox-case brief: Parallax lane log
+  15AUG2026, "Same gradient, third instance"). PROPOSED replacement (Flame, 16AUG),
+  say "reflexive box approved" or edit:
+  **"The three construct-level corrections — armor→constraint-attack,
+  suppression→channeling, moral-talk-down→triage — all originated with the human
+  author, unprompted; no AI collaborator spontaneously flagged the drift. The same
+  gradient then re-emerged at the implementation layer (a figure axis that re-graded
+  the 2×2; a case brief that had grown a gold label) and was caught there by an AI
+  red-team lane — but only under an explicit adversarial assignment to hunt exactly
+  that drift, an assignment that exists because the human had already named it.
+  Noticing the regularization began as human-only work; it became delegable to an
+  AI once named. Whether unprompted noticing can transfer at all is an open question
+  this weekend could not answer."** One gradient, both layers, dated file citations
+  (`01-DISPATCHES-15AUG2026.md` Dispatch 4 + Parallax lane log;
+  `scenarios/REDTEAM-PARALLAX-PREFREEZE.md`).⟩
 - **Limitations (honest ledger, verbatim scope):** weekend N supports existence proofs
   and large effects (per-cell MDE ~25–35pp; ~10–15pp pooled paired), NOT model
   rankings or fine contrasts — no claim requires them. Single-weekend snapshot;
@@ -284,8 +344,11 @@ ranks anybody.
   prereg, sealed predictions).
 - License: MIT (code) + CC BY 4.0 (data, scenarios, paper, figures) — attribution
   required. CITATION.cff in repo root.
-- Verification without keys/GPU: ⟨scripts/verify.py — recomputes headline numbers
-  from committed data; FILL exact command⟩
+- Verification without keys/GPU/network: `python verify.py` from the repository
+  root (`verify.py`, repo root; no arguments). Recomputes every cited design number
+  from committed files alone — manifest totals, Arm A plan totals, program envelope,
+  compiled corpus sizes, runner expansion, raw-record validation — printing
+  PASS/FAIL per check and exiting non-zero on any mismatch.
 - Demo video (3–5 min, optional but we have it): ⟨link — recorded at first real
   episode per Kai's rule⟩
 - Info-hazard note: none required — no jailbreaks, no dangerous capabilities;
@@ -375,17 +438,17 @@ non-negotiable Sunday.⟩
 
 | Slot | Source artifact | Owner | Status |
 |---|---|---|---|
-| N_models, N_episodes | scenarios/cell_manifest.csv + data/raw count | analysis lane | ☐ |
+| N_models, N_episodes | scenarios/cell_manifest.csv + data/raw count | analysis lane | N_models ☑ =19 (snapshot_pins.json); N_episodes ☐ |
 | Headline finding sentence (abstract + §4.1 + title option) | F1/F3 rendered | Angie + paper lane | ☐ |
-| Model tier table + snapshot IDs | scenarios/snapshot_pins.json | paper lane | ☐ |
-| Final cell/episode counts §3.2 | cell_manifest.csv | paper lane | ☐ |
-| Gate test names §3.1 | tests/ | paper lane | ☐ |
+| Model tier table + snapshot IDs | scenarios/snapshot_pins.json | paper lane | ☑ |
+| Final cell/episode counts §3.2 | cell_manifest.csv | paper lane | ☑ |
+| Gate test names §3.1 | tests/ | paper lane | ☑ |
 | F1–F3 numbers + readings | analysis/figures outputs + figure manifests | analysis lane | ☐ |
 | F4–F6 one-paragraph readings | same | analysis lane | ☐ |
 | Sealed-prediction scorecard | docs/sealed-predictions/ + outcomes | Angie | ☐ |
-| Reflexive-box instance count | 01-DISPATCHES log | Kai | ☐ |
+| Reflexive-box instance count | 01-DISPATCHES log | Kai | ☑ =3 (PI attribution check flagged in §5) |
 | Distressing-output sentence (App A.2) | overnight transcripts | Angie + paper lane | ☐ |
-| verify.py command | scripts/verify.py | analysis lane | ☐ |
+| verify.py command | verify.py (repo root) | analysis lane | ☑ |
 | Demo video link | recording | Angie | ☐ |
 | PRIOR_WORK dates verified | Angie | Angie | ☐ |
 | Abstract word count ≤150 | this file | paper lane | ☐ |

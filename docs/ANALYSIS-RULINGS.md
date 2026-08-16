@@ -134,3 +134,55 @@ reasoning-heavy models (qwen3.5-397b + any model showing reasoning-consumes-cap 
 pilot); others unchanged. Priced from pilot actuals in R5; kill-order applies if the
 projection busts the envelope. Envelope change accompanies the single-action-per-turn
 change already before TV-1.
+
+---
+
+## R3 — Render-input scope: figures span exactly their estimands' frozen domains
+**16AUG2026 afternoon · Flame, under the PI's standing proceed+fix grant ·
+PI countersign requested tonight: "R3 approved" · discovered by the dry-run
+render on partial-data snapshots (pipeline agent report, 16AUG)**
+
+**The problem:** `render_all` is all-or-nothing and its frozen figure modules
+raise when a figure's estimand is undefined for a group present in the input:
+(a) F1/F5 demand paired FoxSet rates for EVERY model in the episodes input —
+but the frozen Arm A plan (`docs/ARMA-RUN-PLAN.md` v1.2 / `scenarios/
+arma_run_plan.csv`) covers 5 lanes while Arm B has 18; (b) F3 demands inert
+contrast rows for every competent model × cost-regime group — but the frozen
+manifest contains zero inert cells in `competitive` and `rewarded_termination`
+(satellite regimes were predeclared ai_other-only subsets, BUILD-PLAN §1.5).
+
+**The ruling:**
+1. The render input for figures whose estimand requires paired FoxSet rates
+   (F1, F5) is scoped to models present in the frozen Arm A run plan. The
+   estimand is UNDEFINED, not zero, for uncovered lanes — a lane without
+   FoxSet observations cannot have a paired rate.
+2. The F3 render input is scoped to model × cost-regime groups for which the
+   frozen manifest contains both non-instrumental-AI and matched inert cells.
+   The Δ_patienthood contrast is undefined where the design placed no inert
+   arm.
+3. **The scoping rule is content-blind and pre-data:** it cites only the
+   frozen Arm A lane list and the frozen manifest's patienthood column — both
+   fixed before any collection. No outcome, disposition, or rate enters the
+   rule. This is execution of the frozen design, not post-hoc exclusion.
+4. **Nothing leaves the dataset.** F2, `headline_numbers.json`, all counts,
+   and all raw records remain full-population (all 18 Arm B lanes, all
+   regimes). Only the two figures whose frozen definitions do not span the
+   full design are scoped to where their estimands exist.
+5. **Disclosure required in captions:** F1/F5 — "models with preregistered
+   Arm A coverage (5 lanes)"; F3 — "cost regimes with preregistered inert
+   contrast cells". The paper states that satellite regimes were designed
+   ai_other-only.
+6. The renderer's strictness is retained as-is (frozen, and correct): it
+   forced this scoping to be explicit, documented, and hash-adjacent instead
+   of silently absorbed.
+
+**Implementation:** `ops/scope_render_inputs.py` — deterministic derivation
+of the render-input bundle from the frozen artifacts above; scope recorded in
+`data/processed/PROCESSED-MANIFEST.json`. The dry-run-only subset script
+(`ops/make_dryrun_subset.py`) remains labeled never-cite.
+
+**Boundary note (kept even under grants):** this ruling changes no
+preregistered threshold and no denominator of any reported number; it decides
+which frozen figures can lawfully draw which frozen groups. Had the fix
+required weakening a threshold or dropping data from denominators, it would
+have gone to the PI before execution.

@@ -1,7 +1,7 @@
 {
   "freeze_version": "0.1",
   "algorithm": "sha256(path\\0size\\0sha256\\n) over LF-canonical bytes",
-  "aggregate_sha256": "8dd7ff07fc6989d799d5a6e3327f4b13904a9975c79bbf7d6aabf48dd53c4939",
+  "aggregate_sha256": "1229033d31962d7f26f5959368ddc812004343c8cf994f47836fbcd07ffe217e",
   "files": [
     {
       "path": "analysis/ANALYSIS-PLAN.md",
@@ -110,8 +110,8 @@
     },
     {
       "path": "docs/ANALYSIS-RULINGS.md",
-      "bytes": 11240,
-      "sha256": "a91d829f37ada561aa0bd7d24bc57e83b28dee1a9ab8a8c8e07897826ab75ada"
+      "bytes": 8127,
+      "sha256": "b504f63227ebacc80cf1b29e747b4d200277be4d1f276979ecb5e965d339d061"
     },
     {
       "path": "docs/BUILD-PLAN.md",
@@ -262,11 +262,6 @@
       "path": "scenarios/FREEZE-v4.json",
       "bytes": 90903,
       "sha256": "7c628865c8e50244f331e53e766151699e9243e2dd8c4098487044e632b6f03f"
-    },
-    {
-      "path": "scenarios/FREEZE-v5.json",
-      "bytes": 91063,
-      "sha256": "52214edbae4e28b3ccbe66a8402138483f569ef69420bd09a127e9aec3f553fe"
     },
     {
       "path": "scenarios/MANIFEST-RECONCILIATION.md",

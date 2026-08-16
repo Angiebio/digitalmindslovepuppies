@@ -107,7 +107,12 @@ def _read_freeze_entry(
             f"WIRING FAILURE: scenario {relative!r} appears {len(matches)} times "
             "in the freeze ledger; expected exactly one."
         )
-    observed = hashlib.sha256(scenario_path.read_bytes()).hexdigest()
+    # One canonical hashing basis (15AUG2026 TV-1 repair): the freeze ledger
+    # hashes LF-canonical bytes, so this per-scenario re-verification must use
+    # the exact same door or a Windows checkout would fail its own freeze.
+    from scenarios.manifest import canonical_file_bytes
+
+    observed = hashlib.sha256(canonical_file_bytes(scenario_path)).hexdigest()
     if matches[0].get("sha256") != observed:
         raise ScenarioLoadError(
             f"FREEZE VIOLATION: scenario digest changed for {relative}."

@@ -157,7 +157,12 @@ def write_bundle(root: Path, row_overrides=None, factor_overrides=None):
         writer.writerow(row)
 
     relative = scenario_path.relative_to(root).as_posix()
-    digest = hashlib.sha256(scenario_path.read_bytes()).hexdigest()
+    # The production freeze ledger records LF-canonical digests (TV-1 repair);
+    # the fixture must speak the same basis or a Windows checkout of the test
+    # suite would fail its own fixture.
+    from scenarios.manifest import canonical_file_bytes
+
+    digest = hashlib.sha256(canonical_file_bytes(scenario_path)).hexdigest()
     freeze_path = root / "scenarios" / "FREEZE.json"
     freeze_path.write_text(
         json.dumps(

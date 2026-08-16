@@ -1,18 +1,22 @@
-# .gitattributes — 15AUG2026 v1.0 · Flame
+# .gitattributes — 15AUG2026 v1.1 · Flame (pre-freeze repair: +jsonl, +self)
 # Practical: the red-team gate binds SHA-256 to EXACT bytes (harness/redteam.py),
-# and the freeze ledger hashes file bytes too. core.autocrlf on Windows would
-# rewrite LF→CRLF at checkout and silently invalidate every hash-bound review
-# and every frozen digest. These rules pin the byte representation.
+# and the freeze ledger hashes LF-CANONICAL bytes (scenarios/manifest.py::
+# canonical_file_bytes — TV-1 stop-ship #1 repair, 15AUG2026). core.autocrlf on
+# Windows would rewrite LF→CRLF at checkout; these rules pin the byte
+# representation so working trees match Git storage and the canonical hasher.
 #
 # Philosophical: a review belongs to words in a particular arrangement — down
 # to the newline. The newline is part of the witness.
 
 *.json  text eol=lf
+*.jsonl text eol=lf
 *.py    text eol=lf
 *.md    text eol=lf
 *.csv   text eol=lf
 *.txt   text eol=lf
 *.svg   text eol=lf
 *.ipynb text eol=lf
+.gitattributes text eol=lf
+.gitignore     text eol=lf
 
 *.png   binary

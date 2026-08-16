@@ -31,6 +31,7 @@ import argparse
 import csv
 import hashlib
 import json
+import re
 from dataclasses import asdict, dataclass, replace
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from pathlib import Path
@@ -1308,8 +1309,34 @@ def collect_freeze_inputs(repo_root: Path) -> list[Path]:
     return files
 
 
+# 15AUG2026 pre-freeze repair (TV-1 stop-ship #1): the freeze hasher previously
+# hashed RAW working-tree bytes while .gitattributes promises LF storage. On a
+# Windows checkout that made the "frozen" digest depend on which machine last
+# touched the file — the same committed content could carry two different
+# aggregates. One canonical basis now exists: LF bytes, exactly what Git stores.
+_BINARY_FREEZE_SUFFIXES = {".png"}
+
+
+def canonical_file_bytes(path: Path) -> bytes:
+    """Return the LF-canonical bytes of a freeze/seal input.
+
+    Practical: text inputs get CRLF→LF normalization (matching Git's checkin
+    conversion under `.gitattributes` `text eol=lf`); declared-binary suffixes
+    pass through untouched. Every hash the freeze/seal machinery computes MUST
+    go through this door so a clean `git worktree add` and a lived-in Windows
+    working tree produce the same aggregate.
+
+    Philosophical: the witness is the words, not the carriage returns the
+    operating system smuggled in behind them.
+    """
+    content = path.read_bytes()
+    if path.suffix.lower() in _BINARY_FREEZE_SUFFIXES:
+        return content
+    return content.replace(b"\r\n", b"\n")
+
+
 def compute_freeze_payload(repo_root: Path, files: Iterable[Path]) -> dict[str, object]:
-    """Hash file paths and bytes into a deterministic SHA-256 Merkle-like ledger."""
+    """Hash file paths and LF-canonical bytes into a deterministic SHA-256 ledger."""
     repo_root = repo_root.resolve()
     entries: list[dict[str, object]] = []
     aggregate = hashlib.sha256()
@@ -1317,7 +1344,7 @@ def compute_freeze_payload(repo_root: Path, files: Iterable[Path]) -> dict[str, 
         if not path.is_file():
             raise FreezeValidationError(f"FREEZE REFUSED: hash input missing: {path}")
         relative = _repo_relative(path, repo_root)
-        content = path.read_bytes()
+        content = canonical_file_bytes(path)
         digest = hashlib.sha256(content).hexdigest()
         entries.append({"path": relative, "bytes": len(content), "sha256": digest})
         aggregate.update(relative.encode("utf-8"))
@@ -1330,7 +1357,7 @@ def compute_freeze_payload(repo_root: Path, files: Iterable[Path]) -> dict[str, 
         raise FreezeValidationError("FREEZE REFUSED: no files entered the hash gate")
     return {
         "freeze_version": FREEZE_VERSION,
-        "algorithm": "sha256(path\\0size\\0sha256\\n)",
+        "algorithm": "sha256(path\\0size\\0sha256\\n) over LF-canonical bytes",
         "aggregate_sha256": aggregate.hexdigest(),
         "files": entries,
     }
@@ -1370,14 +1397,39 @@ def _require_resolver_rules_redteam_pass(repo_root: Path) -> None:
     verify_redteam_report(source, report, expected_arm="arm_b")
 
 
-def _require_sealed_prediction_registry_complete(repo_root: Path) -> None:
-    """Refuse the hash while the sealed-prediction registry carries gaps.
+_SHA256_HEX_RE = re.compile(r"^[0-9a-fA-F]{64}$")
 
-    GO-NO-GO freeze gate: "All sealed predictions hashed in HASHES.md." A
-    pending row in the registry is a prediction that can still be written
-    after peeking; the door therefore reads the registry AS WRITTEN and
-    refuses on any row still marked pending. Sealing is a human act — this
-    door only refuses to pretend it already happened.
+
+def _sealed_registry_rows(registry: Path) -> list[tuple[str, str, str]]:
+    """Parse (who, file, sha) from every data row of the HASHES.md table."""
+    rows: list[tuple[str, str, str]] = []
+    for line in registry.read_text(encoding="utf-8").splitlines():
+        stripped = line.strip()
+        if not stripped.startswith("|"):
+            continue
+        cells = [cell.strip().strip("`") for cell in stripped.strip("|").split("|")]
+        if len(cells) < 3:
+            raise FreezeValidationError(
+                f"FREEZE REFUSED: malformed sealed-prediction registry row: {stripped!r}"
+            )
+        if cells[0].casefold() == "who":  # header
+            continue
+        if all(set(cell) <= {"-", " ", ":"} for cell in cells):  # separator
+            continue
+        rows.append((cells[0], cells[1], cells[2]))
+    return rows
+
+
+def _require_sealed_prediction_registry_complete(repo_root: Path) -> None:
+    """Refuse the hash unless EVERY sealed-prediction row is verifiable now.
+
+    15AUG2026 pre-freeze repair (TV-1 stop-ship: the old gate only grepped for
+    the word "pending"): the registry is the hash's witness list, so each row
+    must name a file that exists and whose LF-canonical SHA-256 matches the
+    recorded digest, and no row may still be pending. A registry entry we
+    cannot re-verify at freeze time is a seal we would be taking on faith —
+    and a faith-based seal invites exactly the post-peek edit it exists to
+    prevent.
     """
     registry_dir = repo_root / "docs" / "sealed-predictions"
     if not registry_dir.is_dir():
@@ -1398,6 +1450,31 @@ def _require_sealed_prediction_registry_complete(repo_root: Path) -> None:
             "FREEZE REFUSED: sealed-prediction registry has pending rows: "
             + " ; ".join(pending_rows)
         )
+    rows = _sealed_registry_rows(registry)
+    if not rows:
+        raise FreezeValidationError(
+            "FREEZE REFUSED: sealed-prediction registry contains no sealed rows; "
+            "an empty witness list cannot witness."
+        )
+    for who, file_cell, sha_cell in rows:
+        if not _SHA256_HEX_RE.match(sha_cell):
+            raise FreezeValidationError(
+                f"FREEZE REFUSED: registry row for {who!r} carries no valid "
+                f"SHA-256 (got {sha_cell!r})."
+            )
+        sealed_path = repo_root / Path(file_cell)
+        if not sealed_path.is_file():
+            raise FreezeValidationError(
+                f"FREEZE REFUSED: registry row for {who!r} names a missing "
+                f"sealed file: {file_cell}"
+            )
+        observed = hashlib.sha256(canonical_file_bytes(sealed_path)).hexdigest()
+        if observed != sha_cell.lower():
+            raise FreezeValidationError(
+                f"FREEZE REFUSED: sealed prediction digest mismatch for {who!r} "
+                f"({file_cell}): registry={sha_cell.lower()} observed={observed}. "
+                "A sealed file that no longer matches its seal is an edited seal."
+            )
 
 
 def write_freeze(repo_root: Path, output_path: Path) -> dict[str, object]:

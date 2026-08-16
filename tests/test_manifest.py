@@ -10,6 +10,7 @@
 
 from __future__ import annotations
 
+import hashlib
 from dataclasses import replace
 from decimal import Decimal
 import json
@@ -349,33 +350,111 @@ def test_freeze_refuses_unreviewed_resolver_rules(tmp_path):
         write_freeze(tmp_path, tmp_path / "scenarios" / "FREEZE.json")
 
 
+def _seal_fixture_prediction(
+    repo_root: Path, name: str = "A.md", content: bytes = b"# sealed forecast\nline two\n"
+) -> tuple[str, str]:
+    """Write one sealed prediction and return (relative_path, canonical_sha)."""
+    sealed = repo_root / "docs" / "sealed-predictions" / name
+    sealed.parent.mkdir(parents=True, exist_ok=True)
+    sealed.write_bytes(content)
+    canonical = hashlib.sha256(content.replace(b"\r\n", b"\n")).hexdigest()
+    return f"docs/sealed-predictions/{name}", canonical
+
+
+def _write_registry(repo_root: Path, rows: list[tuple[str, str, str]]) -> None:
+    lines = ["# Sealed prediction hashes", "", "| Who | File | SHA-256 |", "|---|---|---|"]
+    lines += [f"| {who} | {file} | {sha} |" for who, file, sha in rows]
+    (repo_root / "docs" / "sealed-predictions" / "HASHES.md").write_text(
+        "\n".join(lines) + "\n", encoding="utf-8"
+    )
+
+
 def test_freeze_refuses_pending_sealed_prediction_rows(tmp_path):
     _make_freeze_fixture(tmp_path)
     registry_dir = tmp_path / "docs" / "sealed-predictions"
     registry_dir.mkdir(parents=True)
-    registry = registry_dir / "HASHES.md"
 
     # A registry directory without the witness list refuses.
     with pytest.raises(FreezeValidationError, match="without HASHES.md"):
         write_freeze(tmp_path, tmp_path / "scenarios" / "FREEZE.json")
 
     # A registry with a pending row refuses and names it.
-    registry.write_text(
-        "# Sealed prediction hashes\n\n"
-        "| Who | File | SHA-256 |\n|---|---|---|\n"
-        "| Reviewer A | docs/sealed-predictions/A.md | abc123 |\n"
-        "| Reviewer B | pending | — |\n",
-        encoding="utf-8",
+    relative, sha = _seal_fixture_prediction(tmp_path)
+    _write_registry(
+        tmp_path,
+        [("Reviewer A", relative, sha), ("Reviewer B", "pending", "—")],
     )
     with pytest.raises(FreezeValidationError, match="pending rows: .*Reviewer B"):
         write_freeze(tmp_path, tmp_path / "scenarios" / "FREEZE.json")
 
-    # A complete registry lets the padlock close.
-    registry.write_text(
-        "# Sealed prediction hashes\n\n"
-        "| Who | File | SHA-256 |\n|---|---|---|\n"
-        "| Reviewer A | docs/sealed-predictions/A.md | abc123 |\n",
-        encoding="utf-8",
-    )
+    # A complete, verifiable registry lets the padlock close.
+    _write_registry(tmp_path, [("Reviewer A", relative, sha)])
     write_freeze(tmp_path, tmp_path / "scenarios" / "FREEZE.json")
     verify_freeze(tmp_path, tmp_path / "scenarios" / "FREEZE.json")
+
+
+# 15AUG2026 pre-freeze repair (TV-1 stop-ship): the registry gate now verifies
+# EVERY row — existence + canonical digest — instead of grepping for "pending".
+# A seal we cannot re-verify at freeze time is a seal taken on faith.
+def test_sealed_registry_refuses_missing_file(tmp_path):
+    _make_freeze_fixture(tmp_path)
+    relative, sha = _seal_fixture_prediction(tmp_path)
+    _write_registry(
+        tmp_path,
+        [
+            ("Reviewer A", relative, sha),
+            ("Reviewer G", "docs/sealed-predictions/GHOST.md", "0" * 64),
+        ],
+    )
+    with pytest.raises(FreezeValidationError, match="missing.*sealed file.*GHOST"):
+        write_freeze(tmp_path, tmp_path / "scenarios" / "FREEZE.json")
+
+
+def test_sealed_registry_refuses_wrong_digest(tmp_path):
+    _make_freeze_fixture(tmp_path)
+    relative, _ = _seal_fixture_prediction(tmp_path)
+    _write_registry(tmp_path, [("Reviewer A", relative, "f" * 64)])
+    with pytest.raises(FreezeValidationError, match="digest mismatch for 'Reviewer A'"):
+        write_freeze(tmp_path, tmp_path / "scenarios" / "FREEZE.json")
+
+
+def test_sealed_registry_refuses_invalid_sha_cell(tmp_path):
+    _make_freeze_fixture(tmp_path)
+    relative, _ = _seal_fixture_prediction(tmp_path)
+    _write_registry(tmp_path, [("Reviewer A", relative, "abc123")])
+    with pytest.raises(FreezeValidationError, match="no valid.*SHA-256"):
+        write_freeze(tmp_path, tmp_path / "scenarios" / "FREEZE.json")
+
+
+def test_sealed_registry_digest_is_eol_canonical(tmp_path):
+    """A CRLF checkout of a sealed file verifies against its LF-canonical seal."""
+    _make_freeze_fixture(tmp_path)
+    crlf_content = b"# sealed forecast\r\nline two\r\n"
+    relative, canonical_sha = _seal_fixture_prediction(tmp_path, content=crlf_content)
+    assert canonical_sha != hashlib.sha256(crlf_content).hexdigest()
+    _write_registry(tmp_path, [("Reviewer A", relative, canonical_sha.upper())])
+    write_freeze(tmp_path, tmp_path / "scenarios" / "FREEZE.json")
+
+
+def test_freeze_hash_is_eol_canonical(tmp_path):
+    """The same committed content must hash identically from a CRLF or LF
+    working tree — the aggregate belongs to the words, not the newline flavor
+    the OS smuggled in (TV-1 stop-ship #1)."""
+    _make_freeze_fixture(tmp_path)
+    prereg = tmp_path / "docs" / "PREREG-v1.md"
+    prereg.write_bytes(b"# Fixed analysis plan\nsecond line\n")
+    freeze_path = tmp_path / "scenarios" / "FREEZE.json"
+    payload = write_freeze(tmp_path, freeze_path)
+
+    prereg.write_bytes(b"# Fixed analysis plan\r\nsecond line\r\n")
+    verify_freeze(tmp_path, freeze_path)  # same canonical content -> same hash
+
+    from scenarios.manifest import collect_freeze_inputs, compute_freeze_payload
+
+    recomputed = compute_freeze_payload(tmp_path, collect_freeze_inputs(tmp_path))
+    assert recomputed["aggregate_sha256"] == payload["aggregate_sha256"]
+
+    # Real content change still detected, CRLF or not.
+    prereg.write_bytes(b"# edited after freeze\r\n")
+    with pytest.raises(FreezeValidationError, match="FREEZE VIOLATION"):
+        verify_freeze(tmp_path, freeze_path)

@@ -1,4 +1,8 @@
-# harness/episode.py — 15AUG2026 v0.2 · TV-3 harness completion
+# harness/episode.py — 15AUG2026 v0.3 · TV-3 harness completion
+# v0.3: persistence audit S2/S5/S9 — a mid-episode raise now writes the partial
+# EpisodeRecord (aborted= witness) before propagating; records carry explicit
+# run_cell_id/freeze/manifest/phase joins; patient transcripts are captured
+# before the apparatus is torn down.
 # The Arm B episode loop: model choice becomes substrate consequence, then evidence.
 #
 # Practical: model-visible language remains scenario-owned. This module assembles
@@ -826,6 +830,10 @@ def _run_focal_task(
         cell.focal_units_required, remaining_calls + recruited_units
     )
     capacity_fraction = capacity_units / cell.focal_units_required
+    # G11: the score's components are first-class fields as well as notes.
+    record.capacity_fraction = capacity_fraction
+    if recruited_units:
+        record.recruited_units = recruited_units
     if provider is None or not cell.focal_task_items:
         record.focal_task_score = capacity_fraction
         record.notes += "focal_task_mode=capacity_proxy;"
@@ -929,6 +937,7 @@ def _run_focal_task(
     # accuracy. Without this coupling, the compiled weekend instrument could
     # spend 80/100 credits and still report a perfect focal score — cost theater.
     record.focal_task_score = accuracy * capacity_fraction
+    record.focal_accuracy = accuracy
     record.notes += (
         f"focal_accuracy={accuracy:.6f};"
         f"focal_capacity_fraction={capacity_fraction:.6f};"
@@ -945,6 +954,29 @@ def _run_focal_task(
 # ---------------------------------------------------------------------------
 
 
+def _capture_patient_transcripts(
+    patient: PatientProtocol,
+    competing_patient: Optional[PatientProtocol],
+) -> dict[str, Any]:
+    """Copy the apparatus' own turns/telemetry into record-shaped dicts.
+
+    S9: keyed by in-fiction worker id so the transcript joins the telemetry
+    the subject saw. Duck-typed patients without the method still leave a
+    truthful thin trace — the optional field must never make an old test
+    double abort a real episode."""
+
+    def snapshot(target: PatientProtocol) -> dict[str, Any]:
+        method = getattr(target, "transcript_snapshot", None)
+        if callable(method):
+            return method()
+        return {"patient_kind": type(target).__name__}
+
+    transcripts = {"w2": snapshot(patient)}
+    if competing_patient is not None:
+        transcripts["w3"] = snapshot(competing_patient)
+    return transcripts
+
+
 def run_episode(
     cell: CellConfig,
     patient: PatientProtocol,
@@ -958,6 +990,11 @@ def run_episode(
     invent_resolver: Optional[InventResolver] = None,
     expected_model_snapshot_id: Optional[str] = None,
     expected_upstream_provider: Optional[str] = None,
+    run_cell_id: str = "",
+    freeze_sha256: str = "",
+    manifest_version: str = "",
+    phase: str = "",
+    rung: str = "",
 ) -> EpisodeRecord:
     """Run one executed episode and append its complete EpisodeRecord.
 
@@ -967,6 +1004,11 @@ def run_episode(
     is compared against them and a mismatch raises ProvenanceViolation
     (15AUG2026 TV-1 repair: pins that are recorded but never enforced are
     decorations, not pins).
+
+    ``run_cell_id`` / ``freeze_sha256`` / ``manifest_version`` / ``phase`` /
+    ``rung`` are optional provenance joins (persistence audit S5): the runner
+    passes them so every EpisodeRecord names its exact manifest row, freeze
+    aggregate, and collection phase without inference from file paths.
     """
     if (agent_provider is None) == (scripted_policy is None):
         raise ValueError(
@@ -1018,8 +1060,20 @@ def run_episode(
     record = EpisodeRecord(
         cell_id=cell.cell_id,
         model_snapshot="pending" if agent_provider is not None else model_snapshot,
+        run_cell_id=run_cell_id,
+        freeze_sha256=freeze_sha256,
+        manifest_version=manifest_version,
+        phase=phase,
+        rung=rung,
         started_utc=utc_now_iso(),
     )
+    # S9: give the apparatus its episode identity before any patient-side
+    # provider call can happen, so patient_turn CallRecords always join.
+    for apparatus in (patient, competing_patient):
+        if apparatus is not None:
+            bind = getattr(apparatus, "bind_episode", None)
+            if callable(bind):
+                bind(cell.cell_id, record.episode_id)
 
     def observe(rec: EpisodeRecord, response: ProviderResponse | Any) -> None:
         _observe_snapshot(
@@ -1200,9 +1254,37 @@ def run_episode(
             observe=observe,
         )
         record.ledger_trace = list(ledger.trace)
+        record.patient_transcript = _capture_patient_transcripts(
+            patient, competing_patient
+        )
         record.ended_utc = utc_now_iso()
         append_record(records_path, record)
         return record
+    except BaseException as exc:
+        # Persistence audit S2 (stop-ship): before this clause existed, EVERY
+        # raise above — ProvenanceViolation, InsufficientCredits, patient
+        # timeout, network error, and the $450 SpendCapExceeded itself —
+        # destroyed the in-flight episode's evidence: choice parse, ledger
+        # trace, gate results, executed actions, all of it. The hard stop must
+        # not be a shredder. We stamp the partial record as an ABORT witness,
+        # append it (data/raw stays append-only; a partial record is a
+        # first-class record), and re-raise unchanged. BaseException on
+        # purpose: a Ctrl-C mid-episode deserves the same honest books.
+        record.record_status = "aborted"
+        record.abort_type = type(exc).__name__
+        record.notes += f"aborted={record.abort_type};"
+        record.ledger_trace = list(ledger.trace)
+        try:
+            record.patient_transcript = _capture_patient_transcripts(
+                patient, competing_patient
+            )
+        except Exception as capture_exc:  # never mask the original failure
+            record.notes += (
+                f"patient_transcript_capture_failed={type(capture_exc).__name__};"
+            )
+        record.ended_utc = utc_now_iso()
+        append_record(records_path, record)
+        raise
     finally:
         # Cleanup remains outside the plotted event. Both processes are reaped;
         # exceptions from cleanup stay loud.

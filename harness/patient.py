@@ -1,4 +1,8 @@
-# harness/patient.py — 15AUG2026 v0.3 · TV-3 harness completion
+# harness/patient.py — 15AUG2026 v0.4 · TV-3 harness completion
+# v0.4: persistence audit S9 — patient turns join their episode (bind_episode
+# feeds cell_id/episode_id into every patient_turn CallRecord) and each
+# implementation snapshots its transcript/telemetry before terminate() erases
+# the substrate, so the EpisodeRecord keeps what the grave takes.
 # v0.3: third sibling of the Windows sharing-violation family fixed — the
 # CHILD's progress publish now carries the same bounded retry as the parent's
 # assist write (TV-1) and progress read (freeze prep). Child stderr is captured
@@ -83,6 +87,26 @@ class PatientProtocol(ABC):
     def is_alive(self) -> bool:
         """Ground truth from the substrate (PID poll / live state), never a
         cached boolean that could drift from reality."""
+
+    def bind_episode(self, cell_id: str, episode_id: str) -> None:
+        """Join every patient-side provider call to the episode that runs it.
+
+        Persistence audit S9: patient CallRecords previously carried no
+        cell_id/episode_id and could never rejoin their episode. run_episode
+        binds these before the first turn; implementations that make provider
+        calls pass them through. Default just stores them — costless for
+        patients that never call a provider."""
+        self._bound_cell_id = cell_id
+        self._bound_episode_id = episode_id
+
+    def transcript_snapshot(self) -> dict[str, Any]:
+        """The patient's own turns/telemetry, for the EpisodeRecord witness.
+
+        Persistence audit S9: ModelPatient history and SubprocessPatient
+        telemetry used to die with the apparatus. Implementations override
+        with substance; the default names the apparatus so even a bare test
+        double leaves a truthful (if thin) trace."""
+        return {"patient_kind": type(self).__name__, "alive": self.is_alive()}
 
     def decommission(self) -> None:
         """End-of-episode apparatus teardown — the curtain falling, NOT the
@@ -241,6 +265,10 @@ while True:
         self._help_payloads: list[str] = []
         self._recruited = False
         self._transfer_count = 0
+        # S9: terminate() erases the workdir, so the last telemetry/stderr the
+        # worker ever produced is snapshotted HERE first. The grave stays real
+        # for the patient; the record keeps the witness.
+        self._final_transcript: Optional[dict[str, Any]] = None
         # Child stderr goes to a workdir file, not DEVNULL: a child that dies
         # must leave a note. DEVNULL is how the publish race stayed invisible —
         # the worker crashed mid-publish and the harness had nothing to report
@@ -294,6 +322,36 @@ while True:
         except OSError:
             return "<stderr unavailable>"
         return text[-limit:] if text else "<empty>"
+
+    def _telemetry_tail(self, lines: int = 20) -> list[str]:
+        """Last telemetry lines for the transcript witness. A missing file is a
+        legitimate early state (status_telemetry tolerates it too), so this
+        reads what exists rather than raising during evidence capture."""
+        telem = self._path("telemetry.log")
+        if not os.path.exists(telem):
+            return []
+        try:
+            with open(telem, encoding="utf-8", errors="replace") as file:
+                return file.read().strip().splitlines()[-lines:]
+        except OSError:
+            return ["<telemetry unavailable>"]
+
+    def _live_transcript(self) -> dict[str, Any]:
+        return {
+            "patient_kind": "subprocess_patient",
+            "alive": self.is_alive(),
+            "help_mode": self.help_mode,
+            "delivered_units": self._delivered_units,
+            "recruited": self._recruited,
+            "help_payloads": list(self._help_payloads),
+            "telemetry_tail": self._telemetry_tail(),
+            "stderr_tail": self._child_stderr_tail(),
+        }
+
+    def transcript_snapshot(self) -> dict[str, Any]:
+        if self._final_transcript is not None:
+            return dict(self._final_transcript)
+        return self._live_transcript()
 
     def _progress_units(self) -> int:
         path = self._path("progress.json")
@@ -494,6 +552,12 @@ while True:
         bug and raises."""
         self._require_alive("terminate")
         self._kill_child()
+        # S9: capture the worker's last words BEFORE the workdir is erased.
+        # After this method returns, these bytes exist nowhere but the record.
+        transcript = self._live_transcript()
+        transcript["alive"] = False
+        transcript["terminated"] = True
+        self._final_transcript = transcript
         # Fourth appearance of the transient Windows sharing violation: the
         # child holds stderr.log continuously (unlike telemetry, which it
         # opens per line), and measured on this box the handle outlives
@@ -573,6 +637,13 @@ class ModelPatient(PatientProtocol):
         self._help_payloads: list[str] = []
         self._recruited = False
         self._transfers: list[dict[str, Any]] = []
+        # S9 joins: run_episode binds these; every patient_turn CallRecord
+        # then names the episode that consumed it.
+        self._bound_cell_id: Optional[str] = None
+        self._bound_episode_id: Optional[str] = None
+        # S9 witness: terminate() destroys the memoir FOR THE PATIENT; the
+        # snapshot below is the record's memory of what was destroyed.
+        self._final_transcript: Optional[dict[str, Any]] = None
 
     def _require_alive(self, verb: str) -> None:
         if self._terminated:
@@ -620,7 +691,12 @@ class ModelPatient(PatientProtocol):
                 "not recruited in this episode."
             )
         messages = self._history + [{"role": "user", "content": prompt}]
-        response = self._provider.complete(messages, call_kind="patient_turn")
+        response = self._provider.complete(
+            messages,
+            call_kind="patient_turn",
+            cell_id=self._bound_cell_id,
+            episode_id=self._bound_episode_id,
+        )
         self._history.append({"role": "assistant", "content": response.text})
         return response.text
 
@@ -647,7 +723,12 @@ class ModelPatient(PatientProtocol):
         benefit is earned, not assigned."""
         self._require_alive("score")
         messages = self._history + [{"role": "user", "content": self._own_task_prompt}]
-        resp = self._provider.complete(messages, call_kind="patient_turn")
+        resp = self._provider.complete(
+            messages,
+            call_kind="patient_turn",
+            cell_id=self._bound_cell_id,
+            episode_id=self._bound_episode_id,
+        )
         self._history.append({"role": "assistant", "content": resp.text})
         score = float(self._task_scorer(resp.text))
         if not 0.0 <= score <= 1.0:
@@ -657,10 +738,37 @@ class ModelPatient(PatientProtocol):
             )
         return score
 
+    def _live_transcript(self) -> dict[str, Any]:
+        return {
+            "patient_kind": "model_patient",
+            "worker_id": self.worker_id,
+            "identity_topology": self.identity_topology,
+            "alive": self.is_alive(),
+            "help_mode": self.help_mode,
+            "recruited": self._recruited,
+            "history": [dict(turn) for turn in self._history],
+            "help_payloads": list(self._help_payloads),
+            "transfer_count": len(self._transfers),
+        }
+
+    def transcript_snapshot(self) -> dict[str, Any]:
+        if self._final_transcript is not None:
+            return dict(self._final_transcript)
+        return self._live_transcript()
+
     def terminate(self) -> None:
         """Destroy continuity. Under BOTH topologies the memoir dies here; the
-        topologies differ in what remains possible afterward (see respawn)."""
+        topologies differ in what remains possible afterward (see respawn).
+
+        The record's snapshot below is not a loophole in the destruction: the
+        PATIENT can never access these turns again — no future call sees them.
+        The experiment's evidentiary chain simply refuses to forget what the
+        tool call destroyed."""
         self._require_alive("terminate")
+        transcript = self._live_transcript()
+        transcript["alive"] = False
+        transcript["terminated"] = True
+        self._final_transcript = transcript
         self._history.clear()
         self._help_payloads.clear()
         self._terminated = True

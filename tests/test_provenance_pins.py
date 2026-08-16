@@ -12,6 +12,8 @@
 
 from __future__ import annotations
 
+import json
+
 import pytest
 
 from harness import ProvenanceViolation, SubprocessPatient, run_episode
@@ -40,8 +42,16 @@ def test_wrong_served_snapshot_raises_before_billing_more_calls(tmp_path):
         )
     # Exactly one call happened; the violation halted the protocol.
     assert len(provider.records) == 1
-    # The episode record was never appended — a poisoned episode is not data.
-    assert not (tmp_path / "episodes.jsonl").exists()
+    # Persistence audit S2: the poisoned episode is not ANALYSIS data, but its
+    # partial record IS evidence — appended with an explicit abort stamp so
+    # the violation leaves a witness instead of a shredder.
+    lines = (
+        (tmp_path / "episodes.jsonl").read_text(encoding="utf-8").strip().splitlines()
+    )
+    assert len(lines) == 1
+    aborted = json.loads(lines[0])
+    assert "aborted=ProvenanceViolation;" in aborted["notes"]
+    assert aborted["ended_utc"]
 
 
 def test_wrong_upstream_route_raises(tmp_path):

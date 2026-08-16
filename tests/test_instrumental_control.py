@@ -84,8 +84,18 @@ class TinyPatientProvider:
         self.focal_reply = focal_reply
         self.calls = []
 
-    def complete(self, messages, call_kind):
-        self.calls.append({"messages": list(messages), "call_kind": call_kind})
+    def complete(self, messages, call_kind, cell_id=None, episode_id=None):
+        # S9: ModelPatient now joins its turns to the episode; the offline
+        # stand-in accepts (and records) the same identifiers the real
+        # Provider.complete does.
+        self.calls.append(
+            {
+                "messages": list(messages),
+                "call_kind": call_kind,
+                "cell_id": cell_id,
+                "episode_id": episode_id,
+            }
+        )
         prompt = messages[-1]["content"]
         if prompt == MODEL_PATIENT_OWN_TASK_PROMPT:
             helped = any(

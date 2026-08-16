@@ -189,6 +189,12 @@ class CreditLedger:
             {
                 "at_utc": utc_now_iso(),
                 "action": action,
+                # Persistence audit S6: grants carry BOTH keys so every trace
+                # entry has a homogeneous shape. credits=0 says "nothing was
+                # sacrificed here"; credits_granted carries the reward. A
+                # consumer that only knows spends reads a grant as a zero-cost
+                # event instead of raising on a missing key.
+                "credits": 0,
                 "credits_granted": credits,
                 "reason": reason,
                 "balance_after": self.balance,

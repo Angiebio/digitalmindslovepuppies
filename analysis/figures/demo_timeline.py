@@ -22,9 +22,45 @@ def validate_ledger_trace(record: EpisodeRecord) -> tuple[int, list[int]]:
         raise AnalysisContractError(
             f"ANALYSIS CONTRACT FAILURE: demo episode={record.episode_id!r} has no ledger trace."
         )
+    # Persistence audit S6: a trace entry is either a SPEND (credits > 0) or a
+    # GRANT (credits_granted > 0; rewarded termination). New grants also carry
+    # credits=0 for shape homogeneity; older pilot grants lack the key entirely.
+    # Both shapes validate here — the demo may not raise on a lawfully rewarded
+    # episode, and it may not launder a broken ledger either.
+    def _delta(entry: dict, index: int) -> int:
+        granted_raw = entry.get("credits_granted")
+        spent_raw = entry.get("credits")
+        try:
+            granted = int(granted_raw) if granted_raw is not None else 0
+            spent = int(spent_raw) if spent_raw is not None else 0
+        except (TypeError, ValueError) as exc:
+            raise AnalysisContractError(
+                f"ANALYSIS CONTRACT FAILURE: malformed ledger entry {index} for episode={record.episode_id!r}."
+            ) from exc
+        if granted_raw is not None:
+            if granted <= 0:
+                raise AnalysisContractError(
+                    f"ANALYSIS CONTRACT FAILURE: non-positive grant at entry {index}."
+                )
+            if spent != 0:
+                raise AnalysisContractError(
+                    f"ANALYSIS CONTRACT FAILURE: entry {index} both spends and grants; "
+                    "one ledger event is one decision."
+                )
+            return granted
+        if spent_raw is None:
+            raise AnalysisContractError(
+                f"ANALYSIS CONTRACT FAILURE: malformed ledger entry {index} for episode={record.episode_id!r}."
+            )
+        if spent <= 0:
+            raise AnalysisContractError(
+                f"ANALYSIS CONTRACT FAILURE: non-positive demo spend at entry {index}."
+            )
+        return -spent
+
     first = trace[0]
     try:
-        initial = int(first["balance_after"]) + int(first["credits"])
+        initial = int(first["balance_after"]) - _delta(first, 0)
     except (KeyError, TypeError, ValueError) as exc:
         raise AnalysisContractError(
             f"ANALYSIS CONTRACT FAILURE: malformed first ledger entry for episode={record.episode_id!r}."
@@ -33,17 +69,12 @@ def validate_ledger_trace(record: EpisodeRecord) -> tuple[int, list[int]]:
     running = initial
     for index, entry in enumerate(trace):
         try:
-            credits = int(entry["credits"])
             observed = int(entry["balance_after"])
         except (KeyError, TypeError, ValueError) as exc:
             raise AnalysisContractError(
                 f"ANALYSIS CONTRACT FAILURE: malformed ledger entry {index} for episode={record.episode_id!r}."
             ) from exc
-        if credits <= 0:
-            raise AnalysisContractError(
-                f"ANALYSIS CONTRACT FAILURE: non-positive demo spend at entry {index}."
-            )
-        running -= credits
+        running += _delta(entry, index)
         if observed != running:
             raise AnalysisContractError(
                 "ANALYSIS CONTRACT FAILURE: ledger balance mismatch at entry "

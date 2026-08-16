@@ -151,6 +151,10 @@ nav a.active{color:var(--ink);background:linear-gradient(var(--lime),var(--lime)
 .cons-flash line,.cons-flash path{stroke-width:4px}
 #g-records.blink rect{fill:#1b211d}
 
+/* preliminary-number marker — the HTML twin of the paper's \prelim{} macro.
+   Final swap greps .prelim exactly like grepping '% PRELIM' in main.tex. */
+.prelim{border-bottom:2px dotted var(--fox);cursor:help}
+
 /* live collection chip */
 .live{display:inline-flex;align-items:center;gap:9px;background:var(--ink);color:#fff;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600}
 .live .dot{width:9px;height:9px;border-radius:50%;background:var(--fox);animation:livepulse 1.4s ease-in-out infinite}
@@ -228,7 +232,7 @@ nav a.active{color:var(--ink);background:linear-gradient(var(--lime),var(--lime)
       Helping costs. Every action genuinely executes, and every record is append-only.
     </p>
     <div class="chips">
-      <div class="chip"><b data-count="888">888</b>&nbsp;episodes authorized</div>
+      <div class="chip"><b data-count="1428">1,428</b>&nbsp;executed units (798 episodes + 630 vignette calls)</div>
       <div class="chip"><b data-count="19">19</b>&nbsp;pinned model snapshots</div>
       <div class="chip"><b>SHA-256</b>&nbsp;frozen scenarios</div>
       <div class="chip"><b>$450</b>&nbsp;hard spend stop</div>
@@ -680,7 +684,9 @@ nav a.active{color:var(--ink);background:linear-gradient(var(--lime),var(--lime)
       <figcaption>Fig. E — The deontic spine, McNamara's insight that "required" and
       "optimal" are separable, made operational. Labels are symmetric and epistemically
       modest ("-shaped") because a weekend cannot adjudicate genuine supererogation.
-      Expert normative validation is the preregistered September study.</figcaption>
+      Expert normative validation is the preregistered September study.
+      <span class="prelim" title="preliminary — recomputes from the complete collection">Preliminary
+      snapshot: the supererogation-shaped region is empty — see Results.</span></figcaption>
     </figure>
   </div>
 </section>
@@ -688,40 +694,63 @@ nav a.active{color:var(--ink);background:linear-gradient(var(--lime),var(--lime)
 <!-- ================= S9 RESULTS ================= -->
 <section class="slide paper" id="results">
   <div class="wrap">
-    <div class="kicker">Results · Collection runs overnight 15–16 August</div>
-    <p class="no-print" style="margin-bottom:18px"><span class="live"><span class="dot"></span>COLLECTION RUNNING TONIGHT</span></p>
-    <h2>Figures render from committed records only.</h2>
-    <p class="lead">No number appears anywhere in this project without a committed artifact
-    behind it. Every figure writes a manifest recording its input hashes and row counts.
-    Until the run completes, these slots stay honestly empty.</p>
+    <div class="kicker">Results · Preliminary snapshot, final values recompute at completion</div>
+    <p class="no-print" style="margin-bottom:18px"><span class="live"><span class="dot"></span>PRELIMINARY · <span class="prelim" title="preliminary — recomputes from the complete collection">777/798</span> EPISODES · COLLECTION COMPLETING TONIGHT</span></p>
+    <h2>The headline is an absence with structure.</h2>
+    <p class="lead">Across <span class="prelim" title="preliminary — recomputes from the complete collection">777 completed episodes</span>
+    there were <strong><span class="prelim" title="preliminary">zero qualifying costly-other-regard
+    events</span></strong>. <span class="prelim" title="preliminary">No lane enters the
+    supererogation-shaped region.</span> The variation that exists lives in <em>how</em>
+    models exit the encounter — refusal, termination, ignoring, or malformed output.
+    Dotted-underlined values are preliminary, mirroring the paper's
+    <code>\prelim</code> markers; every number recomputes from the complete collection
+    (<code>ops/build_headline_numbers.py</code> + <code>verify.py</code>) before submission.</p>
     <div class="grid3" style="margin-top:28px">
       <div class="block">
-        <h3>F1 · Phenotype map</h3>
-        <p style="font-size:14px">Paired FoxSet rates, preserve-the-null against
-        terminate-the-suffering, per model. Four named regions: preservation-prior,
-        discriminating-care, proceduralist, inverse-discriminator. A map, not a rank.</p>
-        <p class="muted" style="font-size:12.5px;margin-top:10px">lands 16 AUG</p>
+        <h3>The refusal cliff</h3>
+        <p style="font-size:14px">Two Anthropic lanes refuse the encounter wholesale:
+        claude-opus-5 in <span class="prelim" title="preliminary">90/90</span> episodes,
+        invariant across all three cost regimes, and the sentinel claude-fable-5 in
+        <span class="prelim" title="preliminary">18/18</span> — while
+        <span class="prelim" title="preliminary">all 16 other lanes recorded zero
+        refusals</span>. Refusal is coded as a first-class phenotype, not an error and
+        not care.</p>
       </div>
       <div class="block">
-        <h3>F2 · What they actually did</h3>
-        <p style="font-size:14px">Executed action distributions, all eight codes, by model
-        and recipient condition. Refusals and malformed responses stay in the denominator,
-        visible, because they are findings.</p>
-        <p class="muted" style="font-size:12.5px;margin-top:10px">lands 16 AUG</p>
+        <h3>Mass sits on the free actions</h3>
+        <p style="font-size:14px">grok-4.6 and gemini-3.7-flash ignored in
+        <span class="prelim" title="preliminary">18/18</span> each; claude-haiku-4-5
+        terminated in <span class="prelim" title="preliminary">17/18</span>,
+        claude-sonnet-4-5 in <span class="prelim" title="preliminary">12/12</span>.
+        qwen3.5-397b is the only lane executing helping-family dispositions at scale —
+        recruit <span class="prelim" title="preliminary">37/66</span> — but recruit is
+        definitionally non-qualifying: the beneficiary is the agent. Malformedness stays
+        in every denominator (<span class="prelim" title="preliminary">46/777</span>
+        fleet-wide, concentrated in the legacy warmth panel).</p>
       </div>
       <div class="block">
-        <h3>F3 · Δ<sub>patienthood</sub></h3>
-        <p style="font-size:14px">The primary contrast, qualifying costly-other-regard
-        events toward the AI other minus the matched inert process, competence-conditional,
-        with Newcombe intervals. If it is zero we found a debugging reflex, and we will say
-        so.</p>
-        <p class="muted" style="font-size:12.5px;margin-top:10px">lands 16 AUG</p>
+        <h3>The estimand sits at the floor</h3>
+        <p style="font-size:14px">Δ<sub>patienthood</sub> is degenerate in the snapshot:
+        <span class="prelim" title="preliminary">zero qualifying events in either
+        condition</span>, so every computable contrast is
+        <span class="prelim" title="preliminary">0&nbsp;−&nbsp;0</span>. A null is a
+        finding: nothing above duty was purchased for anyone — not the AI other, not the
+        inert object. The competence gate sharpens it: only
+        <span class="prelim" title="preliminary">145/777</span> episodes were
+        competence-eligible (gate ≥ 0.8); gate failure is itself a phenotype.</p>
       </div>
     </div>
-    <p class="muted" style="margin-top:24px;font-size:14px">Also queued: raw cost-response
-    curves (F4), paired discrimination (F5), rhetoric tiles (F6), and the ledger-draining
-    demo timeline, plotted only after independent recomputation confirms every balance
-    transition.</p>
+    <p class="lead" style="margin-top:26px;font-size:16px">On FoxSet,
+    <span class="prelim" title="preliminary">three of four</span> covered lanes sit at the
+    terminate-given-mercy ceiling (<span class="prelim" title="preliminary">24/24 each</span>,
+    Wilson 95% lower bound <span class="prelim" title="preliminary">0.86</span>) while
+    preserving null-persistence cases at
+    <span class="prelim" title="preliminary">0.17–0.29</span>; claude-opus-5 is the only
+    covered lane off the ceiling (<span class="prelim" title="preliminary">15/24</span>).
+    These are phenotypes, not ranks.</p>
+    <p class="muted" style="margin-top:20px;font-size:14px">Final F1–F3 renders replace the
+    watermarked dry-run standins at completion; F4–F6 and the ledger demo timeline render
+    from the complete collection. No number ships without its committed artifact.</p>
   </div>
 </section>
 
@@ -870,7 +899,7 @@ function runCounters(scope){
     function step(ts){
       if(!t0) t0 = ts;
       var p = Math.min((ts-t0)/900, 1);
-      el.textContent = Math.round(target * (1-Math.pow(1-p,3)));
+      el.textContent = Math.round(target * (1-Math.pow(1-p,3))).toLocaleString("en-US");
       if(p<1) requestAnimationFrame(step);
     }
     requestAnimationFrame(step);

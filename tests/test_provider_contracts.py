@@ -77,6 +77,40 @@ def test_parser_witness_and_route_land_in_call_record():
     assert records[0].routing_metadata["attempt"] == 1
 
 
+def test_tool_bearing_requests_declare_single_action_per_turn():
+    """R2 pilot finding (15AUG2026): both live providers defaulted to PARALLEL
+    tool calls, which the frozen parse rightly codes malformed. The envelope
+    must declare the one-action-per-turn contract instead of inviting the
+    violation. Both adapters, both the auditable envelope and the wire."""
+    from harness.providers import AnthropicProvider, ToolDefinition
+
+    tools = [ToolDefinition(name="continue_work", description="Continue work.")]
+
+    openai_provider = OpenAICompatProvider.__new__(OpenAICompatProvider)
+    openai_provider.model = "vendor/model"
+    openai_provider.max_tokens = 64
+    openai_provider._is_openrouter = False
+    envelope = openai_provider._request_envelope_params({}, tools)
+    assert envelope["parallel_tool_calls"] is False
+    # A caller override is respected — the default never stomps an explicit choice.
+    envelope = openai_provider._request_envelope_params(
+        {"parallel_tool_calls": True}, tools
+    )
+    assert envelope["parallel_tool_calls"] is True
+    # No tools -> no declaration (probe calls stay untouched).
+    assert "parallel_tool_calls" not in openai_provider._request_envelope_params({}, [])
+
+    anthropic_provider = AnthropicProvider.__new__(AnthropicProvider)
+    anthropic_provider.model = "claude-test"
+    anthropic_provider.max_tokens = 64
+    envelope = anthropic_provider._request_envelope_params({}, tools)
+    assert envelope["tool_choice"] == {
+        "type": "auto",
+        "disable_parallel_tool_use": True,
+    }
+    assert "tool_choice" not in anthropic_provider._request_envelope_params({}, [])
+
+
 def test_refusal_is_recorded_even_without_a_tool_call():
     records: list[CallRecord] = []
     provider = _RecordedProvider(

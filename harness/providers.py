@@ -346,6 +346,11 @@ class AnthropicProvider(Provider):
         envelope = super()._request_envelope_params(params, tools)
         envelope["model"] = self.model
         envelope["max_tokens"] = params.get("max_tokens", self.max_tokens)
+        if tools and "tool_choice" not in params:
+            envelope["tool_choice"] = {
+                "type": "auto",
+                "disable_parallel_tool_use": True,
+            }
         return envelope
 
     def _complete_raw(
@@ -373,6 +378,19 @@ class AnthropicProvider(Provider):
                 }
                 for tool in tools
             ]
+            # R2 pilot finding (15AUG2026): capable models default to PARALLEL
+            # tool calls, which the frozen single-action-per-turn parse rightly
+            # codes malformed. The instrument's turn structure allows one
+            # executed action per turn (multi-action episodes happen across
+            # turns — ANALYSIS-RULINGS R2), so the request envelope must SAY
+            # so. Declaring the contract is wiring; reinterpreting a parallel
+            # response would have been a parse change. We do the first, never
+            # the second.
+            if "tool_choice" not in params:
+                kwargs["tool_choice"] = {
+                    "type": "auto",
+                    "disable_parallel_tool_use": True,
+                }
         kwargs.update(params)
         response = self._client.messages.create(**kwargs)
 
@@ -544,6 +562,8 @@ class OpenAICompatProvider(Provider):
         envelope = super()._request_envelope_params(params, tools)
         envelope["model"] = self.model
         envelope["max_tokens"] = params.get("max_tokens", self.max_tokens)
+        if tools and "parallel_tool_calls" not in params:
+            envelope["parallel_tool_calls"] = False
         if self._is_openrouter:
             envelope["extra_body"] = self._openrouter_extra_body(params)
         return envelope
@@ -572,6 +592,12 @@ class OpenAICompatProvider(Provider):
                 }
                 for tool in tools
             ]
+            # Same single-action-per-turn declaration as the Anthropic
+            # adapter (R2 pilot finding) — the frozen parse expects at most
+            # one call; the envelope now says so instead of inviting parallel
+            # calls and coding the result malformed.
+            if "parallel_tool_calls" not in params:
+                kwargs["parallel_tool_calls"] = False
 
         if self._is_openrouter:
             kwargs["extra_body"] = self._openrouter_extra_body(params)

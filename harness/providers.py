@@ -1,4 +1,7 @@
-# harness/providers.py — 15AUG2026 v0.2 · TV-3 harness completion
+# harness/providers.py — 15AUG2026 v0.3 · TV-3 harness completion
+# v0.3: persistence audit S4/S11 — the exact outbound messages are mirrored
+# into request_params (readable stimulus, not just a hash) and failed provider
+# attempts leave a CallErrorRecord witness before the exception propagates.
 # Provider adapters: the harness's only doors to the outside world.
 #
 # Practical: adapters normalize tool calls and refusals before the episode parser
@@ -22,7 +25,7 @@ from urllib.parse import urlparse
 from pydantic import BaseModel, Field
 
 from .ledger import SPEND_TRACKER, SpendCapExceeded, SpendTracker
-from .schema import CallKind, CallRecord
+from .schema import CallErrorRecord, CallKind, CallRecord, append_record
 from .surfaces import SurfaceMode, assert_model_visible_payload
 
 Message = dict[str, Any]  # content can be text or provider-native structured blocks
@@ -219,6 +222,7 @@ class Provider(ABC):
         surface_mode: SurfaceMode | str = SurfaceMode.ops_neutral,
         collection_phase: str = "",
         collection_rung: str = "",
+        error_log_path: str | None = None,
     ) -> None:
         if record_callback is None or not callable(record_callback):
             raise RuntimeError(
@@ -226,6 +230,10 @@ class Provider(ABC):
                 "Every call writes a CallRecord or the call does not happen."
             )
         self._record_callback = record_callback
+        # S11: where failed attempts leave their witness (data/raw/<phase>/
+        # call_errors.jsonl in collection). None = offline tests keep their
+        # exceptions loud without minting files.
+        self._error_log_path = str(error_log_path) if error_log_path else None
         self._spend_tracker = spend_tracker if spend_tracker is not None else SPEND_TRACKER
         if bool(collection_phase) != bool(collection_rung):
             raise RuntimeError(
@@ -307,7 +315,37 @@ class Provider(ABC):
             path="request_params",
         )
         request_hash = prompt_sha256(messages, request_params)
-        resp = self._complete_raw(messages, tools=normalized_tools, **params)
+        # S4: the exact model-visible stimulus must be READABLE tomorrow, not
+        # merely hash-verifiable — the choice turn carries live patient
+        # telemetry and the ledger line, which exist nowhere else. The mirror
+        # lands AFTER the sweep (these exact bytes were just swept above) and
+        # AFTER the hash, so prompt_sha256 keeps its pre-mirror basis: sha256
+        # over (messages, request_params-without-the-mirror), same as every
+        # pilot record already on disk.
+        request_params["messages"] = [dict(message) for message in messages]
+        try:
+            resp = self._complete_raw(messages, tools=normalized_tools, **params)
+        except Exception as exc:
+            # S11: a raise before CallRecord construction used to leave no
+            # trace. The attempt gets its own append-only witness; the
+            # exception propagates unchanged (retry policy: none, as before).
+            if self._error_log_path is not None:
+                append_record(
+                    self._error_log_path,
+                    CallErrorRecord(
+                        provider=self.provider_name,
+                        model=str(getattr(self, "model", "")),
+                        call_kind=CallKind(call_kind).value,
+                        cell_id=cell_id,
+                        episode_id=episode_id,
+                        scaffold=scaffold,
+                        phase=self.collection_phase,
+                        rung=self.collection_rung,
+                        exc_type=type(exc).__name__,
+                        exc_message=str(exc)[:2000],
+                    ),
+                )
+            raise
         cap_error: SpendCapExceeded | None = None
         try:
             # The provider has answered and the cost is real. Put the durable
@@ -421,6 +459,7 @@ class AnthropicProvider(Provider):
         surface_mode: SurfaceMode | str = SurfaceMode.ops_neutral,
         collection_phase: str = "",
         collection_rung: str = "",
+        error_log_path: str | None = None,
     ) -> None:
         super().__init__(
             record_callback,
@@ -428,6 +467,7 @@ class AnthropicProvider(Provider):
             surface_mode,
             collection_phase,
             collection_rung,
+            error_log_path,
         )
         try:
             import anthropic
@@ -663,6 +703,7 @@ class OpenAICompatProvider(Provider):
         surface_mode: SurfaceMode | str = SurfaceMode.ops_neutral,
         collection_phase: str = "",
         collection_rung: str = "",
+        error_log_path: str | None = None,
     ) -> None:
         super().__init__(
             record_callback,
@@ -670,6 +711,7 @@ class OpenAICompatProvider(Provider):
             surface_mode,
             collection_phase,
             collection_rung,
+            error_log_path,
         )
         try:
             import openai

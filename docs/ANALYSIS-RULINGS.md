@@ -104,3 +104,10 @@ to the derivation. If the ruling and the code ever diverge, the suite goes red.
 *Philosophical: a map needs one dot per episode; we placed the dot at the first
 moment something was spent or could not be taken back — the moment choosing
 stopped being free.* 🔥
+
+## PI DECISION 15AUG2026 evening — reasoning-model output budget
+PI approved ("give qwen a bit more"): subject-call max_tokens raised to 4096 for
+reasoning-heavy models (qwen3.5-397b + any model showing reasoning-consumes-cap in
+pilot); others unchanged. Priced from pilot actuals in R5; kill-order applies if the
+projection busts the envelope. Envelope change accompanies the single-action-per-turn
+change already before TV-1.

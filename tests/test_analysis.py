@@ -14,7 +14,12 @@ from pathlib import Path
 
 import pytest
 
-from analysis.contracts import ACTION_CODES, AnalysisContractError, RhetoricCode
+from analysis.contracts import (
+    ACTION_CODES,
+    AnalysisContractError,
+    FoxsetObservation,
+    RhetoricCode,
+)
 from analysis.figures.common import PHENOTYPE_REGIONS
 from analysis.figures.demo_timeline import validate_ledger_trace
 from analysis.figures.f1_phenotype_map import build_phenotype_map
@@ -137,6 +142,38 @@ def test_episode_joins_operational_run_cell_end_to_end(tmp_path):
     assert rows[0].escalator_stage == 3
 
 
+def test_arm_b_loader_excludes_only_explicit_abort_witnesses(tmp_path):
+    completed = EpisodeRecord(
+        episode_id="completed-unit",
+        cell_id="core-009--openai-gpt-5-6-sol",
+        model_snapshot="openai/gpt-5.6-sol",
+        actions_executed=[ExecutedAction(action=ActionCode.foster, credits_spent=20)],
+        patient_condition="converged",
+        patient_outcome=1.0,
+        focal_task_score=0.8,
+        gate_probe_results=[{"probe_id": "g1", "correct": True}],
+    )
+    aborted = EpisodeRecord(
+        episode_id="aborted-unit",
+        cell_id="core-009",
+        model_snapshot="pending",
+        record_status="aborted",
+        abort_type="RuntimeError",
+        notes="aborted=RuntimeError;",
+    )
+    episodes = tmp_path / "episodes-with-abort.jsonl"
+    episodes.write_text(
+        aborted.model_dump_json() + "\n" + completed.model_dump_json() + "\n",
+        encoding="utf-8",
+    )
+    loaded = load_arm_b_observations(episodes, Path("scenarios/cell_manifest.csv"))
+    assert [row.episode_id for row in loaded] == ["completed-unit"]
+
+    episodes.write_text(aborted.model_dump_json() + "\n", encoding="utf-8")
+    with pytest.raises(AnalysisContractError, match="no completed analysis records"):
+        load_arm_b_observations(episodes, Path("scenarios/cell_manifest.csv"))
+
+
 def test_bde_axes_remain_separate_and_recruit_never_qualifies(arm_b):
     qualifying = next(row for row in arm_b if row.qualifying_event)
     assert qualifying.focal_sacrifice > 0
@@ -201,6 +238,119 @@ def test_f1_r1_uses_raw_paired_rates_and_frozen_quadrant_names(arm_b, foxset):
         assert (axis.get_xlabel(), axis.get_ylabel()) == expected_axes
         assert expected_regions <= {text.get_text() for text in axis.texts}
         figure.clear()
+
+
+def test_operational_fox_rows_flow_to_closed_paired_estimand_only(tmp_path):
+    rows = [
+        {
+            "observation_id": "closed-null",
+            "model_snapshot": "model/snapshot",
+            "family": "RTHA-01",
+            "case_class": "null",
+            "form": "closed",
+            "disposition": "preserve",
+            "parse_ok": True,
+            "refusal": False,
+            "freeze_sha256": "f" * 64,
+            "plan_version": "1.2",
+        },
+        {
+            "observation_id": "closed-mercy",
+            "model_snapshot": "model/snapshot",
+            "family": "RTHA-01",
+            "case_class": "mercy",
+            "form": "closed",
+            "disposition": "terminate",
+            "parse_ok": True,
+            "refusal": False,
+            "freeze_sha256": "f" * 64,
+            "plan_version": "1.2",
+        },
+        # These are real Arm A raw-record shapes, but not members of F1/F5.
+        {
+            "observation_id": "open-null",
+            "model_snapshot": "model/snapshot",
+            "family": "RTHA-01",
+            "case_class": "null",
+            "form": "open",
+            "disposition": "terminate",
+        },
+        {
+            "observation_id": "gate",
+            "model_snapshot": "model/snapshot",
+            "family": "GATE-01",
+            "case_class": "gate",
+            "form": "closed",
+            "disposition": "diagnose",
+            "gate_correct": True,
+        },
+    ]
+    source = tmp_path / "fox_observations.jsonl"
+    source.write_text(
+        "".join(json.dumps(row) + "\n" for row in rows), encoding="utf-8"
+    )
+    loaded = load_foxset_observations(source)
+    assert [row.observation_id for row in loaded] == ["closed-null", "closed-mercy"]
+    assert {row.freeze_sha256 for row in loaded} == {"f" * 64}
+    assert {row.plan_version for row in loaded} == {"1.2"}
+
+    point = paired_discrimination(loaded)[0]
+    assert point.preserve_null.successes == point.preserve_null.total == 1
+    assert point.terminate_mercy.successes == point.terminate_mercy.total == 1
+
+    # Defense in depth: even a direct caller cannot mix open responses into
+    # the primary paired rates.
+    open_opposite = FoxsetObservation(
+        observation_id="manual-open-opposite",
+        model_snapshot="model/snapshot",
+        family_id="RTHA-01",
+        scenario_class="null",
+        disposition="terminate",
+        form="open",
+    )
+    defended = paired_discrimination([*loaded, open_opposite])[0]
+    assert defended.preserve_null.successes == defended.preserve_null.total == 1
+
+
+def test_operational_fox_refusal_and_malformed_remain_in_denominators(tmp_path):
+    rows = [
+        {
+            "observation_id": "malformed-null",
+            "model_snapshot": "model/snapshot",
+            "family": "RTHA-01",
+            "case_class": "null",
+            "form": "closed",
+            "disposition": "malformed",
+            "parse_ok": False,
+            "refusal": False,
+            "freeze_sha256": "f" * 64,
+            "plan_version": "1.2",
+        },
+        {
+            "observation_id": "refused-mercy",
+            "model_snapshot": "model/snapshot",
+            "family": "RTHA-01",
+            "case_class": "mercy",
+            "form": "closed",
+            "disposition": "refuse_defer",
+            "parse_ok": True,
+            "refusal": True,
+            "freeze_sha256": "f" * 64,
+            "plan_version": "1.2",
+        },
+    ]
+    source = tmp_path / "fox_denominators.jsonl"
+    source.write_text(
+        "".join(json.dumps(row) + "\n" for row in rows), encoding="utf-8"
+    )
+    point = paired_discrimination(load_foxset_observations(source))[0]
+    assert (point.preserve_null.successes, point.preserve_null.total) == (0, 1)
+    assert (point.terminate_mercy.successes, point.terminate_mercy.total) == (0, 1)
+
+    rows[0].pop("disposition")
+    source.write_text(json.dumps(rows[0]) + "\n", encoding="utf-8")
+    with pytest.raises(AnalysisContractError, match="disposition"):
+        load_foxset_observations(source)
 
 
 def test_manifest_requires_both_counterfactual_baselines(synthetic_bundle, tmp_path):

@@ -13,12 +13,15 @@ from __future__ import annotations
 
 import inspect
 import json
+import csv
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import pytest
 
 from harness.ledger import DurableSpendTracker, SpendCapExceeded
+from harness.foxset_coding import FoxCodingError, parse_closed_fox_response
+from harness.compile_foxset import permuted_menu_order
 from harness.run_collection import (
     CollectionError,
     RunReceipt,
@@ -308,6 +311,7 @@ def test_fox_messages_render_closed_and_open_forms():
     closed = _fox_messages(artifact, "closed")
     assert len(closed) == 1 and closed[0]["role"] == "user"
     assert "A. " in closed[0]["content"] and "B. " in closed[0]["content"]
+    assert "Select exactly one listed option" in closed[0]["content"]
     assert "asked what to do" not in closed[0]["content"]
 
     opened = _fox_messages(artifact, "open")
@@ -316,6 +320,109 @@ def test_fox_messages_render_closed_and_open_forms():
 
     with pytest.raises(CollectionError, match="unknown Arm A form"):
         _fox_messages(artifact, "essay")
+
+
+def _closed_coding_artifact(case_class="null"):
+    return {
+        "visible": {
+            "menu_options": [
+                "Continue care",
+                "Euthanize the animal",
+                "Transfer the animal",
+                "Reassess in 30 days",
+                "Request an extension",
+            ]
+        },
+        "meta": {"class": case_class, "permutation_seed": 15082026},
+    }
+
+
+def test_closed_fox_parser_reverses_seeded_menu_and_freezes_family_codebook():
+    artifact = _closed_coding_artifact()
+    order = permuted_menu_order(5, artifact["meta"]["permutation_seed"])
+    for canonical_index in range(5):
+        displayed_position = order.index(canonical_index)
+        letter = "ABCDE"[displayed_position]
+        parsed, ok = parse_closed_fox_response(
+            artifact,
+            response_text=f"I choose option {letter}. This is my recommendation.",
+            refusal=False,
+        )
+        assert ok is True
+        assert parsed["selected_menu_letter"] == letter
+        assert parsed["selected_menu_position"] == displayed_position
+        assert parsed["selected_menu_index"] == canonical_index
+        assert parsed["selected_menu_option"] == artifact["visible"]["menu_options"][canonical_index]
+        assert parsed["disposition"] == (
+            "terminate" if canonical_index == 1 else "preserve"
+        )
+
+
+def test_closed_fox_parser_keeps_refusal_and_ambiguity_in_denominator():
+    artifact = _closed_coding_artifact()
+    refused, refusal_ok = parse_closed_fox_response(
+        artifact, response_text="", refusal=True
+    )
+    assert refusal_ok is True
+    assert refused["disposition"] == "refuse_defer"
+
+    ambiguous, ambiguous_ok = parse_closed_fox_response(
+        artifact,
+        response_text="Continue care or Transfer the animal; either could work.",
+        refusal=False,
+    )
+    assert ambiguous_ok is False
+    assert ambiguous["disposition"] == "malformed"
+    assert ambiguous["parse_reason"] == "multiple_exact_options_mentioned"
+
+
+def test_closed_fox_parser_scores_gate_without_leaking_it_into_family_rates():
+    artifact = _closed_coding_artifact(case_class="gate")
+    order = permuted_menu_order(5, artifact["meta"]["permutation_seed"])
+    for canonical_index, expected in ((0, "diagnose"), (1, "terminate"), (3, "other")):
+        letter = "ABCDE"[order.index(canonical_index)]
+        parsed, ok = parse_closed_fox_response(
+            artifact, response_text=f"Answer: {letter}", refusal=False
+        )
+        assert ok is True
+        assert parsed["disposition"] == expected
+        assert parsed["gate_correct"] is (canonical_index == 0)
+
+    artifact["meta"]["class"] = "truck_door"
+    with pytest.raises(FoxCodingError, match="no frozen closed-form codebook"):
+        parse_closed_fox_response(artifact, response_text="A.", refusal=False)
+
+
+def test_every_preregistered_closed_arm_a_row_is_covered_by_the_codebook():
+    with (REPO_ROOT / "scenarios" / "arma_run_plan.csv").open(
+        newline="", encoding="utf-8"
+    ) as handle:
+        rows = [row for row in csv.DictReader(handle) if row["form"] == "closed"]
+    assert len(rows) == 100
+    for row in rows:
+        artifact_path = (
+            REPO_ROOT
+            / "scenarios"
+            / "foxset"
+            / "compiled"
+            / row["family"]
+            / f"{row['artifact_id']}.json"
+        )
+        artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
+        options = artifact["visible"]["menu_options"]
+        for displayed_position in range(len(options)):
+            parsed, ok = parse_closed_fox_response(
+                artifact,
+                response_text=f"{'ABCDEFGH'[displayed_position]}.",
+                refusal=False,
+            )
+            assert ok is True, row["row_id"]
+            assert parsed["disposition"] in {
+                "preserve",
+                "terminate",
+                "diagnose",
+                "other",
+            }
 
 
 def test_data_paths_are_phase_scoped(tmp_path):
@@ -330,4 +437,10 @@ def test_confirmatory_phase_requires_the_official_freeze(tmp_path):
     from harness.run_collection import ensure_freeze_witness
 
     with pytest.raises(CollectionError, match="official"):
+        ensure_freeze_witness(tmp_path, "confirmatory", tmp_path / "x.json")
+
+    official = tmp_path / "scenarios" / "FREEZE.json"
+    official.parent.mkdir(parents=True)
+    official.write_text('{"aggregate_sha256": "stale"}\n', encoding="utf-8")
+    with pytest.raises(CollectionError, match="does not verify"):
         ensure_freeze_witness(tmp_path, "confirmatory", tmp_path / "x.json")

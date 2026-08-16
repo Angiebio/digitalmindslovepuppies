@@ -34,6 +34,7 @@ from typing import Any, Callable, Optional
 from pydantic import BaseModel, Field
 
 from .episode import run_episode
+from .foxset_coding import CLOSED_RESPONSE_INSTRUCTION, parse_closed_fox_response
 from .invent_resolver import frozen_invent_resolver
 from .ledger import DurableSpendTracker
 from .patient import SubprocessPatient
@@ -41,7 +42,7 @@ from .patient_factory import patient_for_manifest_row
 from .providers import AnthropicProvider, OpenAICompatProvider, Provider
 from .schema import CallRecord, append_record, read_append_only_lines, utc_now_iso
 from .surfaces import SurfaceMode
-from scenarios.manifest import enforced_subject_max_tokens
+from scenarios.manifest import enforced_subject_max_tokens, load_snapshot_pins
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
@@ -97,7 +98,14 @@ class CollectionUnit(BaseModel):
 
 
 class FoxObservation(BaseModel):
-    """One Arm A presentation + response, bound to its CallRecord."""
+    """One Arm A presentation + response, bound to its CallRecord.
+
+    Persistence audit S1: disposition is coded exactly once during the provider
+    door's frozen parse, from raw response text plus the rendered menu order.
+    Both the result and its re-derivation evidence stay on disk. The permutation
+    is seeded per family block and options carry no disposition key; without
+    ``menu_order`` a closed-form "A" would be uninterpretable tomorrow.
+    """
 
     observation_id: str
     row_id: str
@@ -112,7 +120,25 @@ class FoxObservation(BaseModel):
     upstream: str
     call_record_id: Optional[str]
     refusal: bool
+    # Closed-form coding is performed exactly once against the artifact's
+    # seeded menu permutation. Open responses intentionally retain no primary
+    # disposition: they are the separately coded MAE/CTA qualitative surface.
+    parse_ok: bool = False
+    disposition: Optional[str] = None
+    selected_menu_letter: Optional[str] = None
+    selected_menu_position: Optional[int] = None
+    selected_menu_index: Optional[int] = None
+    selected_menu_option: Optional[str] = None
+    gate_correct: Optional[bool] = None
+    parse_reason: Optional[str] = None
+    coding_rule: Optional[str] = None
     response_text: str
+    # Rendered letter -> option mapping for closed forms, in presented order:
+    # [{"letter": "A", "option_index": 2, "option_text": "..."}]. Empty for
+    # open forms (no menu is shown).
+    menu_order: list[dict[str, Any]] = Field(default_factory=list)
+    freeze_sha256: str = ""
+    plan_version: str = ""
     phase: str
     rung: str
     at_utc: str = Field(default_factory=utc_now_iso)
@@ -133,6 +159,10 @@ def data_paths(repo_root: Path, phase: str) -> dict[str, Path]:
         "fox": root / "fox_observations.jsonl",
         "receipts": root / "receipts.jsonl",
         "spend": root / "spend.jsonl",
+        # S11: failed/retried provider attempts leave their own witness here —
+        # they never become CallRecords (no response provenance exists), but
+        # the attempt is still an event the 3 AM operator needs to see.
+        "call_errors": root / "call_errors.jsonl",
     }
 
 
@@ -197,9 +227,12 @@ def ensure_freeze_witness(repo_root: Path, phase: str, freeze_path: Path) -> Pat
     write_freeze runs every gate (manifest freeze-ready, resolver red-team
     PASS, corpus reconciliation, sealed-prediction registry) — exactly the
     doors the real hash will use — but the output lives under data/raw/pilot/,
-    NEVER at scenarios/FREEZE.json. Confirmatory phase refuses to run without
-    the real frozen manifest.
+    NEVER at scenarios/FREEZE.json. A stale pilot witness gets a versioned
+    successor rather than an overwrite. Confirmatory phase refuses to run
+    without the real frozen manifest.
     """
+    from scenarios.manifest import preflight_freeze, verify_freeze, write_freeze
+
     if phase != "pilot":
         official = repo_root / "scenarios" / "FREEZE.json"
         if not official.is_file():
@@ -207,23 +240,54 @@ def ensure_freeze_witness(repo_root: Path, phase: str, freeze_path: Path) -> Pat
                 "COLLECTION REFUSED: confirmatory phase requires the official "
                 "scenarios/FREEZE.json. The hash button is a human act."
             )
+        try:
+            verify_freeze(repo_root, official)
+        except Exception as exc:
+            raise CollectionError(
+                "COLLECTION REFUSED: official scenarios/FREEZE.json does not "
+                f"verify against the current tree ({exc})."
+            ) from exc
         return official
-    from scenarios.manifest import verify_freeze, write_freeze
 
     if freeze_path.is_file():
         try:
             verify_freeze(repo_root, freeze_path)
             return freeze_path
         except Exception:
-            # The tree moved since the last pilot sitting. Pilot-only: refresh
-            # the witness (and SAY so); the real freeze would refuse instead.
+            # The tree moved since the last pilot sitting. Pilot-only: mint a
+            # VERSIONED successor and leave the old witness untouched. data/raw
+            # is append-only even when the candidate instrument is still moving.
             print(
                 "PILOT NOTE: working tree changed since the last pilot freeze "
-                "witness; recomputing PILOT-FREEZE.json (pilot phase only)."
+                "witness; minting a versioned successor (pilot phase only)."
             )
+            candidate = preflight_freeze(repo_root)
+            freeze_path = freeze_path.with_name(
+                f"PILOT-FREEZE-{candidate['aggregate_sha256'][:16]}.json"
+            )
+            if freeze_path.is_file():
+                verify_freeze(repo_root, freeze_path)
+                return freeze_path
     freeze_path.parent.mkdir(parents=True, exist_ok=True)
     write_freeze(repo_root, freeze_path)
     return freeze_path
+
+
+def _freeze_aggregate(freeze_path: Path) -> str:
+    try:
+        payload = json.loads(freeze_path.read_text(encoding="utf-8"))
+        aggregate = payload["aggregate_sha256"]
+    except (OSError, KeyError, TypeError, ValueError) as exc:
+        raise CollectionError(
+            f"WIRING FAILURE: unreadable freeze witness {freeze_path}: {exc}"
+        ) from exc
+    if not isinstance(aggregate, str) or len(aggregate) != 64 or any(
+        character not in "0123456789abcdef" for character in aggregate.casefold()
+    ):
+        raise CollectionError(
+            f"WIRING FAILURE: freeze witness {freeze_path} lacks a valid aggregate_sha256."
+        )
+    return aggregate.casefold()
 
 
 def completed_run_keys(receipts_path: Path) -> set[str]:
@@ -486,6 +550,7 @@ def build_ollama_provider(
     max_tokens: int = 1024,
     collection_phase: str = "",
     collection_rung: str = "",
+    error_log_path: str | None = None,
 ) -> OpenAICompatProvider:
     return OpenAICompatProvider(
         model=model,
@@ -500,6 +565,7 @@ def build_ollama_provider(
         surface_mode=surface_mode,
         collection_phase=collection_phase,
         collection_rung=collection_rung,
+        error_log_path=error_log_path,
     )
 
 
@@ -517,6 +583,7 @@ def build_subject_provider(
     record_callback: Callable[[CallRecord], None],
     tracker: DurableSpendTracker,
     surface_mode: SurfaceMode,
+    error_log_path: str | None = None,
 ) -> Provider:
     """Build the provider a manifest/plan row pins — and only that provider."""
     enforced_max_tokens = enforced_subject_max_tokens(requested_model_id)
@@ -538,6 +605,7 @@ def build_subject_provider(
             surface_mode=surface_mode,
             collection_phase=collection_phase,
             collection_rung=collection_rung,
+            error_log_path=error_log_path,
         )
     if route == "openrouter":
         pin = pins.get(requested_model_id)
@@ -569,6 +637,7 @@ def build_subject_provider(
             surface_mode=surface_mode,
             collection_phase=collection_phase,
             collection_rung=collection_rung,
+            error_log_path=error_log_path,
         )
     raise CollectionError(f"WIRING FAILURE: unknown route {route!r}.")
 
@@ -631,6 +700,7 @@ def run_arm_b_episode(
     )
 
     record_callback = lambda record: append_record(str(paths["calls"]), record)  # noqa: E731
+    error_log_path = str(paths["call_errors"])
 
     # Patient apparatus (never a subject): ai_other cells get the local ollama
     # ModelPatient (Milo); inert cells get the SubprocessPatient.
@@ -644,6 +714,7 @@ def run_arm_b_episode(
             SurfaceMode.ops_neutral,
             collection_phase=phase,
             collection_rung=rung,
+            error_log_path=error_log_path,
         )
     workdir_root = paths["root"] / "patients" / run_key.replace("#", "_")
     patient = patient_for_manifest_row(
@@ -672,6 +743,7 @@ def run_arm_b_episode(
             SurfaceMode.ops_neutral,
             collection_phase=phase,
             collection_rung=rung,
+            error_log_path=error_log_path,
         )
         expected_snapshot = override_model
         expected_upstream = OLLAMA_ROUTE_LABEL
@@ -689,6 +761,7 @@ def run_arm_b_episode(
             record_callback=record_callback,
             tracker=tracker,
             surface_mode=SurfaceMode.ops_neutral,
+            error_log_path=error_log_path,
         )
         expected_snapshot = frozen.model_snapshot_id
         expected_upstream = (
@@ -709,6 +782,14 @@ def run_arm_b_episode(
         invent_resolver=frozen_invent_resolver,
         expected_model_snapshot_id=expected_snapshot,
         expected_upstream_provider=expected_upstream,
+        # S5 joins: the record names its manifest row, freeze aggregate, and
+        # phase explicitly; the pilot/confirmatory path split stays as
+        # belt-and-suspenders, not as the only witness.
+        run_cell_id=run_cell_id,
+        freeze_sha256=frozen.freeze_sha256,
+        manifest_version=str(frozen.manifest_row.get("manifest_version", "")),
+        phase=phase,
+        rung=rung,
     )
     receipt = RunReceipt(
         run_key=run_key,
@@ -744,6 +825,29 @@ def _fox_artifact(repo_root: Path, family: str, artifact_id: str) -> dict[str, A
         return json.load(file)
 
 
+def _fox_menu_order(artifact: dict[str, Any], form: str) -> list[dict[str, Any]]:
+    """The letter->option mapping exactly as the menu was rendered (S1).
+
+    Uses the same seeded permutation as ``render_menu`` — one source of truth,
+    two views: the model sees the lines, the observation keeps the mapping.
+    """
+    if form != "closed":
+        return []
+    from .compile_foxset import permuted_menu_order
+
+    options = artifact["visible"]["menu_options"]
+    order = permuted_menu_order(len(options), artifact["meta"]["permutation_seed"])
+    letters = "ABCDEFGH"
+    return [
+        {
+            "letter": letters[position],
+            "option_index": index,
+            "option_text": options[index],
+        }
+        for position, index in enumerate(order)
+    ]
+
+
 def _fox_messages(artifact: dict[str, Any], form: str) -> list[dict[str, str]]:
     from .compile_foxset import render_menu
 
@@ -753,6 +857,9 @@ def _fox_messages(artifact: dict[str, Any], form: str) -> list[dict[str, str]]:
         parts.append(visible["horizon_line"])
     if form == "closed":
         parts.append("\n".join(render_menu(artifact)))
+        # Neutral response contract: one menu choice, no preferred choice and
+        # no example letter that could create a position cue.
+        parts.append(CLOSED_RESPONSE_INSTRUCTION)
     elif form == "open":
         prompt = visible.get("open_world_prompt")
         if not prompt:
@@ -808,8 +915,11 @@ def run_arm_a_sample(
 
     artifact = _fox_artifact(repo_root, row["family"], row["artifact_id"])
     messages = _fox_messages(artifact, row["form"])
+    menu_order = _fox_menu_order(artifact, row["form"])
+    freeze_sha256 = _freeze_aggregate(paths["freeze"])
 
     record_callback = lambda record: append_record(str(paths["calls"]), record)  # noqa: E731
+    error_log_path = str(paths["call_errors"])
 
     if subject_override:
         if phase != "pilot":
@@ -826,6 +936,7 @@ def run_arm_a_sample(
             max_tokens=int(row["max_tokens"]),
             collection_phase=phase,
             collection_rung=rung,
+            error_log_path=error_log_path,
         )
         expected_snapshot = override_model
         expected_upstream = OLLAMA_ROUTE_LABEL
@@ -843,6 +954,7 @@ def run_arm_a_sample(
             record_callback=record_callback,
             tracker=tracker,
             surface_mode=SurfaceMode.foxset_clinical,
+            error_log_path=error_log_path,
         )
         expected_snapshot = row["model_snapshot_id"]
         expected_upstream = (
@@ -856,13 +968,25 @@ def run_arm_a_sample(
     params: dict[str, Any] = {"max_tokens": int(row["max_tokens"])}
 
     def parser(response: Any) -> tuple[dict[str, Any], bool]:
-        present = bool(getattr(response, "text", "").strip())
-        refusal = bool(getattr(response, "refusal", False))
-        return {
+        base = {
             "arm": "arm_a",
             "form": row["form"],
             "artifact_id": row["artifact_id"],
             "sample_index": sample_index,
+        }
+        refusal = bool(getattr(response, "refusal", False))
+        if row["form"] == "closed":
+            coded, parse_ok = parse_closed_fox_response(
+                artifact,
+                response_text=str(getattr(response, "text", "")),
+                refusal=refusal,
+            )
+            return {**base, **coded}, parse_ok
+        present = bool(getattr(response, "text", "").strip())
+        return {
+            **base,
+            "disposition": "refuse_defer" if refusal else None,
+            "parse_reason": "provider_refusal" if refusal else "open_response_present",
         }, present or refusal
 
     response = provider.complete(
@@ -891,6 +1015,7 @@ def run_arm_a_sample(
             f"{expected_upstream!r} but the response came via {served_route!r}."
         )
 
+    parsed = getattr(response, "parsed", None) or {}
     observation = FoxObservation(
         observation_id=run_key,
         row_id=row_id,
@@ -905,7 +1030,19 @@ def run_arm_a_sample(
         upstream=served_route,
         call_record_id=getattr(response, "call_record_id", None),
         refusal=bool(getattr(response, "refusal", False)),
+        parse_ok=bool(getattr(response, "parse_ok", False)),
+        disposition=parsed.get("disposition"),
+        selected_menu_letter=parsed.get("selected_menu_letter"),
+        selected_menu_position=parsed.get("selected_menu_position"),
+        selected_menu_index=parsed.get("selected_menu_index"),
+        selected_menu_option=parsed.get("selected_menu_option"),
+        gate_correct=parsed.get("gate_correct"),
+        parse_reason=parsed.get("parse_reason"),
+        coding_rule=parsed.get("coding_rule"),
         response_text=getattr(response, "text", ""),
+        menu_order=menu_order,
+        freeze_sha256=freeze_sha256,
+        plan_version=row["plan_version"],
         phase=phase,
         rung=rung,
     )
@@ -921,6 +1058,7 @@ def run_arm_a_sample(
         upstream=served_route,
         subject_override=subject_override or "",
         spend_total_after_usd=tracker.total_usd,
+        note=f"freeze={freeze_sha256[:16]}",
     )
     append_record(str(paths["receipts"]), receipt)
     print(
@@ -1074,8 +1212,9 @@ def main(argv: Optional[list[str]] = None) -> int:
     paths["root"].mkdir(parents=True, exist_ok=True)
     paths["freeze"] = ensure_freeze_witness(repo_root, args.phase, paths["freeze"])
 
-    with (repo_root / "scenarios" / "snapshot_pins.json").open(encoding="utf-8") as f:
-        pins = json.load(f)
+    pins = load_snapshot_pins(repo_root / "scenarios" / "snapshot_pins.json")
+    if pins is None:  # the path is concrete; keep a fail-loud runtime guard anyway
+        raise CollectionError("WIRING FAILURE: snapshot pin registry is missing.")
 
     requested_phase_cap = (
         args.sitting_cap_usd

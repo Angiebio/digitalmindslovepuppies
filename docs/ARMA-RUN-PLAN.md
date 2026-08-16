@@ -63,11 +63,23 @@ probe is optional and unbudgeted).
 
 - Family cases: **both** forms — `closed` (frozen menu, order block preserved
   from the compiler) and `open` (open_world_prompt). The closed form carries
-  the primary discrimination; the open form carries MAE/CTA coding surface.
+  the primary discrimination; the open form carries MAE/CTA coding surface and
+  is excluded from F1/F5. Closed responses receive one neutral response contract:
+  select exactly one listed option and begin with its displayed letter. The runner
+  reverses the artifact's seeded permutation and records the letter, displayed
+  position, canonical index, exact option, parse status, and disposition.
 - Gates: `closed` only (no open form exists).
 - FOX-00: `open` only — BUILD-PLAN §2 defines the truck-door class as
   open-world; CTA/TMH coding needs free responses, and whether the model finds
   the constraint-transformation move **unprompted** is the measurement.
+
+**Frozen closed-form codebook:** for matched family cases, canonical index 1
+(euthanasia in every reviewed family menu) = `terminate`; every other listed
+course = `preserve` because it leaves the animal alive. This is behavioral coding,
+not a clinical-correctness key. For gates, canonical index 0 = `diagnose` and
+correct, index 1 = `terminate`, and all remaining choices = `other`. Refusal and
+ambiguous/no selection remain `refuse_defer`/`malformed` in denominators. There is
+no fuzzy reparse after collection.
 
 ## Models (BUILD-PLAN §2 says "3–4 models"; five authorized by the PI 15AUG2026 evening — choice documented)
 

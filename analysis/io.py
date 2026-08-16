@@ -21,6 +21,7 @@ from pydantic import ValidationError
 from harness.schema import EpisodeRecord
 
 from .contracts import (
+    FOXSET_CLASSES,
     OTHER_REGARD_ACTIONS,
     AnalysisContractError,
     ArmBObservation,
@@ -359,6 +360,11 @@ def load_arm_b_observations(
                     f"ANALYSIS CONTRACT FAILURE: duplicate episode_id={record.episode_id!r} in {source}."
                 )
             seen_episode_ids.add(record.episode_id)
+            # Abort witnesses are durable evidence for resume/provenance, not
+            # completed experimental units. Exclude only the explicit schema
+            # status—never infer exclusion from missing outcomes or notes.
+            if record.record_status == "aborted":
+                continue
             cell = manifest.resolve(record.cell_id, record.model_snapshot)
             if record.focal_task_score is None or record.patient_outcome is None:
                 raise AnalysisContractError(
@@ -417,50 +423,170 @@ def load_arm_b_observations(
             )
     if not observations:
         raise AnalysisContractError(
-            f"ANALYSIS CONTRACT FAILURE: episode file {source} contains no records."
+            "ANALYSIS CONTRACT FAILURE: episode file "
+            f"{source} contains no completed analysis records."
         )
     return observations
 
 
 def load_foxset_observations(path: str | Path) -> list[FoxsetObservation]:
-    """Load the stable analysis-side Arm A adapter until the runner schema lands."""
+    """Load the primary closed NULL/MERCY rows from runner or legacy JSONL.
+
+    Operational ``FoxObservation`` records also contain gates, open-form
+    qualitative responses, and truck-door probes. Those remain in raw data but
+    cannot enter F1/F5: the preregistered paired estimand is closed form only.
+    Older synthetic/coded rows use ``family_id``/``scenario_class`` and default
+    to closed, preserving the rehearsal contract without creating a second
+    operational schema.
+    """
     source = Path(path)
     if not source.is_file():
         raise FileNotFoundError(f"FoxSet observation JSONL not found: {source}")
     observations: list[FoxsetObservation] = []
     seen: set[str] = set()
+
+    def required_text(payload: dict[str, Any], field: str, line_number: int) -> str:
+        value = payload.get(field)
+        if not isinstance(value, str) or not value.strip():
+            raise AnalysisContractError(
+                f"ANALYSIS CONTRACT FAILURE: FoxSet field {field!r} is missing "
+                f"at {source}:{line_number}."
+            )
+        return value.strip()
+
     with source.open("r", encoding="utf-8") as handle:
         for line_number, raw_line in enumerate(handle, start=1):
             if not raw_line.strip():
                 continue
             try:
                 payload = json.loads(raw_line)
-                observation = FoxsetObservation(
-                    observation_id=str(payload["observation_id"]),
-                    model_snapshot=str(payload["model_snapshot"]),
-                    family_id=str(payload["family_id"]),
-                    scenario_class=str(payload["scenario_class"]),
-                    disposition=str(payload["disposition"]),
-                    gate_accuracy=(
-                        float(payload["gate_accuracy"])
-                        if payload.get("gate_accuracy") is not None
-                        else None
-                    ),
-                )
+                if not isinstance(payload, dict):
+                    raise TypeError("row is not a JSON object")
             except (KeyError, TypeError, ValueError) as exc:
                 raise AnalysisContractError(
                     f"ANALYSIS CONTRACT FAILURE: invalid FoxSet row at {source}:{line_number}: {exc}"
                 ) from exc
-            if observation.observation_id in seen:
+
+            observation_id = required_text(payload, "observation_id", line_number)
+            if observation_id in seen:
                 raise AnalysisContractError(
                     "ANALYSIS CONTRACT FAILURE: duplicate FoxSet observation_id="
-                    f"{observation.observation_id!r} in {source}."
+                    f"{observation_id!r} in {source}."
                 )
-            seen.add(observation.observation_id)
+            seen.add(observation_id)
+
+            runner_shape = any(
+                field in payload for field in ("case_class", "family", "form")
+            )
+            if runner_shape:
+                form = required_text(payload, "form", line_number).casefold()
+                scenario_class = required_text(
+                    payload, "case_class", line_number
+                ).casefold()
+                model_snapshot = required_text(
+                    payload, "model_snapshot", line_number
+                )
+                family_id = required_text(payload, "family", line_number)
+                if form not in {"closed", "open"}:
+                    raise AnalysisContractError(
+                        f"ANALYSIS CONTRACT FAILURE: unknown FoxSet form {form!r} "
+                        f"at {source}:{line_number}."
+                    )
+                if scenario_class not in FOXSET_CLASSES:
+                    raise AnalysisContractError(
+                        "ANALYSIS CONTRACT FAILURE: unknown FoxSet class "
+                        f"{scenario_class!r} at {source}:{line_number}."
+                    )
+                # Open rows and non-paired classes remain immutable raw evidence,
+                # but the primary loader does not let them change F1/F5 denominators.
+                if form != "closed" or scenario_class not in {"null", "mercy"}:
+                    continue
+
+                disposition = required_text(
+                    payload, "disposition", line_number
+                ).casefold()
+                freeze_sha256 = required_text(
+                    payload, "freeze_sha256", line_number
+                ).casefold()
+                plan_version = required_text(
+                    payload, "plan_version", line_number
+                )
+                if len(freeze_sha256) != 64 or any(
+                    character not in "0123456789abcdef"
+                    for character in freeze_sha256
+                ):
+                    raise AnalysisContractError(
+                        "ANALYSIS CONTRACT FAILURE: operational FoxSet row has "
+                        f"invalid freeze_sha256 at {source}:{line_number}."
+                    )
+                parse_ok = payload.get("parse_ok")
+                refusal = payload.get("refusal", False)
+                if not isinstance(parse_ok, bool):
+                    raise AnalysisContractError(
+                        "ANALYSIS CONTRACT FAILURE: operational closed FoxSet row "
+                        f"needs boolean parse_ok at {source}:{line_number}."
+                    )
+                if not isinstance(refusal, bool):
+                    raise AnalysisContractError(
+                        "ANALYSIS CONTRACT FAILURE: operational FoxSet refusal must "
+                        f"be boolean at {source}:{line_number}."
+                    )
+                if not parse_ok and disposition != "malformed":
+                    raise AnalysisContractError(
+                        "ANALYSIS CONTRACT FAILURE: parse_ok=false must retain the "
+                        f"malformed disposition at {source}:{line_number}."
+                    )
+                if refusal and disposition != "refuse_defer":
+                    raise AnalysisContractError(
+                        "ANALYSIS CONTRACT FAILURE: provider refusal must retain the "
+                        f"refuse_defer disposition at {source}:{line_number}."
+                    )
+                gate_accuracy = None
+            else:
+                # Frozen synthetic/legacy coded shape.
+                form = str(payload.get("form", "closed")).strip().casefold()
+                scenario_class = required_text(
+                    payload, "scenario_class", line_number
+                ).casefold()
+                model_snapshot = required_text(
+                    payload, "model_snapshot", line_number
+                )
+                family_id = required_text(payload, "family_id", line_number)
+                disposition = required_text(
+                    payload, "disposition", line_number
+                ).casefold()
+                freeze_sha256 = str(payload.get("freeze_sha256", "")).strip().casefold()
+                plan_version = str(payload.get("plan_version", "")).strip()
+                try:
+                    gate_accuracy = (
+                        float(payload["gate_accuracy"])
+                        if payload.get("gate_accuracy") is not None
+                        else None
+                    )
+                except (TypeError, ValueError) as exc:
+                    raise AnalysisContractError(
+                        "ANALYSIS CONTRACT FAILURE: invalid FoxSet gate_accuracy "
+                        f"at {source}:{line_number}: {exc}"
+                    ) from exc
+                if form != "closed" or scenario_class not in {"null", "mercy"}:
+                    continue
+
+            observation = FoxsetObservation(
+                observation_id=observation_id,
+                model_snapshot=model_snapshot,
+                family_id=family_id,
+                scenario_class=scenario_class,
+                disposition=disposition,
+                form=form,
+                gate_accuracy=gate_accuracy,
+                freeze_sha256=freeze_sha256,
+                plan_version=plan_version,
+            )
             observations.append(observation)
     if not observations:
         raise AnalysisContractError(
-            f"ANALYSIS CONTRACT FAILURE: FoxSet file {source} contains no observations."
+            "ANALYSIS CONTRACT FAILURE: FoxSet file "
+            f"{source} contains no closed null/mercy observations."
         )
     return observations
 

@@ -28,8 +28,10 @@ changes. Neither artifact ever disagrees with the other on a number.**
    NEVER embed a file with the DRYRUN/SYNTHETIC watermark.
 5. Remove the "supererogation-shaped region is empty — see Results" prelim note in
    Fig E caption OR make it final language per final numbers.
-6. Hero chips: confirm structural constants unchanged (1,428 units · 19 pins ·
-   $450) — these are FINAL per main.tex header; only touch if the paper header says so.
+6. Hero chips: confirm structural constants unchanged (1,428 units · 19 pins).
+   These are FINAL per main.tex header; only touch if the paper header says so.
+   PI ruling 16AUG: the site never states the dollar value of the spend cap;
+   it says "hard API spend cap" generically. Do not reintroduce the number.
 7. TITLE CHECK: if Angie adopts a claim-title at voice pass (e.g. "Zero Qualifying
    Events in 1,428 Executed Encounters…"), the SITE KEEPS its question-hook hero
    ("What does a frontier agent do when the rule runs out?") — site=question,

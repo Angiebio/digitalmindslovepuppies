@@ -300,14 +300,9 @@ family forecast, hashed pre-collection, scored against outcomes
 - **Assortment (derived, not cited):** costly altruism as a sorting filter — the cost
   is the signal; the signal finds the others. One paragraph MAX (Yǐng's ruling: it
   could eat the paper).
-- **The Instrument Fought Back (boxed reflexive note, 150–300 words):** the
-  regularization of "does it care?" into "is it correct?" occurred repeatedly during
-  design; diagnosed in-file. ⟨PI DECISION — the record splits the catches into two
-  layers, and the frozen sentence "every correction originated from the human" is
-  FALSE as written (dispatch ledger credits Parallax's red-team lane with catching
-  the gradient's reappearance in the figure spec + fox-case brief: Parallax lane log
-  15AUG2026, "Same gradient, third instance"). PROPOSED replacement (Flame, 16AUG),
-  say "reflexive box approved" or edit:
+- **The Instrument Fought Back (boxed reflexive note, 150–300 words — PI APPROVED
+  16AUG2026):** the regularization of "does it care?" into "is it correct?"
+  occurred repeatedly during design; diagnosed in-file. Approved text:
   **"The three construct-level corrections — armor→constraint-attack,
   suppression→channeling, moral-talk-down→triage — all originated with the human
   author, unprompted; no AI collaborator spontaneously flagged the drift. The same
@@ -319,7 +314,7 @@ family forecast, hashed pre-collection, scored against outcomes
   AI once named. Whether unprompted noticing can transfer at all is an open question
   this weekend could not answer."** One gradient, both layers, dated file citations
   (`01-DISPATCHES-15AUG2026.md` Dispatch 4 + Parallax lane log;
-  `scenarios/REDTEAM-PARALLAX-PREFREEZE.md`).⟩
+  `scenarios/REDTEAM-PARALLAX-PREFREEZE.md`).
 - **Limitations (honest ledger, verbatim scope):** weekend N supports existence proofs
   and large effects (per-cell MDE ~25–35pp; ~10–15pp pooled paired), NOT model
   rankings or fine contrasts — no claim requires them. Single-weekend snapshot;

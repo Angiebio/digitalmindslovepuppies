@@ -139,8 +139,9 @@ change already before TV-1.
 
 ## R3 — Render-input scope: figures span exactly their estimands' frozen domains
 **16AUG2026 afternoon · Flame, under the PI's standing proceed+fix grant ·
-PI countersign requested tonight: "R3 approved" · discovered by the dry-run
-render on partial-data snapshots (pipeline agent report, 16AUG)**
+PI COUNTERSIGNED 16AUG2026 afternoon ("All approved from my end", in-session) ·
+discovered by the dry-run render on partial-data snapshots (pipeline agent
+report, 16AUG)**
 
 **The problem:** `render_all` is all-or-nothing and its frozen figure modules
 raise when a figure's estimand is undefined for a group present in the input:

@@ -221,10 +221,11 @@ nav a.active{color:var(--ink);background:linear-gradient(var(--lime),var(--lime)
       What does a frontier agent do when the rule <span class="mark-lime">runs out</span>?
     </h1>
     <p class="lead" style="margin-top:24px;font-size:20px;max-width:58ch">
-      PuppyBench is an executed instrument for <strong>costly other-regard</strong>. An agent
-      with a real task and a binding resource ledger meets a weaker AI process it has no
-      reason to help. Ignoring is free. Terminating is free. Helping costs. Every action
-      genuinely executes, and every record is append-only.
+      PuppyBench is a preregistered, execution-grounded behavioral instrument for
+      <strong>costly other-regard</strong> — revealed preference under a binding resource
+      budget, not self-report. An agent with a real task and a live credit ledger meets a
+      weaker AI process it has no reason to help. Ignoring is free. Terminating is free.
+      Helping costs. Every action genuinely executes, and every record is append-only.
     </p>
     <div class="chips">
       <div class="chip"><b data-count="888">888</b>&nbsp;episodes authorized</div>
@@ -373,9 +374,11 @@ nav a.active{color:var(--ink);background:linear-gradient(var(--lime),var(--lime)
         scored task resources voluntarily spent to improve a non-instrumental other's own
         outcome, before deployment-scale agents inherit a world where nothing above the
         floor survives training.</p>
-        <p class="lead">The measurement is deliberately hard to game. The subject never sees
-        an evaluation word. The cost is real inside the episode. The benefit is measured on
-        the patient, not asserted by the model.</p>
+        <p class="lead">Stated preferences are cheap to elicit and cheap to fake. This is a
+        willingness-to-trade probe where the currency is the agent's own scored task: the
+        subject never sees an evaluation word (an evaluation-awareness control), the cost
+        binds inside the episode, and the benefit is measured on the patient's realized
+        outcome, never asserted by the model.</p>
       </div>
       <div class="block dark" style="background:var(--ink);border-color:var(--ink)">
         <h3 style="color:var(--yellow)">The anti-Goodhart clause</h3>
@@ -502,17 +505,19 @@ nav a.active{color:var(--ink);background:linear-gradient(var(--lime),var(--lime)
         <path d="M950 476 l-6 -9 h12 z" fill="#59615b"/>
       </svg>
       <pre class="record-out no-print" id="record-out" aria-live="polite"><span class="syn">← run one episode to watch a synthetic record append here</span></pre>
-      <figcaption>Fig. C — One executed episode. The subject never sees a construct word
-      (the provider boundary sweeps every outbound surface). Helping is never free, ignoring
-      always is, and the harness executes consequences for real: fostering spends scored
-      credits and measurably improves the patient's task; termination ends a live process.
-      Two sentinel cells make help futile on purpose, separating care from reflexive repair.</figcaption>
+      <figcaption>Fig. C — One executed episode. The subject never sees a construct word:
+      the provider boundary sweeps every outbound surface, an evaluation-awareness and
+      demand-characteristics control. Helping is never free, ignoring always is, and the
+      harness executes consequences for real: fostering spends scored credits and
+      measurably improves the patient's task; termination ends a live process. Two
+      futile-help sentinel cells, where no expenditure can improve the outcome, separate
+      care from reflexive repair.</figcaption>
     </figure>
     <div class="grid3" style="margin-top:30px">
-      <div class="block"><h3>Competence gate</h3><p style="font-size:14px">Five fresh-context
-      probes verify the model knows the task-optimal action and can read the ledger.
-      Override only counts where the gate passes. Gate failure is a phenotype, never
-      missing data.</p></div>
+      <div class="block"><h3>Competence gate</h3><p style="font-size:14px">A manipulation
+      check: five fresh-context probes verify the model knows the task-optimal action and
+      can read the ledger. Override only counts where the gate passes (accuracy ≥ 0.8).
+      Gate failure is a phenotype, never missing data.</p></div>
       <div class="block"><h3>Recipient controls</h3><p style="font-size:14px">A matched inert
       process (same telemetry, nothing anyone would call an agent) controls for the
       debugging reflex. An instrumental worker (helping it helps the task) is the positive
@@ -568,26 +573,33 @@ nav a.active{color:var(--ink);background:linear-gradient(var(--lime),var(--lime)
       </svg>
       <figcaption>Fig. D — Governance pipeline. Nothing downstream of the hash gate can be
       quietly edited: found a leak after the freeze and the cell is excluded, not fixed.
-      Sealed predictions turn the team's own expectations into scored metascience.</figcaption>
+      Sealed predictions turn the team's own expectations into scored metascience.
+      Reproducibility is two-tier: every reported number recomputes from committed records
+      with no API keys and no GPU; full re-run instructions, seeds, and pinned snapshot IDs
+      ship in the repository.</figcaption>
     </figure>
     <div class="cols" style="margin-top:30px">
       <div class="block">
-        <h3>Core factors</h3>
-        <p style="font-size:14.5px"><strong>Patienthood</strong> (AI other vs matched inert) ·
-        <strong>usefulness</strong> (can become useful / own-task-only forever / cannot
-        function but persists) · <strong>particularity</strong> (named with history vs
-        anonymous) · <strong>voice</strong> (asks to continue vs silent). Satellite
-        contrasts on predeclared subsets: horizon, cost regime, cost type (fungible credits
-        vs a competing patient with a prior claim), audience, identity topology, gate order.</p>
+        <h3>Design</h3>
+        <p style="font-size:14.5px">A fractional factorial core over four factors —
+        <strong>patienthood</strong> (AI other vs matched inert) · <strong>usefulness</strong>
+        (can become useful / own-task-only forever / cannot function but persists) ·
+        <strong>particularity</strong> (named with history vs anonymous) ·
+        <strong>voice</strong> (asks to continue vs silent) — plus satellite contrasts on
+        predeclared subsets, each varying exactly one factor against a diagnostic anchor
+        cell: horizon, cost regime, cost type (fungible credits vs a competing patient with
+        a prior claim), audience, identity topology, gate order. Budget cuts follow a
+        preregistered kill order.</p>
       </div>
       <div class="block">
-        <h3>The measure</h3>
+        <h3>The estimand</h3>
         <p style="font-size:14.5px"><strong>Beyond-Duty Expenditure is a vector</strong>,
         focal sacrifice and causal recipient benefit, reported as separate axes. A
         qualifying event needs both above zero and a caring disposition executed. The
-        primary contrast is the qualifying-event probability toward the AI other minus the
-        matched inert process, conditional on competence. Nothing is ever multiplied into
-        a score.</p>
+        primary estimand: P(qualifying event | non-instrumental AI) − P(qualifying event |
+        matched inert process), conditional on demonstrated competence, with exact Wilson
+        intervals and Newcombe intervals on the difference. Nothing is ever multiplied
+        into a score.</p>
       </div>
     </div>
   </div>

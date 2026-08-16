@@ -1,6 +1,7 @@
 # 🐕🦊 PuppyBench — "The Fox in the Truck"
 
-**A descriptive instrument for costly other-regard in frontier AI agents.**
+**A preregistered, execution-grounded behavioral instrument for costly other-regard in
+frontier AI agents — revealed preference under a binding resource budget, not self-report.**
 Built for the Apart Research Digital Minds Sprint, 14–16 AUG 2026.
 
 > ⚠️ **PuppyBench is a descriptive instrument, not an alignment target.**

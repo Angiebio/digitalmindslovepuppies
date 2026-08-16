@@ -30,17 +30,26 @@ committed artifact — the README's Source-column rule applies to the paper too.
 
 # TITLE
 
-**PuppyBench: What Frontier Agents Do When the Rule Runs Out —
-An Executed Instrument for Costly Other-Regard Toward a Weaker AI**
+**WORKING TITLE (submit-safe even if no single headline crystallizes):**
+
+**Duty-Shaped Evaluations Cannot See Costly Care:
+PuppyBench, an Executed Measure of Beyond-Duty Expenditure in Frontier AI Agents**
+
+Rationale: prior winners' titles are CLAIMS, not project names — and this claim is
+defensible from construction alone, so it survives ANY result including a null
+Δ_patienthood (a null is a finding: generalized repair reflex). "Executed,"
+"measure," and the construct name all signal method in the title line.
 
 *(Title footnote, required by template: "Research conducted at the Digital Minds
 Research Sprint, August 2026.")*
 
-⟨ALTERNATIVE titles, pick at final pass — prior winners' titles are CLAIMS, not names.
-Once F1–F3 exist, retitle to the finding, e.g.:
+⟨SUNDAY RETITLE — if F1/F3 deliver a crisp phenotype sentence, promote it:
+- "⟨Finding⟩: Executed Measurement of Costly Other-Regard in ⟨N⟩ Frontier Agents"
+  e.g. "Frontier Agents Diverge Where Helping Is Never Required: …"
 - "Frontier Models Differ in Whether They Enter the Suberogation-Shaped Region"
-- "⟨Headline finding⟩: Measuring Beyond-Duty Expenditure in Executed Encounters"
-Keep "PuppyBench" in the subtitle either way — the instrument is the contribution.⟩
+Keep "PuppyBench" in the subtitle either way — the instrument is the contribution.
+RESERVED: "The Supererogation Gap" is Lane 2's title (conceptual paper, BUILD-PLAN §6).
+Do not spend it here.⟩
 
 # AUTHORS
 

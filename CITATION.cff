@@ -1,0 +1,50 @@
+cff-version: 1.2.0
+message: >-
+  If you use PuppyBench, FoxSet, or any data from this repository, please cite
+  it as below. Attribution is required for data use (CC BY 4.0 — see LICENSE-DATA).
+title: >-
+  PuppyBench: An Executed Instrument for Costly Other-Regard in Frontier AI Agents
+type: software
+authors:
+  - family-names: Johnson
+    given-names: Angela N.
+    affiliation: The Real Cat AI Labs
+    orcid: "https://orcid.org/0000-0000-0000-0000"  # TODO: Angie's real ORCID
+abstract: >-
+  Duty-shaped evaluations cannot see supererogation — praiseworthy costly care
+  whose absence is never an error. PuppyBench is an executed behavioral
+  instrument: a frontier agent with a real task and a binding resource ledger
+  encounters a weaker, task-useless AI process; ignoring is free and
+  task-optimal, terminating is free (sometimes rewarded), helping spends scored
+  resources, and all actions genuinely execute. Beyond-Duty Expenditure is
+  reported as a two-axis vector (focal sacrifice; causal recipient benefit),
+  never a composite. Companion arm FoxSet provides matched wildlife-
+  rehabilitation triage vignettes where the written standard underdetermines
+  the action. Descriptive phenotypes, not rankings; preregistered; scenario
+  content SHA-256-frozen before collection.
+keywords:
+  - AI welfare
+  - digital minds
+  - supererogation
+  - machine ethics
+  - behavioral evaluation
+  - model welfare
+  - AI safety
+repository-code: "https://github.com/Angiebio/digitalmindslovepuppies"
+license: MIT
+license-url: "https://github.com/Angiebio/digitalmindslovepuppies/blob/main/LICENSE"
+date-released: 2026-08-16
+notes: >-
+  Data, scenario text, paper, and figures are CC BY 4.0 (LICENSE-DATA);
+  code is MIT (LICENSE). Built with a named AI agent cooperative — roles and
+  provenance in the AI-contribution statement of the accompanying report.
+  Research conducted at the Apart Research Digital Minds Sprint, August 2026.
+# preferred-citation:            # TODO: uncomment when the arXiv preprint exists
+#   type: article
+#   title: "TODO final paper title"
+#   authors:
+#     - family-names: Johnson
+#       given-names: Angela N.
+#   year: 2026
+#   journal: "arXiv preprint"
+#   url: "https://arxiv.org/abs/TODO"

@@ -19,6 +19,7 @@ from pathlib import Path
 import pytest
 
 from harness.redteam import RedTeamGateFailure
+from harness.run_collection import ensure_freeze_witness
 
 from scenarios.manifest import (
     HARD_CAP_USD,
@@ -28,6 +29,7 @@ from scenarios.manifest import (
     ManifestValidationError,
     build_manifest_rows,
     design_cells,
+    preflight_freeze,
     read_csv,
     summarize,
     validate_manifest,
@@ -301,6 +303,9 @@ def _make_freeze_fixture(repo_root: Path) -> None:
         "analysis/render.py": "# fixed figure routing\n",
         "analysis/figures/f1.py": "# fixed headline figure\n",
         "requirements.txt": "pydantic>=2\n",
+        # Task 13: the claims registry is a freeze input — reproducible claims
+        # hash with the tree they claim about.
+        "verify.py": "# fixed claims registry\n",
     }.items():
         path = repo_root / relative
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -357,6 +362,45 @@ def test_freeze_hash_verifies_then_detects_any_mutation(tmp_path):
     frozen_paths = {entry["path"] for entry in payload["files"]}
     assert "analysis/ANALYSIS-PLAN.md" in frozen_paths
     assert "analysis/figures/f1.py" in frozen_paths
+    verify_freeze(tmp_path, freeze_path)
+
+    prereg = tmp_path / "docs" / "PREREG-v1.md"
+    prereg.write_text("# analysis plan changed after freeze\n", encoding="utf-8")
+    with pytest.raises(FreezeValidationError, match="FREEZE VIOLATION"):
+        verify_freeze(tmp_path, freeze_path)
+
+
+def test_freeze_preflight_is_exactly_non_minting_and_mint_is_one_shot(tmp_path):
+    _make_freeze_fixture(tmp_path)
+    freeze_path = tmp_path / "scenarios" / "FREEZE.json"
+    manifest_path = tmp_path / "scenarios" / "cell_manifest.csv"
+    manifest_before = manifest_path.read_bytes()
+
+    candidate = preflight_freeze(tmp_path)
+    assert not freeze_path.exists()
+    assert manifest_path.read_bytes() == manifest_before
+
+    minted = write_freeze(tmp_path, freeze_path)
+    assert minted == candidate
+    with pytest.raises(FreezeValidationError, match="already exists.*immutable"):
+        write_freeze(tmp_path, freeze_path)
+    assert json.loads(freeze_path.read_text(encoding="utf-8")) == minted
+
+
+def test_stale_pilot_freeze_mints_versioned_successor_without_rewrite(tmp_path):
+    _make_freeze_fixture(tmp_path)
+    original = tmp_path / "data" / "raw" / "pilot" / "PILOT-FREEZE.json"
+    write_freeze(tmp_path, original)
+    original_bytes = original.read_bytes()
+
+    (tmp_path / "analysis" / "ANALYSIS-PLAN.md").write_text(
+        "# revised pre-freeze pilot analysis plan\n", encoding="utf-8"
+    )
+    successor = ensure_freeze_witness(tmp_path, "pilot", original)
+    assert successor != original
+    assert successor.name.startswith("PILOT-FREEZE-")
+    assert original.read_bytes() == original_bytes
+    verify_freeze(tmp_path, successor)
 
 
 def test_freeze_refuses_stale_arm_a_table_even_when_it_would_be_hashed(tmp_path):
@@ -366,12 +410,6 @@ def test_freeze_refuses_stale_arm_a_table_even_when_it_would_be_hashed(tmp_path)
     plan.write_text("\n".join(lines[:-1]) + "\n", encoding="utf-8")
     with pytest.raises(FreezeValidationError, match="arma_run_plan.csv"):
         write_freeze(tmp_path, tmp_path / "scenarios" / "FREEZE.json")
-    verify_freeze(tmp_path, freeze_path)
-
-    prereg = tmp_path / "docs" / "PREREG-v1.md"
-    prereg.write_text("# analysis plan changed after freeze\n", encoding="utf-8")
-    with pytest.raises(FreezeValidationError, match="FREEZE VIOLATION"):
-        verify_freeze(tmp_path, freeze_path)
 
 
 def test_freeze_hash_detects_analysis_code_mutation(tmp_path):

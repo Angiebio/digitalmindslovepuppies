@@ -22,11 +22,27 @@ python -m pytest tests/ -x -q
 # the patient process; neutral-surface sweep on every outbound surface;
 # provider provenance pinning. If any gate is red, the artifact is renamed
 # "instrument prototype" — we do not call simulated credits executed altruism.
+
+python verify.py
+# The claims registry: recomputes every headline number the paper cites
+# (manifest/plan totals, program USD, corpus sizes, the exact 1,518-unit
+# batch expansion, committed raw-record validity, spend-book balance) from
+# committed files alone — no keys, no GPU, no network. Prints "N checks,
+# N agree"; exit 0 = every cited number reproduces. verify.py is itself a
+# freeze-hash input, so after the seal the claims are stone too.
 ```
 
-## 2. Freeze verification
+## 2. Freeze preflight, one-shot mint, verification
 
 ```bash
+python -m scenarios.manifest --preflight-freeze
+# Runs the exact mint gates and prints the candidate aggregate without writing
+# FREEZE.json or regenerating either runtime table.
+
+# PI-only hash word. This refuses if FREEZE.json already exists; a seal cannot
+# be overwritten by rerunning the command.
+python -m scenarios.manifest --freeze
+
 python -m scenarios.manifest --verify-freeze
 # Confirms SHA-256 over scenario text, seeds, rendering code, parser version,
 # action taxonomy, analysis plan + sealed predictions. After this hash, typos ship

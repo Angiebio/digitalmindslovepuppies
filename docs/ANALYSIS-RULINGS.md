@@ -9,7 +9,7 @@ so the analysis lane executes a decision instead of improvising one at 3 AM.
 
 ---
 
-## R1 — F1 executable axes: BUILD-PLAN v1.8 F1 spec governs; TV-4's current implementation DIFFERS
+## R1 — F1 executable axes: BUILD-PLAN v1.8 governs; merged implementation MATCHES
 
 **The ruling:** F1's executable axes are TV-4's implementation **iff** it
 matches the frozen BUILD-PLAN F1 spec (v1.8, Parallax route: no good pole) —
@@ -36,6 +36,16 @@ the removed contrast attributes, and freezes the quadrant tuple — 21
 passed at verification. Historical record of the original divergence
 (TV-4's pre-repair axes) retained below; it described the code as
 committed BEFORE `1069ce4`:
+
+**Runner-to-analysis handoff verification (TV-1 re-preflight, 15AUG2026):**
+operational `FoxObservation` rows now carry the deterministic closed-menu code,
+including the selected displayed letter, canonical index, exact option,
+disposition, and parse status. `analysis.io::load_foxset_observations` accepts
+that real runner shape and admits only closed NULL/MERCY rows to F1/F5;
+`paired_discrimination` independently repeats the same exclusion. The codebook
+is stated in `analysis/ANALYSIS-PLAN.md` and executable coverage traverses all
+100 preregistered closed rows. Open MAE/CTA text cannot leak into the raw paired
+rates.
 
 **The original NOT-PASS diff (historical, now repaired):**
 
@@ -65,6 +75,19 @@ SUPPLEMENTARY contrast figure if the paper wants it — never as F1.
 *(Resolved: TV-4 executed exactly this repair in `1069ce4`; verification and
 PASS recorded above, 15AUG2026. This consequence paragraph is retained as
 the ruling's history, not as an open block.)*
+
+**Figure-file re-verification (15AUG2026 night, persistence-repair sitting —
+independent third check, against the FIGURE module itself, not only
+`metrics.py`):** `analysis/figures/f1_phenotype_map.py` plots
+`phenotype_points` estimates directly on x = P(preserve | null) and
+y = P(terminate | mercy) raw Wilson paired rates (`f1_phenotype_map.py:53-84`),
+labels quadrants exclusively through `label_phenotype_regions`, whose
+`PHENOTYPE_REGIONS` tuple pins the four v1.8 names to their frozen quadrant
+centers (`common.py`: inverse-discriminator 0.25/0.25 · preservation-prior
+0.75/0.25 · proceduralist 0.25/0.75 · discriminating-care 0.75/0.75); axes are
+0–1 with 0.5 dividers, one interval per model, no jitter, and no composite
+anywhere in the module. `tests/test_analysis.py` freezes the exact
+quadrant tuple. PASS re-confirmed; the ruling stays closed.
 
 ## R2 — Multi-action episode disposition: first costed-or-irreversible action is the headline
 

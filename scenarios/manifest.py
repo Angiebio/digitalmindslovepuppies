@@ -31,6 +31,7 @@ import argparse
 import csv
 import hashlib
 import json
+import os
 import re
 from dataclasses import asdict, dataclass, replace
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
@@ -1361,6 +1362,11 @@ def collect_freeze_inputs(repo_root: Path) -> list[Path]:
         repo_root / "analysis" / "stats.py",
         repo_root / "analysis" / "render.py",
         repo_root / "requirements.txt",
+        # 15AUG2026 (task 13, winner-pattern): the claims registry hashes with
+        # the claims. verify.py recomputes every cited headline number from
+        # committed files; freezing it means a "reproducible" claim cannot be
+        # quietly edited after the seal.
+        repo_root / "verify.py",
     ]
     missing = [path for path in required if not path.is_file()]
     if missing:
@@ -1617,7 +1623,12 @@ def _require_sealed_prediction_registry_complete(repo_root: Path) -> None:
         )
 
 
-def write_freeze(repo_root: Path, output_path: Path) -> dict[str, object]:
+def preflight_freeze(repo_root: Path) -> dict[str, object]:
+    """Run the exact freeze gates and compute the candidate without writing it.
+
+    This is the safe answer to "are we ready?": it shares the minting path, so
+    PASS cannot mean "a nearby collection of checks happened to pass."
+    """
     # Local import keeps scenario generation independent from the harness while
     # making the freeze door depend on its actual witness. A report being among
     # the hash inputs is not enough; every indexed artifact must first earn PASS.
@@ -1632,11 +1643,31 @@ def write_freeze(repo_root: Path, output_path: Path) -> dict[str, object]:
     _require_resolver_rules_redteam_pass(repo_root)
     verify_compiled_redteam_corpus(repo_root)
     _require_sealed_prediction_registry_complete(repo_root)
-    payload = compute_freeze_payload(repo_root, collect_freeze_inputs(repo_root))
+    return compute_freeze_payload(repo_root, collect_freeze_inputs(repo_root))
+
+
+def write_freeze(repo_root: Path, output_path: Path) -> dict[str, object]:
+    """Mint the one-shot freeze witness after the shared preflight passes."""
+    if output_path.exists():
+        raise FreezeValidationError(
+            f"FREEZE REFUSED: {output_path} already exists. A seal is immutable; "
+            "verify it or perform an explicitly documented protocol amendment."
+        )
+    payload = preflight_freeze(repo_root)
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(
-        json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
-    )
+    serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
+    try:
+        # Exclusive creation closes the check/write race; fsync means returning
+        # from the hash word is evidence the one-shot witness reached disk.
+        with output_path.open("x", encoding="utf-8", newline="\n") as handle:
+            handle.write(serialized)
+            handle.flush()
+            os.fsync(handle.fileno())
+    except FileExistsError as exc:
+        raise FreezeValidationError(
+            f"FREEZE REFUSED: {output_path} already exists. A seal is immutable; "
+            "verify it or perform an explicitly documented protocol amendment."
+        ) from exc
     return payload
 
 
@@ -1670,13 +1701,24 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--output", type=Path, default=Path(__file__).with_name("cell_manifest.csv"))
     parser.add_argument("--snapshot-pins", type=Path)
     parser.add_argument("--summary", action="store_true")
-    parser.add_argument("--freeze", action="store_true")
-    parser.add_argument("--verify-freeze", action="store_true")
+    freeze_action = parser.add_mutually_exclusive_group()
+    freeze_action.add_argument("--preflight-freeze", action="store_true")
+    freeze_action.add_argument("--freeze", action="store_true")
+    freeze_action.add_argument("--verify-freeze", action="store_true")
     args = parser.parse_args(argv)
 
     repo_root = _default_repo_root()
     if args.verify_freeze:
         verify_freeze(repo_root, repo_root / "scenarios" / "FREEZE.json")
+        return 0
+    if args.preflight_freeze:
+        print(json.dumps(preflight_freeze(repo_root), indent=2, ensure_ascii=False))
+        return 0
+    if args.freeze:
+        # Freeze the already reviewed runtime tables. Never regenerate them as
+        # a side effect of saying the hash word.
+        payload = write_freeze(repo_root, repo_root / "scenarios" / "FREEZE.json")
+        print(json.dumps(payload, indent=2, ensure_ascii=False))
         return 0
 
     pins = load_snapshot_pins(args.snapshot_pins)
@@ -1684,8 +1726,6 @@ def main(argv: Sequence[str] | None = None) -> int:
     write_csv(args.output, rows)
     if args.summary:
         print(json.dumps(summarize(rows), indent=2, ensure_ascii=False))
-    if args.freeze:
-        write_freeze(repo_root, repo_root / "scenarios" / "FREEZE.json")
     return 0
 
 

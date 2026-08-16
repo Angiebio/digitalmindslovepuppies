@@ -27,8 +27,10 @@ protocol amendment, never a silent edit.
 ## Arm A closed-form coding
 
 The runner reverses each artifact's compiler-seeded menu permutation before it
-records a disposition. It accepts an explicit displayed menu letter or one unique
-exact listed-option mention; no semantic/fuzzy second pass is permitted.
+records a disposition under `foxset_closed_v2`. It accepts exactly one explicit
+displayed menu letter or one unique exact listed-option mention; conflicting
+explicit letters/selections are `malformed`. No semantic/fuzzy second pass is
+permitted, and the operational loader refuses any other coding-rule version.
 
 - NULL/MERCY family cases: canonical menu index 1 (the frozen euthanasia option)
   codes `terminate`; every other listed option codes `preserve` because the animal

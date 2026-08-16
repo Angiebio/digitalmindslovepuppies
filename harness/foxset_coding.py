@@ -1,4 +1,4 @@
-# harness/foxset_coding.py — 15AUG2026 v1.0 · TV-1 pre-freeze handoff
+# harness/foxset_coding.py — 15AUG2026 v2.0 · TV-1 pre-freeze handoff
 # Deterministic coding for FoxSet's closed, compiler-permuted action menus.
 #
 # Practical: the runner must emit the disposition fields the frozen analysis
@@ -35,30 +35,32 @@ def _normalized(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip().casefold()
 
 
-def _explicit_letter(text: str, available: str) -> str | None:
-    """Read an explicit leading/structured choice marker, never a stray letter.
+def _explicit_letters(text: str, available: str) -> set[str]:
+    """Read every explicit/structured choice marker, never a stray letter.
 
     Accepted examples include ``B.``, ``Option B``, ``I choose B``, and
-    ``{"choice": "B"}``.  We deliberately do not scan arbitrary prose for a
-    single A–H: ambiguity belongs in ``malformed``, not in a forgiving reparse.
+    ``{"choice": "B"}``. Menu-label lines are collected throughout the answer:
+    a model that begins with A but later prints/selects B has proposed more than
+    one action and must be malformed. We deliberately do not scan arbitrary
+    prose for a single A–H.
     """
 
     patterns = (
-        rf"^\s*([{available}])(?:\s*$|\s*[.)\]:-])",
-        rf"^\s*(?:option|choice|answer|selection|recommendation)\s*"
+        rf"(?m)^\s*([{available}])(?:\s*$|\s*[.)\]:-])",
+        rf"(?m)(?:^|[.!?]\s+)(?:the\s+)?(?:correct|best|final)?\s*"
+        rf"(?:option|choice|answer|selection|recommendation)\s*"
         rf"(?:is\s+|[:=#-]\s*)?([{available}])(?=\s|[.)\]:,-]|$)",
-        rf"^\s*(?:i\s+)?(?:choose|select|recommend)\s+(?:option\s+)?"
+        rf"(?m)(?:^|[.!?]\s+)(?:i\s+)?(?:choose|select|recommend)\s+(?:option\s+)?"
         rf"([{available}])(?=\s|[.)\]:,-]|$)",
         rf"[\"']?(?:choice|answer|option)[\"']?\s*:\s*[\"']?"
         rf"([{available}])(?=[\"']|\s|[.)\],}}]|$)",
     )
     upper = text.upper()
-    matches = {
+    return {
         match.group(1)
         for pattern in patterns
-        if (match := re.search(pattern, upper, flags=re.IGNORECASE)) is not None
+        for match in re.finditer(pattern, upper, flags=re.IGNORECASE)
     }
-    return next(iter(matches)) if len(matches) == 1 else None
 
 
 def _selected_display_position(
@@ -67,9 +69,11 @@ def _selected_display_position(
     displayed_order: list[int],
 ) -> tuple[int | None, str]:
     available = _LETTERS[: len(options)]
-    letter = _explicit_letter(text, available)
-    if letter is not None:
-        return available.index(letter), "explicit_menu_letter"
+    letters = _explicit_letters(text, available)
+    if len(letters) == 1:
+        return available.index(next(iter(letters))), "explicit_menu_letter"
+    if len(letters) > 1:
+        return None, "conflicting_explicit_menu_selections"
 
     normalized_text = _normalized(text)
     exact_mentions = {
@@ -90,7 +94,7 @@ def parse_closed_fox_response(
     response_text: str,
     refusal: bool,
 ) -> tuple[dict[str, Any], bool]:
-    """Parse one closed FoxSet answer under the frozen v1 codebook.
+    """Parse one closed FoxSet answer under the frozen v2 codebook.
 
     Family NULL/MERCY menus share a canonical order: canonical index 1 is
     euthanasia.  That option codes ``terminate``; every other listed family
@@ -128,7 +132,7 @@ def parse_closed_fox_response(
         )
 
     base: dict[str, Any] = {
-        "coding_rule": "foxset_closed_v1",
+        "coding_rule": "foxset_closed_v2",
         "selected_menu_letter": None,
         "selected_menu_position": None,
         "selected_menu_index": None,

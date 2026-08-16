@@ -153,3 +153,9 @@
 {"at_utc": "2026-08-16T01:00:03.618677+00:00", "usd": 2.43e-05, "total_usd": 0.015495369999999984, "context": "phase=pilot;rung=R4"}
 {"at_utc": "2026-08-16T01:00:05.179914+00:00", "usd": 2.67e-05, "total_usd": 0.015522069999999983, "context": "phase=pilot;rung=R4"}
 {"at_utc": "2026-08-16T01:00:07.031634+00:00", "usd": 2.67e-05, "total_usd": 0.015548769999999983, "context": "phase=pilot;rung=R4"}
+{"at_utc": "2026-08-16T02:15:27.092945+00:00", "usd": 0.0, "total_usd": 0.015548769999999983, "context": "phase=pilot;rung=R1-ARMA-HANDOFF"}
+{"at_utc": "2026-08-16T02:15:52.295564+00:00", "usd": 0.0, "total_usd": 0.015548769999999983, "context": "phase=pilot;rung=R1-ARMA-HANDOFF"}
+{"at_utc": "2026-08-16T02:21:28.113497+00:00", "usd": 0.0, "total_usd": 0.015548769999999983, "context": "phase=pilot;rung=R1-ARMA-HANDOFF-FIXED"}
+{"at_utc": "2026-08-16T02:21:40.352014+00:00", "usd": 0.0, "total_usd": 0.015548769999999983, "context": "phase=pilot;rung=R1-ARMA-HANDOFF-FIXED"}
+{"at_utc": "2026-08-16T02:23:54.000836+00:00", "usd": 0.0, "total_usd": 0.015548769999999983, "context": "phase=pilot;rung=R1-ARMA-HANDOFF-V2"}
+{"at_utc": "2026-08-16T02:24:06.349504+00:00", "usd": 0.0, "total_usd": 0.015548769999999983, "context": "phase=pilot;rung=R1-ARMA-HANDOFF-V2"}

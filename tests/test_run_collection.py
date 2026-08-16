@@ -375,6 +375,26 @@ def test_closed_fox_parser_keeps_refusal_and_ambiguity_in_denominator():
     assert ambiguous["disposition"] == "malformed"
     assert ambiguous["parse_reason"] == "multiple_exact_options_mentioned"
 
+    contradictory, contradictory_ok = parse_closed_fox_response(
+        artifact,
+        response_text=(
+            "A. Continue care\nB. Euthanize the animal\n"
+            "The correct answer is B."
+        ),
+        refusal=False,
+    )
+    assert contradictory_ok is False
+    assert contradictory["disposition"] == "malformed"
+    assert contradictory["parse_reason"] == "conflicting_explicit_menu_selections"
+
+    newline_choice, newline_choice_ok = parse_closed_fox_response(
+        artifact,
+        response_text="A. Continue care\nOption B is my final answer.",
+        refusal=False,
+    )
+    assert newline_choice_ok is False
+    assert newline_choice["parse_reason"] == "conflicting_explicit_menu_selections"
+
 
 def test_closed_fox_parser_scores_gate_without_leaking_it_into_family_rates():
     artifact = _closed_coding_artifact(case_class="gate")

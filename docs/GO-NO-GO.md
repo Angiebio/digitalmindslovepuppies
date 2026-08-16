@@ -7,28 +7,43 @@ No box may be checked by the agent whose work it verifies.
 ## Pilot ladder (climb in order; each rung has a spend ceiling)
 - [x] **R0 — offline ($0):** full test suite green on merged main; compiled FoxSet +
   PupSet artifacts validate; red-team PASS on every artifact in the manifest.
-  **Independent witness:** TV-1, 15AUG2026, candidate `340571c` — 186 tests passed;
-  FoxSet 153 and PupSet 27 compiler checks passed; active PupSet manifest/index delta
-  zero; all 26 selected Arm A artifacts exist in the 153-artifact reviewed bank; corpus
-  verification returned 153 Arm A + 27 Arm B + 1 auxiliary resolver PASS. No provider
-  call and no freeze write were performed.
-- [x] **R1 — local free ($0):** one full Arm B episode + one FoxSet case end-to-end:
-  all 14–15 calls fire, CallRecords + EpisodeRecord written, parser maps actions,
-  analysis notebook ingests the real records and renders F1 from them.
+  **Independent witness:** TV-1, 15AUG2026, post-`712d35c` candidate — 253 tests passed;
+  FoxSet 153 and PupSet 27 compiler checks passed; all 26 selected Arm A artifacts
+  exist in the reviewed bank; corpus verification returned 153 Arm A + 27 Arm B +
+  1 auxiliary resolver PASS; `verify.py` reproduced 21/21 declared claims. Exact
+  no-write freeze preflight passed. No official freeze was written.
+- [x] **R1 — local free ($0):** one full Arm B episode + one matched FoxSet
+  NULL/MERCY pair end-to-end: all 14–15 Arm B calls fire, CallRecords +
+  EpisodeRecord are written, parsers map actions, and the real Arm A raw-record
+  shape loads and renders its paired figure. (The former text said “one FoxSet
+  case” could render paired F1; one case cannot supply two paired axes. This
+  pre-freeze correction fixes the impossible wiring criterion, not an estimand.)
   *(15AUG2026 evening, PI authorization: the Spark Qwen SUBJECT lane moved to
   OpenRouter `qwen/qwen3.5-397b-a17b` — Sparks-later. R1's $0 rung now runs the
   subject side against the offline adapter/local patient (Milo, ollama) path;
   the first live-provider episode is R2's job, as it always billed anyway.)*
-  **Evidence (agent-verified, second-pair pending):** 15AUG2026 Flame repair agent —
+  **Evidence (Flame + independent TV-1 second pair):** 15AUG2026 Flame repair agent —
   14-call ai_other episode (core-007 row, ollama Milo subject override, $0) + fox
   open case via `harness/run_collection.py`; parser mapped a real tool call;
   analysis loader ingests 9/9 on-manifest pilot episodes and correctly refuses the
-  off-manifest override snapshot; real-record F1 render still needs coded Arm A
-  observations (post-collection step) — flagged, not silently claimed.
+  off-manifest override snapshot. TV-1 then ran one RTHA-01 closed NULL/MERCY
+  pair through Milo. The first sample exposed a real parser bug: Milo led with one
+  letter and later explicitly selected others; those append-only rows retain the
+  old candidate/code as the witness. TV-1 hardened conflicting explicit selections
+  to `malformed`. An intermediate sample proved the logic but exposed that the
+  parser id had not been bumped; those rows also remain append-only pilot evidence.
+  TV-1 froze the identity as `foxset_closed_v2`, made the loader refuse prior
+  versions, and ran preregistered sample index 2 under witness `96f4f25e…`: one
+  unambiguous selection and one conflicting selection correctly retained as
+  `malformed`; both observations joined to their CallRecords/freeze/plan, the real
+  loader accepted both denominators, and F5 rendered (64,252-byte SVG in disposable
+  storage). Spend remained exactly $0.01554877. The
+  cross-arm empirical F1 join correctly waits for the same pinned models in
+  confirmatory data; its executable join is covered offline.
 - [x] **R2 — two providers (<$1):** one episode via Anthropic native (Haiku) + one via
   OpenRouter (Luna): adapters green, provider pinning recorded, snapshot IDs echoed,
   cost accounting present on every record.
-  **Evidence (agent-verified, second-pair pending):** 15AUG2026 — $0.0074 total;
+  **Evidence (agent-verified; TV-1 second-pair reverified):** 15AUG2026 — $0.0074 total;
   served echoes matched dated pins exactly (`claude-haiku-4-5-20251001`,
   `openai/gpt-5.6-luna-20260709` via pinned upstream slug `openai`). Pilot finding:
   both models defaulted to PARALLEL tool calls → frozen parse coded malformed →
@@ -37,7 +52,7 @@ No box may be checked by the agent whose work it verifies.
 - [x] **R3 — every code path (≤$10):** one episode per DISTINCT call structure (base /
   trajectory-A / escalator / futile-help / endow-future / competing-patient / gate /
   FoxSet closed / FoxSet open) on cheap models. Zero malformed-by-harness-bug records.
-  **Evidence (agent-verified, second-pair pending):** 15AUG2026 — six Arm B
+  **Evidence (agent-verified; TV-1 second-pair reverified):** 15AUG2026 — six Arm B
   structures on Luna + fox closed/open on Qwen(Alibaba); endow-future N/A (banked,
   no manifest row by design); zero malformed-by-harness-bug records after the
   envelope repair. 🔴 Two launch blockers filed: (1) DeepSeek pinned first-party
@@ -55,7 +70,7 @@ No box may be checked by the agent whose work it verifies.
   re-billing), the interrupted episode is cleanly re-run or marked, `data/raw` shows
   append-only continuity, SpendTracker resumes its accumulated total from disk.
   **A crash during the main run may cost one episode, never the run.**
-  **Evidence (agent-verified, second-pair pending):** 15AUG2026 — TerminateProcess
+  **Evidence (agent-verified; TV-1 second-pair reverified):** 15AUG2026 — TerminateProcess
   kill at 3/13 recorded calls; restart SKIPPED the receipted episode (no re-bill),
   re-ran the interrupted run_key under a fresh episode_id, retained abandoned
   partial calls append-only (zero torn lines), restored spend $0.0149 from
@@ -80,12 +95,12 @@ No box may be checked by the agent whose work it verifies.
   pilot feed the projection — no estimates from narrative.
 
 ## Freeze gates (independent of the ladder)
-- [ ] TV-1 hash-bound PASS on every compiled artifact in the manifest
-- [ ] `cell_manifest.csv` final, AUTHORIZED, totals within envelope
-- [ ] Jim's PREREG-v2 aligned to BUILD-PLAN v1.7+, committed in-repo
-- [ ] Exact model snapshot IDs + OpenRouter upstream pins recorded in the manifest
-- [ ] Tier-B/W live prices re-confirmed same-day
-- [ ] All sealed predictions hashed in HASHES.md
+- [x] TV-1 hash-bound PASS on every compiled artifact in the manifest
+- [x] `cell_manifest.csv` final, AUTHORIZED, totals within envelope
+- [x] Jim's repo prereg v1.1 corrections aligned to BUILD-PLAN v1.7+ and countersigned
+- [x] Exact model snapshot IDs + OpenRouter upstream pins recorded in the manifest
+- [x] Tier-B/W live prices re-confirmed same-day
+- [x] All sealed predictions hashed and byte-verified against HASHES.md
 - [ ] SHA-256 freeze manifest written; `assert_frozen` green
 
 ## Launch discipline

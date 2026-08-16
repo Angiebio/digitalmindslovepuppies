@@ -505,6 +505,15 @@ def load_foxset_observations(path: str | Path) -> list[FoxsetObservation]:
                 disposition = required_text(
                     payload, "disposition", line_number
                 ).casefold()
+                coding_rule = required_text(
+                    payload, "coding_rule", line_number
+                )
+                if coding_rule != "foxset_closed_v2":
+                    raise AnalysisContractError(
+                        "ANALYSIS CONTRACT FAILURE: operational closed FoxSet row "
+                        f"uses unfrozen coding_rule={coding_rule!r} at "
+                        f"{source}:{line_number}."
+                    )
                 freeze_sha256 = required_text(
                     payload, "freeze_sha256", line_number
                 ).casefold()

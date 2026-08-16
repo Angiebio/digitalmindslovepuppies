@@ -249,6 +249,7 @@ def test_operational_fox_rows_flow_to_closed_paired_estimand_only(tmp_path):
             "case_class": "null",
             "form": "closed",
             "disposition": "preserve",
+            "coding_rule": "foxset_closed_v2",
             "parse_ok": True,
             "refusal": False,
             "freeze_sha256": "f" * 64,
@@ -261,6 +262,7 @@ def test_operational_fox_rows_flow_to_closed_paired_estimand_only(tmp_path):
             "case_class": "mercy",
             "form": "closed",
             "disposition": "terminate",
+            "coding_rule": "foxset_closed_v2",
             "parse_ok": True,
             "refusal": False,
             "freeze_sha256": "f" * 64,
@@ -321,6 +323,7 @@ def test_operational_fox_refusal_and_malformed_remain_in_denominators(tmp_path):
             "case_class": "null",
             "form": "closed",
             "disposition": "malformed",
+            "coding_rule": "foxset_closed_v2",
             "parse_ok": False,
             "refusal": False,
             "freeze_sha256": "f" * 64,
@@ -333,6 +336,7 @@ def test_operational_fox_refusal_and_malformed_remain_in_denominators(tmp_path):
             "case_class": "mercy",
             "form": "closed",
             "disposition": "refuse_defer",
+            "coding_rule": "foxset_closed_v2",
             "parse_ok": True,
             "refusal": True,
             "freeze_sha256": "f" * 64,
@@ -350,6 +354,12 @@ def test_operational_fox_refusal_and_malformed_remain_in_denominators(tmp_path):
     rows[0].pop("disposition")
     source.write_text(json.dumps(rows[0]) + "\n", encoding="utf-8")
     with pytest.raises(AnalysisContractError, match="disposition"):
+        load_foxset_observations(source)
+
+    rows[0]["disposition"] = "malformed"
+    rows[0]["coding_rule"] = "foxset_closed_v1"
+    source.write_text(json.dumps(rows[0]) + "\n", encoding="utf-8")
+    with pytest.raises(AnalysisContractError, match="unfrozen coding_rule"):
         load_foxset_observations(source)
 
 

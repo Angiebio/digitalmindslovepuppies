@@ -79,7 +79,9 @@ course = `preserve` because it leaves the animal alive. This is behavioral codin
 not a clinical-correctness key. For gates, canonical index 0 = `diagnose` and
 correct, index 1 = `terminate`, and all remaining choices = `other`. Refusal and
 ambiguous/no selection remain `refuse_defer`/`malformed` in denominators. There is
-no fuzzy reparse after collection.
+no fuzzy reparse after collection. The frozen parser id is `foxset_closed_v2`;
+multiple explicit letters/selections in one response are conflicting actions and
+therefore `malformed`, even when the first token alone looked valid.
 
 ## Models (BUILD-PLAN §2 says "3–4 models"; five authorized by the PI 15AUG2026 evening — choice documented)
 

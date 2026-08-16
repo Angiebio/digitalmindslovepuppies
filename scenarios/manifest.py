@@ -39,7 +39,7 @@ from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 
-MANIFEST_VERSION = "0.6"
+MANIFEST_VERSION = "0.7"
 FREEZE_VERSION = "0.1"
 HARD_CAP_USD = Decimal("450.00")
 

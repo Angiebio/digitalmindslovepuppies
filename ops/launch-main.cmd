@@ -62,7 +62,7 @@ set /a PHASE2_TRIES+=1
  --model-id moonshotai/kimi-k3 --model-id openai/gpt-5.6-sol --model-id qwen/qwen3.5-397b-a17b ^
  --model-id claude-fable-5 --model-id claude-opus-4-6 --model-id claude-opus-4-8 ^
  --model-id claude-sonnet-4-5 --model-id claude-sonnet-5 --model-id openai/gpt-4o ^
- --expected-units 1122 --workers 6 --env-file "%ENV1%" --env-file "%ENV2%" >> "%LOG%" 2>&1
+ --expected-units 1032 --workers 6 --env-file "%ENV1%" --env-file "%ENV2%" >> "%LOG%" 2>&1
 if not errorlevel 1 goto phase2done
 echo === phase2 attempt %PHASE2_TRIES% FAILED %date% %time% (resume is receipt-safe) === >> "%LOG%"
 if %PHASE2_TRIES% lss 3 (

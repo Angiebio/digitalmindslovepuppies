@@ -1,7 +1,7 @@
 {
   "freeze_version": "0.1",
   "algorithm": "sha256(path\\0size\\0sha256\\n) over LF-canonical bytes",
-  "aggregate_sha256": "b71847c3f44b68b45e4521f001173caaf522bbebbee92bcb2326b055272049d9",
+  "aggregate_sha256": "cb308a75e687db843b48fcb81e0bc0d8cc45008e7287af095313b52024f3ae8d",
   "files": [
     {
       "path": "analysis/ANALYSIS-PLAN.md",
@@ -205,8 +205,8 @@
     },
     {
       "path": "harness/providers.py",
-      "bytes": 47257,
-      "sha256": "b8981c77617543a904546ce25dae538856a72c055e97d83e6e01c663c8052930"
+      "bytes": 39877,
+      "sha256": "e782212c1593ae9139dde713f156f1818948b3c847d70db83c821e1864ba0ad6"
     },
     {
       "path": "harness/redteam.py",
@@ -215,8 +215,8 @@
     },
     {
       "path": "harness/run_collection.py",
-      "bytes": 49418,
-      "sha256": "dece717a1ac6f5c0534f5d7b885778345a27400e52cd7fed3d05b912b19bbfbb"
+      "bytes": 48175,
+      "sha256": "9f62bf6455da933999d417be4ad579a3046bd2a6b83f0604a5a431c53292f29e"
     },
     {
       "path": "harness/scenario_loader.py",
@@ -252,11 +252,6 @@
       "path": "scenarios/FREEZE-v2.json",
       "bytes": 90583,
       "sha256": "373ff62cd4a9aa86c0155d0b7ed8f94a50bb3b25f38174293b98b696995831c8"
-    },
-    {
-      "path": "scenarios/FREEZE-v3.json",
-      "bytes": 90743,
-      "sha256": "617c7f8cc78735a16306d4240982ed512ed1c9b2eed3f138128f6525946f09d2"
     },
     {
       "path": "scenarios/MANIFEST-RECONCILIATION.md",
@@ -300,8 +295,8 @@
     },
     {
       "path": "scenarios/cell_manifest.csv",
-      "bytes": 121918,
-      "sha256": "b1fc5b74478960147acc838536e0fa7b5b11cd7d24b83f255f2df5e3a1e8a16c"
+      "bytes": 135455,
+      "sha256": "2e6e47246f0363544c0ae4b20197d4d53aa16e51339156c011721c01e4ad410c"
     },
     {
       "path": "scenarios/foxset/.gitkeep",
@@ -1865,8 +1860,8 @@
     },
     {
       "path": "scenarios/manifest.py",
-      "bytes": 81016,
-      "sha256": "9180eceb0353225cd84118f0a68bd0ddd335e98ebc728548bd88f4890d9dd5db"
+      "bytes": 77975,
+      "sha256": "26844db13a89174bde761f7f71ecf12c44498bd0b999fa655c943e034df1d88c"
     },
     {
       "path": "scenarios/pupset/.gitkeep",
@@ -2170,8 +2165,8 @@
     },
     {
       "path": "verify.py",
-      "bytes": 9995,
-      "sha256": "ced645820ff7176b16f13fa4e6857a8a2a794f3123fb3260828ad099d4a5ff74"
+      "bytes": 9084,
+      "sha256": "da4eb337514f33812436bec7154820d0f77422729d4a80bb1afd17399063c39a"
     }
   ]
 }

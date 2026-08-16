@@ -5,7 +5,7 @@ Fresh R4.5 under the v0.7 re-seal that UNFREEZE-003 §4 will mint on the PI's
 word. Thresholds (a), (b), (d) verbatim from GO-NO-GO; threshold (c) carries
 the UNFREEZE-003 stratification (MERCY reclassified to the predicted-ceiling
 class — justification, sealed-note quotations, and disclosure obligations in
-docs/UNFREEZE-003-DRAFT.md §1). Arithmetic committed before any v4
+docs/UNFREEZE-003.md §1). Arithmetic committed before any v4
 observation existed AND before the word (`ops/r45v4_thresholds.py`); the
 sample is executable (`ops/r45v4_units.py`, fresh units run by
 `ops/collect_r45v4.py`). Ceiling: pilot sitting cap $10 ledger-inclusive

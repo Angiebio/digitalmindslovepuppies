@@ -1,19 +1,7 @@
-# UNFREEZE-003 — DRAFT — post-data amendment to the preregistered check (third)
-**16AUG2026 · v0.1-DRAFT · Flame climb-four prep agent · STATUS: PREPARED, NOT EXECUTED**
+# UNFREEZE-003 — post-data amendment to the preregistered check (third)
+**16AUG2026 · v1.0 · Flame climb-four prep agent · STATUS: EXECUTED**
 
-<!-- DRAFT-SENTINEL-BEGIN (ops/apply_unfreeze3.py removes this block verbatim at execution) -->
-> **DRAFT SENTINEL.** Nothing in this document is in force. No stimulus byte,
-> no seal, no manifest row, and no collection behavior changes until the PI
-> gives the word. On that word, `ops/apply_unfreeze3.py` (invoked by
-> `ops/climb4.cmd`) strips this banner, stamps the verbatim PI word and
-> timestamp below, renames this file to `docs/UNFREEZE-003.md`, and executes
-> §4 exactly. Until then the working tree carries PREPARED code that is
-> provably dormant (tests/test_single_call_forcing.py) and collectors that
-> REFUSE to run (`ops/collect_r45v4.py` exit 3, `ops/r45v4_thresholds.py`
-> exit 2) under the standing v0.6 design.
-<!-- DRAFT-SENTINEL-END -->
-
-**PI word, verbatim:** ⟨PI-WORD — stamped at execution⟩ · ⟨TIMESTAMP ET⟩
+**PI word, verbatim:** **mercy is a ceiling — climb** · 16AUG2026 09:17 EASTERN DAYLIGHT TIME
 
 This is the third documented un-freeze and the second post-data amendment to
 a preregistered threshold. UNFREEZE-001 changed token-budget parameters under

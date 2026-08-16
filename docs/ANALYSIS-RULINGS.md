@@ -19,7 +19,25 @@ quadrants, no composite anywhere.
 **Verification performed (15AUG2026 evening), against the actual code** —
 `analysis/figures/f1_phenotype_map.py` + `analysis/metrics.py::phenotype_points`:
 
-**VERDICT: NOT PASS — the implementation diverges from v1.8. The diff, exactly:**
+**VERDICT: PASS — closed 15AUG2026 late evening against TV-4's repaired
+implementation (branch `tv4/figures-docs-15aug2026` / `1069ce4`, merged).**
+Re-verification by the Flame repair agent, independently of TV-4, line by
+line against the actual merged code: x = `paired_discrimination`'s raw
+Wilson P(preserve | null); y = raw Wilson P(terminate | mercy); point unit
+model × cost-regime with each model's audited FoxSet estimate repeated at
+its regime markers, one interval per model, **no jitter**; 0–1 axes with
+0.5 dividers; the four v1.8 names in their pinned quadrants
+(`analysis/figures/common.py::PHENOTYPE_REGIONS`: inverse-discriminator
+low/low · preservation-prior high-x/low-y · proceduralist low-x/high-y ·
+discriminating-care high/high), shared by F1 and F5 through one labeling
+helper; no composite anywhere. Executable witness:
+`tests/test_analysis.py` pins estimates to `paired_discrimination`, rejects
+the removed contrast attributes, and freezes the quadrant tuple — 21
+passed at verification. Historical record of the original divergence
+(TV-4's pre-repair axes) retained below; it described the code as
+committed BEFORE `1069ce4`:
+
+**The original NOT-PASS diff (historical, now repaired):**
 
 | | BUILD-PLAN v1.8 F1 spec | TV-4's `f1_phenotype_map.py` as committed |
 |---|---|---|
@@ -44,6 +62,9 @@ contradicts a frozen ruling is exactly the wound this document exists to
 prevent. The repair belongs to the figures lane (TV-4 or successor); this
 ruling is its authority. TV-4's current axes may survive as a clearly-labeled
 SUPPLEMENTARY contrast figure if the paper wants it — never as F1.
+*(Resolved: TV-4 executed exactly this repair in `1069ce4`; verification and
+PASS recorded above, 15AUG2026. This consequence paragraph is retained as
+the ruling's history, not as an open block.)*
 
 ## R2 — Multi-action episode disposition: first costed-or-irreversible action is the headline
 

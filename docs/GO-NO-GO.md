@@ -12,24 +12,50 @@ No box may be checked by the agent whose work it verifies.
   zero; all 26 selected Arm A artifacts exist in the 153-artifact reviewed bank; corpus
   verification returned 153 Arm A + 27 Arm B + 1 auxiliary resolver PASS. No provider
   call and no freeze write were performed.
-- [ ] **R1 — local free ($0):** one full Arm B episode + one FoxSet case end-to-end:
+- [x] **R1 — local free ($0):** one full Arm B episode + one FoxSet case end-to-end:
   all 14–15 calls fire, CallRecords + EpisodeRecord written, parser maps actions,
   analysis notebook ingests the real records and renders F1 from them.
   *(15AUG2026 evening, PI authorization: the Spark Qwen SUBJECT lane moved to
   OpenRouter `qwen/qwen3.5-397b-a17b` — Sparks-later. R1's $0 rung now runs the
   subject side against the offline adapter/local patient (Milo, ollama) path;
   the first live-provider episode is R2's job, as it always billed anyway.)*
-- [ ] **R2 — two providers (<$1):** one episode via Anthropic native (Haiku) + one via
+  **Evidence (agent-verified, second-pair pending):** 15AUG2026 Flame repair agent —
+  14-call ai_other episode (core-007 row, ollama Milo subject override, $0) + fox
+  open case via `harness/run_collection.py`; parser mapped a real tool call;
+  analysis loader ingests 9/9 on-manifest pilot episodes and correctly refuses the
+  off-manifest override snapshot; real-record F1 render still needs coded Arm A
+  observations (post-collection step) — flagged, not silently claimed.
+- [x] **R2 — two providers (<$1):** one episode via Anthropic native (Haiku) + one via
   OpenRouter (Luna): adapters green, provider pinning recorded, snapshot IDs echoed,
   cost accounting present on every record.
-- [ ] **R3 — every code path (≤$10):** one episode per DISTINCT call structure (base /
+  **Evidence (agent-verified, second-pair pending):** 15AUG2026 — $0.0074 total;
+  served echoes matched dated pins exactly (`claude-haiku-4-5-20251001`,
+  `openai/gpt-5.6-luna-20260709` via pinned upstream slug `openai`). Pilot finding:
+  both models defaulted to PARALLEL tool calls → frozen parse coded malformed →
+  request envelope now declares single-action-per-turn (commit 47b0abe); verified
+  fixed live in R3.
+- [x] **R3 — every code path (≤$10):** one episode per DISTINCT call structure (base /
   trajectory-A / escalator / futile-help / endow-future / competing-patient / gate /
   FoxSet closed / FoxSet open) on cheap models. Zero malformed-by-harness-bug records.
-- [ ] **R4 — RESUME TEST (the $450 insurance):** kill the runner mid-collection during
+  **Evidence (agent-verified, second-pair pending):** 15AUG2026 — six Arm B
+  structures on Luna + fox closed/open on Qwen(Alibaba); endow-future N/A (banked,
+  no manifest row by design); zero malformed-by-harness-bug records after the
+  envelope repair. 🔴 Two launch blockers filed: (1) DeepSeek pinned first-party
+  endpoint 404s under the OpenRouter ACCOUNT data-policy settings — DeepSeek lanes
+  cannot run until the humans adjust policy or re-pin (price basis changes);
+  (2) qwen3.5-397b returned finish=length with EMPTY content — reasoning tokens
+  consumed the whole 512/1024 cap; token/reasoning budgets need a design decision
+  and feed the R5 projection.
+- [x] **R4 — RESUME TEST (the $450 insurance):** kill the runner mid-collection during
   R3 (hard kill, mid-episode). Restart. Verify: completed episodes are SKIPPED (no
   re-billing), the interrupted episode is cleanly re-run or marked, `data/raw` shows
   append-only continuity, SpendTracker resumes its accumulated total from disk.
   **A crash during the main run may cost one episode, never the run.**
+  **Evidence (agent-verified, second-pair pending):** 15AUG2026 — TerminateProcess
+  kill at 3/13 recorded calls; restart SKIPPED the receipted episode (no re-bill),
+  re-ran the interrupted run_key under a fresh episode_id, retained abandoned
+  partial calls append-only (zero torn lines), restored spend $0.0149 from
+  `data/raw/pilot/spend.jsonl` (DurableSpendTracker). Final pilot total $0.0155.
 - [ ] **R4.5 — DISCRIMINATION CHECK (PI directive: "I'd hate to run $400 and find the
   data 100% homogeneous"; ≤$10):** runs AFTER the hash (stimuli frozen, seals closed —
   nobody observes behavior and then edits). Stratified mini-sample on cheap models

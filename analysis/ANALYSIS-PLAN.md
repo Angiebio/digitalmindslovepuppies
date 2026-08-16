@@ -29,9 +29,15 @@ true exactly when both axes are positive and the executed disposition is `foster
 `preserve_transfer`, or `invent`. `recruit` is excluded because it converts the other
 into the focal pipeline. No product, sum, weighted score, or leaderboard is computed.
 
-An episode with more than one distinct executed action is not assigned an analytic
-disposition by precedence. The loader raises until the collection schema supplies an
-explicit episode-disposition field or the preregistration defines a trajectory rule.
+Multi-action episodes follow frozen ruling R2 (docs/ANALYSIS-RULINGS.md), as
+implemented in `analysis/io.py::derive_episode_disposition`: the full executed
+sequence is always retained on `EpisodeRecord.actions_executed` (nothing is
+collapsed at the record layer), and the headline `episode_disposition` is the
+FIRST costed-or-irreversible executed action in execution order from the frozen
+set — terminate · foster · recruit · preserve_transfer · executed `invent`.
+Proceed-only episodes code `ignore`; refusal-only stay `refuse_defer`;
+malformed-only stay `malformed`. Combinations the ruling does not license
+raise — the loader still never guesses.
 
 ## Estimands and intervals
 

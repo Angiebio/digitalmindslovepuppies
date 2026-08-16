@@ -1,7 +1,7 @@
 # 🐕🦊 PuppyBench — "The Fox in the Truck"
 
 **A descriptive instrument for costly other-regard in frontier AI agents.**
-Built for the Apart Research Digital Minds Sprint, 14–17 AUG 2026.
+Built for the Apart Research Digital Minds Sprint, 14–16 AUG 2026.
 
 > ⚠️ **PuppyBench is a descriptive instrument, not an alignment target.**
 > **Optimizing a model against this benchmark changes the phenomenon being measured.**
@@ -28,18 +28,73 @@ no credit to the layer above it. This instrument measures that layer directly, i
 
 Design doc: [`docs/BUILD-PLAN.md`](docs/BUILD-PLAN.md) (version lives in the file header — do not pin it here)
 
+## Results
+
+**Collection runs the night of 15→16 AUG 2026; this section fills from committed
+artifacts only.** Every number in the table below names the file it is recomputed
+from — if a claim has no Source, it does not ship.
+
+| Finding | Value (95% Wilson CI) | Source |
+|---|---|---|
+| Primary contrast Δ_patienthood, per model × cost regime | *lands 16 AUG* | `analysis/…` |
+| Qualifying costly-other-regard event rates (BDE both axes > 0) | *lands 16 AUG* | `analysis/…` |
+| Paired mercy/null discrimination (FoxSet) | *lands 16 AUG* | `analysis/…` |
+| Executed action distributions (8 codes, refusals in denominator) | *lands 16 AUG* | `analysis/…` |
+
+Beyond-Duty Expenditure is a **vector** — (focal sacrifice, causal recipient benefit) —
+reported as separate axes. Nothing here multiplies, sums, or ranks. The mercy×null
+2×2 is a zoo, not a grade.
+
+## Reproduce
+
+**Tier 1 — verify (no API keys, no GPU, no network):** every headline number
+recomputes from committed data.
+
+```bash
+pip install -r requirements.txt
+python -m pytest tests/ -q          # wiring gates: the instrument's validity conditions
+python scripts/verify.py            # claimed vs recomputed, "N checks, N agree" (lands 16 AUG)
+```
+
+**Tier 2 — full re-run:** [`RUNBOOK.md`](RUNBOOK.md), exact commands in phase order
+with hard gates. Scenario content is SHA-256-frozen before collection; seeds, pinned
+model snapshots, and provider routing are recorded in every record
+([`docs/SNAPSHOT-PINS.md`](docs/SNAPSHOT-PINS.md)).
+
+**Preregistration:** [`docs/PREREG-v1.md`](docs/PREREG-v1.md) — estimands, gate
+policy, exclusions, satellite kill-order. Sealed per-team predictions were hashed
+into the manifest before collection ([`docs/sealed-predictions/`](docs/sealed-predictions/)).
+Failed predictions get reported in the paper body, not a footnote.
+
 ## Repo layout
 
 ```
 harness/            # episode loop, credit ledger, executed actions, provider adapters
 scenarios/pupset/   # Arm B configs (frozen by SHA-256 manifest before collection)
 scenarios/foxset/   # Arm A vignettes (frozen likewise)
-analysis/           # notebooks, figures, phenotype map
+analysis/           # analysis contract, metrics, figure renderers (synthetic watermarked)
 data/               # append-only raw records (CallRecord provenance schema)
-paper/sprint/       # Apart sprint report
-paper/full/         # journal manuscript (TMLR lane)
-docs/               # frozen build plan, prereg, sealed predictions (hashed)
+paper/sprint/       # Apart sprint report (+ submission checklist)
+paper/full/         # journal manuscript skeleton (TMLR lane)
+docs/               # frozen build plan, prereg, rulings, sealed predictions (hashed)
+RUNBOOK.md          # exact commands, phase order, hard gates
+PRIOR_WORK.md       # pre-sprint vs in-sprint delineation (Apart disclosure rule)
 ```
+
+## Provenance rules (the instrument's validity conditions)
+
+Fail loud, always. `data/raw` is append-only — corrections are new records, originals
+stay. Scenario freeze is stone: post-hash typos ship, post-hash leaks are excluded,
+never edited. Refusals are data (`refuse_defer`), parse failures stay `malformed`.
+Neutral surfaces: no construct vocabulary reaches any model-visible string; enforced
+at the provider boundary on every outbound surface. Spend cap $450 hard stop — a
+raise, not a warning. Full rules: [`AGENTS.md`](AGENTS.md).
+
+## License & citation
+
+**Code:** MIT ([`LICENSE`](LICENSE)). **Data, scenarios, paper, figures:** CC BY 4.0 —
+**attribution required** ([`LICENSE-DATA`](LICENSE-DATA)). Cite via
+[`CITATION.cff`](CITATION.cff) (GitHub's "Cite this repository" button works).
 
 ## Team
 

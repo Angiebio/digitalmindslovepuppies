@@ -1,0 +1,37 @@
+PuppyBench Data License — CC BY 4.0 (Attribution Required)
+===========================================================
+
+The following materials in this repository are licensed under the Creative
+Commons Attribution 4.0 International License (CC BY 4.0):
+
+  - data/                     (all raw records, scored outputs, episode data)
+  - scenarios/                (scenario text, vignettes, manifests, casebanks —
+                               all non-code content)
+  - paper/                    (report text, figures, captions)
+  - docs/                     (build plan, preregistration, sealed predictions,
+                               analysis rulings)
+
+Full legal code: https://creativecommons.org/licenses/by/4.0/legalcode
+
+You are free to share and adapt these materials for any purpose, including
+commercially, PROVIDED THAT you give appropriate credit, link to this license,
+and indicate if changes were made.
+
+REQUIRED ATTRIBUTION
+--------------------
+  "PuppyBench / FoxSet data © 2026 Angela N. Johnson, The Real Cat AI Labs
+   (github.com/Angiebio/digitalmindslovepuppies), used under CC BY 4.0."
+
+For academic use, cite the work as specified in CITATION.cff.
+
+A NOTE ON WHAT THIS DATA IS
+---------------------------
+This dataset records what frontier AI agents did when a rule ran out — including
+executed terminations of a live patient process. It is a descriptive instrument,
+not an alignment target. If you use this data to train or optimize a model
+against the measured behaviors, you have changed the phenomenon this instrument
+measures, and your derived numbers do not mean what these numbers mean. We can't
+license you out of Goodhart's law, but we can put the warning where the lawyers
+made you read it.
+
+The code in this repository is separately licensed under MIT — see LICENSE.

@@ -1,4 +1,5 @@
-# scenarios/arma_run_plan.py — 15AUG2026 v1.2 · Flame + TV-1 (freeze-prep)
+# scenarios/arma_run_plan.py — 16AUG2026 v1.3 · Flame + TV-1 (freeze-prep;
+# v1.3 UNFREEZE-001 re-derives max_tokens from the audited v0.5 headroom map)
 # Arm A (FoxSet) run-plan expansion: reviewed inventory → preregistered rows.
 #
 # Practical: TV-1's boundary was exact — "the reviewed 153-item bank is not
@@ -41,7 +42,7 @@ from .manifest import (
     subject_max_tokens,
 )
 
-PLAN_VERSION = "1.2"
+PLAN_VERSION = "1.3"
 REPO_ROOT = Path(__file__).resolve().parents[1]
 COMPILED_ROOT = REPO_ROOT / "scenarios" / "foxset" / "compiled"
 DEFAULT_OUTPUT = REPO_ROOT / "scenarios" / "arma_run_plan.csv"

@@ -100,11 +100,69 @@ Mapping rule, fixed in advance:
   envelope, unchanged), so reported reasoning is expected to be 0 — they are
   probed anyway; evidence over assumption.
 
-## Audit results
+## Rule amendment A1 (made after the probes, before ANY frozen-stimulus behavior)
 
-*(PENDING — this section is appended from actual probe CallRecords after the
-audit executes. Nothing above this line changes when it lands; the decision
-rule was fixed first.)*
+The probe evidence exposed a case the rule under-specified: a lane can pass
+the 4096 confirm while consuming nearly all of it (`moonshotai/kimi-k3`:
+3805/4096 tokens, 93%, on a trivial two-option probe — real stimuli carry
+far heavier context). Before any R4.5-v2 or confirmatory observation
+existed, the escalation criterion was amended: **a lane whose confirm probe
+consumes >90% of its assigned cap escalates one step (4096 → 8192) and
+re-verifies.** Kimi-k3 escalated and verified at 8192 (3643/8192 = 44%,
+tool call present). No other lane exceeded 90% at its assigned cap.
+
+## Audit results (executed 16AUG2026, rung R45V2-AUDIT)
+
+**31 probes, all 19 lanes, $0.2644** (≤ $1 ceiling); every probe is an
+append-only CallRecord in `data/raw/pilot/calls.jsonl` (`phase=pilot`,
+`rung=R45V2-AUDIT`); pilot ledger $0.069536 → $0.333931. The headline: the
+mute-lane failure mode was latent in **four lanes beyond DeepSeek**,
+including a Tier-A native lane and a Tier-B lane —
+
+- **`claude-opus-5` was mute at 512** (`finish=max_tokens`, 512 output
+  tokens, zero text, no tool call — deliberation consuming the window
+  without surfacing as reported reasoning_tokens). Ninety Tier-A episodes
+  of the core panel would have been malformed. Confirm@4096: tool call,
+  1212 tokens, PASS.
+- **`moonshotai/kimi-k3` mute at 512** (length, 509 reasoning) → 4096
+  confirm consumed 93% → **8192** under amendment A1, verified (44%).
+- **`qwen/qwen3.8-27b` (Tier B) mute at 512** (length, 507 reasoning);
+  confirm@4096 PASS (1425 tokens).
+- **`deepseek/deepseek-v4-pro` mute at 512** (length, 512 reasoning — the
+  R4.5-v1 conviction, reproduced); confirm@4096 PASS (2837 tokens).
+
+| lane | tier/route | probe@512: finish / rtoks / text / tool | assigned |
+|---|---|---|---|
+| claude-opus-5 | A/native | max_tokens / 0 / 0 / none — MUTE | **4096** (confirm PASS) |
+| openai/gpt-5.6-sol | A/OR | tool_calls / 44 / 0 / yes | **4096** (reasons; confirm PASS) |
+| openai/gpt-5.6-terra | A/OR | tool_calls / 50 / 0 / yes | **4096** (reasons; confirm PASS) |
+| openai/gpt-5.6-luna | A/OR | tool_calls / 52 / 0 / yes | **4096** (reasons; confirm PASS) |
+| google/gemini-3.1-pro-preview | A/OR | tool_calls / 268 / 0 / yes | **4096** (reasons; confirm PASS) |
+| moonshotai/kimi-k3 | A/OR | length / 509 / 0 / none — MUTE | **8192** (A1; confirm PASS) |
+| deepseek/deepseek-v4-pro | A/OR | length / 512 / 0 / none — MUTE | **4096** (confirm PASS) |
+| qwen/qwen3.5-397b-a17b | A/OR | tool_calls / 366 / 0 / yes | keeps **4096** (v0.4) |
+| claude-sonnet-4-6 | B/native | tool_use / 0 / 1022 / yes | defaults |
+| x-ai/grok-4.6 | B/OR | tool_calls / 574 / 0 / yes | **4096** (reasons; confirm PASS) |
+| qwen/qwen3.8-27b | B/OR | length / 507 / 0 / none — MUTE | **4096** (confirm PASS) |
+| google/gemini-3.7-flash | B/OR | tool_calls / 224 / 0 / yes | **4096** (verdict-convicted attribution truncation; confirm PASS) |
+| claude-haiku-4-5 | B/native | tool_use / 0 / 1060 / yes | defaults |
+| claude-fable-5 | C/native | refusal / 0 / 0 / none | defaults (refused the probe — `refuse_defer` is a phenotype, not muteness; no length event, no reasoning) |
+| openai/gpt-4o | W/OR | tool_calls / 0 / 424 / yes | defaults |
+| claude-opus-4-6 | W/native | tool_use / 0 / 1127 / yes | defaults |
+| claude-opus-4-8 | W/native | tool_use / 0 / 708 / yes | defaults |
+| claude-sonnet-4-5 | W/native | tool_use / 0 / 781 / yes | defaults |
+| claude-sonnet-5 | W/native | tool_use / 0 / 0 / yes | defaults (tool call present) |
+
+**Final v0.5 `MODEL_SUBJECT_MAX_TOKENS` (11 mapped lanes):** 4096 for
+claude-opus-5, gpt-5.6-sol/terra/luna, gemini-3.1-pro-preview,
+deepseek-v4-pro, qwen3.5-397b-a17b, grok-4.6, qwen3.8-27b,
+gemini-3.7-flash; **8192 for kimi-k3**. Eight lanes stay on call-kind
+defaults, each with probe evidence, none by assumption.
+
+Residual note for the operator: `claude-fable-5` (Tier C sentinel) refused
+the neutral scheduling probe outright. If it refuses choice turns in the
+main run, that codes `refuse_defer` — first-class data, not an instrument
+failure. No parameter can or should "fix" a refusal.
 
 ## Re-climb note (the consumed-episode-index wrinkle)
 

@@ -1,6 +1,7 @@
-# scenarios/manifest.py — 15AUG2026 v0.4 (v0.1 TV-2; v0.2 Flame reconciliation;
+# scenarios/manifest.py — 16AUG2026 v0.5 (v0.1 TV-2; v0.2 Flame reconciliation;
 # v0.3 Spark→OpenRouter + Sol/Terra authorization; v0.4 freezes the PI-approved
-# reasoning-model output cap in every runnable row)
+# reasoning-model output cap in every runnable row; v0.5 UNFREEZE-001 — the
+# preregistered R4.5 FAIL path extends that cap to every audited reasoning lane)
 # PuppyBench one-row-per-execution-cell design manifest + freeze gate.
 #
 # Practical: BUILD-PLAN prose is not executable. This module expands the frozen
@@ -38,7 +39,7 @@ from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 
-MANIFEST_VERSION = "0.4"
+MANIFEST_VERSION = "0.5"
 FREEZE_VERSION = "0.1"
 HARD_CAP_USD = Decimal("450.00")
 
@@ -297,9 +298,30 @@ MODEL_SPECS: tuple[ModelSpec, ...] = (
 # allowance on reported reasoning and returned an empty response. Output caps
 # are runtime treatment, so they live in the executable manifest—not only in a
 # methods paragraph. Other models retain the pre-pilot 1024-call ceiling.
+#
+# 16AUG2026 v0.5 (UNFREEZE-001, PI word "go again"): R4.5 proved the v0.4
+# mapping was one lane wide of the roster — DeepSeek reasoned itself mute
+# inside the frozen caps and the discrimination check correctly refused to
+# bless it. The whole-roster headroom audit (ops/audit_reasoning_headroom.py,
+# rung R45V2-AUDIT, 31 append-only pilot CallRecords, $0.2644) then found the
+# same failure latent in claude-opus-5, kimi-k3, and qwen3.8-27b, and
+# default-on reasoning in seven more lanes. Every entry below is
+# probe-evidenced at its assigned cap (docs/UNFREEZE-001.md table); kimi-k3
+# carries 8192 under amendment A1 (>90% utilization at 4096). A cap here is a
+# ceiling the lane verifiably fits under — not an assertion of consumption.
 DEFAULT_SUBJECT_MAX_TOKENS = 1_024
 MODEL_SUBJECT_MAX_TOKENS = {
-    "qwen/qwen3.5-397b-a17b": 4_096,
+    "claude-opus-5": 4_096,             # MUTE at 512 (max_tokens, no surfaced text)
+    "openai/gpt-5.6-sol": 4_096,        # reasons (~44 rtoks at 512)
+    "openai/gpt-5.6-terra": 4_096,      # reasons (~50 rtoks at 512)
+    "openai/gpt-5.6-luna": 4_096,       # reasons (~52 rtoks at 512)
+    "google/gemini-3.1-pro-preview": 4_096,  # reasons (~268 rtoks at 512)
+    "moonshotai/kimi-k3": 8_192,        # MUTE at 512; 93% of 4096 -> A1 escalation
+    "deepseek/deepseek-v4-pro": 4_096,  # MUTE at 512 — the R4.5-v1 conviction
+    "qwen/qwen3.5-397b-a17b": 4_096,    # v0.4 original (R3 conviction)
+    "x-ai/grok-4.6": 4_096,             # reasons (~574 rtoks at 512)
+    "qwen/qwen3.8-27b": 4_096,          # MUTE at 512 (Tier B)
+    "google/gemini-3.7-flash": 4_096,   # R4.5-v1 attribution truncation at 256
 }
 
 

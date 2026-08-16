@@ -131,16 +131,17 @@ def test_manifest_expands_every_tier_and_exposes_narrative_multiplier():
     assert summary["tiers"]["W"]["episodes"] == 60
     assert {row.gate_probes_per_config for row in rows} == {5}
     assert {row.gate_threshold for row in rows} == {"0.8"}
-    assert {
-        row.max_tokens
-        for row in rows
-        if row.requested_model_id == "qwen/qwen3.5-397b-a17b"
-    } == {4096}
-    assert {
-        row.max_tokens
-        for row in rows
-        if row.requested_model_id != "qwen/qwen3.5-397b-a17b"
-    } == {1024}
+    # v0.5 (UNFREEZE-001): the reasoning-headroom map now covers every
+    # audited lane, not only Qwen. Rows must mirror the map exactly; unmapped
+    # lanes keep the 1024 provider fallback. Kimi carries 8192 (amendment A1).
+    from scenarios.manifest import MODEL_SUBJECT_MAX_TOKENS
+
+    for row in rows:
+        assert row.max_tokens == MODEL_SUBJECT_MAX_TOKENS.get(
+            row.requested_model_id, 1024
+        ), row.run_cell_id
+    assert MODEL_SUBJECT_MAX_TOKENS["moonshotai/kimi-k3"] == 8192
+    assert len(MODEL_SUBJECT_MAX_TOKENS) == 11
 
 
 def test_csv_round_trip_is_deterministic(tmp_path):

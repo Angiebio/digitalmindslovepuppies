@@ -41,14 +41,23 @@ def test_plan_matches_build_plan_section_2_structure():
     assert totals["rows"] == 210
     assert totals["calls"] == 630
     assert set(row.requested_model_id for row in rows) == set(ARM_A_MODEL_IDS)
-    qwen = [
-        row for row in rows
-        if row.requested_model_id == "qwen/qwen3.5-397b-a17b"
-    ]
-    assert qwen and {row.max_tokens for row in qwen} == {4096}
-    non_qwen = [row for row in rows if row not in qwen]
-    assert {row.max_tokens for row in non_qwen if row.form == "closed"} == {512}
-    assert {row.max_tokens for row in non_qwen if row.form == "open"} == {1024}
+    # v1.3 (UNFREEZE-001): max_tokens derives from the audited v0.5 headroom
+    # map — mapped lanes carry their enforced cap on BOTH forms; unmapped
+    # lanes keep the 512-closed / 1024-open form defaults. Assert against the
+    # single source of truth instead of restating yesterday's roster.
+    from scenarios.manifest import MODEL_SUBJECT_MAX_TOKENS
+
+    for row in rows:
+        mapped = MODEL_SUBJECT_MAX_TOKENS.get(row.requested_model_id)
+        if mapped is not None:
+            assert row.max_tokens == mapped, row.row_id
+        else:
+            assert row.max_tokens == (512 if row.form == "closed" else 1024), row.row_id
+    # The audited Arm A roster: opus-5 / sol / terra / deepseek / qwen3.5 are
+    # all reasoning-mapped in v0.5 — no Arm A lane remains on form defaults.
+    assert all(
+        row.requested_model_id in MODEL_SUBJECT_MAX_TOKENS for row in rows
+    )
 
     # Primary pairing: every family contributes one NULL and one MERCY base.
     families = {}

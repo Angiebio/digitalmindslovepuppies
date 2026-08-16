@@ -222,3 +222,24 @@ Rows / cells / episodes / calls and the preregistered expected-token estimate
 remain **278 / 27 / 888 / 12,124 / $431.509628**. `max_tokens` is a ceiling, not
 an assertion that every response consumes it; R5 uses post-hash pilot actuals
 and invokes the frozen kill order if reasoning usage breaks the $450 envelope.
+
+## 10. 16AUG2026 — UNFREEZE-001 whole-roster headroom extension (v0.5; PI word "go again")
+
+R4.5 FAILED thresholds (c)/(d) — the frozen caps made DeepSeek mute
+(docs/R45-VERDICT.md) — and the preregistered FAIL path executed:
+documented un-freeze (docs/UNFREEZE-001.md), FREEZE.json → FREEZE-v1.json
+archived, whole-roster reasoning-headroom audit
+(ops/audit_reasoning_headroom.py, rung R45V2-AUDIT, 31 probes, $0.2644).
+The v0.4 single-lane mapping became the audited 11-lane v0.5 map: 4096 for
+claude-opus-5 (mute at 512 — a Tier-A native lane caught before it cost
+$75), gpt-5.6-sol/terra/luna, gemini-3.1-pro-preview, deepseek-v4-pro,
+qwen3.5-397b-a17b, grok-4.6, qwen3.8-27b (mute at 512, Tier B),
+gemini-3.7-flash; **8192 for kimi-k3** (mute at 512; 93% utilization at
+4096 → amendment A1). Arm A plan v1.3 derives the same map.
+
+Rows / cells / episodes / calls and the expected-token estimate remain
+**278 / 27 / 888 / 12,124 / $431.509628** (Arm A: 210 rows / 630 calls /
+$6.642216; program $438.151844, headroom $11.848156). Scope was
+token-budget parameters only: zero stimulus bytes changed, every hash-bound
+red-team PASS carries forward. No kill-order cut was needed at the estimate
+stage; R5 re-projects from post-hash actuals before launch.

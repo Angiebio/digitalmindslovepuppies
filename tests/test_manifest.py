@@ -96,26 +96,64 @@ def test_design_has_exact_primary_matches_and_isolated_satellites():
         assert len(matches) == 1, ai_cell.scenario_cell_id
 
 
+# The design totals are a function of MANIFEST_VERSION: the UNFREEZE-003
+# kill-order (v0.7) removes DeepSeek's 27 Arm B rows (90 episodes / 1,232
+# calls / $4.078560). Keying the expectations on the live version constant
+# keeps this suite green on BOTH sides of the PI's word — before the flip it
+# proves the sealed v0.6 design, after it proves the executed kill-order.
+_TOTALS_BY_MANIFEST_VERSION = {
+    "0.6": {
+        "rows": 278,
+        "models": 19,
+        "episodes": 888,
+        "calls": 12_124,
+        "usd": Decimal("431.509628"),
+        "over_upper_by": 608,
+        "tier_a_episodes": 720,
+    },
+    "0.7": {
+        "rows": 251,
+        "models": 18,
+        "episodes": 798,
+        "calls": 10_892,
+        "usd": Decimal("427.431068"),
+        "over_upper_by": 518,
+        "tier_a_episodes": 630,
+    },
+}
+
+
+def _expected_totals():
+    from scenarios.manifest import MANIFEST_VERSION
+
+    return _TOTALS_BY_MANIFEST_VERSION[MANIFEST_VERSION]
+
+
 def test_manifest_expands_every_tier_and_exposes_narrative_multiplier():
     rows = build_manifest_rows()
     summary = summarize(rows)
+    totals = _expected_totals()
 
     # v0.2 honest recount (TV-3 stop-freeze): per-cell 13/14/15-call episodes,
     # paid-call token billing, Trajectory-A + futile-sentinel cells included.
-    assert len(rows) == 278
+    assert len(rows) == totals["rows"]
     assert summary["design_cells"] == 27
-    assert summary["models"] == 19
-    assert summary["episodes"] == 888
-    assert summary["calls"] == 12_124
+    assert summary["models"] == totals["models"]
+    assert summary["episodes"] == totals["episodes"]
+    assert summary["calls"] == totals["calls"]
     # v0.2.1 (15AUG2026 pin run): pinned-endpoint prices for deepseek-v4-pro
     # (0.435/0.87), qwen3.8-27b (0.45/3.2), gemini-3.7-flash (0.375/1.875)
     # replaced the stale roster prices; $428.544320 -> $423.282188.
     # v0.3 (PI authorization 15AUG2026 evening): the local-Sparks Qwen subject
     # became OpenRouter qwen/qwen3.5-397b-a17b (Alibaba pin, 0.39/2.34) —
     # the lane stopped being free; $423.282188 -> $431.509628.
-    assert Decimal(summary["usd"]) == Decimal("431.509628")
+    # v0.7 (UNFREEZE-003, prepared): DeepSeek Arm B kill-order
+    # $431.509628 -> $427.431068.
+    assert Decimal(summary["usd"]) == totals["usd"]
     assert Decimal(summary["usd"]) < HARD_CAP_USD
-    assert summary["episode_count_vs_build_plan"]["over_upper_by"] == 608
+    assert summary["episode_count_vs_build_plan"]["over_upper_by"] == totals[
+        "over_upper_by"
+    ]
     # The call floor TV-3 demanded: no ai_other row may claim fewer than 14
     # calls, and Trajectory A issues 15.
     for row in rows:
@@ -125,7 +163,7 @@ def test_manifest_expands_every_tier_and_exposes_narrative_multiplier():
         else:
             assert row.est_calls_per_episode == 13, row.run_cell_id
 
-    assert summary["tiers"]["A"]["episodes"] == 720
+    assert summary["tiers"]["A"]["episodes"] == totals["tier_a_episodes"]
     assert summary["tiers"]["B"]["episodes"] == 90
     assert summary["tiers"]["C"]["episodes"] == 18
     assert summary["tiers"]["W"]["episodes"] == 60

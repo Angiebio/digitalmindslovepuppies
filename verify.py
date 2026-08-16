@@ -28,28 +28,50 @@ REPO = Path(__file__).resolve().parent
 # When post-collection paper numbers are pinned, they are added HERE and
 # become checks — never prose-only citations.
 # ---------------------------------------------------------------------------
-CLAIMS = {
+# The Arm B design totals are a function of the manifest version: the
+# UNFREEZE-003 kill-order (docs/KILL-ORDER-001-DEEPSEEK-ARMB.md) removes the
+# 27 DeepSeek Arm B rows (90 episodes / 1,232 calls / $4.078560) at v0.7 while
+# the Arm A plan is untouched. Keying the claims on the SAME version constant
+# the manifest generator reads means this checker can never bless a tree whose
+# design and citations disagree about which climb it is on.
+from scenarios.manifest import MANIFEST_VERSION
+
+_DESIGN_CLAIMS_BY_MANIFEST_VERSION = {
     # scenarios/MANIFEST-RECONCILIATION.md §9 · docs/ARMA-RUN-PLAN.md
-    "arm_b_manifest_rows": 278,
+    "0.6": {
+        "arm_b_manifest_rows": 278,
+        "arm_b_episodes": 888,
+        "arm_b_est_calls": 12_124,
+        "arm_b_est_usd": Decimal("431.509628"),
+        "program_est_usd": Decimal("438.151844"),
+        "collection_units_total": 1_518,
+    },
+    # docs/UNFREEZE-003 §(c): DeepSeek Arm B kill-order executed.
+    "0.7": {
+        "arm_b_manifest_rows": 251,
+        "arm_b_episodes": 798,
+        "arm_b_est_calls": 10_892,
+        "arm_b_est_usd": Decimal("427.431068"),
+        "program_est_usd": Decimal("434.073284"),
+        "collection_units_total": 1_428,
+    },
+}
+
+CLAIMS = {
     "arm_b_scenario_cells": 27,
-    "arm_b_episodes": 888,
-    "arm_b_est_calls": 12_124,
-    "arm_b_est_usd": Decimal("431.509628"),
     # docs/ARMA-RUN-PLAN.md (v1.2, five models, 3 samples/row)
     "arm_a_plan_rows": 210,
     "arm_a_samples": 630,
     "arm_a_models": 5,
     "arm_a_est_usd": Decimal("6.642216"),
     # docs/ARMA-RUN-PLAN.md cost reconciliation
-    "program_est_usd": Decimal("438.151844"),
     "program_hard_cap_usd": Decimal("450.00"),
     # docs/GO-NO-GO.md R0 (TV-1 witness): compiled corpus sizes
     "foxset_compiled_artifacts": 153,
     "pupset_compiled_cells": 27,
-    # RUNBOOK.md §3: the exact frozen batch expansion
-    "collection_units_total": 1_518,
     # docs/GO-NO-GO.md pilot ladder: the pilot spend ceiling
     "pilot_spend_cap_usd": Decimal("12.00"),
+    **_DESIGN_CLAIMS_BY_MANIFEST_VERSION[MANIFEST_VERSION],
 }
 
 _results: list[tuple[str, bool, str]] = []

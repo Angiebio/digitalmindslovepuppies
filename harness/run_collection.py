@@ -42,7 +42,11 @@ from .patient_factory import patient_for_manifest_row
 from .providers import AnthropicProvider, OpenAICompatProvider, Provider
 from .schema import CallRecord, append_record, read_append_only_lines, utc_now_iso
 from .surfaces import SurfaceMode
-from scenarios.manifest import enforced_subject_max_tokens, load_snapshot_pins
+from scenarios.manifest import (
+    enforced_subject_max_tokens,
+    hard_single_call_lanes,
+    load_snapshot_pins,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
@@ -389,9 +393,23 @@ def build_collection_plan(
             model_id = row["requested_model_id"]
             tier = tier_by_model.get(model_id)
             if tier is None:
-                raise CollectionError(
-                    f"WIRING FAILURE: Arm A model {model_id!r} has no Arm B tier binding."
-                )
+                # UNFREEZE-003 kill-order (caught by the apply_unfreeze3
+                # dry-run, 16AUG2026): a lane killed from Arm B keeps its Arm
+                # A rows — "Arm A stays" is the rule — so its tier binding
+                # falls back to the frozen roster instead of the (now
+                # row-less) manifest. Anything the roster does not know is
+                # still a wiring failure, loudly.
+                from scenarios.manifest import MODEL_SPECS, arm_b_killed_lanes
+
+                roster_tier = {
+                    spec.model_id: spec.tier for spec in MODEL_SPECS
+                }.get(model_id)
+                if roster_tier is None or model_id not in arm_b_killed_lanes():
+                    raise CollectionError(
+                        f"WIRING FAILURE: Arm A model {model_id!r} has no Arm "
+                        "B tier binding and no kill-order roster fallback."
+                    )
+                tier = roster_tier
             if selected(model_id, tier):
                 units.extend(
                     CollectionUnit(
@@ -638,6 +656,11 @@ def build_subject_provider(
             collection_phase=collection_phase,
             collection_rung=collection_rung,
             error_log_path=error_log_path,
+            # UNFREEZE-003 forcing family (empty at v0.6 — dormant): lanes
+            # that ignore parallel_tool_calls=false get the structural
+            # single-call surface on tool-bearing turns. Tool-less calls and
+            # every other lane are byte-identical to the sealed envelope.
+            hard_single_call=requested_model_id in hard_single_call_lanes(),
         )
     raise CollectionError(f"WIRING FAILURE: unknown route {route!r}.")
 

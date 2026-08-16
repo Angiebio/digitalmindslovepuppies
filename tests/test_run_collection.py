@@ -201,10 +201,16 @@ def test_batch_plan_expands_exact_frozen_counts_without_cartesian_growth(tmp_pat
     both = build_collection_plan(
         REPO_ROOT, include_arm_b=True, include_arm_a=True
     )
-    assert len(arm_b) == 888
+    # The checked-in CSV carries the sealed design of the CURRENT manifest
+    # version: 888 Arm B episodes at v0.6; 798 after the UNFREEZE-003
+    # DeepSeek Arm B kill-order regenerates it at v0.7 (Arm A unchanged).
+    from scenarios.manifest import MANIFEST_VERSION
+
+    arm_b_expected = {"0.6": 888, "0.7": 798}[MANIFEST_VERSION]
+    assert len(arm_b) == arm_b_expected
     assert len(arm_a) == 630
-    assert len(both) == 1518
-    assert len({unit.run_key for unit in both}) == 1518
+    assert len(both) == arm_b_expected + 630
+    assert len({unit.run_key for unit in both}) == arm_b_expected + 630
 
     tier_b = build_collection_plan(
         REPO_ROOT,
@@ -226,7 +232,7 @@ def test_batch_plan_expands_exact_frozen_counts_without_cartesian_growth(tmp_pat
     assert {unit.requested_model_id for unit in luna} == {"openai/gpt-5.6-luna"}
     assert collection_plan_summary(both, tmp_path / "receipts.jsonl")[
         "units_remaining"
-    ] == 1518
+    ] == arm_b_expected + 630
 
 
 def test_subject_builder_enforces_the_frozen_qwen_reasoning_cap(monkeypatch):

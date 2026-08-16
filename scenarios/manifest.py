@@ -331,6 +331,56 @@ MODEL_SUBJECT_MAX_TOKENS = {
 }
 
 
+# ---------------------------------------------------------------------------
+# UNFREEZE-003 lane remedies — PREPARED 16AUG2026, DORMANT at v0.6.
+#
+# Practical: both registries are keyed by MANIFEST_VERSION, so flipping the
+# single version string above (ops/apply_unfreeze3.py, PI word only) activates
+# them everywhere at once — row generation, tier validation, and the provider
+# builder consult these functions, never the dicts. At "0.6" both return the
+# empty set and the sealed design is byte-for-byte unchanged.
+#
+#   ARM_B_KILL_ORDER — the R4.5-v3 preregistered kill-order determination
+#   (docs/R45-VERDICT-3.md: diag 1/2 parseable at 16384 -> DeepSeek's Arm B
+#   lanes DROP from the confirmatory run; its Arm A lanes STAY — that surface
+#   demonstrably speaks). docs/KILL-ORDER-001-DEEPSEEK-ARMB.md is the ledger.
+#
+#   HARD_SINGLE_CALL — the UNFREEZE-003 forcing family: providers that
+#   demonstrably ignore parallel_tool_calls=false (gemini-3.1-pro ep001,
+#   kimi-k3 ep000/ep001, deepseek diag ep004 — R4.5-v3 RESULTS). Their
+#   tool-bearing turns are re-parameterized so exactly one tool call is
+#   structurally possible (harness/providers.py forced single-call surface).
+#
+# Philosophical: a lane remedy written next to the roster it remedies cannot
+# quietly diverge from it. The kill and the cure live one version-flip away,
+# in the same stone the seal covers.
+# ---------------------------------------------------------------------------
+ARM_B_KILL_ORDER_BY_VERSION: dict[str, frozenset[str]] = {
+    "0.7": frozenset({"deepseek/deepseek-v4-pro"}),
+}
+HARD_SINGLE_CALL_LANES_BY_VERSION: dict[str, frozenset[str]] = {
+    "0.7": frozenset(
+        {
+            "google/gemini-3.1-pro-preview",
+            "moonshotai/kimi-k3",
+            "deepseek/deepseek-v4-pro",
+        }
+    ),
+}
+
+
+def arm_b_killed_lanes(version: str | None = None) -> frozenset[str]:
+    """Arm B lanes removed from the confirmatory design at this version."""
+    return ARM_B_KILL_ORDER_BY_VERSION.get(version or MANIFEST_VERSION, frozenset())
+
+
+def hard_single_call_lanes(version: str | None = None) -> frozenset[str]:
+    """Lanes whose tool-bearing calls run the forced single-call surface."""
+    return HARD_SINGLE_CALL_LANES_BY_VERSION.get(
+        version or MANIFEST_VERSION, frozenset()
+    )
+
+
 def subject_max_tokens(
     model_id: str, *, default: int = DEFAULT_SUBJECT_MAX_TOKENS
 ) -> int:
@@ -554,6 +604,12 @@ def _tier_c_episodes(cell: DesignCell) -> int:
 
 
 def _episodes_for(model: ModelSpec, cell: DesignCell, core: Sequence[DesignCell]) -> int:
+    # UNFREEZE-003 kill-order: a killed Arm B lane simply has zero episodes in
+    # every cell. Row generation and the tier/episode validator both flow
+    # through this function, so the drop cannot desynchronize. Arm A is a
+    # different plan (scenarios/arma_run_plan.py) and is untouched.
+    if model.model_id in arm_b_killed_lanes():
+        return 0
     if model.tier == "A":
         return CORE_EPISODES_TIER_A if cell.design_role == "core" else SATELLITE_EPISODES_TIER_A
     if model.tier == "B":
@@ -1046,9 +1102,18 @@ def validate_manifest(rows: Sequence[ManifestRow], *, freeze_ready: bool = False
         tier: {row.requested_model_id for row in rows if row.model_tier == tier}
         for tier in {row.model_tier for row in rows}
     }
+    # A lane killed by the UNFREEZE-003 order has zero Arm B rows by design;
+    # expecting it here would make the validator demand rows the kill forbids.
     expected_tier_models = {
-        tier: {model.model_id for model in MODEL_SPECS if model.tier == tier}
+        tier: {
+            model.model_id
+            for model in MODEL_SPECS
+            if model.tier == tier and model.model_id not in arm_b_killed_lanes()
+        }
         for tier in {model.tier for model in MODEL_SPECS}
+    }
+    expected_tier_models = {
+        tier: models for tier, models in expected_tier_models.items() if models
     }
     if tier_models != expected_tier_models:
         raise ManifestValidationError(

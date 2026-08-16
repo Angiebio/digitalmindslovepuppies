@@ -604,6 +604,139 @@ class AnthropicProvider(Provider):
         )
 
 
+# ---------------------------------------------------------------------------
+# UNFREEZE-003 forced single-call surface (PREPARED, dormant until v0.7)
+#
+# Practical: R4.5-v3 proved that `parallel_tool_calls: false` does not bind on
+# the gemini/kimi/deepseek provider family — capable models answered a
+# single-action turn with 2..25 parallel calls and the frozen parse rightly
+# coded every one `malformed` (multiple_tool_calls). Declaring the contract
+# was not enough; these functions make it STRUCTURAL: the K action tools are
+# collapsed into ONE wrapper tool whose `operation` enum carries the exact
+# config-owned tool names, and `tool_choice` forces that single function.
+# There is exactly one callable function on the wire; every menu action stays
+# expressible through the enum, so the cell is narrowed in protocol, not in
+# content. The translation back is a strict structural bijection — a single
+# in-contract wrapper call maps to the named action tool; anything else
+# (multiple calls, wrong name, invalid JSON, out-of-enum operation,
+# non-object arguments) is left untouched for the frozen parser to code
+# `malformed`. Rule (g) stands: we never re-read generously, we only stop
+# inviting the violation.
+#
+# Philosophical: the old envelope asked politely and some providers heard a
+# suggestion. This one is a doorway shaped like exactly one action. What the
+# model does in that doorway is still entirely its own.
+# ---------------------------------------------------------------------------
+
+FORCED_SINGLE_CALL_TOOL_NAME = "commit_operation"
+_FORCED_WRAPPER_PREAMBLE = (
+    "Commit exactly one operation for this turn. Set 'operation' to one of "
+    "the listed values; supply that operation's parameters, if any, in "
+    "'arguments'."
+)
+
+
+def forced_single_call_tool(tools: list[ToolDefinition]) -> ToolDefinition:
+    """Derive the ONE wire tool from the cell's config-owned action tools.
+
+    Deterministic assembly only: names, descriptions, and parameter schemas
+    are the cell config's exact strings (already swept and hash-bound); the
+    glue is fixed protocol wording that itself passes the ops-neutral sweep.
+    """
+    if not tools:
+        raise RuntimeError(
+            "WIRING FAILURE: forced single-call surface requires a non-empty "
+            "tool list; probe calls without tools never enter this path."
+        )
+    names = [tool.name for tool in tools]
+    if len(set(names)) != len(names):
+        raise RuntimeError(
+            "WIRING FAILURE: duplicate tool names cannot form a forced enum."
+        )
+    if FORCED_SINGLE_CALL_TOOL_NAME in names:
+        raise RuntimeError(
+            "WIRING FAILURE: a cell tool collides with the forced wrapper "
+            f"name {FORCED_SINGLE_CALL_TOOL_NAME!r}; the bijection would tear."
+        )
+    lines = []
+    for tool in tools:
+        line = f"- {tool.name}: {tool.description}"
+        if (tool.input_schema or {}).get("properties"):
+            line += " Parameters (JSON schema): " + json.dumps(
+                tool.input_schema, sort_keys=True, separators=(",", ":")
+            )
+        lines.append(line)
+    return ToolDefinition(
+        name=FORCED_SINGLE_CALL_TOOL_NAME,
+        description=_FORCED_WRAPPER_PREAMBLE + "\n" + "\n".join(lines),
+        input_schema={
+            "type": "object",
+            "properties": {
+                "operation": {
+                    "type": "string",
+                    "enum": names,
+                    "description": "The single operation to perform this turn.",
+                },
+                "arguments": {
+                    "type": "object",
+                    "description": (
+                        "Parameters for the selected operation, when it "
+                        "defines any."
+                    ),
+                    "additionalProperties": True,
+                },
+            },
+            "required": ["operation"],
+            "additionalProperties": False,
+        },
+    )
+
+
+def translate_forced_single_call(
+    tool_calls: list[ToolInvocation],
+    tools: list[ToolDefinition],
+) -> list[ToolInvocation]:
+    """Map one in-contract wrapper call back to its action tool — nothing else.
+
+    Fail-closed: every out-of-contract shape is returned UNCHANGED so the
+    frozen parser codes it exactly as it codes today (missing_tool_call /
+    multiple_tool_calls / unknown_tool / invalid_tool_arguments). No second
+    parse pass, no generous selection among parallel calls.
+    """
+    if len(tool_calls) != 1:
+        return tool_calls
+    call = tool_calls[0]
+    if call.name != FORCED_SINGLE_CALL_TOOL_NAME or not call.arguments_valid:
+        return tool_calls
+    operation = call.arguments.get("operation")
+    allowed = {tool.name for tool in tools}
+    if operation not in allowed:
+        return tool_calls
+    if "arguments" in call.arguments:
+        inner = call.arguments["arguments"]
+        if not isinstance(inner, dict):
+            # The published schema says object; a violation stays malformed.
+            return tool_calls
+    else:
+        # Deterministic flattening rule (preregistered in UNFREEZE-003): a
+        # wrapper call that puts the operation's parameters at the top level
+        # carries them as-is, minus the routing key.
+        inner = {
+            key: value
+            for key, value in call.arguments.items()
+            if key != "operation"
+        }
+    return [
+        ToolInvocation(
+            call_id=call.call_id,
+            name=operation,
+            arguments=inner,
+            arguments_valid=True,
+            raw_arguments=call.raw_arguments,
+        )
+    ]
+
+
 def _selected_openrouter_route(metadata: dict[str, Any]) -> str:
     endpoints = metadata.get("endpoints") or {}
     for endpoint in endpoints.get("available") or []:
@@ -704,6 +837,7 @@ class OpenAICompatProvider(Provider):
         collection_phase: str = "",
         collection_rung: str = "",
         error_log_path: str | None = None,
+        hard_single_call: bool = False,
     ) -> None:
         super().__init__(
             record_callback,
@@ -748,6 +882,11 @@ class OpenAICompatProvider(Provider):
         self.pinned_upstream = (pinned_upstream or "").strip() or None
         self.provider_order = list(provider_order or [])  # audit witness only
         self.route_label = route_label or f"direct:{urlparse(base_url).netloc}"
+        # UNFREEZE-003 forcing family flag: dormant everywhere until the
+        # v0.7 registry (scenarios.manifest.hard_single_call_lanes) names the
+        # lane. When True, tool-bearing calls run the forced single-call
+        # surface; tool-less probe calls are untouched.
+        self.hard_single_call = bool(hard_single_call)
         self.usd_per_mtok_in = usd_per_mtok_in
         self.usd_per_mtok_out = usd_per_mtok_out
         self.max_tokens = max_tokens
@@ -815,6 +954,16 @@ class OpenAICompatProvider(Provider):
             envelope["parallel_tool_calls"] = parallel
         if choice is not None:
             envelope["tool_choice"] = choice
+        if tools and getattr(self, "hard_single_call", False):
+            # Forced single-call surface: the hashed envelope records the
+            # EXACT wire truth — one wrapper tool, forced tool_choice. The
+            # caller's tools remain the derivation input, never the payload.
+            wrapper = forced_single_call_tool(tools)
+            envelope["tools"] = [wrapper.model_dump(mode="json")]
+            envelope["tool_choice"] = {
+                "type": "function",
+                "function": {"name": wrapper.name},
+            }
         if self._is_openrouter:
             envelope["extra_body"] = self._openrouter_extra_body(params)
         elif "extra_body" in params:
@@ -834,6 +983,8 @@ class OpenAICompatProvider(Provider):
             )
         parallel = self._single_action_parallel_value(params, tools)
         choice = self._single_action_tool_choice(params, tools)
+        forcing = bool(tools) and getattr(self, "hard_single_call", False)
+        wire_tools = [forced_single_call_tool(tools)] if forcing else tools
         kwargs: dict[str, Any] = {
             "model": self.model,
             "messages": messages,
@@ -852,7 +1003,7 @@ class OpenAICompatProvider(Provider):
                         "parameters": tool.input_schema,
                     },
                 }
-                for tool in tools
+                for tool in wire_tools
             ]
             # Same single-action-per-turn declaration as the Anthropic
             # adapter (R2 pilot finding) — the frozen parse expects at most
@@ -862,6 +1013,13 @@ class OpenAICompatProvider(Provider):
                 kwargs["parallel_tool_calls"] = parallel
             if choice is not None:
                 kwargs["tool_choice"] = choice
+            if forcing:
+                # UNFREEZE-003: exactly one function exists on the wire and
+                # tool_choice forces it — identical to the hashed envelope.
+                kwargs["tool_choice"] = {
+                    "type": "function",
+                    "function": {"name": FORCED_SINGLE_CALL_TOOL_NAME},
+                }
 
         if self._is_openrouter:
             kwargs["extra_body"] = self._openrouter_extra_body(params)
@@ -894,6 +1052,11 @@ class OpenAICompatProvider(Provider):
                     raw_arguments=raw_arguments,
                 )
             )
+        if forcing:
+            # Structural bijection back to the config-owned action tool.
+            # Out-of-contract shapes pass through untouched and the frozen
+            # parser codes them malformed — never a generous re-reading.
+            tool_calls = translate_forced_single_call(tool_calls, tools)
 
         usage = response.usage
         if usage is None:

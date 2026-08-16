@@ -55,7 +55,17 @@ python -m scenarios.manifest --verify-freeze
 # First print the exact frozen expansion. Dry-run performs no env load, freeze
 # write, provider call, or data-directory creation.
 python -m harness.run_collection --phase confirmatory --rung PREFLIGHT --all-arm-b --all-arm-a --dry-run
-# Expected: 1,518 units = 888 Arm B episodes + 630 Arm A samples.
+# Expected at manifest v0.6: 1,518 units = 888 Arm B episodes + 630 Arm A samples.
+# Expected at manifest v0.7 (UNFREEZE-003 executed — DeepSeek Arm B kill-order):
+#   1,428 units = 798 Arm B episodes + 630 Arm A samples.
+
+# CLIMB FOUR (16AUG2026, prepared): after the third NO-GO, the whole
+# re-climb is ONE invocation on the PI's word — see docs/UNFREEZE-003-DRAFT.md:
+#   ops\climb4.cmd "<PI word, verbatim>"
+# It finalizes UNFREEZE-003, re-seals v0.7, runs the preregistered R4.5-v4
+# (ops/r45v4_units.py, <=$10 sitting), and on GO only: R5 + main launch.
+# Rehearse everything except spend, repo untouched:
+#   python ops\apply_unfreeze3.py --dry-run
 
 # Run ONE orchestrator process at a time. It parallelizes one sequential lane
 # per selected model; --expected-units makes scope growth a hard failure.

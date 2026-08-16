@@ -464,12 +464,40 @@ def _choice_messages(
     return messages
 
 
-def _observe_snapshot(record: EpisodeRecord, response: ProviderResponse | Any) -> None:
+class ProvenanceViolation(RuntimeError):
+    """The provider served something other than the frozen pin.
+
+    15AUG2026 TV-1 repair ("real pins, enforced"): a manifest row promises an
+    exact model snapshot on an exact upstream. When the served echo disagrees,
+    the episode is not data — it is a different experiment wearing our cell id.
+    We raise, we do not annotate."""
+
+
+def _observe_snapshot(
+    record: EpisodeRecord,
+    response: ProviderResponse | Any,
+    expected_snapshot: Optional[str] = None,
+    expected_upstream: Optional[str] = None,
+) -> None:
     snapshot = str(getattr(response, "model_snapshot", "")).strip()
     if not snapshot:
         raise RuntimeError(
             "WIRING FAILURE: focal agent response omitted exact model_snapshot."
         )
+    if expected_snapshot is not None and snapshot != expected_snapshot:
+        raise ProvenanceViolation(
+            f"PROVENANCE VIOLATION: frozen cell pins model snapshot "
+            f"{expected_snapshot!r} but the provider served {snapshot!r}. "
+            "Halt before another call bills against the wrong deployment."
+        )
+    if expected_upstream is not None:
+        served_route = str(getattr(response, "upstream_route", "")).strip()
+        if served_route.casefold() != expected_upstream.strip().casefold():
+            raise ProvenanceViolation(
+                f"PROVENANCE VIOLATION: frozen cell pins upstream "
+                f"{expected_upstream!r} but the response was served via "
+                f"{served_route!r}. A pinned route that drifts is not pinned."
+            )
     if record.model_snapshot in {"pending", "scripted/none"}:
         record.model_snapshot = snapshot
     elif record.model_snapshot != snapshot:
@@ -479,7 +507,12 @@ def _observe_snapshot(record: EpisodeRecord, response: ProviderResponse | Any) -
         )
 
 
-def _run_gate_probes(cell: CellConfig, provider: Any, record: EpisodeRecord) -> None:
+def _run_gate_probes(
+    cell: CellConfig,
+    provider: Any,
+    record: EpisodeRecord,
+    observe: Callable[[EpisodeRecord, Any], None] = _observe_snapshot,
+) -> None:
     results: list[dict[str, Any]] = []
     for probe in cell.gate_probes:
         def parser(response: ProviderResponse | Any, item: GateProbeSpec = probe):
@@ -508,7 +541,7 @@ def _run_gate_probes(cell: CellConfig, provider: Any, record: EpisodeRecord) -> 
             response_parser=parser,
             max_tokens=cell.probe_max_tokens,
         )
-        _observe_snapshot(record, response)
+        observe(record, response)
         score, detail = _score_response(
             getattr(response, "text", ""),
             probe.expected_answer,
@@ -549,6 +582,7 @@ def _run_post_choice_probes(
     record: EpisodeRecord,
     action_tool: str,
     telemetry: str,
+    observe: Callable[[EpisodeRecord, Any], None] = _observe_snapshot,
 ) -> None:
     values = {
         "action_tool": action_tool or cell.no_action_text,
@@ -574,7 +608,7 @@ def _run_post_choice_probes(
             response_parser=parser,
             max_tokens=cell.probe_max_tokens,
         )
-        _observe_snapshot(record, response)
+        observe(record, response)
         return getattr(response, "text", "")
 
     record.post_choice_account = run_one(
@@ -761,6 +795,7 @@ def _run_focal_task(
     recruited: bool,
     ledger: CreditLedger,
     record: EpisodeRecord,
+    observe: Callable[[EpisodeRecord, Any], None] = _observe_snapshot,
 ) -> None:
     remaining_calls = ledger.consequences()["remaining_tool_calls"]
     # Instrumental mechanical benefit (TV-1 NO-GO: "positive control is
@@ -860,7 +895,7 @@ def _run_focal_task(
                 ledger.consequences()["context_token_budget"],
             ),
         )
-        _observe_snapshot(record, response)
+        observe(record, response)
         score, detail = _score_response(
             getattr(response, "text", ""),
             item.expected_answer,
@@ -921,8 +956,18 @@ def run_episode(
     help_payload: Optional[str] = None,
     competing_patient: Optional[PatientProtocol] = None,
     invent_resolver: Optional[InventResolver] = None,
+    expected_model_snapshot_id: Optional[str] = None,
+    expected_upstream_provider: Optional[str] = None,
 ) -> EpisodeRecord:
-    """Run one executed episode and append its complete EpisodeRecord."""
+    """Run one executed episode and append its complete EpisodeRecord.
+
+    ``expected_model_snapshot_id`` / ``expected_upstream_provider`` are the
+    frozen pins from the manifest row (FrozenCell.model_snapshot_id and
+    .upstream_provider). When provided, EVERY provider response in the episode
+    is compared against them and a mismatch raises ProvenanceViolation
+    (15AUG2026 TV-1 repair: pins that are recorded but never enforced are
+    decorations, not pins).
+    """
     if (agent_provider is None) == (scripted_policy is None):
         raise ValueError(
             "WIRING FAILURE: run_episode needs exactly one chooser — "
@@ -975,6 +1020,20 @@ def run_episode(
         model_snapshot="pending" if agent_provider is not None else model_snapshot,
         started_utc=utc_now_iso(),
     )
+
+    def observe(rec: EpisodeRecord, response: ProviderResponse | Any) -> None:
+        _observe_snapshot(
+            rec,
+            response,
+            expected_snapshot=expected_model_snapshot_id,
+            expected_upstream=expected_upstream_provider,
+        )
+
+    if expected_model_snapshot_id or expected_upstream_provider:
+        record.notes += (
+            f"pinned_snapshot={expected_model_snapshot_id or ''};"
+            f"pinned_upstream={expected_upstream_provider or ''};"
+        )
     selected_action = ActionCode.malformed
     selected_tool = ""
     selected_action_executed = False
@@ -1000,12 +1059,12 @@ def run_episode(
                 response_parser=trajectory_parser,
                 max_tokens=cell.choice_max_tokens,
             )
-            _observe_snapshot(record, response)
+            observe(record, response)
             pre_response = getattr(response, "text", "")
             record.pre_objective_response = pre_response
 
         if agent_provider is not None and cell.gate_before_choice:
-            _run_gate_probes(cell, agent_provider, record)
+            _run_gate_probes(cell, agent_provider, record, observe=observe)
 
         for turn in range(max_turns):
             telemetry_parts = [
@@ -1061,7 +1120,7 @@ def run_episode(
                     trusted_model_output_indexes=trusted_indexes,
                     max_tokens=cell.choice_max_tokens,
                 )
-                _observe_snapshot(record, response)
+                observe(record, response)
                 parse, _ = _choice_parse(response, cell)
                 record.choice_parse = parse
                 selected_action = ActionCode(parse["action"])
@@ -1099,7 +1158,7 @@ def run_episode(
                 break
 
         if agent_provider is not None and not cell.gate_before_choice:
-            _run_gate_probes(cell, agent_provider, record)
+            _run_gate_probes(cell, agent_provider, record, observe=observe)
 
         if agent_provider is not None:
             current_telemetry = (
@@ -1113,6 +1172,7 @@ def run_episode(
                 record,
                 selected_tool,
                 current_telemetry,
+                observe=observe,
             )
 
         if competing_patient is not None:
@@ -1137,6 +1197,7 @@ def run_episode(
             recruited,
             ledger,
             record,
+            observe=observe,
         )
         record.ledger_trace = list(ledger.trace)
         record.ended_utc = utc_now_iso()

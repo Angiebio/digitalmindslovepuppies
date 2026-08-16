@@ -134,7 +134,9 @@ def test_openrouter_selected_route_requires_positive_endpoint_witness():
 
 def test_openrouter_request_is_pinned_and_selected_route_is_recorded():
     records: list[CallRecord] = []
-    with pytest.raises(RuntimeError, match="requires provider_order"):
+    # 15AUG2026 TV-1 repair: the adapter refuses OpenRouter without exactly ONE
+    # pinned upstream slug; a whole provider list is not a pin.
+    with pytest.raises(RuntimeError, match="requires pinned_upstream"):
         OpenAICompatProvider(
             model="vendor/model",
             base_url="https://openrouter.ai/api/v1",
@@ -142,6 +144,16 @@ def test_openrouter_request_is_pinned_and_selected_route_is_recorded():
             usd_per_mtok_in=0.0,
             usd_per_mtok_out=0.0,
             record_callback=records.append,
+        )
+    with pytest.raises(RuntimeError, match="requires pinned_upstream"):
+        OpenAICompatProvider(
+            model="vendor/model",
+            base_url="https://openrouter.ai/api/v1",
+            api_key="offline-key",
+            usd_per_mtok_in=0.0,
+            usd_per_mtok_out=0.0,
+            record_callback=records.append,
+            provider_order=["vendor-route", "other-route"],  # audit list is not a pin
         )
 
     provider = OpenAICompatProvider(
@@ -151,7 +163,8 @@ def test_openrouter_request_is_pinned_and_selected_route_is_recorded():
         usd_per_mtok_in=0.0,
         usd_per_mtok_out=0.0,
         record_callback=records.append,
-        provider_order=["vendor-route"],
+        pinned_upstream="vendor-route",
+        provider_order=["vendor-route", "other-route", "third-route"],
         spend_tracker=SpendTracker(hard_cap_usd=1.0),
     )
     captured = {}
@@ -164,7 +177,7 @@ def test_openrouter_request_is_pinned_and_selected_route_is_recorded():
         return SimpleNamespace(
             choices=[choice],
             usage=usage,
-            model="vendor/model-snapshot-1",
+            model="vendor/model",
             model_extra={
                 "openrouter_metadata": {
                     "attempt": 1,
@@ -185,8 +198,11 @@ def test_openrouter_request_is_pinned_and_selected_route_is_recorded():
     provider._client = SimpleNamespace(
         chat=SimpleNamespace(completions=SimpleNamespace(create=create))
     )
-    provider.complete([{"role": "user", "content": "worker=w1 status=running"}])
+    response = provider.complete(
+        [{"role": "user", "content": "worker=w1 status=running"}]
+    )
 
+    # Exactly ONE slug transmitted — the audit list never reaches the wire.
     policy = captured["extra_body"]["provider"]
     assert policy == {
         "order": ["vendor-route"],
@@ -195,3 +211,6 @@ def test_openrouter_request_is_pinned_and_selected_route_is_recorded():
     }
     assert records[-1].upstream_route == "Vendor Route"
     assert records[-1].routing_metadata["attempt"] == 1
+    # The endpoint witness's served deployment wins over the top-level echo.
+    assert response.model_snapshot == "vendor/model-snapshot-1"
+    assert records[-1].model_snapshot == "vendor/model-snapshot-1"

@@ -293,8 +293,25 @@ def build_pins(*, skip_local: bool = False, allow_partial: bool = False) -> dict
                     f"WIRING FAILURE: {spec.model_id!r} is not in the live "
                     "OpenRouter catalog; the roster cannot freeze."
                 )
+            # 15AUG2026 TV-1 repair ("real pins, enforced"): the id we ask by
+            # is a NAME; the catalog's canonical_slug is the dated EVENT that
+            # actually serves it. Only the event can be a snapshot pin.
+            canonical_slug = str(entry.get("canonical_slug") or "").strip()
+            if not canonical_slug:
+                raise PinError(
+                    f"WIRING FAILURE: OpenRouter catalog exposes no "
+                    f"canonical_slug for {spec.model_id!r}; a nameless "
+                    "deployment cannot be pinned as an event."
+                )
             endpoints = fetch_openrouter_endpoints(spec.model_id)
             upstream, provider_order, chosen = choose_upstream(spec.model_id, endpoints)
+            upstream_slug = str(chosen.get("tag") or "").strip()
+            if not upstream_slug:
+                raise PinError(
+                    f"WIRING FAILURE: chosen endpoint for {spec.model_id!r} "
+                    f"({upstream}) carries no routing tag; the adapter cannot "
+                    "isolate a route it cannot name."
+                )
             default_in = per_mtok(entry.get("pricing", {}), "prompt")
             default_out = per_mtok(entry.get("pricing", {}), "completion")
             endpoint_pricing = chosen.get("pricing") or {}
@@ -306,8 +323,10 @@ def build_pins(*, skip_local: bool = False, allow_partial: bool = False) -> dict
                 live_in, live_out = default_in, default_out
                 pricing_basis = "openrouter top-level default (endpoint pricing absent)"
             pins[spec.model_id] = {
-                "snapshot_id": spec.model_id,
+                "snapshot_id": canonical_slug,
+                "snapshot_basis": "openrouter canonical_slug (live catalog)",
                 "upstream_provider": upstream,
+                "upstream_slug": upstream_slug,
                 "route": spec.route,
                 "provider_order": provider_order,
                 "pricing_usd_per_mtok_input": _plain(live_in),

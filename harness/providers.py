@@ -430,12 +430,32 @@ def _selected_openrouter_route(metadata: dict[str, Any]) -> str:
     )
 
 
+def _selected_openrouter_model(metadata: dict[str, Any]) -> Optional[str]:
+    """The served snapshot the SELECTED endpoint reports, when present.
+
+    The router's endpoint witness names the exact deployment (canonical dated
+    slug) it served — stronger provenance than the top-level echo, which can
+    repeat whatever alias we asked for. Absence is tolerated here; the caller
+    falls back to the response echo and the episode-level pin enforcement
+    still gets one honest string to compare.
+    """
+    endpoints = metadata.get("endpoints") or {}
+    for endpoint in endpoints.get("available") or []:
+        if endpoint.get("selected") is True and endpoint.get("model"):
+            return str(endpoint["model"])
+    return None
+
+
 class OpenAICompatProvider(Provider):
     """OpenAI-compatible adapter for direct APIs, OpenRouter, and local vLLM.
 
-    For OpenRouter, ``provider_order`` is mandatory. The adapter sends both
-    ``order`` and ``only`` plus ``allow_fallbacks=false`` and requires selected
-    endpoint metadata in the response.
+    For OpenRouter, ``pinned_upstream`` — exactly ONE provider routing slug —
+    is mandatory (15AUG2026 TV-1 repair: the adapter previously transmitted the
+    WHOLE endpoint order, so "pinned" routing could still land on any of a
+    dozen upstreams). The adapter sends ``order=[pinned]``, ``only=[pinned]``,
+    ``allow_fallbacks=false`` and requires selected endpoint metadata in the
+    response. ``provider_order`` survives as audit metadata only; it is never
+    transmitted.
     """
 
     provider_name = "openai_compat"
@@ -450,6 +470,7 @@ class OpenAICompatProvider(Provider):
         record_callback: Callable[[CallRecord], None],
         max_tokens: int = 1024,
         spend_tracker: SpendTracker | None = None,
+        pinned_upstream: Optional[str] = None,
         provider_order: Optional[list[str]] = None,
         route_label: Optional[str] = None,
         surface_mode: SurfaceMode | str = SurfaceMode.ops_neutral,
@@ -464,13 +485,16 @@ class OpenAICompatProvider(Provider):
             ) from exc
 
         self._is_openrouter = "openrouter.ai" in base_url.lower()
-        if self._is_openrouter and not provider_order:
+        if self._is_openrouter and not (pinned_upstream or "").strip():
             raise RuntimeError(
-                "WIRING FAILURE: OpenRouter adapter requires provider_order. "
-                "Unpinned routing invalidates provider-level provenance."
+                "WIRING FAILURE: OpenRouter adapter requires pinned_upstream — "
+                "exactly one frozen provider slug. Unpinned or list-shaped "
+                "routing invalidates provider-level provenance."
             )
-        if provider_order is not None and (
-            not provider_order or any(not item.strip() for item in provider_order)
+        if pinned_upstream is not None and not pinned_upstream.strip():
+            raise ValueError("WIRING FAILURE: pinned_upstream is an empty route slug.")
+        if provider_order is not None and any(
+            not item.strip() for item in provider_order
         ):
             raise ValueError("WIRING FAILURE: provider_order contains an empty route slug.")
 
@@ -484,7 +508,8 @@ class OpenAICompatProvider(Provider):
         self.provider_name = "openrouter" if self._is_openrouter else "openai_compat"
         self.model = model
         self.base_url = base_url
-        self.provider_order = list(provider_order or [])
+        self.pinned_upstream = (pinned_upstream or "").strip() or None
+        self.provider_order = list(provider_order or [])  # audit witness only
         self.route_label = route_label or f"direct:{urlparse(base_url).netloc}"
         self.usd_per_mtok_in = usd_per_mtok_in
         self.usd_per_mtok_out = usd_per_mtok_out
@@ -499,11 +524,14 @@ class OpenAICompatProvider(Provider):
                 "WIRING FAILURE: caller attempted to override frozen OpenRouter "
                 "routing or add model fallbacks."
             )
+        # ONE slug, isolated. The chosen upstream is the entire routing
+        # universe for this call; everything else is a provenance violation
+        # waiting to happen, not a fallback.
         return {
             **caller_extra,
             "provider": {
-                "order": self.provider_order,
-                "only": self.provider_order,
+                "order": [self.pinned_upstream],
+                "only": [self.pinned_upstream],
                 "allow_fallbacks": False,
             },
         }
@@ -602,6 +630,7 @@ class OpenAICompatProvider(Provider):
         if router_metadata is not None and hasattr(router_metadata, "model_dump"):
             router_metadata = router_metadata.model_dump(mode="json")
         router_metadata = dict(router_metadata or {})
+        served_model = response.model
         if self._is_openrouter:
             if not router_metadata:
                 raise RuntimeError(
@@ -615,12 +644,15 @@ class OpenAICompatProvider(Provider):
                     "despite fallbacks being disabled. Stop before mixing routes."
                 )
             upstream_route = _selected_openrouter_route(router_metadata)
+            # Prefer the endpoint witness's served deployment (canonical dated
+            # slug) over the top-level echo: pins are events, not names.
+            served_model = _selected_openrouter_model(router_metadata) or response.model
         else:
             upstream_route = self.route_label
 
         return ProviderResponse(
             text=message.content or "",
-            model_snapshot=response.model,
+            model_snapshot=served_model,
             upstream_route=upstream_route,
             input_tokens=in_tokens,
             output_tokens=out_tokens,

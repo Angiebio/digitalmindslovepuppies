@@ -99,6 +99,13 @@ class CallRecord(BaseModel):
     input_tokens: int
     output_tokens: int                               # NOTE: reasoning tokens bill as output — they land here
     reasoning_tokens: int = 0                        # subset of output_tokens, when exposed separately
+    # UNFREEZE-004 bug-class amendment: some upstreams (AkashML/qwen3.8, live
+    # during the main run) report reasoning BESIDE completion_tokens rather
+    # than inside it. "subset" = the historical shape (reasoning ⊆ output).
+    # "additive" = output_tokens carries raw_completion + reasoning, billed
+    # conservatively — the ledger can only overcount.
+    token_accounting: str = "subset"
+    raw_completion_tokens: Optional[int] = None      # provider's raw completion_tokens (additive mode only)
     usd_cost: float
 
     @model_validator(mode="after")
@@ -126,11 +133,37 @@ class CallRecord(BaseModel):
             raise ValueError(
                 "WIRING FAILURE: token counts and call cost must be non-negative."
             )
-        if self.reasoning_tokens > self.output_tokens:
+        if self.token_accounting not in {"subset", "additive"}:
             raise ValueError(
-                "WIRING FAILURE: reasoning_tokens is a subset of output_tokens; "
-                "it cannot exceed the billed output count."
+                f"WIRING FAILURE: unknown token_accounting={self.token_accounting!r}; "
+                "a record must name its billing dialect."
             )
+        if self.token_accounting == "additive":
+            # UNFREEZE-004: additive records must show their arithmetic — the
+            # billed output is exactly raw completion + separately-reported
+            # reasoning, or the record is lying about its own repair.
+            if self.raw_completion_tokens is None or self.raw_completion_tokens < 0:
+                raise ValueError(
+                    "WIRING FAILURE: additive token accounting requires the "
+                    "provider's raw non-negative completion_tokens on the record."
+                )
+            if self.output_tokens != self.raw_completion_tokens + self.reasoning_tokens:
+                raise ValueError(
+                    "WIRING FAILURE: additive accounting must satisfy "
+                    "output_tokens == raw_completion_tokens + reasoning_tokens."
+                )
+        else:
+            if self.raw_completion_tokens is not None:
+                raise ValueError(
+                    "WIRING FAILURE: raw_completion_tokens only exists in "
+                    "additive accounting; subset records own their raw count "
+                    "as output_tokens."
+                )
+            if self.reasoning_tokens > self.output_tokens:
+                raise ValueError(
+                    "WIRING FAILURE: reasoning_tokens is a subset of output_tokens; "
+                    "it cannot exceed the billed output count."
+                )
         return self
 
 

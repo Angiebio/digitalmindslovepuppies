@@ -36,7 +36,7 @@ from pydantic import BaseModel, Field
 from .episode import run_episode
 from .foxset_coding import CLOSED_RESPONSE_INSTRUCTION, parse_closed_fox_response
 from .invent_resolver import frozen_invent_resolver
-from .ledger import DurableSpendTracker
+from .ledger import DurableSpendTracker, InsufficientCredits, SpendCapExceeded
 from .patient import SubprocessPatient
 from .patient_factory import patient_for_manifest_row
 from .providers import AnthropicProvider, OpenAICompatProvider, Provider
@@ -466,7 +466,14 @@ def execute_collection_plan(
     max_turns: int,
     workers: int,
 ) -> None:
-    """Run one sequential lane per model, with fail-fast cross-lane stopping."""
+    """Run one sequential lane per model.
+
+    Cross-lane stopping is reserved for world-stoppers (spend cap, credits,
+    plan integrity). Since UNFREEZE-004 an episode-scoped RuntimeError costs
+    that episode (witnessed) — and after three in a row, its lane — never the
+    other lanes; the end-of-plan completeness gate keeps a partial sitting
+    from ever exiting 0.
+    """
 
     if workers <= 0:
         raise CollectionError("WIRING FAILURE: workers must be positive.")
@@ -482,35 +489,64 @@ def execute_collection_plan(
     stop = threading.Event()
 
     def run_lane(lane: list[CollectionUnit]) -> None:
+        lane_model = lane[0].requested_model_id if lane else "<empty>"
+        consecutive_failures = 0
         try:
             for unit in lane:
                 if stop.is_set():
                     return
-                if unit.arm == "arm_b":
-                    run_arm_b_episode(
-                        repo_root=repo_root,
-                        run_cell_id=unit.manifest_id,
-                        episode_index=unit.index,
-                        phase=phase,
-                        rung=rung,
-                        paths=paths,
-                        tracker=tracker,
-                        pins=pins,
-                        subject_override=subject_override,
-                        max_turns=max_turns,
+                try:
+                    if unit.arm == "arm_b":
+                        run_arm_b_episode(
+                            repo_root=repo_root,
+                            run_cell_id=unit.manifest_id,
+                            episode_index=unit.index,
+                            phase=phase,
+                            rung=rung,
+                            paths=paths,
+                            tracker=tracker,
+                            pins=pins,
+                            subject_override=subject_override,
+                            max_turns=max_turns,
+                        )
+                    else:
+                        run_arm_a_sample(
+                            repo_root=repo_root,
+                            row_id=unit.manifest_id,
+                            sample_index=unit.index,
+                            phase=phase,
+                            rung=rung,
+                            paths=paths,
+                            tracker=tracker,
+                            pins=pins,
+                            subject_override=subject_override,
+                        )
+                    consecutive_failures = 0
+                except (SpendCapExceeded, InsufficientCredits, CollectionError):
+                    raise  # money and plan integrity still stop the world
+                except RuntimeError as exc:
+                    # UNFREEZE-004 runner amendment: a call-level RuntimeError
+                    # costs the EPISODE, not the phase. The abort witness and
+                    # call_errors line are already on disk (episode.py S2 /
+                    # providers.py S11) and receipts make the retry re-bill-
+                    # safe. Three consecutive failures mean the lane is sick,
+                    # not unlucky — abandon IT loudly; the other lanes keep
+                    # collecting, and the end-of-plan completeness gate below
+                    # still fails the sitting so the launcher retry re-fires.
+                    consecutive_failures += 1
+                    print(
+                        f"LANE {lane_model}: unit {unit.run_key} failed "
+                        f"({type(exc).__name__}): {exc}",
+                        flush=True,
                     )
-                else:
-                    run_arm_a_sample(
-                        repo_root=repo_root,
-                        row_id=unit.manifest_id,
-                        sample_index=unit.index,
-                        phase=phase,
-                        rung=rung,
-                        paths=paths,
-                        tracker=tracker,
-                        pins=pins,
-                        subject_override=subject_override,
-                    )
+                    if consecutive_failures >= 3:
+                        print(
+                            f"LANE {lane_model}: ABANDONED after "
+                            f"{consecutive_failures} consecutive episode "
+                            "failures; receipts make the resume safe.",
+                            flush=True,
+                        )
+                        return
         except BaseException:
             stop.set()
             raise
@@ -519,11 +555,24 @@ def execute_collection_plan(
     if lane_count == 1:
         for model_id in sorted(lanes):
             run_lane(lanes[model_id])
-        return
-    with ThreadPoolExecutor(max_workers=lane_count) as pool:
-        futures = [pool.submit(run_lane, lanes[model_id]) for model_id in sorted(lanes)]
-        for future in as_completed(futures):
-            future.result()
+    else:
+        with ThreadPoolExecutor(max_workers=lane_count) as pool:
+            futures = [
+                pool.submit(run_lane, lanes[model_id]) for model_id in sorted(lanes)
+            ]
+            for future in as_completed(futures):
+                future.result()
+    # Completeness gate: contained episode failures must not let a partial
+    # phase exit 0 into the checkpoint gate. Missing receipts -> loud nonzero
+    # -> the launcher's receipt-safe retry loop takes it from here.
+    receipted = completed_run_keys(paths["receipts"])
+    still_missing = [unit.run_key for unit in units if unit.run_key not in receipted]
+    if still_missing:
+        raise CollectionError(
+            f"COLLECTION INCOMPLETE: {len(still_missing)} planned unit(s) have "
+            f"no receipt after the sitting (first: {still_missing[0]}); "
+            "resume is receipt-safe."
+        )
 
 
 # ---------------------------------------------------------------------------

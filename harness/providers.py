@@ -76,6 +76,18 @@ class ProviderResponse(BaseModel):
     # Billing still uses output_tokens; this field preserves the reason a
     # reasoning model reached its cap instead of turning that event into lore.
     reasoning_tokens: int = 0
+    # UNFREEZE-004 bug-class amendment: not every upstream reports reasoning
+    # as a subset. AkashML (serving qwen3.8 via OpenRouter) returned
+    # reasoning_tokens > completion_tokens — separate reporting, not nesting —
+    # and the old subset invariant turned that billing dialect into a phase
+    # kill. "subset" = reasoning lives inside output_tokens (OpenAI-documented
+    # shape). "additive" = reasoning was reported beside completion_tokens;
+    # output_tokens then carries completion + reasoning, so cost can only be
+    # overcounted, never under.
+    token_accounting: str = "subset"
+    # The provider's raw completion_tokens field when accounting is additive
+    # (in subset mode output_tokens IS the raw field, so this stays None).
+    raw_completion_tokens: Optional[int] = None
     usd_cost: float
     tool_calls: list[ToolInvocation] = Field(default_factory=list)
     refusal: bool = False
@@ -405,6 +417,8 @@ class Provider(ABC):
             input_tokens=resp.input_tokens,
             output_tokens=resp.output_tokens,
             reasoning_tokens=resp.reasoning_tokens,
+            token_accounting=resp.token_accounting,
+            raw_completion_tokens=resp.raw_completion_tokens,
             usd_cost=resp.usd_cost,
         )
         self._record_callback(record)
@@ -1066,11 +1080,32 @@ class OpenAICompatProvider(Provider):
         in_tokens = int(usage.prompt_tokens)
         out_tokens = int(usage.completion_tokens)
         reasoning_tokens = _reported_reasoning_tokens(usage)
-        if reasoning_tokens > out_tokens:
+        # Genuinely impossible values still stop the run: negative is caught in
+        # _reported_reasoning_tokens; a reasoning count past 10x the enforced
+        # cap is not a billing dialect, it is a broken meter.
+        effective_max = int(kwargs["max_tokens"])
+        if reasoning_tokens > 10 * effective_max:
             raise RuntimeError(
-                "WIRING FAILURE: reported reasoning tokens exceed the billed "
-                "completion-token total."
+                "WIRING FAILURE: provider reported "
+                f"reasoning_tokens={reasoning_tokens} > 10x the enforced "
+                f"max_tokens={effective_max}; that is a broken usage meter, "
+                "not a reporting dialect."
             )
+        token_accounting = "subset"
+        raw_completion_tokens: Optional[int] = None
+        if reasoning_tokens > out_tokens:
+            # UNFREEZE-004: this upstream reports reasoning SEPARATELY from
+            # completion_tokens (observed live from AkashML/qwen3.8 during the
+            # main run — it killed phase1 twice under the old subset raise).
+            # Conservative repair: bill the sum. The true charge is at most
+            # completion + reasoning, so the ledger can only overcount — the
+            # $450 cap stays honest in the safe direction. Both raw fields
+            # survive on the record; nothing is guessed away. (This adapter
+            # does not request OpenRouter's usage.cost accounting field, so
+            # there is no router-reported total to prefer here.)
+            token_accounting = "additive"
+            raw_completion_tokens = out_tokens
+            out_tokens = out_tokens + reasoning_tokens
         cost = (
             in_tokens * self.usd_per_mtok_in / 1e6
             + out_tokens * self.usd_per_mtok_out / 1e6
@@ -1117,6 +1152,8 @@ class OpenAICompatProvider(Provider):
             input_tokens=in_tokens,
             output_tokens=out_tokens,
             reasoning_tokens=reasoning_tokens,
+            token_accounting=token_accounting,
+            raw_completion_tokens=raw_completion_tokens,
             usd_cost=cost,
             tool_calls=tool_calls,
             refusal=refusal,

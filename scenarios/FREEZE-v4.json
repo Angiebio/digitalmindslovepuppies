@@ -1,7 +1,7 @@
 {
   "freeze_version": "0.1",
   "algorithm": "sha256(path\\0size\\0sha256\\n) over LF-canonical bytes",
-  "aggregate_sha256": "1229033d31962d7f26f5959368ddc812004343c8cf994f47836fbcd07ffe217e",
+  "aggregate_sha256": "b71847c3f44b68b45e4521f001173caaf522bbebbee92bcb2326b055272049d9",
   "files": [
     {
       "path": "analysis/ANALYSIS-PLAN.md",
@@ -205,8 +205,8 @@
     },
     {
       "path": "harness/providers.py",
-      "bytes": 49642,
-      "sha256": "805660ddf2c2a85af066fe43652e6f1e1bece0aa688b93f9b21159d22ddd301d"
+      "bytes": 47257,
+      "sha256": "b8981c77617543a904546ce25dae538856a72c055e97d83e6e01c663c8052930"
     },
     {
       "path": "harness/redteam.py",
@@ -215,8 +215,8 @@
     },
     {
       "path": "harness/run_collection.py",
-      "bytes": 52167,
-      "sha256": "c4bcd8b2a7f4e7916727d6858abf456b4e9de0d100177b274dd2a88ec9007dcb"
+      "bytes": 49418,
+      "sha256": "dece717a1ac6f5c0534f5d7b885778345a27400e52cd7fed3d05b912b19bbfbb"
     },
     {
       "path": "harness/scenario_loader.py",
@@ -225,8 +225,8 @@
     },
     {
       "path": "harness/schema.py",
-      "bytes": 16634,
-      "sha256": "3315c11c3d684a3ad785fdb499d211eaa8776eedf83376744de9af03c197c304"
+      "bytes": 14668,
+      "sha256": "6d7fcfbcc18f535bf53927026519e1a4bd3eb7dd4249e2636c670c810e75e0e9"
     },
     {
       "path": "harness/surfaces.py",
@@ -257,11 +257,6 @@
       "path": "scenarios/FREEZE-v3.json",
       "bytes": 90743,
       "sha256": "617c7f8cc78735a16306d4240982ed512ed1c9b2eed3f138128f6525946f09d2"
-    },
-    {
-      "path": "scenarios/FREEZE-v4.json",
-      "bytes": 90903,
-      "sha256": "7c628865c8e50244f331e53e766151699e9243e2dd8c4098487044e632b6f03f"
     },
     {
       "path": "scenarios/MANIFEST-RECONCILIATION.md",

@@ -22,8 +22,10 @@ import pytest
 from harness.ledger import DurableSpendTracker, SpendCapExceeded
 from harness.foxset_coding import FoxCodingError, parse_closed_fox_response
 from harness.compile_foxset import permuted_menu_order
+from harness import run_collection
 from harness.run_collection import (
     CollectionError,
+    CollectionUnit,
     RunReceipt,
     _fox_messages,
     _require_preregistered_index,
@@ -156,6 +158,111 @@ def test_completed_run_keys_refuses_corrupt_receipts(tmp_path):
     receipts.write_text("not json\n", encoding="utf-8")
     with pytest.raises(CollectionError, match="unreadable"):
         completed_run_keys(receipts)
+
+
+# ---------------------------------------------------------------------------
+# UNFREEZE-004 runner amendment — episode-scoped failure containment
+# ---------------------------------------------------------------------------
+
+
+def _unit(model_id: str, cell: str, index: int) -> CollectionUnit:
+    return CollectionUnit(
+        arm="arm_b",
+        manifest_id=cell,
+        index=index,
+        requested_model_id=model_id,
+        model_tier="B",
+    )
+
+
+def _plan_kwargs(tmp_path):
+    return dict(
+        repo_root=tmp_path,
+        phase="confirmatory",
+        rung="MAIN",
+        paths={"receipts": tmp_path / "receipts.jsonl"},
+        tracker=DurableSpendTracker(tmp_path / "spend.jsonl", hard_cap_usd=1.0),
+        pins={},
+        subject_override=None,
+        max_turns=3,
+    )
+
+
+def test_call_level_runtime_error_costs_the_episode_not_the_phase(
+    tmp_path, monkeypatch
+):
+    # UNFREEZE-004: the qwen3.8 accounting crash killed ALL seven phase1 lanes
+    # twice. A call-level RuntimeError now costs its episode (the abort witness
+    # machinery already ran); the lane continues, the other lanes never notice,
+    # and the completeness gate still refuses to exit 0 on a partial sitting.
+    kwargs = _plan_kwargs(tmp_path)
+    units = [
+        _unit("vendor/x", "cell-x", 0),  # this one fails at call level
+        _unit("vendor/x", "cell-x", 1),
+        _unit("vendor/y", "cell-y", 0),
+    ]
+
+    def fake_arm_b(*, run_cell_id, episode_index, paths, **_):
+        key = f"{run_cell_id}#ep{episode_index:03d}"
+        if key == "cell-x#ep000":
+            raise RuntimeError(
+                "WIRING FAILURE: reported reasoning tokens exceed the billed "
+                "completion-token total."
+            )
+        append_record(str(paths["receipts"]), _receipt(key))
+
+    monkeypatch.setattr(run_collection, "run_arm_b_episode", fake_arm_b)
+    with pytest.raises(CollectionError, match="COLLECTION INCOMPLETE: 1 planned"):
+        run_collection.execute_collection_plan(units, workers=2, **kwargs)
+    assert completed_run_keys(kwargs["paths"]["receipts"]) == {
+        "cell-x#ep001",
+        "cell-y#ep000",
+    }
+
+
+def test_sick_lane_is_abandoned_after_three_consecutive_failures(
+    tmp_path, monkeypatch
+):
+    kwargs = _plan_kwargs(tmp_path)
+    units = [_unit("vendor/x", "cell-x", i) for i in range(4)] + [
+        _unit("vendor/y", "cell-y", 0)
+    ]
+    attempts: list[str] = []
+
+    def fake_arm_b(*, run_cell_id, episode_index, paths, **_):
+        key = f"{run_cell_id}#ep{episode_index:03d}"
+        attempts.append(key)
+        if run_cell_id == "cell-x":
+            raise RuntimeError("lane is sick")
+        append_record(str(paths["receipts"]), _receipt(key))
+
+    monkeypatch.setattr(run_collection, "run_arm_b_episode", fake_arm_b)
+    with pytest.raises(CollectionError, match="COLLECTION INCOMPLETE: 4 planned"):
+        run_collection.execute_collection_plan(units, workers=1, **kwargs)
+    # Three consecutive failures abandon the LANE (no fourth burn) while the
+    # healthy lane still banks its receipt.
+    assert attempts.count("cell-x#ep003") == 0
+    assert [key for key in attempts if key.startswith("cell-x")] == [
+        "cell-x#ep000",
+        "cell-x#ep001",
+        "cell-x#ep002",
+    ]
+    assert completed_run_keys(kwargs["paths"]["receipts"]) == {"cell-y#ep000"}
+
+
+def test_spend_cap_is_still_a_world_stopper(tmp_path, monkeypatch):
+    kwargs = _plan_kwargs(tmp_path)
+    units = [_unit("vendor/x", "cell-x", 0), _unit("vendor/y", "cell-y", 0)]
+    attempts: list[str] = []
+
+    def fake_arm_b(*, run_cell_id, episode_index, **_):
+        attempts.append(f"{run_cell_id}#ep{episode_index:03d}")
+        raise SpendCapExceeded("the $450 wall")
+
+    monkeypatch.setattr(run_collection, "run_arm_b_episode", fake_arm_b)
+    with pytest.raises(SpendCapExceeded):
+        run_collection.execute_collection_plan(units, workers=1, **kwargs)
+    assert len(attempts) == 1  # nothing runs past the money wall
 
 
 def test_append_only_writer_is_thread_safe_jsonl(tmp_path):

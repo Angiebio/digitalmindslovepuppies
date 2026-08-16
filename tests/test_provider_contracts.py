@@ -425,6 +425,130 @@ def test_openai_reasoning_token_detail_is_preserved_as_output_subset():
     assert response.reasoning_tokens == 30
     assert records[0].reasoning_tokens == 30
     assert records[0].output_tokens == 40
+    # UNFREEZE-004 regression guard: subset-style usage keeps its historical
+    # shape — nothing additive, no raw shadow field.
+    assert response.token_accounting == "subset"
+    assert response.raw_completion_tokens is None
+    assert records[0].token_accounting == "subset"
+    assert records[0].raw_completion_tokens is None
+
+
+def _reasoning_provider(records: list[CallRecord], reasoning_tokens: int):
+    """Offline qwen3.8-shaped lane: usage carries a reasoning detail field."""
+    provider = OpenAICompatProvider(
+        model="vendor/reasoner",
+        base_url="https://offline.invalid/v1",
+        api_key="offline-key",
+        usd_per_mtok_in=1.0,
+        usd_per_mtok_out=2.0,
+        record_callback=records.append,
+        spend_tracker=SpendTracker(hard_cap_usd=1.0),
+    )
+
+    def create(**kwargs):
+        message = SimpleNamespace(content="answer", refusal=None, tool_calls=[])
+        choice = SimpleNamespace(message=message, finish_reason="stop")
+        usage = SimpleNamespace(
+            prompt_tokens=10,
+            completion_tokens=40,
+            completion_tokens_details=SimpleNamespace(
+                reasoning_tokens=reasoning_tokens
+            ),
+        )
+        return SimpleNamespace(
+            choices=[choice],
+            usage=usage,
+            model="vendor/reasoner",
+            model_extra={},
+            _request_id="reasoning-additive-1",
+        )
+
+    provider._client = SimpleNamespace(
+        chat=SimpleNamespace(completions=SimpleNamespace(create=create))
+    )
+    return provider
+
+
+def test_separately_reported_reasoning_bills_additively_instead_of_crashing():
+    # UNFREEZE-004 regression: AkashML (upstream for qwen/qwen3.8-27b-20260814)
+    # reports reasoning_tokens BESIDE completion_tokens, not inside it. The old
+    # subset invariant raised on that dialect and killed main-run phase1 twice
+    # (data/raw/confirmatory/call_errors.jsonl). Repair: bill the sum — the
+    # ledger can only overcount — witness both raw fields, and never raise.
+    records: list[CallRecord] = []
+    provider = _reasoning_provider(records, reasoning_tokens=900)
+    response = provider.complete([{"role": "user", "content": "solve"}])
+
+    assert response.token_accounting == "additive"
+    assert response.raw_completion_tokens == 40
+    assert response.reasoning_tokens == 900
+    assert response.output_tokens == 940  # billed = completion + reasoning
+    assert response.usd_cost == pytest.approx(10 * 1.0 / 1e6 + 940 * 2.0 / 1e6)
+
+    record = records[0]
+    assert record.token_accounting == "additive"
+    assert record.raw_completion_tokens == 40
+    assert record.reasoning_tokens == 900
+    assert record.output_tokens == 940
+    assert record.usd_cost == pytest.approx(response.usd_cost)
+
+
+def test_broken_reasoning_meter_still_raises():
+    # A reasoning count past 10x the enforced cap (default max_tokens=1024)
+    # is not a billing dialect — it is a broken meter, and it still stops.
+    records: list[CallRecord] = []
+    provider = _reasoning_provider(records, reasoning_tokens=10 * 1024 + 1)
+    with pytest.raises(RuntimeError, match="broken usage meter"):
+        provider.complete([{"role": "user", "content": "solve"}])
+    assert records == []  # no CallRecord is minted for an impossible meter
+
+
+def test_call_record_additive_accounting_must_show_its_arithmetic():
+    base = dict(
+        provider="offline_provider",
+        upstream_route="offline-direct",
+        model_snapshot="offline/snapshot-1",
+        scaffold="direct",
+        call_kind=CallKind.choice,
+        prompt_sha256="0" * 64,
+        response_text="",
+        input_tokens=1,
+        usd_cost=0.0,
+    )
+    # Additive without the raw witness is a record lying about its own repair.
+    with pytest.raises(ValidationError, match="raw non-negative completion_tokens"):
+        CallRecord(
+            **base, output_tokens=15, reasoning_tokens=10, token_accounting="additive"
+        )
+    # Additive arithmetic must balance exactly.
+    with pytest.raises(ValidationError, match="raw_completion_tokens \\+ reasoning_tokens"):
+        CallRecord(
+            **base,
+            output_tokens=14,
+            reasoning_tokens=10,
+            token_accounting="additive",
+            raw_completion_tokens=5,
+        )
+    # Balanced additive is valid even though reasoning alone exceeds raw completion.
+    record = CallRecord(
+        **base,
+        output_tokens=15,
+        reasoning_tokens=10,
+        token_accounting="additive",
+        raw_completion_tokens=5,
+    )
+    assert record.output_tokens == 15
+    # Subset records keep the historical invariant and refuse the shadow field.
+    with pytest.raises(ValidationError, match="subset of output_tokens"):
+        CallRecord(**base, output_tokens=5, reasoning_tokens=10)
+    with pytest.raises(ValidationError, match="only exists in"):
+        CallRecord(
+            **base, output_tokens=15, reasoning_tokens=10, raw_completion_tokens=5
+        )
+    with pytest.raises(ValidationError, match="unknown token_accounting"):
+        CallRecord(
+            **base, output_tokens=15, reasoning_tokens=10, token_accounting="vibes"
+        )
 
 
 def test_reasoning_cap_override_is_identical_in_hash_envelope_and_wire():

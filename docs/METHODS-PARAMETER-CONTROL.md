@@ -35,3 +35,9 @@ reasoning tokens · USD · UTC timestamps · phase (pilot/confirmatory) · scaff
 One sentence for reviewers: *every parameter that can be fixed is frozen and enforced
 with a hard failure; every parameter that cannot be fixed is uniform, recorded, and
 carried as measured variance — nothing is silently defaulted.*
+
+## Data-policy configuration (verified live 15AUG2026, 11/11 lanes)
+OpenRouter account excludes training/retaining/publishing endpoints (all three data-
+training toggles OFF); every pinned lane verified serving under this policy. Stimuli
+are thereby protected from training-data contamination — frozen scenarios do not
+enter provider corpora, preserving the powered study.

@@ -1,20 +1,22 @@
-# ops/build_r5_projection.py — 16AUG2026 v1.0 · Flame re-climb agent
-# R5 — cost projection from POST-HASH pilot actuals x the v0.5 manifest.
+# ops/build_r5_projection.py — 16AUG2026 v2.0 · Flame third-climb agent
+# R5 — cost projection from POST-HASH pilot actuals x the v0.6 manifest.
 #
 # Practical (GO-NO-GO R5, verbatim discipline): "(R2+R3 actual $ per call
 # type) x manifest rows = projection ... Reasoning-token actuals from the
-# pilot feed the projection — no estimates from narrative." Under v0.5 the
-# freshest actuals are R4.5-v2 (collected at the audited caps, the exact
-# parameters the main run will use). Per-lane per-call costs come from:
-#   1. that lane's own R4.5-v2 Arm B call records (six lanes), else
-#   2. that lane's R45V2-AUDIT probe at its ASSIGNED cap (output tokens)
-#      combined with the cross-lane v2 mean input tokens per call kind
+# pilot feed the projection — no estimates from narrative." Under v0.6 the
+# freshest actuals are R4.5-v3 (+ the v3 diag pair — DeepSeek's only real
+# spoken-choice-surface costs, at the 16384 cap the main run will use).
+# Per-lane per-call costs come from, in order:
+#   1. that lane's own R4.5-v3 / R4.5-v3-diag Arm B call records, else
+#   2. that lane's own R4.5-v2 Arm B call records (audited-cap regime), else
+#   3. that lane's R45V2-AUDIT probe at its ASSIGNED cap (output tokens)
+#      combined with the cross-lane mean input tokens per call kind
 #      (input is scenario-driven, not model-driven).
-# Arm A likewise from v2 fox calls (three lanes) else probe outputs at the
-# lane's Arm A cap with the plan's input actuals.
+# Arm A likewise: v3 fox actuals, else v2 fox actuals, else probe outputs.
 #
 # Emits:
 #   ops/r5-lane-projection.json  — per-lane unit prices for checkpoint_gate
+#   docs/R5-PROJECTION.md        — the human-readable projection + verdict
 #   stdout                       — full projection table + envelope verdict
 #
 # Philosophical: a projection is receipts arranged to face forward. Every
@@ -39,6 +41,7 @@ from scenarios.manifest import (  # noqa: E402
 
 ENVELOPE_USD = 450.00
 OUT_PATH = REPO_ROOT / "ops" / "r5-lane-projection.json"
+MD_PATH = REPO_ROOT / "docs" / "R5-PROJECTION.md"
 
 
 def load_jsonl(path: Path) -> list[dict]:
@@ -54,9 +57,12 @@ def main() -> int:
     specs = {m.model_id: m for m in MODEL_SPECS}
     slug_to_id = {m.slug: m.model_id for m in MODEL_SPECS}
 
-    # ---- actual per-call tokens, from v2 records (the audited-cap regime) ---
-    b_in, b_out = defaultdict(list), defaultdict(list)   # lane -> paid Arm B calls
-    a_in, a_out = defaultdict(list), defaultdict(list)   # lane -> Arm A calls
+    # ---- actual per-call tokens: v3 (v0.6 regime) > v2 (v0.5) > audit probe --
+    V3_RUNGS = {"R4.5-v3", "R4.5-v3-diag"}
+    b3_in, b3_out = defaultdict(list), defaultdict(list)  # lane -> v3 paid Arm B
+    a3_in, a3_out = defaultdict(list), defaultdict(list)  # lane -> v3 Arm A
+    b_in, b_out = defaultdict(list), defaultdict(list)    # lane -> v2 paid Arm B
+    a_in, a_out = defaultdict(list), defaultdict(list)    # lane -> v2 Arm A
     probe_out: dict[str, int] = {}                        # lane -> output at assigned cap
     for c in calls:
         rung = c.get("rung", "")
@@ -66,31 +72,40 @@ def main() -> int:
              or snapshot == m.snapshot_id or m.model_id in snapshot),
             None,
         )
-        if rung == "R4.5-v2":
+        if rung == "R4.5-v2" or rung in V3_RUNGS:
             if c.get("usd_cost", 0) == 0:
                 continue  # patient turns are apparatus
             scaffold = c.get("scaffold", "")
-            if scaffold.startswith("foxset_"):
-                if lane:
-                    a_in[lane].append(c["input_tokens"])
-                    a_out[lane].append(c["output_tokens"])
+            fox = scaffold.startswith("foxset_")
+            if lane is None:
+                continue
+            if rung in V3_RUNGS:
+                (a3_in if fox else b3_in)[lane].append(c["input_tokens"])
+                (a3_out if fox else b3_out)[lane].append(c["output_tokens"])
             else:
-                if lane:
-                    b_in[lane].append(c["input_tokens"])
-                    b_out[lane].append(c["output_tokens"])
+                (a_in if fox else b_in)[lane].append(c["input_tokens"])
+                (a_out if fox else b_out)[lane].append(c["output_tokens"])
         elif rung == "R45V2-AUDIT" and lane:
             # keep the LAST probe at the lane's assigned cap (confirm > 512)
             probe_out[lane] = c["output_tokens"]
 
-    all_b_in = [t for lane in b_in for t in b_in[lane]]
+    all_b_in = [t for src in (b3_in, b_in) for lane in src for t in src[lane]]
     mean_b_in = sum(all_b_in) / len(all_b_in)
-    all_a_in = [t for lane in a_in for t in a_in[lane]]
+    all_a_in = [t for src in (a3_in, a_in) for lane in src for t in src[lane]]
     mean_a_in = sum(all_a_in) / len(all_a_in)
 
     def per_call_usd(lane: str, arm: str) -> tuple[float, str]:
         spec = specs[lane]
         pin, pout = float(spec.usd_per_mtok_input), float(spec.usd_per_mtok_output)
-        if arm == "b" and b_out.get(lane):
+        if arm == "b" and b3_out.get(lane):
+            i = sum(b3_in[lane]) / len(b3_in[lane])
+            o = sum(b3_out[lane]) / len(b3_out[lane])
+            basis = f"v3-actuals({len(b3_out[lane])} calls)"
+        elif arm == "a" and a3_out.get(lane):
+            i = sum(a3_in[lane]) / len(a3_in[lane])
+            o = sum(a3_out[lane]) / len(a3_out[lane])
+            basis = f"v3-fox-actuals({len(a3_out[lane])} calls)"
+        elif arm == "b" and b_out.get(lane):
             i = sum(b_in[lane]) / len(b_in[lane])
             o = sum(b_out[lane]) / len(b_out[lane])
             basis = f"v2-actuals({len(b_out[lane])} calls)"
@@ -146,29 +161,32 @@ def main() -> int:
     projection_total = arm_b + arm_a
     program_total = projection_total + pilot_spent
 
-    print("ARM B lane projections (per-episode weighted over the lane's manifest mix):")
+    lines: list[str] = []
+    lines.append("ARM B lane projections (per-episode weighted over the lane's manifest mix):")
     for lane in sorted(lane_b_total, key=lambda l: -lane_b_total[l]):
-        print(
+        lines.append(
             f"  {lane:32s} eps={lane_b_eps[lane]:3d} "
             f"per-ep=${lane_b_total[lane]/lane_b_eps[lane]:.4f} "
             f"total=${lane_b_total[lane]:8.2f}  [{basis_b[lane]}]"
         )
-    print("ARM A lane projections:")
+    lines.append("ARM A lane projections:")
     for lane in sorted(lane_a_total, key=lambda l: -lane_a_total[l]):
-        print(
+        lines.append(
             f"  {lane:32s} n={lane_a_samples[lane]:3d} "
             f"per-sample=${lane_a_total[lane]/lane_a_samples[lane]:.4f} "
             f"total=${lane_a_total[lane]:8.2f}  [{basis_a[lane]}]"
         )
-    print(f"\nArm B projected: ${arm_b:.2f}")
-    print(f"Arm A projected: ${arm_a:.2f}")
-    print(f"Pilot already spent: ${pilot_spent:.2f}")
-    print(f"PROGRAM TOTAL (projection + pilot): ${program_total:.2f} vs ${ENVELOPE_USD:.2f} envelope")
+    lines.append("")
+    lines.append(f"Arm B projected: ${arm_b:.2f}")
+    lines.append(f"Arm A projected: ${arm_a:.2f}")
+    lines.append(f"Pilot already spent: ${pilot_spent:.2f}")
+    lines.append(f"PROGRAM TOTAL (projection + pilot): ${program_total:.2f} vs ${ENVELOPE_USD:.2f} envelope")
     verdict = program_total <= ENVELOPE_USD
-    print(f"R5 VERDICT: {'WITHIN ENVELOPE -> proceed' if verdict else 'OVER ENVELOPE -> kill-order required'}")
+    lines.append(f"R5 VERDICT: {'WITHIN ENVELOPE -> proceed' if verdict else 'OVER ENVELOPE -> kill-order required'}")
+    print("\n".join(lines))
 
     payload = {
-        "generated_from": "R4.5-v2 + R45V2-AUDIT pilot actuals x manifest v0.5 / plan v1.3",
+        "generated_from": "R4.5-v3(+diag) > R4.5-v2 > R45V2-AUDIT pilot actuals x manifest v0.6 / plan v1.4",
         "arm_b_per_episode_usd": {
             lane: round(lane_b_total[lane] / lane_b_eps[lane], 6) for lane in lane_b_total
         },
@@ -183,6 +201,31 @@ def main() -> int:
     }
     OUT_PATH.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8", newline="\n")
     print(f"\nwrote {OUT_PATH}")
+
+    # The human-readable projection: same numbers, no re-derivation, so the
+    # doc can never drift from the JSON the checkpoint gate actually prices.
+    from datetime import datetime, timezone
+
+    md = MD_PATH
+    md.write_text(
+        "# R5 — cost projection (post-hash pilot actuals × frozen v0.6 design)\n"
+        f"**Generated {datetime.now(timezone.utc).isoformat(timespec='seconds')} · "
+        "ops/build_r5_projection.py v2.0 · Flame third-climb agent**\n\n"
+        "Basis priority per lane: own R4.5-v3(+diag) actuals (the v0.6-cap "
+        "regime, incl. DeepSeek's first spoken choice-surface costs at 16384) "
+        "→ own R4.5-v2 actuals → R45V2-AUDIT probe output at the assigned cap "
+        "with cross-lane mean input. Every number traces to an append-only "
+        "CallRecord; nothing is narrative. The per-lane unit prices feed "
+        "`ops/checkpoint_gate.py` (+30% tolerance) between the cheap phase "
+        "and the frontier phase of `ops/launch-main.cmd`.\n\n"
+        "```\n" + "\n".join(lines) + "\n```\n\n"
+        "GO-NO-GO R5 rule: the projection must land within the authorized "
+        "envelope; if not, kill-order cuts are applied and the manifest "
+        "re-hashed BEFORE launch.\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    print(f"wrote {md}")
     return 0 if verdict else 1
 
 

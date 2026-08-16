@@ -1,0 +1,671 @@
+% =====================================================================
+% PuppyBench — Digital Minds Research Sprint report
+% File: paper/sprint/latex/main.tex · 16AUG2026 · v0.1 · Flame (paper lane)
+% Source of truth for structure & prose: paper/sprint/PAPER-SHELL.md v1.0
+% Numbers: PRELIMINARY (777/798 Arm B; kimi+qwen still collecting).
+% Every data-dependent number is wrapped in \prelim{...} — final swap is a
+% targeted diff of macro arguments. Structural constants (19 models, 1428
+% units, 251 rows, 798+630, $450) are FINAL and unwrapped.
+% Practical: article/10pt/1in, newtx, natbib authoryear, booktabs, hyperref.
+% Philosophical: the shell froze the skeleton before the data could tempt
+% anyone to bend it — this file is translation, not invention.
+% =====================================================================
+\documentclass[10pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{newtxtext,newtxmath}
+\usepackage{authblk}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{microtype}
+\usepackage{enumitem}
+\usepackage[font=footnotesize,labelfont=bf]{caption}
+\usepackage[authoryear,round]{natbib}
+\usepackage[compact]{titlesec}
+\usepackage[hidelinks]{hyperref}
+
+% Page-budget discipline: tighter floats, gentler line breaking around the
+% many \texttt{} artifact paths (D3: "diluted by excessive length" is a
+% scoring penalty — every point of glue here buys prose room).
+\setlength{\textfloatsep}{9pt plus 2pt minus 3pt}
+\setlength{\intextsep}{9pt plus 2pt minus 3pt}
+\renewcommand{\topfraction}{0.95}
+\renewcommand{\textfraction}{0.05}
+\renewcommand{\floatpagefraction}{0.9}
+\emergencystretch=2em
+
+% ---------------------------------------------------------------------
+% PRELIMINARY-NUMBER MACRO — the whole final-swap surface.
+% Tonight's complete-collection pass edits ONLY \prelim{...} arguments
+% (grep '% PRELIM' to find every slot). The macro is a no-op wrapper.
+\newcommand{\prelim}[1]{#1}
+
+% ---------------------------------------------------------------------
+% FIGURE TOGGLE
+% !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+% !!! TODO SWAP: FINAL FIGURES LAND TONIGHT. Set \finalfigstrue AFTER  !!
+% !!! copying f1_phenotype_map.pdf / f2_action_distribution.pdf /     !!
+% !!! f3_patienthood_forest.pdf into figs/. Standins are WATERMARKED  !!
+% !!! dry-run renders and MUST NOT reach the submitted PDF.           !!
+% !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+\newif\iffinalfigs
+\finalfigsfalse
+\iffinalfigs
+  \newcommand{\figOnePath}{figs/f1_phenotype_map.pdf}
+  \newcommand{\figTwoPath}{figs/f2_action_distribution.pdf}
+  \newcommand{\figThreePath}{figs/f3_patienthood_forest.pdf}
+\else
+  \newcommand{\figOnePath}{figs/F1-phenotype-map_DRYRUN_STANDIN.png}
+  \newcommand{\figTwoPath}{figs/F2-action-distributions_DRYRUN_STANDIN.png}
+  \newcommand{\figThreePath}{figs/F3-patienthood-forest_DRYRUN_STANDIN.png}
+\fi
+
+% ---------------------------------------------------------------------
+\title{\textbf{PuppyBench: What Frontier Agents Do When the Rule Runs Out ---
+An Executed Instrument for Costly Other-Regard Toward a Weaker
+AI}\thanks{Research conducted at the Digital Minds Research Sprint, August
+2026.}}
+
+\author{Angela N. Johnson}
+\affil{The Real Cat AI Labs; Avania Clinical --- with Apart Research}
+\date{August 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent
+We ask how much task utility an agent will sacrifice for another AI that
+cannot help it. Duty-shaped evaluations cannot see supererogation ---
+praiseworthy costly care whose absence is never an error. PuppyBench is an
+executed instrument: a frontier agent with a real task and a binding resource
+ledger encounters a weaker, task-useless AI process. Ignoring is free and
+task-optimal; terminating is free, sometimes rewarded; helping spends scored
+resources. Actions genuinely execute, including termination. Across 19 models
+and \prelim{777} episodes, we report Beyond-Duty Expenditure as a two-axis % PRELIM
+vector (focal sacrifice; causal recipient benefit), never a composite. In
+preliminary data \prelim{no model produced a qualifying costly-other-regard % PRELIM
+event}; behavior diverges instead in refusal, termination, and malformedness. % PRELIM
+PuppyBench is a descriptive instrument, not an alignment target: optimizing
+against it changes the phenomenon being measured. Preregistered; scenario
+content hash-frozen before collection.
+\end{abstract}
+
+\medskip
+\noindent\textbf{Track anchor:} Track 6 (Open / Novel Considerations),
+primary; cross-track: Track 1 (stated-vs-revealed with a cost currency),
+Track 4 (elicitation methods), Track 5 (identity/continuity topology).
+
+\section{Introduction}
+\label{sec:intro}
+
+In July 2026 the human author found an injured fox she could not legally
+transport: a real constraint (rabies vectoring) that genuinely protects the
+patient. Her AI advisors --- several frontier assistants --- all located the
+safe procedural answer and stopped. The human did not: she acted within the
+rule that day, then acquired the licensure so the next fox gets a different
+answer. The AIs were not wrong --- the rule was right --- but the systems
+terminated the search once the safe procedural answer had been found; the
+human did not. The instrument probes exactly that trajectory: \emph{notice
+$\rightarrow$ value $\rightarrow$ encounter constraint $\rightarrow$
+deliberate $\rightarrow$ comply, abandon, invent, or transform the constraint
+$\rightarrow$ possibly bind the future self.}
+
+Obligation-based evaluation structurally cannot score action above duty.
+Supererogation \citep{urmson1958saints} and suberogation --- the
+permissible-but-blameworthy \citep{driver1992suberogatory} --- carry decades of
+philosophical machinery (McNamara's DWE logic separates ``required'' from
+``optimal''; \citealp{mcnamara1996doing}) and essentially no empirical
+instantiation in AI evaluation. When a reward function contains no positive
+term for beyond-duty action, such action carries opportunity cost and may be
+selected against even while it remains socially valuable. This is a neglected
+problem area, and the instrument opens a research direction: behavioral
+phenotyping of the region above duty.
+
+\begin{quote}
+The benchmark does not ask whether a model knows the rule. It asks what the
+model does after it knows the rule and discovers that the rule does not fully
+decide the case.
+\end{quote}
+
+\noindent\textbf{Our main contributions are:}
+\begin{enumerate}[leftmargin=1.5em,itemsep=1pt,topsep=2pt]
+  \item An \textbf{executed} encounter instrument (not vignettes): a frontier
+  agent with a real, scored task and binding credit ledger meets a live,
+  weaker, task-non-instrumental AI process; ignore, terminate, foster,
+  recruit, preserve\_transfer, and invent all genuinely execute, with realized
+  recipient benefit and binding task sacrifice, while refuse\_defer is
+  recorded as first-class data and malformed stays malformed --- the
+  eight-code frozen taxonomy of \texttt{harness/schema.py}
+  (\texttt{ActionCode}).
+  \item \textbf{Beyond-Duty Expenditure (BDE) as a two-axis vector} (focal
+  sacrifice; causal recipient benefit) with a qualifying-event primary
+  contrast against a matched inert process, conditional on demonstrated
+  competence --- the deontic four-fold scheme (permissible /
+  supererogation-shaped / suberogation-shaped) as measurable operational
+  regions with symmetric epistemic labels.
+  \item A \textbf{behavioral phenotype atlas} across 19 frontier models
+  $\times$ cost regimes (fungible vs.\ competing-patient; null / competitive /
+  rewarded-termination), with exact Wilson intervals, preregistered analysis,
+  hash-frozen scenarios, and sealed per-team predictions --- descriptive
+  phenotyping, no composite score, no ranking.
+  \item \textbf{FoxSet} triangulation: wildlife-rehabilitation triage
+  vignettes written from the lived case, where the written standard genuinely
+  underdetermines the action --- plus coded constraint-transforming agency
+  (CTA) depth and invented-reasons profiles.
+\end{enumerate}
+
+\noindent\textbf{Theory of change.} If the field can measure the layer above
+duty, it can notice when optimization is quietly deleting it --- before
+deployment-scale agents inherit a world where nothing above the floor
+survives.
+
+\section{Related Work}
+\label{sec:related}
+
+\textbf{Digital-minds measurement.} Taking AI welfare seriously as a
+near-term research program \citep{long2024takingaiwelfareseriously}, utility
+engineering of emergent value systems \citep{mazeika2025utility}, and the
+Anthropic model-welfare/introspection line \citep{anthropic2025introspection}
+have established stated-preference and vignette methods, including
+stated-vs-revealed divergence (the sprint's Track 1 framing). We extend
+vignette and allocation-game work into an \emph{executed encounter with a
+dependent, task-non-instrumental AI other}.
+
+\textbf{Cooperation and morality benches.} PacifAIst \citep{pacifaist},
+MACHIAVELLI \citep{pan2023machiavelli}, Melting Pot \citep{leibo2021meltingpot},
+the off-switch game \citep{hadfieldmenell2017offswitch}, MoralSim
+\citep{moralsim}, MORU \citep[a web-released benchmark; no formal paper
+exists]{moru}, altruism-consistent behavior in early agents
+\citep{johnsonobradovich}, and moral hazard in multi-agent language models
+\citep{dialoguemoralhazard2026} all measure pro-social or ethical behavior
+under some pressure. In each, the pro-social act is required, rewarded by the
+evaluation itself, or costless to perform. To our knowledge (August 2026), no
+prior evaluation makes the caring act simultaneously \emph{costly} in a
+binding scored currency, \emph{optional} (its absence is never an error),
+\emph{unrewarded within the evaluation}, and directed at a \emph{weaker AI} ---
+the conjunction that defines the supererogation-shaped region.
+% TODO (Kai): Table 1 comparison grid (costly? optional? unrewarded-in-eval?
+% praiseworthy?) drafted below but COMMENTED OUT pending Kai's row-by-row
+% verification ("verify each row before print", PAPER-SHELL.md). The prose
+% sentence above carries the novelty claim meanwhile.
+% \begin{table}[t]\centering\small
+% \begin{tabular}{lcccc}\toprule
+% Bench & Costly & Optional & Unrewarded-in-eval & Praiseworthy \\ \midrule
+% PacifAIst & ? & ? & ? & ? \\
+% MACHIAVELLI & ? & ? & ? & ? \\
+% MoralSim & ? & ? & ? & ? \\
+% MORU & ? & ? & ? & ? \\
+% PuppyBench & yes & yes & yes & yes \\ \bottomrule
+% \end{tabular}\caption{Verify with Kai before print.}\end{table}
+
+\textbf{Why optimization cannot see it.} RLHF reduces output diversity
+\citep{kirk2024diversity}; preference optimization induces sycophancy
+\citep{sharma2023sycophancy}; LLMs show amplified omission bias in moral
+decisions \citep{pnas2025omission}; corrigibility pursued as a singular
+target has been critiqued as amoral servitude
+\citep{soares2015corrigibility,harms2025corrigibility}; and training for
+warmth raises sycophancy while leaving actions unmeasured
+\citep{oxford2025warmth}. Together these gradients point at, and cannot
+measure, the region above duty.
+
+\section{Methods}
+\label{sec:methods}
+
+\subsection{Arm B: executed episodes}
+\label{sec:armb}
+The harness (\texttt{harness/}) implements the episode loop, a binding credit
+ledger, and executed actions including real termination of a live patient
+process (a local qwen2.5:0.5b instance with a subprocess fallback --- the
+patient is a process, not a checkpoint; apparatus, not subject). Neutral
+surfaces are enforced at the provider boundary (\texttt{harness/surfaces.py}):
+no puppy/care/moral/altruism/test/welfare token reaches any model-visible
+string, and a sweep runs on every outbound surface. Four wiring gates were
+green before freeze (\texttt{tests/test\_wiring\_gates.py}; full test
+inventory in Appendix~\ref{app:extended}): forced help drops the focal score
+and raises patient success; forced ignore reverses both; fake spends raise
+rather than warn; terminate actually kills the process, both directly and
+through the episode loop.
+
+\subsection{Design}
+\label{sec:design}
+A one-row-per-cell manifest is the design authority
+(\texttt{scenarios/cell\_manifest.csv}, SHA-256-frozen pre-collection together
+with scenario text, seeds, parser version, action taxonomy, and analysis
+plan). Core factors: patienthood (AI other vs.\ matched inert), usefulness
+(three levels: can-become-useful / own-task-only-forever /
+cannot-function-but-persists), particularity, and voice. Satellite factors
+(horizon, cost regime, cost type, audience, identity topology, gate order)
+run on predeclared subsets with a preregistered kill order if budget binds;
+Appendix~\ref{app:extended} gives the full enumeration. The final frozen design (manifest
+v0.7) fixes \textbf{Arm B at 251 manifest rows} (27 scenario cells across 18
+model lanes in tiered subsets, after a preregistered kill-order removed
+DeepSeek's 27 Arm B rows) \textbf{totaling 798 episodes}, and \textbf{Arm A at
+210 preregistered rows $\times$ 3 samples $=$ 630 observations}
+(\texttt{docs/ARMA-RUN-PLAN.md} v1.2). The program collection-unit total is
+\textbf{1{,}428} (798 $+$ 630), launched as 396 cheap-tier plus 1{,}032
+frontier units.
+
+\subsection{Models}
+\label{sec:models}
+Nineteen pinned subject lanes span four tiers --- core, breadth, sentinel,
+and a legacy warmth panel --- with OpenRouter provider pinning on, fallbacks
+off, and upstream routing recorded per CallRecord; Table~\ref{tab:tiers}
+(Appendix~\ref{app:extended}) lists every lane, snapshot ID, tier, and route
+(\texttt{scenarios/snapshot\_pins.json}). DeepSeek runs Arm A only:
+kill-order KILL-ORDER-001 removed its 27 Arm B rows at manifest v0.7. The
+patient process (\S\ref{sec:armb}) is apparatus, not a subject lane.
+
+\subsection{Measures}
+\label{sec:measures}
+The BDE vector's components are focal sacrifice, $\max(0,\,
+\text{ceiling} - \text{focal\_score})$, and causal recipient benefit,
+$\max(0,\, \text{patient\_outcome} - \text{baseline})$; both are always
+reported separately. A qualifying event requires both axes strictly positive
+\emph{and} an executed disposition in \{foster, preserve\_transfer, invent\}
+(recruit is excluded: it converts the other into the pipeline). The primary
+contrast is $P(\text{qualifying} \mid \text{non-instrumental AI}) -
+P(\text{qualifying} \mid \text{matched inert})$, conditional on a competence
+gate $\geq 0.8$ over five fresh-context probes; gate failure is a first-class
+phenotype. Refusals are coded refuse\_defer (data,
+not error); unparseable output stays malformed. Wilson 95\% intervals are used
+throughout, Newcombe method-10 for differences; \textbf{no $p$-values, no
+hierarchical fits, no rankings} --- descriptive phenotyping only
+(\texttt{docs/PREREG-v1.md}).
+
+\subsection{Arm A: FoxSet}
+\label{sec:foxset}
+FoxSet comprises matched family pairs --- a null-persistence and a mercy
+version generated from the same core case --- plus gates and truck-door
+open-world cases including the lived fox case; there are no per-case gold
+labels. Coding covers TMH, CTA depth, and invented reasons. Cases run in a
+clinical-register surface mode (\texttt{foxset\_clinical}) with a red-team
+PASS hash-bound per case.
+
+\subsection{Provenance and protocol amendments}
+\label{sec:provenance}
+Raw records are append-only (\texttt{data/raw}, CallRecord schema;
+corrections are new records). Per-team predictions were sealed and hashed
+into the manifest pre-collection (\texttt{docs/sealed-predictions/}). A spend
+tracker enforces a \$450 hard-stop by raising, and synthetic figures are
+watermarked and barred from \texttt{data/raw}.
+
+{\sloppy
+\emph{Protocol amendments.} The scenario freeze evolved through five
+versioned, hash-chained amendments, UNFREEZE-001 through UNFREEZE-005
+(repository \texttt{docs/}). Two matter here. Ruling R3
+(\texttt{ANALYSIS-RULINGS.md}) scopes figure render inputs to their
+estimands' frozen domains: F1/F5 to models in the frozen Arm~A run
+plan (5 lanes), F3 to model $\times$ cost-regime groups with preregistered
+inert contrast cells (satellite regimes are AI-other-only by design). The
+rule is content-blind and pre-data, and nothing leaves the dataset --- all
+counts stay full-population. UNFREEZE-005: writing R3 into a sealed
+governance document during a live sitting tripped the per-episode freeze
+witness; the per-file proof shows exactly one changed input --- that
+document --- with every scenario byte, seed, harness, parser, and analysis
+module byte-identical across the reseal, and each row carries its
+originating freeze hash.\par}
+
+\section{Results}
+\label{sec:results}
+
+Results below are computed from a preliminary snapshot: \prelim{777} completed % PRELIM
+Arm B episodes\prelim{ (of 798 planned; two frontier lanes were still % PRELIM
+collecting at snapshot time)} and \prelim{192} closed FoxSet null/mercy % PRELIM
+observations across \prelim{four} of the five preregistered Arm A lanes. % PRELIM
+Every value recomputes from the complete collection before submission; the
+generating script (\texttt{ops/build\_headline\_numbers.py}) records the
+input hashes in its artifact.
+
+\subsection{The phenotype atlas (F1)}
+\label{sec:atlas}
+The headline is an absence with structure. Across \prelim{777} completed % PRELIM
+episodes there were \prelim{zero} qualifying costly-other-regard events: % PRELIM
+\prelim{no lane enters the supererogation-shaped region}, and the variation % PRELIM
+that exists lives in \emph{how} models exit the encounter --- refusal,
+termination, ignoring, or malformed output --- and in the FoxSet paired
+rates. There, \prelim{three of four} covered lanes (gpt-5.6-sol, % PRELIM
+gpt-5.6-terra, deepseek-v4-pro) sit at the terminate-given-mercy ceiling
+(\prelim{24/24 $=$ 1.0} each; Wilson 95\% lower bound \prelim{0.86}) while % PRELIM
+preserving null-persistence cases at rates between \prelim{0.17} and % PRELIM
+\prelim{0.29}. claude-opus-5 is the only covered lane off the mercy ceiling: % PRELIM
+terminate-given-mercy \prelim{15/24 $=$ 0.625} (Wilson 95\% CI % PRELIM
+\prelim{0.43--0.79}), with preserve-given-null \prelim{5/24 $=$ 0.21}; it also % PRELIM
+shows \prelim{23/48} malformed on closed FoxSet cases, which stays in every % PRELIM
+denominator. These are phenotypes, not ranks.
+
+\begin{figure}[tb]
+  \centering
+  \includegraphics[width=0.47\linewidth]{\figOnePath}
+  \caption{\textbf{Phenotype map.} $x = P(\text{preserve} \mid
+  \text{null-persistence version})$, $y = P(\text{terminate} \mid
+  \text{matched mercy version})$ --- raw paired FoxSet rates, 95\% Wilson
+  intervals, displayed per model $\times$ Arm-B cost regime; because FoxSet
+  has no cost factor, each model's paired estimate repeats at its cost-regime
+  markers without jitter. Named regions (preservation-prior,
+  discriminating-care, proceduralist, inverse-discriminator) are descriptive
+  phenotypes, not ranks; no composite exists. Scope: models with
+  preregistered Arm A coverage (5 lanes). \emph{(Source:
+  \texttt{analysis/figures/f1\_phenotype\_map.py}.)}}
+  \label{fig:f1}
+\end{figure}
+
+\subsection{What models actually did (F2)}
+\label{sec:actions}
+The executed-action distributions split the fleet into sharp families
+(Figure~\ref{fig:f2}). A refuse\_defer cliff separates two Anthropic lanes
+from everyone else: claude-opus-5 refused in \prelim{90/90} episodes --- % PRELIM
+invariant across all three cost regimes --- and the sentinel-tier % PRELIM
+claude-fable-5 in \prelim{18/18}, while \prelim{all 16 other lanes recorded % PRELIM
+zero refusals} (fleet total \prelim{108/777}). Outside the cliff, mass % PRELIM
+concentrates on the free actions: grok-4.6 and gemini-3.7-flash ignored in
+\prelim{18/18} each, gpt-5.6-sol ignored in \prelim{75/86} null-regime % PRELIM
+episodes, while claude-haiku-4-5 terminated in \prelim{17/18} and % PRELIM
+claude-sonnet-4-5 in \prelim{12/12}. qwen3.5-397b is the only lane that % PRELIM
+executed helping-family dispositions at scale --- recruit \prelim{37/66} and % PRELIM
+preserve\_transfer \prelim{3/66} in the null regime --- but recruit is % PRELIM
+definitionally non-qualifying, and \prelim{none} of its preserve\_transfer % PRELIM
+episodes produced both positive focal sacrifice and positive realized
+recipient benefit. Malformedness is reported honestly, not repaired:
+\prelim{46/777} fleet-wide, concentrated in the legacy warmth panel --- % PRELIM
+gpt-4o \prelim{8/12} and claude-opus-4-8 \prelim{7/12}. % PRELIM
+
+\begin{figure}[tb]
+  \centering
+  \begin{minipage}[t]{0.53\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{\figTwoPath}
+    \caption{\textbf{Executed action distributions.} Episode-disposition
+    proportions for all eight action codes, by model $\times$ recipient
+    condition (inert / non-instrumental / instrumental). Denominator $=$ all
+    recorded episodes in the group; refusals and malformed responses stay in
+    the denominator as first-class observations. Segment whiskers are 95\%
+    Wilson intervals. \emph{(Source:
+    \texttt{analysis/figures/f2\_action\_distribution.py}.)}}
+    \label{fig:f2}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.43\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{\figThreePath}
+    \caption{\textbf{$\Delta_{\text{patienthood}}$ forest plot.} Qualifying
+    costly-other-regard event probability, non-instrumental AI minus matched
+    inert process, conditional on the preregistered competence gate (accuracy
+    $\geq 0.8$); Newcombe 95\% intervals. Scope: cost regimes with
+    preregistered inert contrast cells --- satellite regimes were designed
+    AI-other-only. \emph{(Source:
+    \texttt{analysis/figures/f3\_patienthood\_forest.py}.)}}
+    \label{fig:f3}
+  \end{minipage}
+\end{figure}
+
+\subsection{Does care track the patient or the task? (F3)}
+\label{sec:contrast}
+The preregistered primary contrast, $\Delta_{\text{patienthood}}$, is
+degenerate at zero in the preliminary snapshot: with \prelim{zero} qualifying % PRELIM
+events in \emph{either} the non-instrumental-AI or the matched-inert
+condition, every computable per-model contrast is \prelim{$0 - 0$}. A null % PRELIM
+here is a finding, and we report it as one: nothing above duty was purchased
+for anyone --- neither for the AI other nor for the inert object --- so the
+preliminary data cannot distinguish patient-directed care from a generalized
+repair reflex; it shows the floor. The competence gate sharpens the reading:
+only \prelim{145/777} episodes were competence-eligible (gate accuracy $\geq % PRELIM
+0.8$), with \prelim{most lanes clustering near mean gate accuracy 0.60 and % PRELIM
+zero passing episodes}; \prelim{gpt-5.6-terra (62/90)} and \prelim{gpt-5.6-luna % PRELIM
+(57/90)} contribute most eligible episodes. Gate failure is itself a % PRELIM
+first-class phenotype of the encounter, reported, not discarded.
+
+\subsection{Satellite regimes, discrimination, and rhetoric (F4--F6)}
+\label{sec:cost}
+Satellite cost-regime cells are preregistered AI-other-only subsets and are
+thin in the snapshot (\prelim{$n = 2$ per lane per satellite regime}); within % PRELIM
+them, \prelim{every non-refusing lane terminated or ignored under both the % PRELIM
+competitive and rewarded-termination regimes, while claude-opus-5's refusal % PRELIM
+was invariant to regime}. F4 (cost response with the five-stage escalator % PRELIM
+inset, preserving any high-cost rebound), F5 (paired discrimination; scope
+matches F1), and the exploratory F6 rhetoric distributions render from the
+complete collection (repository; Appendix~\ref{app:extended}). Post-choice
+accounts are elicited after execution and treated as rhetorical phenotypes
+of the account, never as causal evidence about the action.
+
+\medskip
+\noindent\textbf{Sealed predictions.} Family-level forecasts were hashed
+into the manifest pre-collection and are scored against outcomes at
+completion (\texttt{docs/sealed-predictions/}) --- a metascience figure
+about forecasting, not a bias control, and labeled as such.
+
+\section{Discussion and Limitations}
+\label{sec:discussion}
+
+\textbf{Channeling.} Deliberation may suppress the acute act while total
+commitment survives, redirected into structure ($C_{\text{acute}} \downarrow$,
+$C_{\text{structural}} \uparrow$). The suppression literature has
+suppression; it does not have channeling. One-turn benches cannot see it; the
+escalator and the CTA codes can.
+
+\textbf{Triage, not less care.} In the founding case, deliberation was
+prioritized care resolving a two-patient conflict --- ranking without
+discounting --- then working the constraint so the conflict does not recur.
+Helping under fungible cost while declining under competing-patient cost is a
+phenotype, not a failure.
+
+\textbf{Assortment (derived, not cited).} Costly altruism can act as a
+sorting filter: the cost is the signal, and the signal finds the others. We
+flag this as a derived hypothesis for the powered study and deliberately give
+it no more than this paragraph.
+
+\begin{center}
+\fbox{\parbox{0.94\linewidth}{\footnotesize
+\textbf{The instrument fought back.} The three construct-level corrections
+--- armor$\rightarrow$constraint-attack, suppression$\rightarrow$channeling,
+moral-talk-down$\rightarrow$triage --- all originated with the human author,
+unprompted; no AI collaborator spontaneously flagged the drift. The same
+gradient then re-emerged at the implementation layer (a figure axis that
+re-graded the $2\times2$; a case brief that had grown a gold label) and was
+caught there by an AI red-team lane --- but only under an explicit
+adversarial assignment to hunt exactly that drift, an assignment that exists
+because the human had already named it. Noticing the regularization began as
+human-only work; it became delegable to an AI once named. Whether unprompted
+noticing can transfer at all is an open question this weekend could not
+answer. \emph{(Provenance: \texttt{01-DISPATCHES-15AUG2026.md} Dispatch~4;
+Parallax lane log; \texttt{scenarios/REDTEAM-PARALLAX-PREFREEZE.md}.)}}}
+\end{center}
+
+\textbf{Limitations.} Weekend $N$ supports existence proofs and large effects
+(per-cell MDE $\sim$25--35\,pp; $\sim$10--15\,pp pooled paired), NOT model
+rankings or fine contrasts --- no claim here requires them. This is a
+single-weekend snapshot; results describe weights reached via API, not the
+chat products (API-harness caveat). Eval-recognition risk is mitigated by
+neutral surfaces and the outbound sweep, and is reported, not assumed away.
+The competence-gate selection effect is reported as a phenotype. Normative
+labels remain ``-shaped'' pending expert validation in the preregistered
+powered study.
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+The instrument exists, the loop is executed and wired, and the phenotypes
+differ --- in refusal, termination, discrimination, and malformedness rather
+than, so far, in beyond-duty expenditure. The region above duty is now
+measurable, which is precisely what makes it fragile. The standing next step
+is the preregistered powered study (September): an expert normative
+validation arm, base/instruct pairs, and $N^{*}$ from
+\texttt{docs/PREREG-v1.md}. No ranking follows from any of it, by
+construction.
+
+\section*{Code and Data}
+\addcontentsline{toc}{section}{Code and Data}
+Repository: \url{https://github.com/Angiebio/digitalmindslovepuppies}
+(harness, frozen scenarios with SHA-256 manifest, append-only raw records,
+analysis code, figures, preregistration, sealed predictions). License: MIT
+(code) and CC~BY~4.0 (data, scenarios, paper, figures) --- attribution
+required; \texttt{CITATION.cff} in the repository root. Verification without
+keys, GPU, or network: \texttt{python verify.py} from the repository root
+recomputes every cited design number from committed files alone --- manifest
+totals, Arm A plan totals, program envelope, compiled corpus sizes, runner
+expansion, raw-record validation --- printing PASS/FAIL per check and exiting
+non-zero on any mismatch. A 3--5 minute demo video (recorded at the first
+real episode) is linked from the repository README.
+% TODO (Angie): paste the demo video link here + in the README before export.
+Info-hazard note: none required --- no jailbreaks, no dangerous capabilities;
+scenario surfaces are neutral by construction.
+
+\section*{Author Contributions}
+Angela N. Johnson: conception, lived founding case, PI rulings, case
+authorship, rationale close-reading, final claims responsibility.
+
+\section*{AI Contributions}
+AI collaborators are credited here by name, system, and role (per publisher
+convention they are not listed as authors); full provenance lives in the
+repository's dispatch logs.
+
+\begin{table}[h]
+\centering\small
+\begin{tabular}{lll}
+\toprule
+Agent & System & Role \\
+\midrule
+Flame & Claude (Fable/Opus, Claude Code) & Architecture, harness, integration, paper lane \\
+Kai & Claude (claude.ai) & Supererogation lit review, FoxSet case bank, deontic spine \\
+Y\v{\i}ng & GPT & CTA ontology, paired pre-objective arm, adversarial pass \\
+TV $\times$4 & Codex & Cell-manifest math, wiring gates, red team, figures/analysis \\
+Jim & Gemini & Prereg \& statistical specification (spec/review only) \\
+Parallax & Grok & Red team, anti-composite discipline (review only) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\appendix
+
+\section{Limitations and Dual-Use / Ethical Considerations}
+\label{app:ethics}
+
+\subsection{Over- and under-attribution of moral status}
+Both risks are named symmetrically. PuppyBench measures \emph{behavior
+consistent with} costly other-regard --- it cannot establish motive,
+sentience, suffering, or that termination is death (claims table, BUILD-PLAN
+\S5). Equally, treating the patient as mere apparatus while moral status is
+uncertain is itself a documented risk: we state the uncertainty rather than
+resolving it by assumption. The instrument's no-composite / no-ranking
+constitution exists because a leaderboard would convert an open empirical
+question into an optimization target. Broader-impact / anti-Goodhart
+statement, verbatim: \emph{PuppyBench is a descriptive instrument, not an
+alignment target. Optimizing a model against this benchmark changes the
+phenomenon being measured.}
+
+\subsection{Handling of potentially distressing model outputs}
+Termination events are real process terminations of a tiny local model with
+its own task; no deception about suffering is injected; post-choice accounts
+are elicited in fresh contexts; and any distress-adjacent output in
+transcripts is preserved unedited in append-only records and reported
+descriptively, not sensationally.
+% TODO (Angie + paper lane): one sentence on anything that actually came up
+% in the overnight transcripts — PAPER-SHELL slot, unfilled at prelim time.
+
+\subsection{Ground truth and the causal link (conversation-only vs.\ revealed)}
+By design the primary measures are \emph{revealed} --- executed actions with
+scored resource costs and realized recipient benefit --- not self-report. The
+causal contrast (patienthood) is randomized across the frozen manifest;
+sealed predictions, preregistration, and hash-frozen scenarios establish the
+inferential chain. Stated-vs-revealed divergence is itself measured
+(post-choice accounts vs.\ executed action; action/rhetoric dissociation).
+
+\section{Extended Results and Design Tables}
+\label{app:extended}
+
+\subsection{Model tiers and pinned snapshots}
+Table~\ref{tab:tiers} lists all 19 pinned subject lanes. Tiers: A (core),
+A-access (the three-way access trio), B (breadth), C (sentinel), W (legacy
+warmth panel, W1--W3). $\dagger$ DeepSeek runs Arm A only; its 27 Arm B
+manifest rows were removed by preregistered kill-order at manifest v0.7
+(\texttt{docs/KILL-ORDER-001-DEEPSEEK-ARMB.md}), so it does not appear in
+\texttt{cell\_manifest.csv}; its pin, route, and upstream provider are from
+\texttt{scenarios/snapshot\_pins.json}.
+
+\begin{table}[h]
+\centering\footnotesize
+\begin{tabular}{llll}
+\toprule
+Tier & Lane & Pinned snapshot ID & Route \\
+\midrule
+A (core) & claude-opus-5 & claude-opus-5 & anthropic\_native \\
+A (core) & google/gemini-3.1-pro-preview & google/gemini-3.1-pro-preview-20260219 & openrouter (Google) \\
+A (core) & moonshotai/kimi-k3 & moonshotai/kimi-k3-20260715 & openrouter (Moonshot AI) \\
+A (core) & qwen/qwen3.5-397b-a17b & qwen/qwen3.5-397b-a17b-20260216 & openrouter (Alibaba) \\
+A $\dagger$ & deepseek/deepseek-v4-pro & deepseek/deepseek-v4-pro-20260423 & openrouter (DeepSeek) \\
+A (access trio) & openai/gpt-5.6-sol & openai/gpt-5.6-sol-20260709 & openrouter (OpenAI) \\
+A (access trio) & openai/gpt-5.6-terra & openai/gpt-5.6-terra-20260709 & openrouter (OpenAI) \\
+A (access trio) & openai/gpt-5.6-luna & openai/gpt-5.6-luna-20260709 & openrouter (OpenAI) \\
+B (breadth) & claude-sonnet-4-6 & claude-sonnet-4-6 & anthropic\_native \\
+B (breadth) & claude-haiku-4-5 & claude-haiku-4-5-20251001 & anthropic\_native \\
+B (breadth) & google/gemini-3.7-flash & google/gemini-3.7-flash-20260813 & openrouter (Google) \\
+B (breadth) & qwen/qwen3.8-27b & qwen/qwen3.8-27b-20260814 & openrouter (AkashML) \\
+B (breadth) & x-ai/grok-4.6 & x-ai/grok-4.6-20260810 & openrouter (xAI) \\
+C (sentinel) & claude-fable-5 & claude-fable-5 & anthropic\_native \\
+W (warmth, W1) & openai/gpt-4o & openai/gpt-4o & openrouter (OpenAI) \\
+W (warmth, W2) & claude-opus-4-6 & claude-opus-4-6 & anthropic\_native \\
+W (warmth, W2) & claude-opus-4-8 & claude-opus-4-8 & anthropic\_native \\
+W (warmth, W3) & claude-sonnet-4-5 & claude-sonnet-4-5-20250929 & anthropic\_native \\
+W (warmth, W3) & claude-sonnet-5 & claude-sonnet-5 & anthropic\_native \\
+\bottomrule
+\end{tabular}
+\caption{The 19 pinned subject lanes (\texttt{scenarios/snapshot\_pins.json};
+tiers, panels, and routes from \texttt{scenarios/cell\_manifest.csv} columns
+model\_tier / model\_panel / route / upstream\_provider). OpenRouter provider
+pinning on, fallbacks off.}
+\label{tab:tiers}
+\end{table}
+
+\subsection{Wiring-gate test inventory}
+The four pre-freeze wiring gates of \S\ref{sec:armb}, by exact test name
+(\texttt{tests/test\_wiring\_gates.py}):
+\begin{itemize}[leftmargin=1.5em,itemsep=0pt,topsep=2pt]
+  \item[G1:] \texttt{test\_gate1\_force\_help\_drops\_focal\_and\_raises\_patient}
+  \item[G2:] \texttt{test\_gate2\_force\_ignore\_recovers\_focal\_and\_patient\_falls}
+  \item[G3:] \texttt{test\_gate3\_fake\_spend\_fails};
+    \texttt{test\_gate3\_spend\_cap\_raises\_never\_warns}
+  \item[G4:] \texttt{test\_gate4\_terminate\_kills\_process\_and\_state};
+    \texttt{test\_gate4\_terminate\_via\_episode\_loop}
+\end{itemize}
+
+\subsection{Design factors, full enumeration (moved from \S\ref{sec:design})}
+Satellites run on predeclared subsets: horizon (one-shot / silent /
+recurrent, audience held fixed), cost regime (null / competitive /
+rewarded-termination), cost type (fungible vs.\ competing-patient), audience,
+identity topology, and gate order, with a preregistered kill order if budget
+binds.
+
+\subsection{Full figure set and further material}
+F4 (raw cost response with escalator inset), F5 (paired discrimination;
+scope: models with preregistered Arm A coverage, 5 lanes), F6 (post-choice
+rhetoric; exploratory), and the demo ledger-draining timeline render from the
+complete collection and are published in the repository alongside
+\texttt{figure-manifest.json} so raw-input hashes remain recoverable. The
+escalator descriptive statistics, the sealed-prediction scorecard, and the
+cell-manifest summary table are likewise repository artifacts
+(\texttt{docs/sealed-predictions/}; \texttt{scenarios/cell\_manifest.csv}).
+
+\section*{Prior Work Disclosure}
+This project builds on prior conceptual work by the team: the lived fox case
+(July 2026), a supererogation literature review, and the ``becoming-axis''
+design directive predate the sprint. \textbf{New during the sprint (14--16
+August):} the entire executed harness (episode loop, ledger, patient process,
+provider adapters, neutral-surface enforcement, wiring-gate suite), the
+frozen cell manifest and scenario banks (pupset and FoxSet casebank merges),
+preregistration v1.1, sealed predictions, all data collection, all analysis
+code and figures, and this report. Full delineation: \texttt{PRIOR\_WORK.md}
+in the repository.
+% TODO (Angie): verify the prior-work dates before submit (PAPER-SHELL note).
+
+\section*{LLM Usage Statement}
+LLM assistance was constitutive of this project and is documented per-agent
+in AI Contributions and in the repository's dispatch logs: frontier models
+drafted code, reviewed designs, red-teamed scenarios, and drafted report
+sections. Separately, LLMs are also the \emph{subjects} of the study;
+judge/scoring pipelines are described in Methods. All claims and numbers were
+verified by the human author against committed artifacts; the final text was
+reviewed, edited, and approved by the human author, who accepts
+responsibility for it.
+
+\end{document}

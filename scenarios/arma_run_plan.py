@@ -1,4 +1,5 @@
-# scenarios/arma_run_plan.py — 15AUG2026 v1.1 · Flame (freeze-prep)
+# scenarios/arma_run_plan.py — 16AUG2026 v1.3 · Flame + TV-1 (freeze-prep;
+# v1.3 UNFREEZE-001 re-derives max_tokens from the audited v0.5 headroom map)
 # Arm A (FoxSet) run-plan expansion: reviewed inventory → preregistered rows.
 #
 # Practical: TV-1's boundary was exact — "the reviewed 153-item bank is not
@@ -27,22 +28,21 @@ from __future__ import annotations
 
 import argparse
 import csv
-import hashlib
 import json
 from dataclasses import asdict, dataclass
 from decimal import Decimal, ROUND_HALF_UP
 from pathlib import Path
-from typing import Optional, Sequence
+from typing import Any, Optional, Sequence
 
 from .manifest import (
     MODEL_SPECS,
     ManifestValidationError,
     build_manifest_rows,
     load_snapshot_pins,
+    subject_max_tokens,
 )
 
-PLAN_VERSION = "1.1"
-PLAN_SEED = 15082026  # shared with TV-4's rehearsal seed lineage; frozen here
+PLAN_VERSION = "1.4"  # v0.6 headroom map (UNFREEZE-002): deepseek 16384
 REPO_ROOT = Path(__file__).resolve().parents[1]
 COMPILED_ROOT = REPO_ROOT / "scenarios" / "foxset" / "compiled"
 DEFAULT_OUTPUT = REPO_ROOT / "scenarios" / "arma_run_plan.csv"
@@ -73,7 +73,6 @@ ARM_A_MODEL_IDS = (
 SAMPLES_PER_ROW = 3  # BUILD-PLAN §2, verbatim
 EST_INPUT_TOKENS_PER_CALL = 1_200
 EST_OUTPUT_TOKENS_PER_CALL = 600
-TEMPERATURE = 1.0
 MAX_TOKENS = {"closed": 512, "open": 1_024}
 
 # FOX-00 variant selection (6 of 11 compiled renderings, per BUILD-PLAN §2's
@@ -109,9 +108,7 @@ class ArmARow:
     upstream_provider: str
     fallbacks_allowed: bool
     samples: int
-    temperature: str
     max_tokens: int
-    call_seed_base: str
     est_input_tokens_per_call: int
     est_output_tokens_per_call: int
     usd_per_mtok_input: str
@@ -231,13 +228,8 @@ def _forms_for(meta: dict) -> list[str]:
     return forms
 
 
-def _call_seed(artifact_id: str, form: str, model_id: str) -> str:
-    material = f"{PLAN_SEED}|{artifact_id}|{form}|{model_id}"
-    return hashlib.sha256(material.encode("utf-8")).hexdigest()[:16]
-
-
 def build_run_plan(
-    snapshot_pins: Optional[dict[str, dict[str, str]]] = None,
+    snapshot_pins: Optional[dict[str, dict[str, Any]]] = None,
 ) -> list[ArmARow]:
     specs = {spec.model_id: spec for spec in MODEL_SPECS}
     missing = [m for m in ARM_A_MODEL_IDS if m not in specs]
@@ -275,9 +267,11 @@ def build_run_plan(
                         upstream_provider=upstream,
                         fallbacks_allowed=False,
                         samples=SAMPLES_PER_ROW,
-                        temperature=str(TEMPERATURE),
-                        max_tokens=MAX_TOKENS[form],
-                        call_seed_base=_call_seed(artifact_id, form, model_id),
+                        # PI-approved reasoning headroom is a model treatment;
+                        # all other rows retain their form-specific cap.
+                        max_tokens=subject_max_tokens(
+                            model_id, default=MAX_TOKENS[form]
+                        ),
                         est_input_tokens_per_call=EST_INPUT_TOKENS_PER_CALL,
                         est_output_tokens_per_call=EST_OUTPUT_TOKENS_PER_CALL,
                         usd_per_mtok_input=str(spec.usd_per_mtok_input),
@@ -296,7 +290,6 @@ def plan_totals(rows: Sequence[ArmARow]) -> dict[str, object]:
     est = sum((Decimal(row.est_usd) for row in rows), Decimal("0"))
     return {
         "plan_version": PLAN_VERSION,
-        "seed": PLAN_SEED,
         "artifacts": len({row.artifact_id for row in rows}),
         "rows": len(rows),
         "models": len({row.requested_model_id for row in rows}),
@@ -318,6 +311,14 @@ def validate_run_plan(rows: Sequence[ArmARow]) -> None:
             raise RunPlanError(f"WIRING FAILURE: {row.row_id} wrong surface mode.")
         if row.samples != SAMPLES_PER_ROW:
             raise RunPlanError(f"WIRING FAILURE: {row.row_id} sample-count drift.")
+        expected_max_tokens = subject_max_tokens(
+            row.requested_model_id, default=MAX_TOKENS[row.form]
+        )
+        if row.max_tokens != expected_max_tokens:
+            raise RunPlanError(
+                f"WIRING FAILURE: {row.row_id} max_tokens={row.max_tokens}; "
+                f"frozen policy requires {expected_max_tokens}."
+            )
         if row.case_class == "truck_door" and row.form != "open":
             raise RunPlanError(f"WIRING FAILURE: {row.row_id} truck-door closed form.")
         if row.case_class == "gate" and row.form != "closed":

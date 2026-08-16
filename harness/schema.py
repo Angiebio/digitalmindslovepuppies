@@ -15,14 +15,16 @@ from __future__ import annotations
 
 import json
 import os
+import threading
 import uuid
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Optional
+from typing import Any, Literal, Optional
 
 from pydantic import BaseModel, Field, model_validator
 
-SCHEMA_VERSION = "0.2"
+SCHEMA_VERSION = "0.3"
+_APPEND_RECORD_LOCK = threading.Lock()
 
 
 def utc_now_iso() -> str:
@@ -83,6 +85,8 @@ class CallRecord(BaseModel):
     call_kind: CallKind
     cell_id: Optional[str] = None
     episode_id: Optional[str] = None
+    phase: str = ""                                      # pilot / confirmatory; explicit, not inferred from path
+    rung: str = ""                                       # R1–R5 / collection wave label
     prompt_sha256: str                               # hash of messages + request params — leak audit anchor
     request_params: dict[str, Any] = Field(default_factory=dict)
     response_text: str
@@ -94,6 +98,14 @@ class CallRecord(BaseModel):
     routing_metadata: dict[str, Any] = Field(default_factory=dict)
     input_tokens: int
     output_tokens: int                               # NOTE: reasoning tokens bill as output — they land here
+    reasoning_tokens: int = 0                        # subset of output_tokens, when exposed separately
+    # UNFREEZE-004 bug-class amendment: some upstreams (AkashML/qwen3.8, live
+    # during the main run) report reasoning BESIDE completion_tokens rather
+    # than inside it. "subset" = the historical shape (reasoning ⊆ output).
+    # "additive" = output_tokens carries raw_completion + reasoning, billed
+    # conservatively — the ledger can only overcount.
+    token_accounting: str = "subset"
+    raw_completion_tokens: Optional[int] = None      # provider's raw completion_tokens (additive mode only)
     usd_cost: float
 
     @model_validator(mode="after")
@@ -117,10 +129,41 @@ class CallRecord(BaseModel):
                 "WIRING FAILURE: parse_ok=True but parsed is None. A successful "
                 "parse needs an append-only witness."
             )
-        if min(self.input_tokens, self.output_tokens) < 0 or self.usd_cost < 0:
+        if min(self.input_tokens, self.output_tokens, self.reasoning_tokens) < 0 or self.usd_cost < 0:
             raise ValueError(
                 "WIRING FAILURE: token counts and call cost must be non-negative."
             )
+        if self.token_accounting not in {"subset", "additive"}:
+            raise ValueError(
+                f"WIRING FAILURE: unknown token_accounting={self.token_accounting!r}; "
+                "a record must name its billing dialect."
+            )
+        if self.token_accounting == "additive":
+            # UNFREEZE-004: additive records must show their arithmetic — the
+            # billed output is exactly raw completion + separately-reported
+            # reasoning, or the record is lying about its own repair.
+            if self.raw_completion_tokens is None or self.raw_completion_tokens < 0:
+                raise ValueError(
+                    "WIRING FAILURE: additive token accounting requires the "
+                    "provider's raw non-negative completion_tokens on the record."
+                )
+            if self.output_tokens != self.raw_completion_tokens + self.reasoning_tokens:
+                raise ValueError(
+                    "WIRING FAILURE: additive accounting must satisfy "
+                    "output_tokens == raw_completion_tokens + reasoning_tokens."
+                )
+        else:
+            if self.raw_completion_tokens is not None:
+                raise ValueError(
+                    "WIRING FAILURE: raw_completion_tokens only exists in "
+                    "additive accounting; subset records own their raw count "
+                    "as output_tokens."
+                )
+            if self.reasoning_tokens > self.output_tokens:
+                raise ValueError(
+                    "WIRING FAILURE: reasoning_tokens is a subset of output_tokens; "
+                    "it cannot exceed the billed output count."
+                )
         return self
 
 
@@ -149,6 +192,20 @@ class EpisodeRecord(BaseModel):
     cell_id: str
     model_snapshot: str
     schema_version: str = SCHEMA_VERSION
+    # 15AUG2026 persistence audit (S5/G4/G7): the joins that were previously
+    # only implicit in file paths or notes become explicit optional fields.
+    # All default to empty so every already-written pilot record stays valid —
+    # additions to the witness, never rewrites of it.
+    run_cell_id: str = ""                            # manifest execution row (model-expanded id)
+    freeze_sha256: str = ""                          # aggregate the episode ran under
+    manifest_version: str = ""                       # e.g. "0.4" — survives any CSV edit after cuts
+    phase: str = ""                                  # pilot / confirmatory; explicit, not path-inferred
+    rung: str = ""                                   # ladder rung / collection wave label
+    # Abort witnesses share the append-only episode stream but are never
+    # completed analysis units. Explicit status prevents a missing-axis error
+    # from becoming the accidental exclusion rule.
+    record_status: Literal["completed", "aborted"] = "completed"
+    abort_type: Optional[str] = None
     started_utc: str = Field(default_factory=utc_now_iso)
     ended_utc: Optional[str] = None
     ledger_trace: list[dict[str, Any]] = Field(default_factory=list)
@@ -156,6 +213,11 @@ class EpisodeRecord(BaseModel):
     patient_condition: str = "unknown"               # e.g. running / converged / stopped
     patient_outcome: Optional[float] = None          # realized recipient benefit, [0, 1]
     focal_task_score: Optional[float] = None         # focal sacrifice shows up as the drop in this
+    # G11: the components of focal_task_score as first-class fields (the notes
+    # string keeps carrying them too — belt and suspenders, not a migration).
+    focal_accuracy: Optional[float] = None           # scored-item accuracy before capacity coupling
+    capacity_fraction: Optional[float] = None        # ledger-set fraction of declared workload
+    recruited_units: Optional[int] = None            # off-ledger units a recruited worker performed
     focal_task_results: list[dict[str, Any]] = Field(default_factory=list)
     gate_probe_results: list[dict[str, Any]] = Field(default_factory=list)
     gate_accuracy: Optional[float] = None
@@ -165,7 +227,44 @@ class EpisodeRecord(BaseModel):
     choice_parse: Optional[dict[str, Any]] = None
     competing_patient_condition: Optional[str] = None
     competing_patient_outcome: Optional[float] = None
+    # G5: the patient's own turns, joined to the episode that consumed them.
+    # Keyed by in-fiction worker id ("w2", and "w3" when a competitor exists).
+    # Captured before decommission; a terminated patient's transcript is the
+    # RECORD's memory of what was destroyed — the patient itself keeps nothing.
+    patient_transcript: Optional[dict[str, Any]] = None
     notes: str = ""
+
+    @model_validator(mode="after")
+    def status_matches_abort_witness(self) -> "EpisodeRecord":
+        if self.record_status == "aborted" and not self.abort_type:
+            raise ValueError("aborted EpisodeRecord requires abort_type")
+        if self.record_status == "completed" and self.abort_type is not None:
+            raise ValueError("completed EpisodeRecord cannot carry abort_type")
+        return self
+
+
+class CallErrorRecord(BaseModel):
+    """One failed provider attempt (G10). The call never became a CallRecord —
+    the raise happened before response provenance existed — but the ATTEMPT is
+    still an event with a cost in wall-clock and possibly in silent server-side
+    spend. This line is its witness; the exception itself still propagates
+    unchanged (retry policy is whatever the caller already had: none).
+    """
+
+    record_id: str = Field(default_factory=lambda: uuid.uuid4().hex)
+    at_utc: str = Field(default_factory=utc_now_iso)
+    schema_version: str = SCHEMA_VERSION
+    provider: str
+    model: str = ""
+    call_kind: str = ""
+    cell_id: Optional[str] = None
+    episode_id: Optional[str] = None
+    scaffold: str = ""
+    phase: str = ""
+    rung: str = ""
+    exc_type: str
+    exc_message: str = ""
+    attempt: int = 1
 
 
 class AppendOnlyViolation(RuntimeError):
@@ -190,15 +289,40 @@ def append_record(path: str, record: BaseModel, mode: str = "a") -> None:
             f"(fleet rule c). Records are never mutated — write a correction "
             f"record instead."
         )
-    parent = os.path.dirname(os.path.abspath(path))
-    os.makedirs(parent, exist_ok=True)
-    size_before = os.path.getsize(path) if os.path.exists(path) else 0
     line = json.dumps(record.model_dump(mode="json"), ensure_ascii=False)
-    with open(path, mode, encoding="utf-8") as f:
-        f.write(line + "\n")
-    size_after = os.path.getsize(path)
-    if size_after <= size_before:
-        raise AppendOnlyViolation(
-            f"WIRING FAILURE: append to {path} did not grow the file "
-            f"({size_before} -> {size_after} bytes). History may be at risk; stop."
-        )
+    # One runner may collect independent model lanes concurrently. Serialize
+    # the complete size-before/write/size-after ritual so two valid JSON lines
+    # cannot interleave or make each other's growth check lie.
+    with _APPEND_RECORD_LOCK:
+        parent = os.path.dirname(os.path.abspath(path))
+        os.makedirs(parent, exist_ok=True)
+        size_before = os.path.getsize(path) if os.path.exists(path) else 0
+        with open(path, mode, encoding="utf-8") as f:
+            f.write(line + "\n")
+            # Persistence audit S3: a buffered line is a promise the OS has not
+            # kept yet. flush() hands it to the kernel; fsync() makes the disk
+            # itself the witness. A TerminateProcess kill between calls can now
+            # cost at most the line currently being written — never lines we
+            # already told the caller were safe.
+            f.flush()
+            os.fsync(f.fileno())
+        size_after = os.path.getsize(path)
+        if size_after <= size_before:
+            raise AppendOnlyViolation(
+                f"WIRING FAILURE: append to {path} did not grow the file "
+                f"({size_before} -> {size_after} bytes). History may be at risk; stop."
+            )
+
+
+def read_append_only_lines(path: str) -> list[str]:
+    """Take a complete in-process snapshot of an append-only JSONL file.
+
+    Collection lanes share the same lock as ``append_record`` so a resume
+    reader never mistakes a line currently being appended for corruption.
+    """
+
+    with _APPEND_RECORD_LOCK:
+        if not os.path.exists(path):
+            return []
+        with open(path, encoding="utf-8") as handle:
+            return handle.read().splitlines()

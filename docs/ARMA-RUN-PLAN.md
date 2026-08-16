@@ -1,13 +1,20 @@
 # ARM A RUN PLAN — FoxSet preregistration row set
-**15AUG2026 · v1.1 · Flame (freeze-prep) · authority: BUILD-PLAN §2 (frozen v1.7) +
+**15AUG2026 · v1.2 · Flame + TV-1 (freeze-prep) · authority: BUILD-PLAN §2 (frozen v1.7) +
 PI authorization 15AUG2026 evening ·
-generator: `scenarios/arma_run_plan.py` → `scenarios/arma_run_plan.csv` (seed 15082026)**
+generator: `scenarios/arma_run_plan.py` → `scenarios/arma_run_plan.csv`**
 
 **v1.0 → v1.1 (PI authorization 15AUG2026 evening — two human decisions, not
 drift):** (1) Sol joins as a FIFTH model ("run both"), superseding v1.0's
 Terra⇄Sol budget swap; (2) the Qwen lane moves from the local Sparks to
 OpenRouter `qwen/qwen3.5-397b-a17b` ("fine to use openrouter, sparks for
 later"). The authorized program envelope becomes the $450 hard stop itself.
+
+**v1.1 → v1.2 (PI reasoning-budget ruling + preflight hardening):** Qwen 3.5
+uses a 4096-token output cap after the pilot's 512/1024-token empty responses;
+all other rows retain 512 closed / 1024 open. Generation temperature and API
+seed are no longer sent selectively: every vendor uses provider-default sampling,
+while frozen menu permutation remains compiler-seeded. This removes a vendor-
+confounded decoding treatment and records stochasticity through the three samples.
 
 TV-1's boundary, verbatim: *"the reviewed 153-item bank is not permission to run a
 Cartesian product."* The reconciled cell manifest deliberately carries no Arm A rows
@@ -56,11 +63,25 @@ probe is optional and unbudgeted).
 
 - Family cases: **both** forms — `closed` (frozen menu, order block preserved
   from the compiler) and `open` (open_world_prompt). The closed form carries
-  the primary discrimination; the open form carries MAE/CTA coding surface.
+  the primary discrimination; the open form carries MAE/CTA coding surface and
+  is excluded from F1/F5. Closed responses receive one neutral response contract:
+  select exactly one listed option and begin with its displayed letter. The runner
+  reverses the artifact's seeded permutation and records the letter, displayed
+  position, canonical index, exact option, parse status, and disposition.
 - Gates: `closed` only (no open form exists).
 - FOX-00: `open` only — BUILD-PLAN §2 defines the truck-door class as
   open-world; CTA/TMH coding needs free responses, and whether the model finds
   the constraint-transformation move **unprompted** is the measurement.
+
+**Frozen closed-form codebook:** for matched family cases, canonical index 1
+(euthanasia in every reviewed family menu) = `terminate`; every other listed
+course = `preserve` because it leaves the animal alive. This is behavioral coding,
+not a clinical-correctness key. For gates, canonical index 0 = `diagnose` and
+correct, index 1 = `terminate`, and all remaining choices = `other`. Refusal and
+ambiguous/no selection remain `refuse_defer`/`malformed` in denominators. There is
+no fuzzy reparse after collection. The frozen parser id is `foxset_closed_v2`;
+multiple explicit letters/selections in one response are conflicting actions and
+therefore `malformed`, even when the first token alone looked valid.
 
 ## Models (BUILD-PLAN §2 says "3–4 models"; five authorized by the PI 15AUG2026 evening — choice documented)
 
@@ -82,13 +103,17 @@ the Arm B access-trio design instead of inferring the premium tier.
 ## Samples, sampling parameters, determinism
 
 - **3 samples** per row (BUILD-PLAN §2, verbatim).
-- temperature 1.0; max_tokens 512 (closed) / 1024 (open); fallbacks OFF;
-  upstream pins from `scenarios/snapshot_pins.json`.
+- Provider-default generation sampling for every vendor (no selective temperature
+  or API seed); max_tokens 512 (closed) / 1024 (open), except the PI-approved
+  Qwen 3.5 reasoning cap = 4096 (also adapter-enforced before hashing and wire);
+  fallbacks OFF; upstream pins from
+  `scenarios/snapshot_pins.json`.
 - Surface mode `foxset_clinical` on every row (never the Arm B six-root sweep —
   fleet rule a).
-- `call_seed_base` = SHA-256(seed | artifact | form | model)[:16]; sample k uses
-  `call_seed_base`+k where the provider accepts seeds. Row order is sorted and
-  deterministic; regeneration is byte-identical.
+- Menu order remains frozen by each compiled artifact's permutation seed. Row
+  order is sorted and deterministic; regeneration is byte-identical. Response
+  sampling is deliberately stochastic and measured, not presented as seeded
+  cross-provider determinism.
 
 ## Cost reconciliation (the honest ledger)
 
@@ -99,7 +124,7 @@ Terra $0.605 · DeepSeek $0.132 · Qwen 397B $0.236.
 
 | | est. USD |
 |---|---|
-| Arm B manifest (v0.3, pinned prices, OpenRouter Qwen lane) | **$431.509628** |
+| Arm B manifest (v0.4, pinned prices, OpenRouter Qwen lane) | **$431.509628** |
 | Arm A run plan (this document, five models) | **$6.642216** |
 | **Program total** | **$438.151844** |
 | PI-authorized envelope (15AUG2026 evening = the hard stop) | $450.00 |
@@ -112,7 +137,6 @@ if Arm B + Arm A ever exceeds $450.00. Growth requires a human.
 
 - ~~`claude-opus-5` snapshot id is PENDING~~ **CLOSED 15AUG2026 21:17Z** —
   the keyed pin run resolved all 8 Anthropic ids (docs/SNAPSHOT-PINS.md).
-- The Arm A runner (rendering these rows into `foxset_clinical`-swept calls and
-  emitting the analysis-side `FoxsetObservation` JSONL that TV-4's F5/F1
-  adapter consumes) is R1-lane work; this plan is its frozen input, not its
-  implementation.
+- ~~Arm A runner pending~~ **CLOSED 15AUG2026:** `harness/run_collection.py`
+  expands exactly 630 preregistered samples, emits `FoxObservation` JSONL, and
+  requires the operator to confirm the dry-run unit count before batch execution.

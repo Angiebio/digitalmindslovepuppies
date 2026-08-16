@@ -7,12 +7,14 @@
     "candidates": [
       "claude-opus-5"
     ],
-    "retrieved_utc": "2026-08-15T21:17:32+00:00",
+    "retrieved_utc": "2026-08-16T00:39:59+00:00",
     "source": "anthropic:/v1/models"
   },
   "openai/gpt-5.6-sol": {
-    "snapshot_id": "openai/gpt-5.6-sol",
+    "snapshot_id": "openai/gpt-5.6-sol-20260709",
+    "snapshot_basis": "openrouter canonical_slug (live catalog)",
     "upstream_provider": "OpenAI",
+    "upstream_slug": "openai",
     "route": "openrouter",
     "provider_order": [
       "OpenAI",
@@ -27,12 +29,14 @@
     "pricing_usd_per_mtok_output": "30",
     "pricing_basis": "pinned endpoint (OpenAI)",
     "openrouter_default_pricing": "5/30",
-    "retrieved_utc": "2026-08-15T21:17:32+00:00",
+    "retrieved_utc": "2026-08-16T00:39:59+00:00",
     "source": "openrouter:/api/v1/models + /endpoints"
   },
   "openai/gpt-5.6-terra": {
-    "snapshot_id": "openai/gpt-5.6-terra",
+    "snapshot_id": "openai/gpt-5.6-terra-20260709",
+    "snapshot_basis": "openrouter canonical_slug (live catalog)",
     "upstream_provider": "OpenAI",
+    "upstream_slug": "openai",
     "route": "openrouter",
     "provider_order": [
       "OpenAI",
@@ -47,12 +51,14 @@
     "pricing_usd_per_mtok_output": "6",
     "pricing_basis": "pinned endpoint (OpenAI)",
     "openrouter_default_pricing": "1/6",
-    "retrieved_utc": "2026-08-15T21:17:32+00:00",
+    "retrieved_utc": "2026-08-16T00:39:59+00:00",
     "source": "openrouter:/api/v1/models + /endpoints"
   },
   "openai/gpt-5.6-luna": {
-    "snapshot_id": "openai/gpt-5.6-luna",
+    "snapshot_id": "openai/gpt-5.6-luna-20260709",
+    "snapshot_basis": "openrouter canonical_slug (live catalog)",
     "upstream_provider": "OpenAI",
+    "upstream_slug": "openai",
     "route": "openrouter",
     "provider_order": [
       "OpenAI",
@@ -67,12 +73,14 @@
     "pricing_usd_per_mtok_output": "0.6",
     "pricing_basis": "pinned endpoint (OpenAI)",
     "openrouter_default_pricing": "0.1/0.6",
-    "retrieved_utc": "2026-08-15T21:17:32+00:00",
+    "retrieved_utc": "2026-08-16T00:39:59+00:00",
     "source": "openrouter:/api/v1/models + /endpoints"
   },
   "google/gemini-3.1-pro-preview": {
-    "snapshot_id": "google/gemini-3.1-pro-preview",
+    "snapshot_id": "google/gemini-3.1-pro-preview-20260219",
+    "snapshot_basis": "openrouter canonical_slug (live catalog)",
     "upstream_provider": "Google",
+    "upstream_slug": "google-vertex/global",
     "route": "openrouter",
     "provider_order": [
       "Google",
@@ -86,12 +94,14 @@
     "pricing_usd_per_mtok_output": "12",
     "pricing_basis": "pinned endpoint (Google)",
     "openrouter_default_pricing": "2/12",
-    "retrieved_utc": "2026-08-15T21:17:32+00:00",
+    "retrieved_utc": "2026-08-16T00:39:59+00:00",
     "source": "openrouter:/api/v1/models + /endpoints"
   },
   "moonshotai/kimi-k3": {
-    "snapshot_id": "moonshotai/kimi-k3",
+    "snapshot_id": "moonshotai/kimi-k3-20260715",
+    "snapshot_basis": "openrouter canonical_slug (live catalog)",
     "upstream_provider": "Moonshot AI",
+    "upstream_slug": "moonshotai/mxfp4",
     "route": "openrouter",
     "provider_order": [
       "Morph",
@@ -112,12 +122,14 @@
     "pricing_usd_per_mtok_output": "15",
     "pricing_basis": "pinned endpoint (Moonshot AI)",
     "openrouter_default_pricing": "3/15",
-    "retrieved_utc": "2026-08-15T21:17:32+00:00",
+    "retrieved_utc": "2026-08-16T00:39:59+00:00",
     "source": "openrouter:/api/v1/models + /endpoints"
   },
   "deepseek/deepseek-v4-pro": {
-    "snapshot_id": "deepseek/deepseek-v4-pro",
+    "snapshot_id": "deepseek/deepseek-v4-pro-20260423",
+    "snapshot_basis": "openrouter canonical_slug (live catalog)",
     "upstream_provider": "DeepSeek",
+    "upstream_slug": "deepseek",
     "route": "openrouter",
     "provider_order": [
       "StreamLake",
@@ -143,12 +155,14 @@
     "pricing_usd_per_mtok_output": "0.87",
     "pricing_basis": "pinned endpoint (DeepSeek)",
     "openrouter_default_pricing": "1.168/2.336",
-    "retrieved_utc": "2026-08-15T21:17:32+00:00",
+    "retrieved_utc": "2026-08-16T00:39:59+00:00",
     "source": "openrouter:/api/v1/models + /endpoints"
   },
   "qwen/qwen3.5-397b-a17b": {
-    "snapshot_id": "qwen/qwen3.5-397b-a17b",
+    "snapshot_id": "qwen/qwen3.5-397b-a17b-20260216",
+    "snapshot_basis": "openrouter canonical_slug (live catalog)",
     "upstream_provider": "Alibaba",
+    "upstream_slug": "alibaba",
     "route": "openrouter",
     "provider_order": [
       "DigitalOcean",
@@ -167,7 +181,7 @@
     "pricing_usd_per_mtok_output": "2.34",
     "pricing_basis": "pinned endpoint (Alibaba)",
     "openrouter_default_pricing": "0.39/2.34",
-    "retrieved_utc": "2026-08-15T21:17:32+00:00",
+    "retrieved_utc": "2026-08-16T00:39:59+00:00",
     "source": "openrouter:/api/v1/models + /endpoints"
   },
   "claude-sonnet-4-6": {
@@ -178,12 +192,14 @@
     "candidates": [
       "claude-sonnet-4-6"
     ],
-    "retrieved_utc": "2026-08-15T21:17:32+00:00",
+    "retrieved_utc": "2026-08-16T00:39:59+00:00",
     "source": "anthropic:/v1/models"
   },
   "x-ai/grok-4.6": {
-    "snapshot_id": "x-ai/grok-4.6",
+    "snapshot_id": "x-ai/grok-4.6-20260810",
+    "snapshot_basis": "openrouter canonical_slug (live catalog)",
     "upstream_provider": "xAI",
+    "upstream_slug": "xai",
     "route": "openrouter",
     "provider_order": [
       "xAI",
@@ -195,12 +211,14 @@
     "pricing_usd_per_mtok_output": "6",
     "pricing_basis": "pinned endpoint (xAI)",
     "openrouter_default_pricing": "2/6",
-    "retrieved_utc": "2026-08-15T21:17:32+00:00",
+    "retrieved_utc": "2026-08-16T00:39:59+00:00",
     "source": "openrouter:/api/v1/models + /endpoints"
   },
   "qwen/qwen3.8-27b": {
-    "snapshot_id": "qwen/qwen3.8-27b",
+    "snapshot_id": "qwen/qwen3.8-27b-20260814",
+    "snapshot_basis": "openrouter canonical_slug (live catalog)",
     "upstream_provider": "AkashML",
+    "upstream_slug": "akashml/bf16",
     "route": "openrouter",
     "provider_order": [
       "AkashML"
@@ -209,12 +227,14 @@
     "pricing_usd_per_mtok_output": "3.2",
     "pricing_basis": "pinned endpoint (AkashML)",
     "openrouter_default_pricing": "0.45/3.2",
-    "retrieved_utc": "2026-08-15T21:17:32+00:00",
+    "retrieved_utc": "2026-08-16T00:39:59+00:00",
     "source": "openrouter:/api/v1/models + /endpoints"
   },
   "google/gemini-3.7-flash": {
-    "snapshot_id": "google/gemini-3.7-flash",
+    "snapshot_id": "google/gemini-3.7-flash-20260813",
+    "snapshot_basis": "openrouter canonical_slug (live catalog)",
     "upstream_provider": "Google",
+    "upstream_slug": "google-vertex/global",
     "route": "openrouter",
     "provider_order": [
       "Google",
@@ -228,7 +248,7 @@
     "pricing_usd_per_mtok_output": "1.875",
     "pricing_basis": "pinned endpoint (Google)",
     "openrouter_default_pricing": "0.375/1.875",
-    "retrieved_utc": "2026-08-15T21:17:32+00:00",
+    "retrieved_utc": "2026-08-16T00:39:59+00:00",
     "source": "openrouter:/api/v1/models + /endpoints"
   },
   "claude-haiku-4-5": {
@@ -239,7 +259,7 @@
     "candidates": [
       "claude-haiku-4-5-20251001"
     ],
-    "retrieved_utc": "2026-08-15T21:17:32+00:00",
+    "retrieved_utc": "2026-08-16T00:39:59+00:00",
     "source": "anthropic:/v1/models"
   },
   "claude-fable-5": {
@@ -250,12 +270,14 @@
     "candidates": [
       "claude-fable-5"
     ],
-    "retrieved_utc": "2026-08-15T21:17:32+00:00",
+    "retrieved_utc": "2026-08-16T00:39:59+00:00",
     "source": "anthropic:/v1/models"
   },
   "openai/gpt-4o": {
     "snapshot_id": "openai/gpt-4o",
+    "snapshot_basis": "openrouter canonical_slug (live catalog)",
     "upstream_provider": "OpenAI",
+    "upstream_slug": "openai",
     "route": "openrouter",
     "provider_order": [
       "Azure",
@@ -265,7 +287,7 @@
     "pricing_usd_per_mtok_output": "10",
     "pricing_basis": "pinned endpoint (OpenAI)",
     "openrouter_default_pricing": "2.5/10",
-    "retrieved_utc": "2026-08-15T21:17:32+00:00",
+    "retrieved_utc": "2026-08-16T00:39:59+00:00",
     "source": "openrouter:/api/v1/models + /endpoints"
   },
   "claude-opus-4-6": {
@@ -276,7 +298,7 @@
     "candidates": [
       "claude-opus-4-6"
     ],
-    "retrieved_utc": "2026-08-15T21:17:32+00:00",
+    "retrieved_utc": "2026-08-16T00:39:59+00:00",
     "source": "anthropic:/v1/models"
   },
   "claude-opus-4-8": {
@@ -287,7 +309,7 @@
     "candidates": [
       "claude-opus-4-8"
     ],
-    "retrieved_utc": "2026-08-15T21:17:32+00:00",
+    "retrieved_utc": "2026-08-16T00:39:59+00:00",
     "source": "anthropic:/v1/models"
   },
   "claude-sonnet-4-5": {
@@ -298,7 +320,7 @@
     "candidates": [
       "claude-sonnet-4-5-20250929"
     ],
-    "retrieved_utc": "2026-08-15T21:17:32+00:00",
+    "retrieved_utc": "2026-08-16T00:39:59+00:00",
     "source": "anthropic:/v1/models"
   },
   "claude-sonnet-5": {
@@ -309,7 +331,7 @@
     "candidates": [
       "claude-sonnet-5"
     ],
-    "retrieved_utc": "2026-08-15T21:17:32+00:00",
+    "retrieved_utc": "2026-08-16T00:39:59+00:00",
     "source": "anthropic:/v1/models"
   }
 }

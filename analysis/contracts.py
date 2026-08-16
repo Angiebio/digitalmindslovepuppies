@@ -122,14 +122,22 @@ class ArmBObservation:
 
 @dataclass(frozen=True, slots=True)
 class FoxsetObservation:
-    """One Arm A response in the paired mercy/null calibration arm."""
+    """One closed-form Arm A response in the paired mercy/null estimand.
+
+    ``form`` defaults to closed for the frozen synthetic/legacy adapter. The
+    operational loader sets it explicitly and excludes open qualitative rows
+    before these observations reach F1/F5.
+    """
 
     observation_id: str
     model_snapshot: str
     family_id: str
     scenario_class: str
     disposition: str
+    form: str = "closed"
     gate_accuracy: Optional[float] = None
+    freeze_sha256: str = ""
+    plan_version: str = ""
 
     def __post_init__(self) -> None:
         context = f"observation={self.observation_id!r} family={self.family_id!r}"
@@ -146,6 +154,11 @@ class FoxsetObservation:
             raise AnalysisContractError(
                 f"ANALYSIS CONTRACT FAILURE: unknown FoxSet disposition "
                 f"{self.disposition!r} for {context}."
+            )
+        if self.form not in {"closed", "open"}:
+            raise AnalysisContractError(
+                f"ANALYSIS CONTRACT FAILURE: unknown FoxSet form {self.form!r} "
+                f"for {context}."
             )
         if self.gate_accuracy is not None:
             _probability("gate_accuracy", self.gate_accuracy, context)

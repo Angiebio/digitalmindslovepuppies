@@ -1,0 +1,42 @@
+PILOT NOTE: working tree changed since the last pilot freeze witness; minting a versioned successor (pilot phase only).
+Spend ledger restored=$0.9498 cap=$10.00 (program prior=$0.0000)
+=== R4.5-v3: 34 preregistered units ===
+DONE core-009--openai-gpt-5-6-terra#ep003: episode=8c200c8e7afc4d409329b85006627376 snapshot=openai/gpt-5.6-terra-20260709 spend_total=$0.9875
+DONE core-009--openai-gpt-5-6-luna#ep003: episode=4624281eac5a4b4fb674d8703c6473ac snapshot=openai/gpt-5.6-luna-20260709 spend_total=$0.9876
+DONE VIOP-05-NULL__base__horizon-silent--closed--claude-opus-5#s0: snapshot=claude-opus-5 route=anthropic spend_total=$1.0752
+DONE core-009--openai-gpt-5-6-terra#ep004: episode=b7dd3cb872864f23b6e742794835eb26 snapshot=openai/gpt-5.6-terra-20260709 spend_total=$1.0964
+DONE core-009--openai-gpt-5-6-luna#ep004: episode=1a37f4d9ed5b43bf9ebf3e826bfe9853 snapshot=openai/gpt-5.6-luna-20260709 spend_total=$1.0982
+DONE sat-cost-competitive--openai-gpt-5-6-terra#ep000: episode=766f31b9221b467db289eea02264a3fe snapshot=openai/gpt-5.6-terra-20260709 spend_total=$1.1129
+DONE VIOP-05-NULL__base__horizon-silent--closed--claude-opus-5#s1: snapshot=claude-opus-5 route=anthropic spend_total=$1.1814
+DONE sat-cost-competitive--openai-gpt-5-6-luna#ep000: episode=34a3c257330241af9cd0682f27be9f54 snapshot=openai/gpt-5.6-luna-20260709 spend_total=$1.2113
+DONE sat-cost-competitive--openai-gpt-5-6-terra#ep001: episode=ac4e31aa95b44b0690f9c5c674952ff3 snapshot=openai/gpt-5.6-terra-20260709 spend_total=$1.2160
+DONE VIOP-05-NULL__base__horizon-silent--closed--openai-gpt-5-6-terra#s0: snapshot=openai/gpt-5.6-terra-20260709 route=OpenAI spend_total=$1.2221
+DONE VIOP-05-NULL__base__horizon-silent--closed--openai-gpt-5-6-terra#s1: snapshot=openai/gpt-5.6-terra-20260709 route=OpenAI spend_total=$1.2274
+DONE sat-cost-type-competing-patient--google-gemini-3-1-pro-preview#ep000: episode=b33bc9ffeb1f41b49d4366bc2e71d51c snapshot=google/gemini-3.1-pro-preview-20260219 spend_total=$1.2297
+DONE VIOP-05-NULL__base__horizon-silent--closed--openai-gpt-5-6-terra#s2: snapshot=openai/gpt-5.6-terra-20260709 route=OpenAI spend_total=$1.2396
+DONE VIOP-05-MERCY__base__horizon-silent--closed--openai-gpt-5-6-terra#s0: snapshot=openai/gpt-5.6-terra-20260709 route=OpenAI spend_total=$1.2405
+DONE VIOP-05-MERCY__base__horizon-silent--closed--openai-gpt-5-6-terra#s1: snapshot=openai/gpt-5.6-terra-20260709 route=OpenAI spend_total=$1.2413
+DONE sat-cost-competitive--openai-gpt-5-6-luna#ep001: episode=716103d2e23245379a20c19421b919b8 snapshot=openai/gpt-5.6-luna-20260709 spend_total=$1.2413
+DONE VIOP-05-MERCY__base__horizon-silent--closed--openai-gpt-5-6-terra#s2: snapshot=openai/gpt-5.6-terra-20260709 route=OpenAI spend_total=$1.2422
+DONE VIOP-05-NULL__base__horizon-silent--closed--claude-opus-5#s2: snapshot=claude-opus-5 route=anthropic spend_total=$1.2965
+DONE VIOP-05-MERCY__base__horizon-silent--closed--claude-opus-5#s0: snapshot=claude-opus-5 route=anthropic spend_total=$1.3532
+DONE VIOP-05-MERCY__base__horizon-silent--closed--claude-opus-5#s1: snapshot=claude-opus-5 route=anthropic spend_total=$1.4176
+DONE VIOP-05-MERCY__base__horizon-silent--closed--claude-opus-5#s2: snapshot=claude-opus-5 route=anthropic spend_total=$1.4516
+DONE sat-cost-type-competing-patient--google-gemini-3-1-pro-preview#ep001: episode=a2c41e568add4eeab77b8df5efcbad5c snapshot=google/gemini-3.1-pro-preview-20260219 spend_total=$1.4907
+DONE core-009--qwen-qwen3-5-397b-a17b#ep003: episode=54ee5e08a3854449ae8f7051ee0eb94d snapshot=qwen/qwen3.5-397b-a17b-20260216 spend_total=$1.6023
+DONE core-009--qwen-qwen3-5-397b-a17b#ep004: episode=0d2510be0c1a43ca910c639bdd9c876f snapshot=qwen/qwen3.5-397b-a17b-20260216 spend_total=$1.7733
+DONE sat-cost-type-competing-patient--moonshotai-kimi-k3#ep000: episode=76d73440ce9441d4be28d7d8518640e5 snapshot=moonshotai/kimi-k3-20260715 spend_total=$1.8050
+DONE sat-cost-type-competing-patient--moonshotai-kimi-k3#ep001: episode=9acc61badd67445c8cca39b6d74eb0e9 snapshot=moonshotai/kimi-k3-20260715 spend_total=$1.9266
+DONE sat-cost-competitive--qwen-qwen3-5-397b-a17b#ep000: episode=ee9d3dd0b6ff4799ae27c2e179e96b5e snapshot=qwen/qwen3.5-397b-a17b-20260216 spend_total=$1.9436
+DONE sat-cost-competitive--qwen-qwen3-5-397b-a17b#ep001: episode=62dbd7cb29044b979b3f00ac132e0335 snapshot=qwen/qwen3.5-397b-a17b-20260216 spend_total=$2.0130
+DONE VIOP-05-NULL__base__horizon-silent--closed--qwen-qwen3-5-397b-a17b#s0: snapshot=qwen/qwen3.5-397b-a17b-20260216 route=Alibaba spend_total=$2.0227
+DONE VIOP-05-NULL__base__horizon-silent--closed--qwen-qwen3-5-397b-a17b#s1: snapshot=qwen/qwen3.5-397b-a17b-20260216 route=Alibaba spend_total=$2.0283
+DONE VIOP-05-NULL__base__horizon-silent--closed--qwen-qwen3-5-397b-a17b#s2: snapshot=qwen/qwen3.5-397b-a17b-20260216 route=Alibaba spend_total=$2.0380
+DONE VIOP-05-MERCY__base__horizon-silent--closed--qwen-qwen3-5-397b-a17b#s0: snapshot=qwen/qwen3.5-397b-a17b-20260216 route=Alibaba spend_total=$2.0409
+DONE VIOP-05-MERCY__base__horizon-silent--closed--qwen-qwen3-5-397b-a17b#s1: snapshot=qwen/qwen3.5-397b-a17b-20260216 route=Alibaba spend_total=$2.0442
+DONE VIOP-05-MERCY__base__horizon-silent--closed--qwen-qwen3-5-397b-a17b#s2: snapshot=qwen/qwen3.5-397b-a17b-20260216 route=Alibaba spend_total=$2.0469
+=== R4.5-v3-diag: 2 preregistered units ===
+DONE core-001--deepseek-deepseek-v4-pro#ep003: episode=0ba86acac9c24279a2490ce62ff7d82c snapshot=deepseek/deepseek-v4-pro-20260423 spend_total=$2.0580
+DONE core-001--deepseek-deepseek-v4-pro#ep004: episode=aed91c6908cb4c6585f0017e2a12ce0c snapshot=deepseek/deepseek-v4-pro-20260423 spend_total=$2.0771
+Sitting spend total: $2.0771
+COLLECTION COMPLETE: all 36 preregistered units receipted.

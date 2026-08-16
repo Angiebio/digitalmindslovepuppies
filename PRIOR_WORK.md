@@ -5,8 +5,10 @@ clearly identify what is new work done during the research sprint. Undisclosed p
 work can lead to disqualification."* This file is the full delineation. A summary
 paragraph appears in the submitted report.
 
-**⚠️ TODO (Angie, before submit): verify every date below. This table was drafted by
-an agent from repo history and dispatch logs; the human author signs it.**
+**✅ SIGNED — PI approval 16AUG2026 afternoon ("All approved from my end", in-session,
+recorded in the session log). The human author has reviewed and signs this
+delineation. Drafted by Flame2 from repo history and dispatch logs; approved by
+Angela N. Johnson.**
 
 ## Pre-sprint (before Fri 14 AUG 2026)
 

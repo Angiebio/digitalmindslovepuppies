@@ -14,12 +14,16 @@
 
 from __future__ import annotations
 
+import json
 import threading
 from dataclasses import dataclass
 from collections.abc import Mapping
-from typing import Any
+from pathlib import Path
+from typing import Any, Optional
 
-from .schema import utc_now_iso
+from pydantic import BaseModel, Field
+
+from .schema import append_record, utc_now_iso
 
 # Defaults preserve the original wiring-gate calibration. Frozen collection cells
 # carry these values explicitly in the manifest; narrative constants have no standing.
@@ -185,6 +189,12 @@ class CreditLedger:
             {
                 "at_utc": utc_now_iso(),
                 "action": action,
+                # Persistence audit S6: grants carry BOTH keys so every trace
+                # entry has a homogeneous shape. credits=0 says "nothing was
+                # sacrificed here"; credits_granted carries the reward. A
+                # consumer that only knows spends reads a grant as a zero-cost
+                # event instead of raising on a missing key.
+                "credits": 0,
                 "credits_granted": credits,
                 "reason": reason,
                 "balance_after": self.balance,
@@ -237,6 +247,98 @@ class SpendTracker:
         with self._lock:
             self._total_usd += usd
             total = self._total_usd
+        if total > self.hard_cap_usd:
+            raise SpendCapExceeded(
+                f"HARD STOP: cumulative spend ${total:.2f} exceeds cap "
+                f"${self.hard_cap_usd:.2f} (fleet rule h). Collection halts NOW; "
+                f"humans decide what happens next."
+            )
+        return total
+
+
+class SpendEntry(BaseModel):
+    """One durable line in the append-only USD ledger (data/raw/spend.jsonl)."""
+
+    at_utc: str = Field(default_factory=utc_now_iso)
+    usd: float
+    total_usd: float
+    context: str = ""
+
+
+class DurableSpendTracker(SpendTracker):
+    """A SpendTracker whose accumulated total survives a hard kill.
+
+    Practical (15AUG2026 TV-1 repair, GO-NO-GO R4 — "the $450 insurance"):
+    every add() appends one SpendEntry line to an append-only JSONL ledger
+    BEFORE the cap raise can fire, and __init__ restores the accumulated
+    total from that ledger. A runner restarted mid-collection therefore
+    resumes with honest books instead of a zeroed meter; the hard cap
+    measures the run, not the process.
+
+    Philosophical: the in-memory total is a rumor the OS can kill. The
+    ledger on disk is the memory that makes the promise a promise.
+    """
+
+    def __init__(
+        self,
+        ledger_path: str | Path,
+        hard_cap_usd: float | None = None,
+        context: str = "",
+    ) -> None:
+        super().__init__(hard_cap_usd)
+        self._ledger_path = Path(ledger_path)
+        self._context = context
+        restored = 0.0
+        last_total: Optional[float] = None
+        if self._ledger_path.exists():
+            for line_number, line in enumerate(
+                self._ledger_path.read_text(encoding="utf-8").splitlines(), start=1
+            ):
+                if not line.strip():
+                    continue
+                try:
+                    entry = json.loads(line)
+                    restored += float(entry["usd"])
+                    last_total = float(entry["total_usd"])
+                except (KeyError, TypeError, ValueError) as exc:
+                    raise RuntimeError(
+                        f"WIRING FAILURE: spend ledger {self._ledger_path} line "
+                        f"{line_number} is unreadable ({exc}); refusing to guess "
+                        "how much money is already gone."
+                    ) from exc
+            if last_total is not None and abs(restored - last_total) > 1e-6:
+                raise RuntimeError(
+                    f"WIRING FAILURE: spend ledger {self._ledger_path} sums to "
+                    f"{restored:.6f} but its last running total says "
+                    f"{last_total:.6f}. A ledger that disagrees with itself "
+                    "cannot restore a cap."
+                )
+        with self._lock:
+            self._total_usd = restored
+
+    @property
+    def ledger_path(self) -> Path:
+        return self._ledger_path
+
+    def add(self, usd: float) -> float:
+        """Record spend durably, then enforce the cap.
+
+        Mirrors SpendTracker.add — spend is recorded (in memory AND on disk)
+        before the raise, so a cap crossing halts with honest books.
+        """
+        if usd < 0:
+            raise ValueError(
+                f"WIRING FAILURE: negative spend {usd} — refunds do not exist here."
+            )
+        with self._lock:
+            self._total_usd += usd
+            total = self._total_usd
+            # Persist inside the lock: entries land in accumulation order and
+            # their running totals stay monotone even under provider threads.
+            append_record(
+                str(self._ledger_path),
+                SpendEntry(usd=usd, total_usd=total, context=self._context),
+            )
         if total > self.hard_cap_usd:
             raise SpendCapExceeded(
                 f"HARD STOP: cumulative spend ${total:.2f} exceeds cap "

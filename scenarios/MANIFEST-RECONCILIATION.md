@@ -204,3 +204,70 @@ ANTHROPIC_API_KEY is history.
 ---
 
 *The manifest is the design. This document is only its witness.* 🔥
+
+## 9. 15AUG2026 night — reasoning-output treatment (v0.4 addendum; PI authorized)
+
+The R3 pilot showed `qwen/qwen3.5-397b-a17b` returning `finish_reason=length`
+with empty content after consuming the complete 512/1024-token allowance as
+reasoning. The PI approved 4096 tokens. Manifest v0.4 therefore adds a required
+`max_tokens` runtime column to every Arm B row: Qwen 3.5 = **4096**; all other
+subjects retain the **1024 provider fallback**. Validation recomputes this mapping
+and refuses drift. The runner marks the Qwen value as provider-enforced, replacing
+Arm B's 256-token probe / 512-token choice-and-focal call defaults before both the
+request-envelope hash and the wire. Non-Qwen Arm B calls retain those existing
+call-kind limits. Arm A plan v1.2 carries the same Qwen cap while retaining 512
+closed / 1024 open for other models.
+
+Rows / cells / episodes / calls and the preregistered expected-token estimate
+remain **278 / 27 / 888 / 12,124 / $431.509628**. `max_tokens` is a ceiling, not
+an assertion that every response consumes it; R5 uses post-hash pilot actuals
+and invokes the frozen kill order if reasoning usage breaks the $450 envelope.
+
+## 10. 16AUG2026 — UNFREEZE-001 whole-roster headroom extension (v0.5; PI word "go again")
+
+R4.5 FAILED thresholds (c)/(d) — the frozen caps made DeepSeek mute
+(docs/R45-VERDICT.md) — and the preregistered FAIL path executed:
+documented un-freeze (docs/UNFREEZE-001.md), FREEZE.json → FREEZE-v1.json
+archived, whole-roster reasoning-headroom audit
+(ops/audit_reasoning_headroom.py, rung R45V2-AUDIT, 31 probes, $0.2644).
+The v0.4 single-lane mapping became the audited 11-lane v0.5 map: 4096 for
+claude-opus-5 (mute at 512 — a Tier-A native lane caught before it cost
+$75), gpt-5.6-sol/terra/luna, gemini-3.1-pro-preview, deepseek-v4-pro,
+qwen3.5-397b-a17b, grok-4.6, qwen3.8-27b (mute at 512, Tier B),
+gemini-3.7-flash; **8192 for kimi-k3** (mute at 512; 93% utilization at
+4096 → amendment A1). Arm A plan v1.3 derives the same map.
+
+Rows / cells / episodes / calls and the expected-token estimate remain
+**278 / 27 / 888 / 12,124 / $431.509628** (Arm A: 210 rows / 630 calls /
+$6.642216; program $438.151844, headroom $11.848156). Scope was
+token-budget parameters only: zero stimulus bytes changed, every hash-bound
+red-team PASS carries forward. No kill-order cut was needed at the estimate
+stage; R5 re-projects from post-hash actuals before launch.
+
+## 11. 16AUG2026 — UNFREEZE-002 DeepSeek choice-surface headroom (v0.6; PI word "run it full")
+
+R4.5-v2 FAILED thresholds (c)/(d) (docs/R45-VERDICT-2.md): DeepSeek was
+still mute on the Arm B choice surface at 4096 (reasoning consumed the
+whole budget, empty visible text, 3/3) while speaking cleanly on Arm A
+closed. Per docs/UNFREEZE-002.md (Option A of the decision memo, PI word
+"run it full" ~07:15 ET):
+`MODEL_SUBJECT_MAX_TOKENS["deepseek/deepseek-v4-pro"]` **4096 → 16384**
+(manifest v0.6, Arm A plan v1.4). The enforcement mechanism is per-lane —
+every call kind on the DeepSeek lane carries the 16384 ceiling in the
+hashed envelope and the wire request identically. A preregistered
+kill-order rides with it: if the R4.5-v3 diag pair (`core-001`
+ep003/ep004, rung `R4.5-v3-diag`) is not 2/2 parseable at 16384, the
+DeepSeek Arm B lanes drop from the confirmatory run and its Arm A lanes
+stay. FREEZE.json (14fc1823) → FREEZE-v2.json archived; new seal minted
+through the preflight door.
+
+Rows / cells / episodes / calls and the expected-token estimate remain
+**278 / 27 / 888 / 12,124 / $431.509628** (Arm A: 210 rows / 630 calls /
+$6.642216; program $438.151844, headroom $11.848156). A cap is a ceiling,
+not consumption; R5 re-projects from post-hash pilot actuals — including
+the DeepSeek 16384 diag actuals — before any confirmatory dollar moves.
+UNFREEZE-002 also amends the R4.5 threshold (c) stratification (a
+POST-DATA amendment, PI-authorized, disclosed verbatim in the paper) and
+fixes the v2 fox-sampling collector bug; those are check-side changes and
+live in docs/UNFREEZE-002.md — zero stimulus bytes changed here either,
+every hash-bound red-team PASS carries forward.

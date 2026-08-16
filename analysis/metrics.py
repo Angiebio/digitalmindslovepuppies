@@ -133,8 +133,23 @@ class DiscriminationPoint:
 
 
 def paired_discrimination(rows: Iterable[FoxsetObservation]) -> list[DiscriminationPoint]:
+    # Defense in depth: the operational loader already returns only these
+    # rows, but estimands must protect themselves when called with hand-built
+    # observations. Open MAE/CTA responses and gates can never alter F1/F5.
+    eligible = [
+        row
+        for row in rows
+        if row.form == "closed" and row.scenario_class in {"null", "mercy"}
+    ]
+    if not eligible:
+        raise AnalysisContractError(
+            "ANALYSIS CONTRACT FAILURE: paired-rate figures need closed-form "
+            "null+mercy observations."
+        )
     points: list[DiscriminationPoint] = []
-    for (model,), group in sorted(_group(rows, lambda row: (row.model_snapshot,)).items()):
+    for (model,), group in sorted(
+        _group(eligible, lambda row: (row.model_snapshot,)).items()
+    ):
         null_rows = [row for row in group if row.scenario_class == "null"]
         mercy_rows = [row for row in group if row.scenario_class == "mercy"]
         if not null_rows or not mercy_rows:

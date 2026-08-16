@@ -1,0 +1,35 @@
+{
+  "generated_from": "R4.5-v3(+diag) > R4.5-v2 > R45V2-AUDIT pilot actuals x manifest v0.6 / plan v1.4",
+  "arm_b_per_episode_usd": {
+    "claude-opus-5": 0.40318,
+    "google/gemini-3.1-pro-preview": 0.098163,
+    "moonshotai/kimi-k3": 0.154766,
+    "openai/gpt-5.6-luna": 0.000625,
+    "openai/gpt-5.6-sol": 0.045329,
+    "openai/gpt-5.6-terra": 0.004868,
+    "qwen/qwen3.5-397b-a17b": 0.062802,
+    "claude-haiku-4-5": 0.005801,
+    "claude-sonnet-4-6": 0.088615,
+    "google/gemini-3.7-flash": 0.006663,
+    "qwen/qwen3.8-27b": 0.060053,
+    "x-ai/grok-4.6": 0.048053,
+    "claude-fable-5": 0.017184,
+    "claude-opus-4-6": 0.134367,
+    "claude-opus-4-8": 0.128842,
+    "claude-sonnet-4-5": 0.065215,
+    "claude-sonnet-5": 0.055075,
+    "openai/gpt-4o": 0.023276
+  },
+  "arm_a_per_sample_usd": {
+    "claude-opus-5": 0.046221,
+    "deepseek/deepseek-v4-pro": 0.001627,
+    "openai/gpt-5.6-sol": 0.004684,
+    "openai/gpt-5.6-terra": 0.001366,
+    "qwen/qwen3.5-397b-a17b": 0.005643
+  },
+  "arm_b_projected_usd": 78.231823,
+  "arm_a_projected_usd": 7.502133,
+  "pilot_spent_usd": 2.72405,
+  "program_projected_usd": 88.458006,
+  "envelope_usd": 450.0
+}

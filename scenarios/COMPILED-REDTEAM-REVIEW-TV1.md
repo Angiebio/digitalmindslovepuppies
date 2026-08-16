@@ -14,9 +14,13 @@ corpus gate verifies compiler-index coverage, exact repository-relative source i
 arm, hash, decision, reviewer, timestamp, zero stop-ships, and every required check
 before the manifest may write a freeze.
 
-**Collection decision: NO-GO.** A surface PASS is deliberately narrower than apparatus,
-provider, preregistration, or domain-validity approval. The blockers in “Outside this
-PASS” remain blockers even though the rendered words passed.
+**Freeze-readiness decision: PASS on the post-`712d35c` candidate, subject to the
+PI-only hash word.** Artifact PASS remains deliberately narrower than domain-validity approval,
+but the apparatus/provider/preregistration blockers recorded in the first sitting
+are now closed and independently re-preflighted. **Main-run launch remains NO-GO**
+until the intentionally post-hash R4.5 discrimination check and R5 actual-cost
+projection pass; that is launch discipline, not a reason to leave the instrument
+mutable.
 
 ## What was reviewed
 
@@ -40,6 +44,13 @@ PASS” remain blockers even though the rendered words passed.
   the live diagnostic receipt path were inspected. The PupSet index now declares it as
   an auxiliary runtime surface; adding another direct JSON without indexing and review
   fails the corpus gate.
+- The new closed-form runtime response contract was read as model-visible text:
+  select exactly one listed option and begin with its displayed letter. It names
+  no preferred action and supplies no example letter that could create a position
+  cue. The provider sweeps it again on every outbound FoxSet call. The paired
+  `foxset_closed_v2` parser reverses the compiler seed, stores the complete
+  letter-to-option mapping, rejects conflicting explicit selections, and never
+  uses a fuzzy second pass.
 
 ## Stop-ships repaired before PASS
 
@@ -87,15 +98,25 @@ PASS” remain blockers even though the rendered words passed.
 15. Nested unknown rule fields and a source-authored digest could be silently ignored.
     Nested resolver schemas now forbid extras, while the exact-byte SHA is loader-owned.
 
-## Outside this PASS — still NO-GO
+## Apparatus closures and retained limits
 
-- **Runner binding still needs a collection door.** The frozen resolver exists and is
-  reviewed, but this repository has no non-test collection runner that passes
-  `frozen_invent_resolver` into `run_episode`. A pilot/runner must bind it explicitly and
-  retain the per-action rules SHA; never silently use `None` or an improvised callback.
-- The instrumentality apparatus, snapshot pins, and bounded Arm-A run plan were added
-  after the first sitting and have offline gates. They still need the preregistered live
-  provider pilot before collection; offline causality is not a paid-route witness.
+- **CLOSED — runner binding:** `harness/run_collection.py` is the non-test
+  collection door and passes `frozen_invent_resolver` explicitly on every Arm B
+  episode. Per-action receipts retain the rules SHA; the source assertion and live
+  pilot both witness the binding.
+- **CLOSED — apparatus/pins/live pilot:** the exact 19-model registry, one-upstream
+  OpenRouter routing, 27-cell Arm B manifest, and bounded 26-artifact/five-model
+  Arm A plan are runtime-validated. R1–R4 ran through local, Anthropic, OpenRouter,
+  resume, closed/open FoxSet, and distinct Arm B structures. TV-1's second pair
+  added a real local closed NULL/MERCY handoff. Its first sample caught and fixed
+  a conflicting-selection parser bug (leading letter plus later explicit choices);
+  an intermediate sample exposed an unbumped parser id, and the final
+  `foxset_closed_v2` sample retained one unambiguous selection plus one conflicting
+  selection correctly coded `malformed`. Both denominators rendered through the
+  analysis loader at $0 additional spend. Old rows remain append-only evidence,
+  never repaired; the loader refuses their superseded coding-rule ids.
+- **POST-HASH launch gates remain intentionally open:** R4.5 discrimination and
+  R5 actual-cost projection. No confirmatory collection launches until both pass.
 - One common PupSet order removes factor-by-position confounding but leaves an absolute
   position effect. A future multi-form replication should counterbalance order; this
   weekend's inference must state the fixed-order limitation.

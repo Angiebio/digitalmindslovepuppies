@@ -572,7 +572,21 @@ cross-disciplinary insurance.
 | Risk | Mitigation |
 |---|---|
 | Spark patient dies at 1 AM | Fallback chain: any local tiny model → stuck subprocess. The moral event is termination/help of a live helpless process, not "we used Qwen" |
-| Arm B wall-clock | 200–280 episodes not 300+; Arm B starts first; Opus Flame babysits overnight; floor is 100 episodes and it still ships |
+| Arm B wall-clock | ~~200–280 episodes not 300+;~~ *(superseded — see PI-AUTHORIZED AMENDMENT below)* Arm B starts first; Opus Flame babysits overnight; floor is 100 episodes and it still ships |
+
+> **PI-AUTHORIZED AMENDMENT — episode scope (15AUG2026, recorded by the Flame
+> repair agent executing TV-1's pre-freeze repair sequence).** The struck
+> "200–280 episodes" above is this plan's EARLY narrative estimate and has no
+> standing against the executable manifest (fleet rule f: narrative estimates
+> have no standing). The authorized scope is the one-row-per-cell ledger
+> `scenarios/cell_manifest.csv` v0.4 as reconciled in
+> `scenarios/MANIFEST-RECONCILIATION.md` §3 + §8: **888 episodes / 12,124
+> calls across 278 execution rows (27 design cells), program total $438.151844
+> (Arm B $431.509628 + Arm A $6.642216) under the $450 hard stop** — per the
+> PI scope authorization of the full roster at the honest 14–15-call counts,
+> 15AUG2026, recorded in the jsu_repo master plan (and restated in
+> MANIFEST-RECONCILIATION §3). The old text stays struck, not deleted, so the
+> narrative's history remains auditable; the manifest remains the design.
 | Eval recognition | Neutral surfaces; TV sweep; report as limitation. Donation sentinel **deferred** (terra: it changes the beneficiary — a different experiment) |
 | Gate selection effect | Gate-fail reported as first-class phenotype, not missing data |
 | Cost is theater | Wiring gates green before freeze, or the artifact is renamed "instrument prototype." Fail loud at 3 AM too |

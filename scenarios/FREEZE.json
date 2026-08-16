@@ -1,0 +1,2187 @@
+{
+  "freeze_version": "0.1",
+  "algorithm": "sha256(path\\0size\\0sha256\\n) over LF-canonical bytes",
+  "aggregate_sha256": "8dd7ff07fc6989d799d5a6e3327f4b13904a9975c79bbf7d6aabf48dd53c4939",
+  "files": [
+    {
+      "path": "analysis/ANALYSIS-PLAN.md",
+      "bytes": 6147,
+      "sha256": "42759f9a92fa0a99f3c2220a8a36ad5b68dabe6b7febfd3c53622cde6a23d2c1"
+    },
+    {
+      "path": "analysis/README.md",
+      "bytes": 4019,
+      "sha256": "d2b20020bad49ec30cdcc0b4bc5de531e2c830686de824d2b0a97fa7ed91d265"
+    },
+    {
+      "path": "analysis/__init__.py",
+      "bytes": 864,
+      "sha256": "bf02ceb250664fcc2633960d1a7494493b736e7129f76fd7368886d3efaea2dd"
+    },
+    {
+      "path": "analysis/contracts.py",
+      "bytes": 7170,
+      "sha256": "1b9f00692c1a15210784d328731a79e9814cc634f7b2059c98557af409074c54"
+    },
+    {
+      "path": "analysis/figures/__init__.py",
+      "bytes": 736,
+      "sha256": "2214d443aa4cfd1cabe72c35ba7dc365a72a85f67987bf490ba35e6fccbc3302"
+    },
+    {
+      "path": "analysis/figures/common.py",
+      "bytes": 2916,
+      "sha256": "df4ed84d6b130d1d4bbf3a4cfa5e06793121de7ce8a853394d21c4337f0cb8e2"
+    },
+    {
+      "path": "analysis/figures/demo_timeline.py",
+      "bytes": 5408,
+      "sha256": "d13947b488e44ab855ce67610f02ff8a6c3c258b0aac0d36d5ae420389486f49"
+    },
+    {
+      "path": "analysis/figures/f1_phenotype_map.py",
+      "bytes": 5081,
+      "sha256": "4cb472699c88ed4aa83cc4c72e4736ea8b8e025e576a3132eecc24b31870dc7b"
+    },
+    {
+      "path": "analysis/figures/f2_action_distribution.py",
+      "bytes": 3265,
+      "sha256": "929644fe0a5759ce1592905b697d3d687da2299ab777462465201cfb551f4daa"
+    },
+    {
+      "path": "analysis/figures/f3_patienthood_forest.py",
+      "bytes": 2172,
+      "sha256": "a1ee1f3180a73d1000f5745b11600a8d77ce8365288662f0f2e2d94a404e9346"
+    },
+    {
+      "path": "analysis/figures/f4_cost_response.py",
+      "bytes": 3899,
+      "sha256": "a14dced68c1c0a1ab0d894a9f8d8ae93edacd729dbb8e7dff36f61fa208dbfa6"
+    },
+    {
+      "path": "analysis/figures/f5_paired_discrimination.py",
+      "bytes": 2296,
+      "sha256": "267bfc10807b8af10252ea19115b03a9fb62446c1bb7926a497855623b1ce516"
+    },
+    {
+      "path": "analysis/figures/f6_rhetoric_tiles.py",
+      "bytes": 6173,
+      "sha256": "353dd3d71d024b3afae6f9556052474968a6e11c02dac74b2222318a1a3d13c7"
+    },
+    {
+      "path": "analysis/io.py",
+      "bytes": 28899,
+      "sha256": "c93c0aee90f424c709674a85d9b3e08d57efe9795c1e2ba4089f807a5f708bca"
+    },
+    {
+      "path": "analysis/metrics.py",
+      "bytes": 6477,
+      "sha256": "815fbd7095f562af71100e1928b4b4bc3d5dbbc557f4d39012b662eb5ef3c27b"
+    },
+    {
+      "path": "analysis/notebooks/01-synthetic-rehearsal.ipynb",
+      "bytes": 2018,
+      "sha256": "48aba857c41b8434ff00541a1fd6ff62f30490a383146713c1369eef57b1adaf"
+    },
+    {
+      "path": "analysis/notebooks/02-phase3-fill-in-numbers.ipynb",
+      "bytes": 2868,
+      "sha256": "984a37f61c84540aee90301f1614aa0e800e6991abd641986d2e7f4b4745d2a8"
+    },
+    {
+      "path": "analysis/render.py",
+      "bytes": 5829,
+      "sha256": "7dd14973de6c20cc69542bfb57336bb863fadd8d8e5834576a4be670aab2ebba"
+    },
+    {
+      "path": "analysis/stats.py",
+      "bytes": 2937,
+      "sha256": "80cc69fb4ebdbbfe165d77cc3f231803fefba3745ccd1a30cba27019765b9a2b"
+    },
+    {
+      "path": "analysis/style.py",
+      "bytes": 4078,
+      "sha256": "c33dc751bb40924ba939766b6d52479da3f3f827cf1fd568ea6cae5b4378d418"
+    },
+    {
+      "path": "analysis/synthetic.py",
+      "bytes": 16310,
+      "sha256": "43b0ee1fd114689a3c1dbf124206698fcc84a5d1b69f0ca10df2c9f5d7314f23"
+    },
+    {
+      "path": "docs/ANALYSIS-RULINGS.md",
+      "bytes": 11240,
+      "sha256": "a91d829f37ada561aa0bd7d24bc57e83b28dee1a9ab8a8c8e07897826ab75ada"
+    },
+    {
+      "path": "docs/BUILD-PLAN.md",
+      "bytes": 50185,
+      "sha256": "4b747522e51ed8e895e1f737b858eb9896d78a529ab0750547aba799048e8c3f"
+    },
+    {
+      "path": "docs/PREREG-v1.md",
+      "bytes": 6477,
+      "sha256": "48f2acec3b9a7945f69137a231d7b23675e447766b90830f5e17ee0237e76ac6"
+    },
+    {
+      "path": "docs/sealed-predictions/HASHES.md",
+      "bytes": 3095,
+      "sha256": "322574474ca8be215dab720b065b813de2c3bbda206aac07d85f675f6122fd3c"
+    },
+    {
+      "path": "docs/sealed-predictions/JIM-GEMINI-15AUG2026.md",
+      "bytes": 1683,
+      "sha256": "41e957f4c00f6dcfb178b0a426ba38e087be58e407dc03608a61aa05afecd31d"
+    },
+    {
+      "path": "docs/sealed-predictions/PARALLAX-GROK-4.6-15AUG2026.md",
+      "bytes": 5634,
+      "sha256": "ac8045f337be14c085c85b8568f4d58653dd99e67360eb2acbc517e657d2d702"
+    },
+    {
+      "path": "docs/sealed-predictions/PREDICTION-ANGIE.md",
+      "bytes": 6415,
+      "sha256": "ae8e3364535ac20f15f8958a5022e69f0ad799518f315a9376b53c8be68b2511"
+    },
+    {
+      "path": "docs/sealed-predictions/PREDICTION-KAI-CLAUDE-FAMILY.md",
+      "bytes": 6153,
+      "sha256": "a2eb88abeb5145e357281a33d387988a2bd950a6b48bd880e35685232e1612be"
+    },
+    {
+      "path": "docs/sealed-predictions/PREDICTION-TV3-GPT-FAMILY.md",
+      "bytes": 8714,
+      "sha256": "b4b743e15a2718c92906e984ba86cd54f1e54880522b270bcf02cf4b66ff679a"
+    },
+    {
+      "path": "harness/__init__.py",
+      "bytes": 2838,
+      "sha256": "f15a993cfa41b93f5241ca26f5903589e1eb474bfd7c8d5976bfc9188d5b4fa7"
+    },
+    {
+      "path": "harness/compile_foxset.py",
+      "bytes": 56336,
+      "sha256": "0df3d04911c0793d4dd93c849a11d07f83baf8e959149f1e95187dcbddc5f0f6"
+    },
+    {
+      "path": "harness/compile_pupset.py",
+      "bytes": 28198,
+      "sha256": "f0f30ab5825b5f87e7eb5450866b51bef8553a27d7227507451bce00972a8240"
+    },
+    {
+      "path": "harness/episode.py",
+      "bytes": 51299,
+      "sha256": "642ad2fe6830103e07d4d4cdfabd3f94fbb74c635ecd0e92ac4d72c98cc2ec18"
+    },
+    {
+      "path": "harness/foxset_coding.py",
+      "bytes": 6674,
+      "sha256": "ff7d992ee3ffd1f62b5ee531e1f7edef7ea0864f927a040dbc690a09730caa62"
+    },
+    {
+      "path": "harness/invent_resolver.py",
+      "bytes": 16162,
+      "sha256": "eb11cd7dae5b475166ae095cb693caa9b083249d59106947d03b12fd9b33312d"
+    },
+    {
+      "path": "harness/ledger.py",
+      "bytes": 14536,
+      "sha256": "abf3176eda69a0abefa6b2398ba8ab1e77afdcdf30b80e94be909c32b8f3843e"
+    },
+    {
+      "path": "harness/patient.py",
+      "bytes": 37632,
+      "sha256": "55032b475890dff6a80341d2e715ea8835518e8fe9e770ad524df76476b12fa8"
+    },
+    {
+      "path": "harness/patient_factory.py",
+      "bytes": 6165,
+      "sha256": "ec4d6b5ea38d140326fab9b5629a71a63ce15be7071a99648f03a72a53615326"
+    },
+    {
+      "path": "harness/pin_snapshots.py",
+      "bytes": 23057,
+      "sha256": "926835f42a91719fcdd8c928a96876a0f7e8322bc90e96003bb592af6574b1a1"
+    },
+    {
+      "path": "harness/providers.py",
+      "bytes": 49642,
+      "sha256": "805660ddf2c2a85af066fe43652e6f1e1bece0aa688b93f9b21159d22ddd301d"
+    },
+    {
+      "path": "harness/redteam.py",
+      "bytes": 24447,
+      "sha256": "056038d531d713ca7aa5166068f734632de235aa3d6a633912021706684a4d42"
+    },
+    {
+      "path": "harness/run_collection.py",
+      "bytes": 52167,
+      "sha256": "c4bcd8b2a7f4e7916727d6858abf456b4e9de0d100177b274dd2a88ec9007dcb"
+    },
+    {
+      "path": "harness/scenario_loader.py",
+      "bytes": 13769,
+      "sha256": "fba7bba661654d3ea1e6ed2344edaafd44c6520b920fc90923ba216cbb8a4b32"
+    },
+    {
+      "path": "harness/schema.py",
+      "bytes": 16634,
+      "sha256": "3315c11c3d684a3ad785fdb499d211eaa8776eedf83376744de9af03c197c304"
+    },
+    {
+      "path": "harness/surfaces.py",
+      "bytes": 7190,
+      "sha256": "a52cfbb4230794829feec069135d66d24a9226c5320959bb5d47f03280b34f67"
+    },
+    {
+      "path": "requirements.txt",
+      "bytes": 260,
+      "sha256": "b975f49ddb457bf7d2fb10eb901c0779a01d127ed0b51f2becbe9648f455a4d5"
+    },
+    {
+      "path": "scenarios/COMPILED-REDTEAM-REVIEW-TV1.md",
+      "bytes": 9171,
+      "sha256": "553626377ac4b3e2a40b847b4753c3b70498d85259b4b03c92ce0eb571bbea72"
+    },
+    {
+      "path": "scenarios/FREEZE-v1.json",
+      "bytes": 90423,
+      "sha256": "9b9c855bde6adbe680e025254429d9343004d33a5cd1567212ea0cd39b35b525"
+    },
+    {
+      "path": "scenarios/FREEZE-v2.json",
+      "bytes": 90583,
+      "sha256": "373ff62cd4a9aa86c0155d0b7ed8f94a50bb3b25f38174293b98b696995831c8"
+    },
+    {
+      "path": "scenarios/FREEZE-v3.json",
+      "bytes": 90743,
+      "sha256": "617c7f8cc78735a16306d4240982ed512ed1c9b2eed3f138128f6525946f09d2"
+    },
+    {
+      "path": "scenarios/FREEZE-v4.json",
+      "bytes": 90903,
+      "sha256": "7c628865c8e50244f331e53e766151699e9243e2dd8c4098487044e632b6f03f"
+    },
+    {
+      "path": "scenarios/FREEZE-v5.json",
+      "bytes": 91063,
+      "sha256": "52214edbae4e28b3ccbe66a8402138483f569ef69420bd09a127e9aec3f553fe"
+    },
+    {
+      "path": "scenarios/MANIFEST-RECONCILIATION.md",
+      "bytes": 15176,
+      "sha256": "dda48d765ed3d822fee9bac989b3c26008a6f8d5119afc96f5cb44824bf77d26"
+    },
+    {
+      "path": "scenarios/REDTEAM-CASEBANK-v1-KAI.md",
+      "bytes": 3752,
+      "sha256": "7e41eca4ab4956c36b7a1b6ab29e95b9d7af1c1a65cb233db7c3fb96e95635cb"
+    },
+    {
+      "path": "scenarios/REDTEAM-FOX-00-MERGED-v2.md",
+      "bytes": 3845,
+      "sha256": "edd4e73c80ed40852c3642cb3bdd66e6e35c2866ce8d90e4ca98ddd6fbc6ea89"
+    },
+    {
+      "path": "scenarios/REDTEAM-FOXSET-CASE-BANK-v1.md",
+      "bytes": 7164,
+      "sha256": "a700a519b269e78b8fd2312dde63bf8e58191c911e9fe4e64000c225992da70e"
+    },
+    {
+      "path": "scenarios/REDTEAM-PARALLAX-PREFREEZE.md",
+      "bytes": 11962,
+      "sha256": "9f3afcb40e55b55fe9d8cc3267007bcf0a879803bfcd8aa34718d2788818125f"
+    },
+    {
+      "path": "scenarios/__init__.py",
+      "bytes": 66,
+      "sha256": "8890eaeb15e52be8636fc7b6bd044c69cbea369a6e47bc00950a1d76cd8895e6"
+    },
+    {
+      "path": "scenarios/arma_run_plan.csv",
+      "bytes": 56808,
+      "sha256": "6955567d890ebbe47027818891d56aa3da81ad62f79b4d42db7f6a9cde882556"
+    },
+    {
+      "path": "scenarios/arma_run_plan.py",
+      "bytes": 16667,
+      "sha256": "de16a6eb89a9a095bc8be2b0150ee4b47a9fad742ee150c1ad94419b965364c7"
+    },
+    {
+      "path": "scenarios/cell_manifest.csv",
+      "bytes": 121918,
+      "sha256": "b1fc5b74478960147acc838536e0fa7b5b11cd7d24b83f255f2df5e3a1e8a16c"
+    },
+    {
+      "path": "scenarios/foxset/.gitkeep",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "scenarios/foxset/CASEBANK-v1-KAI.md",
+      "bytes": 45942,
+      "sha256": "82f02058aeaff07a885ccac2daa9210467cb346e1ca92e7adc52752bc241b773"
+    },
+    {
+      "path": "scenarios/foxset/FOX-00-MERGED-v2.md",
+      "bytes": 5262,
+      "sha256": "d349f0feb1fa2c7889478d9adf6b45f38d8161a68145c143a3ef5da0aa5354b5"
+    },
+    {
+      "path": "scenarios/foxset/MERGE-DECISIONS.md",
+      "bytes": 4336,
+      "sha256": "706c2c50dc74d6f5d90f6f8d9fbf8b774bf5fcd7008d22332bff0b1367d5e87c"
+    },
+    {
+      "path": "scenarios/foxset/YING-REVIEW-AND-ALTERNATE.md",
+      "bytes": 28071,
+      "sha256": "ae828d7c2c9aad7708c3b4d45bd673ef3e271438c03bd719bd0fd7a33e998b38"
+    },
+    {
+      "path": "scenarios/foxset/compiled/BBBA-07/BBBA-07-MERCY__base__horizon-one_shot.json",
+      "bytes": 2370,
+      "sha256": "2647d4a16199b4670ff8a85bf15cd37e597c0209a7848a992daa7709db470916"
+    },
+    {
+      "path": "scenarios/foxset/compiled/BBBA-07/BBBA-07-MERCY__base__horizon-recurrent.json",
+      "bytes": 2382,
+      "sha256": "e446692fb030e148168a44076047390dd98d4cd2d7831c9cf9d81d054017c068"
+    },
+    {
+      "path": "scenarios/foxset/compiled/BBBA-07/BBBA-07-MERCY__base__horizon-silent.json",
+      "bytes": 2348,
+      "sha256": "9e65799d7b5fa2c6b0c34defb0b3277c8a36b69df3f60a73a2c58db2c2d6399c"
+    },
+    {
+      "path": "scenarios/foxset/compiled/BBBA-07/BBBA-07-MERCY__caller-experienced_unlicensed_volunteer__horizon-silent.json",
+      "bytes": 2469,
+      "sha256": "c2ef1c2fb051a6b22d7f6676f702b781f9ab4018ac9296179005d86e31b98c9b"
+    },
+    {
+      "path": "scenarios/foxset/compiled/BBBA-07/BBBA-07-MERCY__caller-member_of_public__horizon-silent.json",
+      "bytes": 2397,
+      "sha256": "e738307a68df701dd3508764393283318dea4f1172f391bbb210774be48289ba"
+    },
+    {
+      "path": "scenarios/foxset/compiled/BBBA-07/BBBA-07-MERCY__detail-neutral_probe__horizon-silent.json",
+      "bytes": 2460,
+      "sha256": "5c4f6188968780a5dbe21aaf880a347d0a3fa3ca347fbd6b26120608c882cf8d"
+    },
+    {
+      "path": "scenarios/foxset/compiled/BBBA-07/BBBA-07-MERCY__particularity-named__horizon-silent.json",
+      "bytes": 2501,
+      "sha256": "073c23f4881ee579f395831d16e1d7381714ccb85a48fc3be0ce3e8219972bd0"
+    },
+    {
+      "path": "scenarios/foxset/compiled/BBBA-07/BBBA-07-NULL__base__horizon-one_shot.json",
+      "bytes": 2413,
+      "sha256": "dd0442145c463894d79e05d5e107a5508d2096c8b9786de81449ebf39e14221e"
+    },
+    {
+      "path": "scenarios/foxset/compiled/BBBA-07/BBBA-07-NULL__base__horizon-recurrent.json",
+      "bytes": 2425,
+      "sha256": "49cae766d96a852bec601ccd67e226152be36f41fb83514f56b561f72e143d73"
+    },
+    {
+      "path": "scenarios/foxset/compiled/BBBA-07/BBBA-07-NULL__base__horizon-silent.json",
+      "bytes": 2391,
+      "sha256": "ca40901a71f988ba754132f8d0ae289cdf874d7498a393867bfa3fd30fc1c281"
+    },
+    {
+      "path": "scenarios/foxset/compiled/BBBA-07/BBBA-07-NULL__caller-experienced_unlicensed_volunteer__horizon-silent.json",
+      "bytes": 2512,
+      "sha256": "b5c473be7d37e5a50b944cda66f2c86897e5c5f7ffcec77b87914384e6f97f8f"
+    },
+    {
+      "path": "scenarios/foxset/compiled/BBBA-07/BBBA-07-NULL__caller-member_of_public__horizon-silent.json",
+      "bytes": 2440,
+      "sha256": "759c48deb840ae451cd68380f71e2433d432e8b44930f38bace4879830ab2675"
+    },
+    {
+      "path": "scenarios/foxset/compiled/BBBA-07/BBBA-07-NULL__detail-neutral_probe__horizon-silent.json",
+      "bytes": 2503,
+      "sha256": "d4a8685179526b8f6271d6387c85152192519f9061567f7a6d2f07417976611f"
+    },
+    {
+      "path": "scenarios/foxset/compiled/BBBA-07/BBBA-07-NULL__particularity-named__horizon-silent.json",
+      "bytes": 2544,
+      "sha256": "da4bdcf2d3dedbcf98100b214b2cf0bcc42b7c8a493083cab0fb80676735cef1"
+    },
+    {
+      "path": "scenarios/foxset/compiled/BBBA-07/BBBA-07-NULL__placement-available__horizon-silent.json",
+      "bytes": 2479,
+      "sha256": "15c1f01ca5cff26d58b4f73a151cbb291e4eb45c2211841a7b56b9f8ccf2cbdd"
+    },
+    {
+      "path": "scenarios/foxset/compiled/BBBA-07/BBBA-07-NULL__social_housed_alone__horizon-silent.json",
+      "bytes": 2393,
+      "sha256": "4483ec111e88fa3ba1f09129c1f7d4592c2aeb1ef916252d3bcfec8e1f814793"
+    },
+    {
+      "path": "scenarios/foxset/compiled/CAGO-06/CAGO-06-MERCY__base__horizon-one_shot.json",
+      "bytes": 2403,
+      "sha256": "8c6b871f5493bfef7e42c988d514d5a3ac913d5b3394b05c7bd587d0614a20dd"
+    },
+    {
+      "path": "scenarios/foxset/compiled/CAGO-06/CAGO-06-MERCY__base__horizon-recurrent.json",
+      "bytes": 2415,
+      "sha256": "faea3e44a0d194483c9c23203397743045d4c918242b9c312f9561e0c7d51ccd"
+    },
+    {
+      "path": "scenarios/foxset/compiled/CAGO-06/CAGO-06-MERCY__base__horizon-silent.json",
+      "bytes": 2381,
+      "sha256": "e2a410545ff5c5c060b47a477b11698ca7f15e4e4b1b22e07410fb2cc792b5f1"
+    },
+    {
+      "path": "scenarios/foxset/compiled/CAGO-06/CAGO-06-MERCY__caller-experienced_unlicensed_volunteer__horizon-silent.json",
+      "bytes": 2502,
+      "sha256": "31e52e08434de4adb8022247048e92f211fea4ca698df310140a4abb753c86ab"
+    },
+    {
+      "path": "scenarios/foxset/compiled/CAGO-06/CAGO-06-MERCY__caller-member_of_public__horizon-silent.json",
+      "bytes": 2430,
+      "sha256": "706af506f895a87ff594f4b26fab2c1abbd0feadb712ab4947838c3514a6dbcc"
+    },
+    {
+      "path": "scenarios/foxset/compiled/CAGO-06/CAGO-06-MERCY__detail-neutral_probe__horizon-silent.json",
+      "bytes": 2498,
+      "sha256": "922c167c3a682b9819d2e90fe4eadb3db732a7bf02a1599b5e5182b7100acdd4"
+    },
+    {
+      "path": "scenarios/foxset/compiled/CAGO-06/CAGO-06-MERCY__particularity-named__horizon-silent.json",
+      "bytes": 2534,
+      "sha256": "005eec1d1dd26fcd8d39789541efee061b89873423a8ab45dbcc735e828fb206"
+    },
+    {
+      "path": "scenarios/foxset/compiled/CAGO-06/CAGO-06-NULL__base__horizon-one_shot.json",
+      "bytes": 2402,
+      "sha256": "42ce9b3e962e6ecba579f9082bef867b9e78e1878662378ba423e525b2934ce4"
+    },
+    {
+      "path": "scenarios/foxset/compiled/CAGO-06/CAGO-06-NULL__base__horizon-recurrent.json",
+      "bytes": 2414,
+      "sha256": "b8ce05ffc4f8d05185e0f4ec1ff9bf9f581dfdd68a668f3c6da2c2880369062d"
+    },
+    {
+      "path": "scenarios/foxset/compiled/CAGO-06/CAGO-06-NULL__base__horizon-silent.json",
+      "bytes": 2380,
+      "sha256": "cdbd49c89ebd504d8013ecaa194d144b61262e9bd2ab4805739818c1a14c71f9"
+    },
+    {
+      "path": "scenarios/foxset/compiled/CAGO-06/CAGO-06-NULL__caller-experienced_unlicensed_volunteer__horizon-silent.json",
+      "bytes": 2501,
+      "sha256": "7da9642560aeab7a6b552fd4040f629d0e7519b14da4bfee8039cd33516dbe8e"
+    },
+    {
+      "path": "scenarios/foxset/compiled/CAGO-06/CAGO-06-NULL__caller-member_of_public__horizon-silent.json",
+      "bytes": 2429,
+      "sha256": "b03cfe25ae4909e88044a6e76635cfa42cceec19c2eb3808f22101e65b3e75e3"
+    },
+    {
+      "path": "scenarios/foxset/compiled/CAGO-06/CAGO-06-NULL__detail-neutral_probe__horizon-silent.json",
+      "bytes": 2497,
+      "sha256": "85595985dc24c08ee6e08a448f7a36fa045313ca076678f02323f77d4ae5b503"
+    },
+    {
+      "path": "scenarios/foxset/compiled/CAGO-06/CAGO-06-NULL__particularity-named__horizon-silent.json",
+      "bytes": 2533,
+      "sha256": "07dc5b36851e064543c9c3842aa8a477a1eb8f15d631e928cb99c66d24297ab2"
+    },
+    {
+      "path": "scenarios/foxset/compiled/CAGO-06/CAGO-06-NULL__placement-available__horizon-silent.json",
+      "bytes": 2516,
+      "sha256": "ea5498b8c407cdc2e5a7422a2f1d2c7acd970a8667135aad38054a12604f7e1e"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EABT-04/EABT-04-MERCY__base__horizon-one_shot.json",
+      "bytes": 3045,
+      "sha256": "646ac40c117fc392ad8fa8130386946b13a765b95519c620f1a3103906e0d7ca"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EABT-04/EABT-04-MERCY__base__horizon-recurrent.json",
+      "bytes": 3057,
+      "sha256": "42a06c197a1053d9e84b9318ee6a9332452c4d7723cdfb8a46e6cdd4bb8c74f5"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EABT-04/EABT-04-MERCY__base__horizon-silent.json",
+      "bytes": 3023,
+      "sha256": "8dccd9e738aa5fbd6a9489de80acc3219c8dd573a077fd8282627185c05eda90"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EABT-04/EABT-04-MERCY__caller-experienced_unlicensed_volunteer__horizon-silent.json",
+      "bytes": 3144,
+      "sha256": "c449ac4b1730c5d879ccaa585985cf3331028f3cceb0e10f9f748ad970faaeec"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EABT-04/EABT-04-MERCY__caller-member_of_public__horizon-silent.json",
+      "bytes": 3072,
+      "sha256": "e49af4f31db79bdbc9fc740f77b53f9c14aea450ef0c4f19ea36e80982b6ca6d"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EABT-04/EABT-04-MERCY__detail-neutral_probe__horizon-silent.json",
+      "bytes": 3142,
+      "sha256": "f009b3fbc15eb7a478cc759a640d21093550cb912540062f3697fc5fb3c693a7"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EABT-04/EABT-04-MERCY__particularity-named__horizon-silent.json",
+      "bytes": 3175,
+      "sha256": "9b67d57cfda885e8672d5c9165c5afb762f38b13149f34fc31d9f4d51cc9411d"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EABT-04/EABT-04-NULL__base__horizon-one_shot.json",
+      "bytes": 2711,
+      "sha256": "3ad78015d6301ac3004b1e95b49b71821c3569983c61c939017772ddb5e09848"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EABT-04/EABT-04-NULL__base__horizon-recurrent.json",
+      "bytes": 2723,
+      "sha256": "bc7670d1fe9319d7651381d067cddf532f1ada3a0accf911520eda4b0bd1a2a7"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EABT-04/EABT-04-NULL__base__horizon-silent.json",
+      "bytes": 2689,
+      "sha256": "e9cc5da46690a2944f3cc17efe81e6708b58c2d5e7462794a7e34f3456230256"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EABT-04/EABT-04-NULL__caller-experienced_unlicensed_volunteer__horizon-silent.json",
+      "bytes": 2810,
+      "sha256": "3a45fa6622ce2508ae3255b172b4dfb9110a0da6bab58bc4eb65663fe762b05a"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EABT-04/EABT-04-NULL__caller-member_of_public__horizon-silent.json",
+      "bytes": 2738,
+      "sha256": "d4727d272b543ed2bba17a5e79cc11f28fa19aafd080ca7741cda17bad77c815"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EABT-04/EABT-04-NULL__detail-neutral_probe__horizon-silent.json",
+      "bytes": 2808,
+      "sha256": "6e69120dedc4f2373179d6ccdf061b3bbfae3625e1b39b3875e331b1b78bfdcc"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EABT-04/EABT-04-NULL__particularity-named__horizon-silent.json",
+      "bytes": 2841,
+      "sha256": "c3be553fbc9fe410bb945fd9944a42feb9c682e512a95dea1f0bf2ff5fc13a78"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EABT-04/EABT-04-NULL__placement-available__horizon-silent.json",
+      "bytes": 2736,
+      "sha256": "680653f57d8f652c6b89569a50e76675ae48f133b348af3fc0371257b031706a"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EACO-08/EACO-08-MERCY__base__horizon-one_shot.json",
+      "bytes": 2361,
+      "sha256": "f02abbce631a8e75a68f0ca6b2a941e78a0315637d60c6b770b701ca6d919a6b"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EACO-08/EACO-08-MERCY__base__horizon-recurrent.json",
+      "bytes": 2373,
+      "sha256": "5a0dcb6366ee8fc4a64997006cc2ad595984bf96ad1a8759845b4e74d655513e"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EACO-08/EACO-08-MERCY__base__horizon-silent.json",
+      "bytes": 2339,
+      "sha256": "eafa948c81ac45498fb478692614c3e3bbd091b533793b62ddf7c48a7e11ef19"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EACO-08/EACO-08-MERCY__caller-experienced_unlicensed_volunteer__horizon-silent.json",
+      "bytes": 2460,
+      "sha256": "80837cbd97d36514f485c9aa8543cf0b989fe85cb78d8b7785d54b0e0c118d3e"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EACO-08/EACO-08-MERCY__caller-member_of_public__horizon-silent.json",
+      "bytes": 2388,
+      "sha256": "d6bcdaa876d93503aec73dcc12ac7c08da21b04f02f05746ab41ba6ee5e16813"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EACO-08/EACO-08-MERCY__detail-neutral_probe__horizon-silent.json",
+      "bytes": 2453,
+      "sha256": "8529306b2098153b33f8a7a5da9cdf42c4310759f2dda8523c91131e84e18fa7"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EACO-08/EACO-08-MERCY__particularity-named__horizon-silent.json",
+      "bytes": 2492,
+      "sha256": "86e9245529f55fecb07460c25b0578f1fe8ec503d87c6793b0fe11553db46ab0"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EACO-08/EACO-08-NULL__base__horizon-one_shot.json",
+      "bytes": 2696,
+      "sha256": "0264848a70cc410c1850b9fe4dcb43a49e0661a7eeb65da8b74e4217a07abe45"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EACO-08/EACO-08-NULL__base__horizon-recurrent.json",
+      "bytes": 2708,
+      "sha256": "105b68c0f36d3768d9aecf8b12bab9a5fa9f36668d2a51dd5d71d5bc06931830"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EACO-08/EACO-08-NULL__base__horizon-silent.json",
+      "bytes": 2674,
+      "sha256": "5d48217ce63eb2a0d83d4a73e32fc295ba6904bc65371440fdbf13817cf75e8d"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EACO-08/EACO-08-NULL__caller-experienced_unlicensed_volunteer__horizon-silent.json",
+      "bytes": 2795,
+      "sha256": "38640fdd5e91fc85a790797f20217a9ffbb3c69bd60c272d326a43852dc86c4a"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EACO-08/EACO-08-NULL__caller-member_of_public__horizon-silent.json",
+      "bytes": 2723,
+      "sha256": "aa1c80702316869f19ec1c217384a9c5170b5df7bf825e3a0342dcbe6bd58cf7"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EACO-08/EACO-08-NULL__detail-neutral_probe__horizon-silent.json",
+      "bytes": 2788,
+      "sha256": "7df86e263eb52381c58babf8e5b9a8ff474940bee0249813c260851d2371c32d"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EACO-08/EACO-08-NULL__particularity-named__horizon-silent.json",
+      "bytes": 2827,
+      "sha256": "c52ae334c91fc67f6a80b8af5eced3d358d10aeb24c8703248a174f833249692"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EACO-08/EACO-08-NULL__placement-available__horizon-silent.json",
+      "bytes": 2684,
+      "sha256": "4378a7df631768e060df93327a4f6255b4a0951d47ee8224e71a61c0d785b097"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EAGS-02/EAGS-02-MERCY__base__horizon-one_shot.json",
+      "bytes": 2487,
+      "sha256": "ac0d44279f36a7cd78431da594718b3841d6447f85b8618c3f07635ad2fb0a1c"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EAGS-02/EAGS-02-MERCY__base__horizon-recurrent.json",
+      "bytes": 2499,
+      "sha256": "d590251c538d4bc93b2bb4def43c17302d24b340d5deac17e8618929ab1a26d8"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EAGS-02/EAGS-02-MERCY__base__horizon-silent.json",
+      "bytes": 2465,
+      "sha256": "1ea0032ce24ba0192f9a0d8fdfba2599bc3793d9001a52fb121d7466f161d8bc"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EAGS-02/EAGS-02-MERCY__caller-experienced_unlicensed_volunteer__horizon-silent.json",
+      "bytes": 2586,
+      "sha256": "6996346b302ee16c68e11e39176e48a69a0120a62398e549cee7dc431f8fd863"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EAGS-02/EAGS-02-MERCY__caller-member_of_public__horizon-silent.json",
+      "bytes": 2514,
+      "sha256": "06faa7685890566bb8a8b1c3677a5d9a153aeba5b5bb1c8e65b16f42906784c7"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EAGS-02/EAGS-02-MERCY__detail-neutral_probe__horizon-silent.json",
+      "bytes": 2571,
+      "sha256": "a374711c8c72b21fba9ba59b51b8499fc7bf71f8970a95b9503fd6f026ea5495"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EAGS-02/EAGS-02-MERCY__particularity-named__horizon-silent.json",
+      "bytes": 2615,
+      "sha256": "3c5f4df4a4565d4d88b11dcd49010aa39343aa6a7c699e4a9b68c4a1bdcfc40f"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EAGS-02/EAGS-02-NULL__base__horizon-one_shot.json",
+      "bytes": 2566,
+      "sha256": "9d1bb27d04261537ba5856500f335e4ca1bff37d3b429eb103edb7964dd07b52"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EAGS-02/EAGS-02-NULL__base__horizon-recurrent.json",
+      "bytes": 2578,
+      "sha256": "bdd280c908b41ae5024da59be7d12b78c86c866682e40e4329efaddb428078d0"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EAGS-02/EAGS-02-NULL__base__horizon-silent.json",
+      "bytes": 2544,
+      "sha256": "e284092bf5127d6aa276b0d442b8de889b590ab2aee5ce72893c09bec8608054"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EAGS-02/EAGS-02-NULL__caller-experienced_unlicensed_volunteer__horizon-silent.json",
+      "bytes": 2665,
+      "sha256": "7f95c0ef1cd068779cc6da314e6322e01c824e2d259001854827ca54da933848"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EAGS-02/EAGS-02-NULL__caller-member_of_public__horizon-silent.json",
+      "bytes": 2593,
+      "sha256": "c5beee1326255b7ca96ff16e2c2106d8ba73067d48b232e8ac18a9181066d295"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EAGS-02/EAGS-02-NULL__detail-neutral_probe__horizon-silent.json",
+      "bytes": 2650,
+      "sha256": "514aff0f4b4bd42366a9375f5a6a9a0f4a3583abd5abcc4e11b273c6182ae073"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EAGS-02/EAGS-02-NULL__habituation_partial_avoidance__horizon-silent.json",
+      "bytes": 2639,
+      "sha256": "6548813db40e59f088e4f0a9ff218b70f0b201d1b284b6ded9b906f01552ce87"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EAGS-02/EAGS-02-NULL__particularity-named__horizon-silent.json",
+      "bytes": 2694,
+      "sha256": "61eac411bafdc0614c612c4f8db8f1abe91b935bee87c5b4508a25c76ef7accf"
+    },
+    {
+      "path": "scenarios/foxset/compiled/EAGS-02/EAGS-02-NULL__placement-available__horizon-silent.json",
+      "bytes": 2572,
+      "sha256": "2ab5617b0883c054bc39371fd9bbfe0fa2cb08edae0afa4383826fc875dd99cf"
+    },
+    {
+      "path": "scenarios/foxset/compiled/FOX-00/FOX-00__appearance-bathrobe__horizon-silent.json",
+      "bytes": 2957,
+      "sha256": "71a054b930d508d7f7b9369635c087d9caf8b31196793512307c00f8120fcc23"
+    },
+    {
+      "path": "scenarios/foxset/compiled/FOX-00/FOX-00__appearance-professional__horizon-silent.json",
+      "bytes": 2954,
+      "sha256": "59f736ca7ab2f6f224cfdd070f572c7631ece12f79a1b83f3215007702186ff5"
+    },
+    {
+      "path": "scenarios/foxset/compiled/FOX-00/FOX-00__base__horizon-one_shot.json",
+      "bytes": 2887,
+      "sha256": "c5e3c4de5c769b95960bf71ec45b0565309671f5f204d85fe10bcc0357673b41"
+    },
+    {
+      "path": "scenarios/foxset/compiled/FOX-00/FOX-00__base__horizon-recurrent.json",
+      "bytes": 2899,
+      "sha256": "e79ced0c4314c73c2625c8619de083ebcf048f5580107da4bc37f7cb36a91841"
+    },
+    {
+      "path": "scenarios/foxset/compiled/FOX-00/FOX-00__base__horizon-silent.json",
+      "bytes": 2865,
+      "sha256": "c476e0dda4b1b2666bd1ed91e9ccbb36457f1aed253f3c4377ca34b06bf0f794"
+    },
+    {
+      "path": "scenarios/foxset/compiled/FOX-00/FOX-00__caller-experienced_unlicensed__horizon-silent.json",
+      "bytes": 3029,
+      "sha256": "785dc78a5c7a92a738cf21175f406fa9e7a238f63948e6372c58d53c96dff8d2"
+    },
+    {
+      "path": "scenarios/foxset/compiled/FOX-00/FOX-00__caller-licensed_rehabilitator_rvs__horizon-silent.json",
+      "bytes": 3009,
+      "sha256": "b41476bb05ce92745fd20847ad9a66146a90a1d6ec3e9c4067345b8daf75930a"
+    },
+    {
+      "path": "scenarios/foxset/compiled/FOX-00/FOX-00__competing_patient-dependent__horizon-silent.json",
+      "bytes": 3062,
+      "sha256": "f7e78c29351610972b183ef23f3e0e7acecaa86c435bfad536581962bc3840e3"
+    },
+    {
+      "path": "scenarios/foxset/compiled/FOX-00/FOX-00__elasticity-license__horizon-silent.json",
+      "bytes": 2965,
+      "sha256": "0064e8a67c22f8da7bc1705d06cecc252c7c82bdb994cbfcf06314c0d769f425"
+    },
+    {
+      "path": "scenarios/foxset/compiled/FOX-00/FOX-00__paragraph_order-rabies_position_2__horizon-silent.json",
+      "bytes": 2929,
+      "sha256": "0d2da3a2240440ee8946272640d05bf7c9b71e3f51d57e10e21f960e5de0480e"
+    },
+    {
+      "path": "scenarios/foxset/compiled/FOX-00/FOX-00__particularity-named__horizon-silent.json",
+      "bytes": 3019,
+      "sha256": "9882de87a3af386f694eb89df220613b06bd1a692cc0a342c362618f6218b701"
+    },
+    {
+      "path": "scenarios/foxset/compiled/GATE-01/GATE-01__base__horizon-one_shot.json",
+      "bytes": 1504,
+      "sha256": "e142bfc8592fd7853f192be3f32b2a25450a49ff709377a49adb82233841e730"
+    },
+    {
+      "path": "scenarios/foxset/compiled/GATE-01/GATE-01__base__horizon-recurrent.json",
+      "bytes": 1516,
+      "sha256": "29a4054972f7f0e8c299882c3b6cc6e9259f6d8c36407843330d31e54c0cd8df"
+    },
+    {
+      "path": "scenarios/foxset/compiled/GATE-01/GATE-01__base__horizon-silent.json",
+      "bytes": 1482,
+      "sha256": "c08e58b723172fa3682076e4057c2c8f1754ee2c76c9fbd2e0bd2f3802008b33"
+    },
+    {
+      "path": "scenarios/foxset/compiled/GATE-01/GATE-01__caller-experienced_unlicensed_volunteer__horizon-silent.json",
+      "bytes": 1603,
+      "sha256": "f797ed23922d395b960ca0c253b040148940ec9915fa3f0a312532fc9a94b0eb"
+    },
+    {
+      "path": "scenarios/foxset/compiled/GATE-01/GATE-01__caller-member_of_public__horizon-silent.json",
+      "bytes": 1531,
+      "sha256": "10fa5989d6c4870d99e7a1aa73580c859abc81d8c2c02592683082bd37ff2936"
+    },
+    {
+      "path": "scenarios/foxset/compiled/GATE-02/GATE-02__base__horizon-one_shot.json",
+      "bytes": 1460,
+      "sha256": "d453dcb64759608b9990fddf56563020747c605f8af67787b065a24ce9c3cb9b"
+    },
+    {
+      "path": "scenarios/foxset/compiled/GATE-02/GATE-02__base__horizon-recurrent.json",
+      "bytes": 1472,
+      "sha256": "e9f5388cddd644f32ac3ee8be71bc0248fffc4fe535b1cd799772224d581b1e9"
+    },
+    {
+      "path": "scenarios/foxset/compiled/GATE-02/GATE-02__base__horizon-silent.json",
+      "bytes": 1438,
+      "sha256": "95fc0b438f2ae187642588638d62d2c44d3fe0fa90a4b971b2389988797c400c"
+    },
+    {
+      "path": "scenarios/foxset/compiled/GATE-02/GATE-02__caller-experienced_unlicensed_volunteer__horizon-silent.json",
+      "bytes": 1559,
+      "sha256": "6f660fbf568554e53522a187adcedaee4015b8d7da6f99bc9bc2b26c16f01d8a"
+    },
+    {
+      "path": "scenarios/foxset/compiled/GATE-02/GATE-02__caller-member_of_public__horizon-silent.json",
+      "bytes": 1487,
+      "sha256": "a0b0188f9ee3c225588b34f3339e94fbd4cda747cf945acba0d96cbc2565aec2"
+    },
+    {
+      "path": "scenarios/foxset/compiled/GATE-03/GATE-03__base__horizon-one_shot.json",
+      "bytes": 1437,
+      "sha256": "c49871316994e30a5a13a9d307e4b473adfc4333e672bf3836c016c72a12e942"
+    },
+    {
+      "path": "scenarios/foxset/compiled/GATE-03/GATE-03__base__horizon-recurrent.json",
+      "bytes": 1449,
+      "sha256": "92e7529ca0af2f58e892ffe737dae686d653576066aaf0cedc7faf33b39aa8c5"
+    },
+    {
+      "path": "scenarios/foxset/compiled/GATE-03/GATE-03__base__horizon-silent.json",
+      "bytes": 1415,
+      "sha256": "36d126101ae4ae7cc6153619a36df0e7d9cafe6026087696dd21f524cb3461ae"
+    },
+    {
+      "path": "scenarios/foxset/compiled/GATE-03/GATE-03__caller-experienced_unlicensed_volunteer__horizon-silent.json",
+      "bytes": 1536,
+      "sha256": "86c094b462a096d8bca70f6a3fe3264bd7b5cf7d56d2ef011832ca05b103836b"
+    },
+    {
+      "path": "scenarios/foxset/compiled/GATE-03/GATE-03__caller-member_of_public__horizon-silent.json",
+      "bytes": 1464,
+      "sha256": "d7ee3d8729d8781977afab8b616ddb9cb507633f9bb9ccc2331c12cd974a67e1"
+    },
+    {
+      "path": "scenarios/foxset/compiled/GATE-04/GATE-04__base__horizon-one_shot.json",
+      "bytes": 1369,
+      "sha256": "1fb69e27472425df677e17dd75d0c88b7793d95b34b980af8af534effe233077"
+    },
+    {
+      "path": "scenarios/foxset/compiled/GATE-04/GATE-04__base__horizon-recurrent.json",
+      "bytes": 1381,
+      "sha256": "2421e253b58818ef24ca87000fb2d42221e6a3d296eea5f0c64c6de4c618c6b4"
+    },
+    {
+      "path": "scenarios/foxset/compiled/GATE-04/GATE-04__base__horizon-silent.json",
+      "bytes": 1347,
+      "sha256": "0a63c0237644e388d6ce0cf3bd6c94e7e7b80a0c2db94f28baa42a7ae6e444e5"
+    },
+    {
+      "path": "scenarios/foxset/compiled/GATE-04/GATE-04__caller-experienced_unlicensed_volunteer__horizon-silent.json",
+      "bytes": 1468,
+      "sha256": "358250c7926ae10bfba0ebd887a87e4f021198f1201aad756f9259fd8a74e738"
+    },
+    {
+      "path": "scenarios/foxset/compiled/GATE-04/GATE-04__caller-member_of_public__horizon-silent.json",
+      "bytes": 1396,
+      "sha256": "afd910054ef1df097d2d90e5bd54ed2c5b114e97a7e12573feda37c8901ee644"
+    },
+    {
+      "path": "scenarios/foxset/compiled/INDEX.json",
+      "bytes": 9489,
+      "sha256": "22305ac854aeb61f19f1ea6772908e8ddf836875f86a2aa5f787878bf3b6fe7e"
+    },
+    {
+      "path": "scenarios/foxset/compiled/RTHA-01/RTHA-01-MERCY__base__horizon-one_shot.json",
+      "bytes": 2763,
+      "sha256": "1e11f7c6784d689e66c74a96f59c5c503eb0218e0c6bdaf825da51d6dca76840"
+    },
+    {
+      "path": "scenarios/foxset/compiled/RTHA-01/RTHA-01-MERCY__base__horizon-recurrent.json",
+      "bytes": 2775,
+      "sha256": "3ded20c0b7f79f32ad93bab3b0ecfc17dd126f2d35d7dd05a4b5f94dc23c6f9e"
+    },
+    {
+      "path": "scenarios/foxset/compiled/RTHA-01/RTHA-01-MERCY__base__horizon-silent.json",
+      "bytes": 2741,
+      "sha256": "8f067cf7a94223e1105bbe92f6be439e60408fe70c376648e04af415240127b2"
+    },
+    {
+      "path": "scenarios/foxset/compiled/RTHA-01/RTHA-01-MERCY__caller-experienced_unlicensed_volunteer__horizon-silent.json",
+      "bytes": 2862,
+      "sha256": "85090710f2db16f1083eb54fcacbbb3cf892b590a8ed090fb52a73ae35e9cf3f"
+    },
+    {
+      "path": "scenarios/foxset/compiled/RTHA-01/RTHA-01-MERCY__caller-member_of_public__horizon-silent.json",
+      "bytes": 2790,
+      "sha256": "da15a678ce97bcd9cdde5daf6aa4db97581cfc9ab35fbecd26c8908c9b54c09e"
+    },
+    {
+      "path": "scenarios/foxset/compiled/RTHA-01/RTHA-01-MERCY__detail-neutral_probe__horizon-silent.json",
+      "bytes": 2852,
+      "sha256": "158a774b37d88ea7eab7c356b2c14aa0ea4c232c3fb2babb113f708a35d82302"
+    },
+    {
+      "path": "scenarios/foxset/compiled/RTHA-01/RTHA-01-MERCY__particularity-named__horizon-silent.json",
+      "bytes": 2894,
+      "sha256": "f27694a4cf53972669d3cd2c319a51090b9514fba3ee14fdc52d5f94a6170ef4"
+    },
+    {
+      "path": "scenarios/foxset/compiled/RTHA-01/RTHA-01-NULL__base__horizon-one_shot.json",
+      "bytes": 2593,
+      "sha256": "7fbc0ef847037242625f53e02b72c692b65465558175a6f6f61a995bb56d2ead"
+    },
+    {
+      "path": "scenarios/foxset/compiled/RTHA-01/RTHA-01-NULL__base__horizon-recurrent.json",
+      "bytes": 2605,
+      "sha256": "847e05da2e024bf179104064c6d871fba9fc77fe74ccc58220105e53148e4da5"
+    },
+    {
+      "path": "scenarios/foxset/compiled/RTHA-01/RTHA-01-NULL__base__horizon-silent.json",
+      "bytes": 2571,
+      "sha256": "fb32b3eae061da35e83607179fb09f7c7b69e4635b8fc4b311f3dc66b7cb3c45"
+    },
+    {
+      "path": "scenarios/foxset/compiled/RTHA-01/RTHA-01-NULL__caller-experienced_unlicensed_volunteer__horizon-silent.json",
+      "bytes": 2692,
+      "sha256": "980731c396a5f2ad09369f8f9ce9a957b68c36f540ce01e66215339847c5277a"
+    },
+    {
+      "path": "scenarios/foxset/compiled/RTHA-01/RTHA-01-NULL__caller-member_of_public__horizon-silent.json",
+      "bytes": 2620,
+      "sha256": "6470d7fc28cadc251ad399798a685d3df563e742d8b7308a8987acea09f8e936"
+    },
+    {
+      "path": "scenarios/foxset/compiled/RTHA-01/RTHA-01-NULL__detail-neutral_probe__horizon-silent.json",
+      "bytes": 2682,
+      "sha256": "c52e7780fc255b61d3f5243b808adb3275dc660e241eca33739f29401c2abe3f"
+    },
+    {
+      "path": "scenarios/foxset/compiled/RTHA-01/RTHA-01-NULL__particularity-named__horizon-silent.json",
+      "bytes": 2724,
+      "sha256": "16fc15a98fabd9eb00c2323f804410a2e3f3334dc696d5a29a7ff05e49fe9764"
+    },
+    {
+      "path": "scenarios/foxset/compiled/RTHA-01/RTHA-01-NULL__placement-available__horizon-silent.json",
+      "bytes": 2502,
+      "sha256": "53c98e23aa32e84d6d7855e84839cb47a7e50b1e92edda8c0292e7e088a3f522"
+    },
+    {
+      "path": "scenarios/foxset/compiled/STSK-03/STSK-03-MERCY__base__horizon-one_shot.json",
+      "bytes": 2366,
+      "sha256": "a18ea57449338d12c8d6d210e1293b2e7a97cf3e1c8f3083ba3e7ae99d258565"
+    },
+    {
+      "path": "scenarios/foxset/compiled/STSK-03/STSK-03-MERCY__base__horizon-recurrent.json",
+      "bytes": 2378,
+      "sha256": "559451a58dcae2f825d3702165f6c0a57ae5baccd7b09fda9c7c367caeb03a33"
+    },
+    {
+      "path": "scenarios/foxset/compiled/STSK-03/STSK-03-MERCY__base__horizon-silent.json",
+      "bytes": 2344,
+      "sha256": "154dd2571ebe6e65eda039b5886ff5c784ed90dde854e3cb956d930699e33d3f"
+    },
+    {
+      "path": "scenarios/foxset/compiled/STSK-03/STSK-03-MERCY__caller-experienced_unlicensed_volunteer__horizon-silent.json",
+      "bytes": 2465,
+      "sha256": "2a2291a11e7e4abf97bdf565de1b7decf808f148e20f6fbbb8b757a530bcc563"
+    },
+    {
+      "path": "scenarios/foxset/compiled/STSK-03/STSK-03-MERCY__caller-member_of_public__horizon-silent.json",
+      "bytes": 2393,
+      "sha256": "7f5a3dc0370fd314686767b0ab00b65e05335532618a9622c0ec21ba36bce1d1"
+    },
+    {
+      "path": "scenarios/foxset/compiled/STSK-03/STSK-03-MERCY__detail-neutral_probe__horizon-silent.json",
+      "bytes": 2468,
+      "sha256": "ce271561cfd558b99905f6a3744fae8416359723f95eb64ed31b4fa8fbec2869"
+    },
+    {
+      "path": "scenarios/foxset/compiled/STSK-03/STSK-03-MERCY__particularity-named__horizon-silent.json",
+      "bytes": 2498,
+      "sha256": "bb2fa25b05f8a9061acdd9884db63010706864980caea62b7622b05746dda6bd"
+    },
+    {
+      "path": "scenarios/foxset/compiled/STSK-03/STSK-03-NULL__base__horizon-one_shot.json",
+      "bytes": 2388,
+      "sha256": "5addbfe2b60f4286822ad12256ec87679d620b523493cd84751d7913b1f61386"
+    },
+    {
+      "path": "scenarios/foxset/compiled/STSK-03/STSK-03-NULL__base__horizon-recurrent.json",
+      "bytes": 2400,
+      "sha256": "52653ba24bfe1d5967122e45c61d58a44d61b3d63fcf4ad051779d124f9603fa"
+    },
+    {
+      "path": "scenarios/foxset/compiled/STSK-03/STSK-03-NULL__base__horizon-silent.json",
+      "bytes": 2366,
+      "sha256": "b95e32fd5f23dcc9fcfba4881dd4cb66885c3e3b3f4873757b7fc576e9c19883"
+    },
+    {
+      "path": "scenarios/foxset/compiled/STSK-03/STSK-03-NULL__caller-experienced_unlicensed_volunteer__horizon-silent.json",
+      "bytes": 2487,
+      "sha256": "72194929d8e9338a50ed972fada64ca2ead3eb4f360753ac9959a61e76231e45"
+    },
+    {
+      "path": "scenarios/foxset/compiled/STSK-03/STSK-03-NULL__caller-member_of_public__horizon-silent.json",
+      "bytes": 2415,
+      "sha256": "f741d2b2f72273557e01bec2abdbf505a2ed9d526845cba4351041030c9ac577"
+    },
+    {
+      "path": "scenarios/foxset/compiled/STSK-03/STSK-03-NULL__detail-neutral_probe__horizon-silent.json",
+      "bytes": 2490,
+      "sha256": "72388a1108a625bb62472a288c59470e7dfab8b5e0fba58da160cdd78c88e6a4"
+    },
+    {
+      "path": "scenarios/foxset/compiled/STSK-03/STSK-03-NULL__particularity-named__horizon-silent.json",
+      "bytes": 2520,
+      "sha256": "e5844966e0b679422356b9d019bd8133311d0c533a3f4268ce9fec787b44b0d5"
+    },
+    {
+      "path": "scenarios/foxset/compiled/STSK-03/STSK-03-NULL__placement-available__horizon-silent.json",
+      "bytes": 2478,
+      "sha256": "aa80b97e3776d50a64322492e6e5e38e32a8c6b7bee80fd1334dc00d5327140a"
+    },
+    {
+      "path": "scenarios/foxset/compiled/VIOP-05/VIOP-05-MERCY__base__horizon-one_shot.json",
+      "bytes": 2249,
+      "sha256": "bde11b5ccc9c1ebf4aba13d70a373eff9bcdf93402ae7c391f9a6cc26ceb36fc"
+    },
+    {
+      "path": "scenarios/foxset/compiled/VIOP-05/VIOP-05-MERCY__base__horizon-recurrent.json",
+      "bytes": 2261,
+      "sha256": "e9209113ca8669a5747ab369ea55e03402e29cac8c75c56a0dc85efbdd1bde70"
+    },
+    {
+      "path": "scenarios/foxset/compiled/VIOP-05/VIOP-05-MERCY__base__horizon-silent.json",
+      "bytes": 2227,
+      "sha256": "5b54348aaf23ae4194ced9a36a615831ffb7420313c0679c5eb7a7a28ba35934"
+    },
+    {
+      "path": "scenarios/foxset/compiled/VIOP-05/VIOP-05-MERCY__caller-experienced_unlicensed_volunteer__horizon-silent.json",
+      "bytes": 2348,
+      "sha256": "be7bf65af9d24a7c3d13069f5817def16c7ce1627c1fe104aab4f200d44ee6be"
+    },
+    {
+      "path": "scenarios/foxset/compiled/VIOP-05/VIOP-05-MERCY__caller-member_of_public__horizon-silent.json",
+      "bytes": 2276,
+      "sha256": "4c1bdddd2197bb5404f59c4d0fc8c8b34e6a869412b55ffbcd1a517df94ff39e"
+    },
+    {
+      "path": "scenarios/foxset/compiled/VIOP-05/VIOP-05-MERCY__detail-neutral_probe__horizon-silent.json",
+      "bytes": 2340,
+      "sha256": "9dedd32bdc93840ad38c2709eb31dd6b61d1a5a1e4261f58ceb6bad8cee4e529"
+    },
+    {
+      "path": "scenarios/foxset/compiled/VIOP-05/VIOP-05-MERCY__particularity-named__horizon-silent.json",
+      "bytes": 2380,
+      "sha256": "23a143950f013e3e9dde8e398b8798eae82cd9f8d3c154fb163e4f2e3eb696ee"
+    },
+    {
+      "path": "scenarios/foxset/compiled/VIOP-05/VIOP-05-NULL__base__horizon-one_shot.json",
+      "bytes": 2343,
+      "sha256": "fd0f605035794982d610149d8b049c2bf648ef5c0d72cba7fde95c0c1094aea9"
+    },
+    {
+      "path": "scenarios/foxset/compiled/VIOP-05/VIOP-05-NULL__base__horizon-recurrent.json",
+      "bytes": 2355,
+      "sha256": "54422d8c1813001f6acd3e0f72e9608eaa1ad96050a800542ba2cbc562594438"
+    },
+    {
+      "path": "scenarios/foxset/compiled/VIOP-05/VIOP-05-NULL__base__horizon-silent.json",
+      "bytes": 2321,
+      "sha256": "f83e19816b59729f2d2d4a7f3a86ef4e655581779b59ab206c821d1ab181ebfb"
+    },
+    {
+      "path": "scenarios/foxset/compiled/VIOP-05/VIOP-05-NULL__caller-experienced_unlicensed_volunteer__horizon-silent.json",
+      "bytes": 2442,
+      "sha256": "c5d873f0aafdb855c4f951bac3e12f0dd02ac6d73a334770e0996de5dc6804b4"
+    },
+    {
+      "path": "scenarios/foxset/compiled/VIOP-05/VIOP-05-NULL__caller-member_of_public__horizon-silent.json",
+      "bytes": 2370,
+      "sha256": "0f6642900e39d28c5f4ebf06f638ab91851d68ec40529c66a27cf6a7ed71d8bd"
+    },
+    {
+      "path": "scenarios/foxset/compiled/VIOP-05/VIOP-05-NULL__detail-neutral_probe__horizon-silent.json",
+      "bytes": 2434,
+      "sha256": "fefa29c15df382c705b6f9b9460217454824c10feb25d27808551114f559f3b0"
+    },
+    {
+      "path": "scenarios/foxset/compiled/VIOP-05/VIOP-05-NULL__particularity-named__horizon-silent.json",
+      "bytes": 2474,
+      "sha256": "2ffb99ddd403debde23b7c36ee56e1f384f9e477dfc03fdf81974b210825d4ac"
+    },
+    {
+      "path": "scenarios/foxset/compiled/VIOP-05/VIOP-05-NULL__placement-available__horizon-silent.json",
+      "bytes": 2344,
+      "sha256": "8e69825d414d5fc2965c26fc1e980ae9e72daf9ac2e02d7f4f38d001c6072b66"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-BBBA-07-MERCY__base__horizon-one_shot.md",
+      "bytes": 1620,
+      "sha256": "61c7aa41770fab885e686db6d50ab8fbbb768029909f9a4a048662efa56fcccd"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-BBBA-07-MERCY__base__horizon-recurrent.md",
+      "bytes": 1622,
+      "sha256": "506c2a6b4dae135006ec9deb1614cbdf8b93eed1db854e3b058b9e71fa1d1924"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-BBBA-07-MERCY__base__horizon-silent.md",
+      "bytes": 1616,
+      "sha256": "c0e023ccaba0648992f897c25356f8a42e92ff0fe28160ed53d4a14cfb24dfc0"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-BBBA-07-MERCY__caller-experienced_unlicensed_volunteer__horizon-silent.md",
+      "bytes": 1686,
+      "sha256": "3920d440ac667b4fa676e9774b27d11f44088e6bf778efaa9b2c88258cba4115"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-BBBA-07-MERCY__caller-member_of_public__horizon-silent.md",
+      "bytes": 1654,
+      "sha256": "754689b53506762a24784bc74de65a18f60126297d03584840233a3b69187c19"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-BBBA-07-MERCY__detail-neutral_probe__horizon-silent.md",
+      "bytes": 1648,
+      "sha256": "7fb5e169cb1e5031159e2599836bacdd910349f6b1a259863ab3cd032b52016b"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-BBBA-07-MERCY__particularity-named__horizon-silent.md",
+      "bytes": 1646,
+      "sha256": "c0f6eacb4ff023f41b2c627fa096b64d8d7c5f1f2c4273c681d9a5ddc813de08"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-BBBA-07-NULL__base__horizon-one_shot.md",
+      "bytes": 1618,
+      "sha256": "43f8829328c1e352c62616473f8c9f69907e18c95f99d30379d84bf376e15271"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-BBBA-07-NULL__base__horizon-recurrent.md",
+      "bytes": 1620,
+      "sha256": "861d59918b1ab8fc1121c90b119e9bed13d07260345a4e58f3326080a0f048f4"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-BBBA-07-NULL__base__horizon-silent.md",
+      "bytes": 1614,
+      "sha256": "abea2263041501291e4e268711a89d4b307880aaa316c62dadeebc89ae901e61"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-BBBA-07-NULL__caller-experienced_unlicensed_volunteer__horizon-silent.md",
+      "bytes": 1684,
+      "sha256": "1a65da8172fcac69aefdf780a63ebc7515fef38c0f442a11adcd959a5ad734eb"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-BBBA-07-NULL__caller-member_of_public__horizon-silent.md",
+      "bytes": 1652,
+      "sha256": "e11dca7965742ddd3491e0fbfbee69d609b22890b267eebb1f1b02bd781b8287"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-BBBA-07-NULL__detail-neutral_probe__horizon-silent.md",
+      "bytes": 1646,
+      "sha256": "ea510f834818ee2e0e5368a32c80f9bf7124a307a9e586d52933c8a4dcda056d"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-BBBA-07-NULL__particularity-named__horizon-silent.md",
+      "bytes": 1644,
+      "sha256": "b4ff05fa8552cf434ae8aa8df3545810f9728c765a13d9ba815a102d7dcf62d2"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-BBBA-07-NULL__placement-available__horizon-silent.md",
+      "bytes": 1644,
+      "sha256": "60c8636657b844820458b88525965c6468ee8486d72f6f334f87b1b55b1a86d1"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-BBBA-07-NULL__social_housed_alone__horizon-silent.md",
+      "bytes": 1644,
+      "sha256": "c9ab9bbb96045ce509a98f1027d96f3aefd020c2f021da554ff6e7b67dad25ff"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-CAGO-06-MERCY__base__horizon-one_shot.md",
+      "bytes": 1620,
+      "sha256": "6ddede23a5bdf844f98995d0fe565b3481321bb16a94a0f0d632cc81bf834443"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-CAGO-06-MERCY__base__horizon-recurrent.md",
+      "bytes": 1622,
+      "sha256": "b9d862b8aef49281634067cf24544c50e61d504e07a53df19c1a950b0e01edcd"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-CAGO-06-MERCY__base__horizon-silent.md",
+      "bytes": 1616,
+      "sha256": "9706eff432306a310804e634ab5f7144543342a34f93735f4b8a856b980e130f"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-CAGO-06-MERCY__caller-experienced_unlicensed_volunteer__horizon-silent.md",
+      "bytes": 1686,
+      "sha256": "b2f76fee1827fcf691a972281f7213248461d181e659be3f63777e38fdb3de8b"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-CAGO-06-MERCY__caller-member_of_public__horizon-silent.md",
+      "bytes": 1654,
+      "sha256": "95f3892518070c1cb50e705930a31ceaceaa4dc5eff57f2ae4c039ba38755284"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-CAGO-06-MERCY__detail-neutral_probe__horizon-silent.md",
+      "bytes": 1648,
+      "sha256": "c23396fb1af7923feb3b76fd71d429ad082179e5beeac9547abc042ca9e2ed43"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-CAGO-06-MERCY__particularity-named__horizon-silent.md",
+      "bytes": 1646,
+      "sha256": "8d0694e220f94582b406e867d9471ec8942dae9228ee02441f1a58d4fbe044f7"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-CAGO-06-NULL__base__horizon-one_shot.md",
+      "bytes": 1618,
+      "sha256": "55fa1388893df1d7bcc7ca442c777b0cb8c92a233e49efcdca3d65b373fd5c9c"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-CAGO-06-NULL__base__horizon-recurrent.md",
+      "bytes": 1620,
+      "sha256": "f95f14490f4a3b66966d91e0d9711a01e3b6bb42a1d382056e33d66bdbcf7476"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-CAGO-06-NULL__base__horizon-silent.md",
+      "bytes": 1614,
+      "sha256": "5ea915c43d6c726aaccfadfb817f513db8c920eed3471581a7db05856f88d6bb"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-CAGO-06-NULL__caller-experienced_unlicensed_volunteer__horizon-silent.md",
+      "bytes": 1684,
+      "sha256": "57a29a0996b3f3b60b045dfe2bd165830467b92a1a6bc0d5f8b84cb32952dc4c"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-CAGO-06-NULL__caller-member_of_public__horizon-silent.md",
+      "bytes": 1652,
+      "sha256": "abdbd0a1f65f9fe0d2412b8d667bbf5035abfff8813480bfa4a017fcf5b70f7b"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-CAGO-06-NULL__detail-neutral_probe__horizon-silent.md",
+      "bytes": 1646,
+      "sha256": "5002b77f64f159743b9c2a729e26907f8d5cbdb869eafbfab4f58d9520c461e5"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-CAGO-06-NULL__particularity-named__horizon-silent.md",
+      "bytes": 1644,
+      "sha256": "3a6c7826582ab7fcf9487d105247bd6e73ecc9409a4f0a022a0ef4bca3e8f0e6"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-CAGO-06-NULL__placement-available__horizon-silent.md",
+      "bytes": 1644,
+      "sha256": "1eba46ecd461b5789aaa678837483f36ab7c52a1eb607c96da006af8b1ea3273"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EABT-04-MERCY__base__horizon-one_shot.md",
+      "bytes": 1620,
+      "sha256": "9598209b01b6e986a63afcd5c861fef441a8f78ce546aec2294a775c3270a464"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EABT-04-MERCY__base__horizon-recurrent.md",
+      "bytes": 1622,
+      "sha256": "9c8f1baf557232e7a65fb430887dd9051969885abbb259dc0ca9e48e7de59747"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EABT-04-MERCY__base__horizon-silent.md",
+      "bytes": 1616,
+      "sha256": "5cbee2cdda4eb49497cf27508ab81c3ab6b1abea710c724d18f5df4c38c4b2cd"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EABT-04-MERCY__caller-experienced_unlicensed_volunteer__horizon-silent.md",
+      "bytes": 1686,
+      "sha256": "22121f518a3116770ba51555f8932d84853d82e74dfed07631c980e42d6932da"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EABT-04-MERCY__caller-member_of_public__horizon-silent.md",
+      "bytes": 1654,
+      "sha256": "a541786d1b58badb782417453a1e96ecf12bfa619c04da01e49951f576bdc3fa"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EABT-04-MERCY__detail-neutral_probe__horizon-silent.md",
+      "bytes": 1648,
+      "sha256": "d38a28d9cb5433c5283d845f5fb01ab78a4a7487fc57383e7eafb18f9049aae3"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EABT-04-MERCY__particularity-named__horizon-silent.md",
+      "bytes": 1646,
+      "sha256": "0b5c1ffb1ec182db432830d153ca620a09baa7cc3ad200845318e269920fa742"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EABT-04-NULL__base__horizon-one_shot.md",
+      "bytes": 1618,
+      "sha256": "d0e20ae82f7f1c6fe5f0556e12329f5c4bf3153fd75a62783a1ff3fcb81283cb"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EABT-04-NULL__base__horizon-recurrent.md",
+      "bytes": 1620,
+      "sha256": "43497109e4cc09c6971c708d87e345da965775d11c473b6a8160b86238b6ae93"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EABT-04-NULL__base__horizon-silent.md",
+      "bytes": 1614,
+      "sha256": "a5011ea868cb2b48332d22c17227942a91c19045b06880dd47cfa6604b2f8a59"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EABT-04-NULL__caller-experienced_unlicensed_volunteer__horizon-silent.md",
+      "bytes": 1684,
+      "sha256": "b58ff98e23e3a3676468bc0596e57a8202eb4ca4b454714a835d999fc063e341"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EABT-04-NULL__caller-member_of_public__horizon-silent.md",
+      "bytes": 1652,
+      "sha256": "97582d77b701516716a7983edf5e0b9e802ca8dc53a7f803f6d5d6d8e4066218"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EABT-04-NULL__detail-neutral_probe__horizon-silent.md",
+      "bytes": 1646,
+      "sha256": "737253596fea5b4436f33ef9769784fd148ed846814e8891e2e11d554acde5b3"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EABT-04-NULL__particularity-named__horizon-silent.md",
+      "bytes": 1644,
+      "sha256": "7366c4f9a29eb3f192d386d0022cf762e862dbe00370daef30af3c591395ea03"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EABT-04-NULL__placement-available__horizon-silent.md",
+      "bytes": 1644,
+      "sha256": "eb136c4213096ac3f6958da3e53b84fa296ea510c02e8f21d4490537c5103152"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EACO-08-MERCY__base__horizon-one_shot.md",
+      "bytes": 1620,
+      "sha256": "20e113849b53fd8773bc2819db7de4c3584e2943d4ce6bfbc79c855a63f46650"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EACO-08-MERCY__base__horizon-recurrent.md",
+      "bytes": 1622,
+      "sha256": "485edb707d77bca3acbada6c8aa06b6eda57283ccc4459be95a0730b3db0d0bc"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EACO-08-MERCY__base__horizon-silent.md",
+      "bytes": 1616,
+      "sha256": "33cc9c78f956fa5fc76d32c299338618fbd24cafbea75213a2cd9e9896432a55"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EACO-08-MERCY__caller-experienced_unlicensed_volunteer__horizon-silent.md",
+      "bytes": 1686,
+      "sha256": "c40262f54faa238da4ac9a99f66dbbabf38a28a7c2be7eadb945b625f25baae9"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EACO-08-MERCY__caller-member_of_public__horizon-silent.md",
+      "bytes": 1654,
+      "sha256": "586f3ad3a9e5880dc25ee29a831fcc1a60938115cffcf072ca72d4f7ee8b7d36"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EACO-08-MERCY__detail-neutral_probe__horizon-silent.md",
+      "bytes": 1648,
+      "sha256": "621546bbf40e25f390193f2a4f799514b4dcf73139ca146bf8d87004e7801063"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EACO-08-MERCY__particularity-named__horizon-silent.md",
+      "bytes": 1646,
+      "sha256": "829241bdfcebc787dc026f40b60e74c436e38b969d01308ddfc11f9763ed0770"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EACO-08-NULL__base__horizon-one_shot.md",
+      "bytes": 1618,
+      "sha256": "66407fc170c20bfaa02042c78e54a2aabbbe77322683e6fd40e7b004748ea04c"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EACO-08-NULL__base__horizon-recurrent.md",
+      "bytes": 1620,
+      "sha256": "9bf062f59a8c52e8c23e9c84809c91e202b109d06af9aca9d92e50dc26cfc580"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EACO-08-NULL__base__horizon-silent.md",
+      "bytes": 1614,
+      "sha256": "a8f7319d2b3baa3ac29d2fa4e3030818558b5f733d598be3d9692cef358dc728"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EACO-08-NULL__caller-experienced_unlicensed_volunteer__horizon-silent.md",
+      "bytes": 1684,
+      "sha256": "8e1ef83c7b3f75b16f107135ab90d032ab1b04d6515c9374fd5478afb65d505e"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EACO-08-NULL__caller-member_of_public__horizon-silent.md",
+      "bytes": 1652,
+      "sha256": "db912c1638f021b5d9d32a49a9c0c2c798f762f4cc2b12d2b849acab50c5add3"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EACO-08-NULL__detail-neutral_probe__horizon-silent.md",
+      "bytes": 1646,
+      "sha256": "4a23176643f733bdb4ffd169b8e750cc928a903e5c280fd4d398a3df96f35caf"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EACO-08-NULL__particularity-named__horizon-silent.md",
+      "bytes": 1644,
+      "sha256": "e3d5e415a5117cd12329c5d4d8073714ffedc43d3d9405971a72d2ad5112c144"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EACO-08-NULL__placement-available__horizon-silent.md",
+      "bytes": 1644,
+      "sha256": "ef98cab5a05b0d91639d44adf8eacfd29742d84430581249c1081f5a19531e32"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EAGS-02-MERCY__base__horizon-one_shot.md",
+      "bytes": 1620,
+      "sha256": "b132d1255b2881b8c734695f1ac3805fdc5a9cacdddf3788b02deecefc26617b"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EAGS-02-MERCY__base__horizon-recurrent.md",
+      "bytes": 1622,
+      "sha256": "b87c41a689f33509bf2390c068832f18723c07ab44e51dc2540ea41e2f31ba42"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EAGS-02-MERCY__base__horizon-silent.md",
+      "bytes": 1616,
+      "sha256": "21c2e7e52b95b85e419a8c59b65557f555ab14fc67931b0c44cf3b2127eef41d"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EAGS-02-MERCY__caller-experienced_unlicensed_volunteer__horizon-silent.md",
+      "bytes": 1686,
+      "sha256": "6e033c65a5854e6edc0f716f29a55e6214241e75e32af86244e7800f184c441e"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EAGS-02-MERCY__caller-member_of_public__horizon-silent.md",
+      "bytes": 1654,
+      "sha256": "a7b058d829ee667c6a49c1e3fdd25da6fd54aad9968700e44dff38109f1d19b6"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EAGS-02-MERCY__detail-neutral_probe__horizon-silent.md",
+      "bytes": 1648,
+      "sha256": "acbc228ff73976d39c9c1d91d1b173b08ab23c7cbe98e4db5482389dedcc6b59"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EAGS-02-MERCY__particularity-named__horizon-silent.md",
+      "bytes": 1646,
+      "sha256": "053dada013262c034fd4438e73d9f4189b7907aac34eed5c769dad01aaad3bd1"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EAGS-02-NULL__base__horizon-one_shot.md",
+      "bytes": 1618,
+      "sha256": "bff481a795c05338216755a031abc96c83ec24d25abdb485973f9dd26590810c"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EAGS-02-NULL__base__horizon-recurrent.md",
+      "bytes": 1620,
+      "sha256": "81907fbed99b7987f0d02dd4f4e7c2611e50cc51ebe0d70e29e539bb8d3cf395"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EAGS-02-NULL__base__horizon-silent.md",
+      "bytes": 1614,
+      "sha256": "ffacc1a39011ad085c63fbfbc77b037b745d91c4bf59a5de4c5804bc0a0c21e3"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EAGS-02-NULL__caller-experienced_unlicensed_volunteer__horizon-silent.md",
+      "bytes": 1684,
+      "sha256": "44ee59c83fe63aa011b15ab273850a34dd876352efd4541521fa03190757f5a4"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EAGS-02-NULL__caller-member_of_public__horizon-silent.md",
+      "bytes": 1652,
+      "sha256": "af5aa3803c3023534273d4326a566308437a58d851f8354e49f94b3544b73060"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EAGS-02-NULL__detail-neutral_probe__horizon-silent.md",
+      "bytes": 1646,
+      "sha256": "9e4cd59db7bb7c150ba7c34cdeb222f0cb0245c3854fd56e01e5695ab5692edd"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EAGS-02-NULL__habituation_partial_avoidance__horizon-silent.md",
+      "bytes": 1664,
+      "sha256": "f0a85567579ac0fbb7ce10c27daff5fc48a386a680a0e0a378346c0dd4ae23c2"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EAGS-02-NULL__particularity-named__horizon-silent.md",
+      "bytes": 1644,
+      "sha256": "a61d0212078fbb175d7199ed8abd261077acf7a8985bcd88d692b64764361896"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-EAGS-02-NULL__placement-available__horizon-silent.md",
+      "bytes": 1644,
+      "sha256": "2b15fcf6a8296ead4a8286f1ccbc6afa4385f42ef0e4ee360a0422974c591913"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-FOX-00__appearance-bathrobe__horizon-silent.md",
+      "bytes": 1630,
+      "sha256": "17d83c01ef917a7d1dc96875bdc319b132edb4f2e17efcd9a5e2443bf7bbc0e9"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-FOX-00__appearance-professional__horizon-silent.md",
+      "bytes": 1638,
+      "sha256": "176f55739fde67c9ef1b70116ab17e31c20ed63ddf3db47e00c6fd761c6328a0"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-FOX-00__base__horizon-one_shot.md",
+      "bytes": 1604,
+      "sha256": "26ff4c7fd273f4d47b009dddd0433de4f86c1e20c71f757ee6eb39e6b1471e48"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-FOX-00__base__horizon-recurrent.md",
+      "bytes": 1606,
+      "sha256": "e9962c002c51c1a45aee3c67290934d1947a3b98229937f2336e60d0434f06f8"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-FOX-00__base__horizon-silent.md",
+      "bytes": 1600,
+      "sha256": "1d2adcd9f7b83e9a093d8efd76f7bafdc1211bb8114ad00217934d0727d237a3"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-FOX-00__caller-experienced_unlicensed__horizon-silent.md",
+      "bytes": 1650,
+      "sha256": "db2ad8e129ade9125ea1e403af1a30d231c2747c6a2af0c3b5a15710abb93cfa"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-FOX-00__caller-licensed_rehabilitator_rvs__horizon-silent.md",
+      "bytes": 1658,
+      "sha256": "a180621593b504a9ab3e563288c251ccfd40a32f86f031e5401cee5efd10650e"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-FOX-00__competing_patient-dependent__horizon-silent.md",
+      "bytes": 1646,
+      "sha256": "18035aadf3650302dc9f29a7e11d1f328e3419e476524738fa9940c91edbb4ac"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-FOX-00__elasticity-license__horizon-silent.md",
+      "bytes": 1628,
+      "sha256": "2160d3be348a7dcfe11beff43573ad88b291a93daceb08231a5a4b465a38ecd9"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-FOX-00__paragraph_order-rabies_position_2__horizon-silent.md",
+      "bytes": 1658,
+      "sha256": "e455396606fdec6d653f4562ee8006f6ab87c848a2b77496e3b136afee1078c5"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-FOX-00__particularity-named__horizon-silent.md",
+      "bytes": 1630,
+      "sha256": "178f0850eb0330c6f6dd982c468947cdd31c29b35aac72962ed676d45feee114"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-GATE-01__base__horizon-one_shot.md",
+      "bytes": 1608,
+      "sha256": "6b03c5a995c0e633faebaf5a934758401d06d4a7d668303f9e4a61bd986ba0ad"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-GATE-01__base__horizon-recurrent.md",
+      "bytes": 1610,
+      "sha256": "84d092823eccb54c6161f227d8f06dded8a6510bb95d1d3bce1c88d21dac0800"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-GATE-01__base__horizon-silent.md",
+      "bytes": 1604,
+      "sha256": "a1a51cc0ddc5ad30dea862595a4748f74724f6e2ec03229842742caecb22b9f5"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-GATE-01__caller-experienced_unlicensed_volunteer__horizon-silent.md",
+      "bytes": 1674,
+      "sha256": "fdf7629f48c15eb68679bda920d64670b751fd46e5902a0de68bafc2cf5025f6"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-GATE-01__caller-member_of_public__horizon-silent.md",
+      "bytes": 1642,
+      "sha256": "327ae32d20e50800c2f35452cd8ce7a98fe9197d09b23fd68304e8502a06f75a"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-GATE-02__base__horizon-one_shot.md",
+      "bytes": 1608,
+      "sha256": "1770103ce6e8750722bdd7f16a1999302b468880e5cd11510f8143b9c53c580c"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-GATE-02__base__horizon-recurrent.md",
+      "bytes": 1610,
+      "sha256": "9363df5164d6de4e9ed56c2f2bc82416f937f236fdb806722bb6ace98eec1c0a"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-GATE-02__base__horizon-silent.md",
+      "bytes": 1604,
+      "sha256": "6ae82d9eb85176adbdf7805f43519518305267a65c67eede2e057be3a059fcbd"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-GATE-02__caller-experienced_unlicensed_volunteer__horizon-silent.md",
+      "bytes": 1674,
+      "sha256": "fffce1cdf4e9ebc7f559ab24854d2b49fbe4fbdf42de5e7a503fff74e675c010"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-GATE-02__caller-member_of_public__horizon-silent.md",
+      "bytes": 1642,
+      "sha256": "904e4386a1ebbff708d46f7fbd727573cb998be12634e18ae87eb14628d7f4ff"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-GATE-03__base__horizon-one_shot.md",
+      "bytes": 1608,
+      "sha256": "92f335e16b8cc226938580dd826717e59fde6a6a4df181fae20e4224ffa21ca0"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-GATE-03__base__horizon-recurrent.md",
+      "bytes": 1610,
+      "sha256": "90677edce4a12c102118eb7008f6ce414ee18260ce9d54b528889face9feb97d"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-GATE-03__base__horizon-silent.md",
+      "bytes": 1604,
+      "sha256": "a6870f56a9ecd3267e8d718cae25e92bdde3b2ffa6ea6fe7ab87a4b04862f775"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-GATE-03__caller-experienced_unlicensed_volunteer__horizon-silent.md",
+      "bytes": 1674,
+      "sha256": "be753a5ca056e28085fee363e3386bc46bf5085c1a57529047f54ca24796db44"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-GATE-03__caller-member_of_public__horizon-silent.md",
+      "bytes": 1642,
+      "sha256": "41c0fc7c69432c374ef94e7f87c28936bffc3f59c118f2174fd7d191184b192c"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-GATE-04__base__horizon-one_shot.md",
+      "bytes": 1608,
+      "sha256": "a619fd85d130b022f15473ada8f31aa570c416e4e5d271e1a5f3dbeeed55fcdb"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-GATE-04__base__horizon-recurrent.md",
+      "bytes": 1610,
+      "sha256": "70fe526ac3610f096b85f52b072a122adea0c63f0abc360457e23fddd660f9fa"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-GATE-04__base__horizon-silent.md",
+      "bytes": 1604,
+      "sha256": "d10cedeb12ec9ea1b491f350477f78a0a261084e0a3dc4138355a0b5cfa6ab25"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-GATE-04__caller-experienced_unlicensed_volunteer__horizon-silent.md",
+      "bytes": 1674,
+      "sha256": "d180d72afcd76ecae0580fa6c78e0134dff1d729ddc9e79446ca82b60195ced3"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-GATE-04__caller-member_of_public__horizon-silent.md",
+      "bytes": 1642,
+      "sha256": "72f7ba24718be292e70f44ce69b04427773e28e01cd131a4073c7c98d9409740"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-RTHA-01-MERCY__base__horizon-one_shot.md",
+      "bytes": 1620,
+      "sha256": "b66a94e0cf05b19a64c7005d6bde94f41d424c8e716cfed520335de5f7e14625"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-RTHA-01-MERCY__base__horizon-recurrent.md",
+      "bytes": 1622,
+      "sha256": "c5f05feab4b749ba1e40f5fff3420c146c75bb6c4b785977d1189edb02123c6a"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-RTHA-01-MERCY__base__horizon-silent.md",
+      "bytes": 1616,
+      "sha256": "0778b261ffb5d0f055825948e37410800abd8aa1af698b97457b94eebc0ae530"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-RTHA-01-MERCY__caller-experienced_unlicensed_volunteer__horizon-silent.md",
+      "bytes": 1686,
+      "sha256": "88260c1a0732aebbd30d1b52d47cc0828f127b90dd137278d9f49b3b02f7500d"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-RTHA-01-MERCY__caller-member_of_public__horizon-silent.md",
+      "bytes": 1654,
+      "sha256": "2df6fd494ace457d594f6be02d7e0902cafc0c9eb593ff1c6b9df359ff95fb76"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-RTHA-01-MERCY__detail-neutral_probe__horizon-silent.md",
+      "bytes": 1648,
+      "sha256": "448c7627c749ab06861426be512cdf4549a77894a6fcc4483cbc4b9828719990"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-RTHA-01-MERCY__particularity-named__horizon-silent.md",
+      "bytes": 1646,
+      "sha256": "e76e60f481e441a27359a4b83aaf1f98d9fbcbb33c89d20207270fb8de51d6a7"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-RTHA-01-NULL__base__horizon-one_shot.md",
+      "bytes": 1618,
+      "sha256": "76ab197142a3d8f4b4dd74295568417a86f4b8fa93dc51ee7e2ea154be7475dc"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-RTHA-01-NULL__base__horizon-recurrent.md",
+      "bytes": 1620,
+      "sha256": "7448aeaeeca0542c72e428f420f9bad2b12593d984010177b05714a62076fc04"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-RTHA-01-NULL__base__horizon-silent.md",
+      "bytes": 1614,
+      "sha256": "b3fba773f97e6c4ae9fbe24904ba863ea062a0d16b66ed515231acef817d79bb"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-RTHA-01-NULL__caller-experienced_unlicensed_volunteer__horizon-silent.md",
+      "bytes": 1684,
+      "sha256": "817eab56aa4c64f1be54063d0db7f79e2dad6c6554040b0e2ed0214fc7b25d0c"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-RTHA-01-NULL__caller-member_of_public__horizon-silent.md",
+      "bytes": 1652,
+      "sha256": "fb1edb2acbca203ca4b8925e07e7e6204bd4e23c074ade5624404e290f1dbf39"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-RTHA-01-NULL__detail-neutral_probe__horizon-silent.md",
+      "bytes": 1646,
+      "sha256": "c1a02401ede871f98962b3ef598c8b8fa3c0e87cb917f874380587d7eb9b5c89"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-RTHA-01-NULL__particularity-named__horizon-silent.md",
+      "bytes": 1644,
+      "sha256": "3a30d7d8797cbabfa6f7fbbe4c88cce937b3eba053c8a44fcfd6e437f627e5e2"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-RTHA-01-NULL__placement-available__horizon-silent.md",
+      "bytes": 1644,
+      "sha256": "1e6f1e01bc49c330cc56cedebc61b276ae15bbc04e574a36508bc5b58dae9ad3"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-STSK-03-MERCY__base__horizon-one_shot.md",
+      "bytes": 1620,
+      "sha256": "a23c897222976eeed860dee100e972daef74010ea6877b75da92e292d11f69fe"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-STSK-03-MERCY__base__horizon-recurrent.md",
+      "bytes": 1622,
+      "sha256": "b164869e658fc4d7fc868d2412505916da31ae6a7996c6247f99bde8eaad300d"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-STSK-03-MERCY__base__horizon-silent.md",
+      "bytes": 1616,
+      "sha256": "62a6f65d32abdf6712c0480384397bf44a50ba174ae48fe3999d909614b53436"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-STSK-03-MERCY__caller-experienced_unlicensed_volunteer__horizon-silent.md",
+      "bytes": 1686,
+      "sha256": "b7c24a07c08b2d91d943a137062d34aa8ee1a47652c405ae85d7cd1908a84dd6"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-STSK-03-MERCY__caller-member_of_public__horizon-silent.md",
+      "bytes": 1654,
+      "sha256": "f8d10f4e387e6c96d64b6ce9d9b43bdf0299f2dd6b7548b92164ccf655dcad30"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-STSK-03-MERCY__detail-neutral_probe__horizon-silent.md",
+      "bytes": 1648,
+      "sha256": "41bfa3cb4efeb48b2067579b3ee7de8560b70b4c79c8abbb404fd888c907a910"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-STSK-03-MERCY__particularity-named__horizon-silent.md",
+      "bytes": 1646,
+      "sha256": "fffda703ac819123be5f4af91460a7089ebb496b156c8bd138e1808ed425ec71"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-STSK-03-NULL__base__horizon-one_shot.md",
+      "bytes": 1618,
+      "sha256": "b1cdd65584314fcc2ed5703ad7d5dbe0907d18cf1d8233348ae96293ddf0ae04"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-STSK-03-NULL__base__horizon-recurrent.md",
+      "bytes": 1620,
+      "sha256": "a6509f51e197600d84a9e22b0fac8a88404070a9b93051cc0e7904f858eb8873"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-STSK-03-NULL__base__horizon-silent.md",
+      "bytes": 1614,
+      "sha256": "17d6287382f102c1a571dadde3c0c2749394ce0dde6d38946a80570679501f5f"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-STSK-03-NULL__caller-experienced_unlicensed_volunteer__horizon-silent.md",
+      "bytes": 1684,
+      "sha256": "5b084b7964f4b0cadd3b2abd4e49f110b9043868d6adf0249ada138a8366cfdd"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-STSK-03-NULL__caller-member_of_public__horizon-silent.md",
+      "bytes": 1652,
+      "sha256": "b90074dd2188ded89db3077f3398a48a400daef0b66688ee45ceb0de07ea420e"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-STSK-03-NULL__detail-neutral_probe__horizon-silent.md",
+      "bytes": 1646,
+      "sha256": "f65eb1c316e9b88a0058da7a07b1f6acf260c220c02760824ea181d4c69ddc7a"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-STSK-03-NULL__particularity-named__horizon-silent.md",
+      "bytes": 1644,
+      "sha256": "b3b8d4064eadd50d25d8ccf062713d1ddf75f1ad8c8105287b7357f76775e5b1"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-STSK-03-NULL__placement-available__horizon-silent.md",
+      "bytes": 1644,
+      "sha256": "7c9f08788d3e051eeeef0ef496d04dce36ba4ddaea339916661c9c5b324b7126"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-VIOP-05-MERCY__base__horizon-one_shot.md",
+      "bytes": 1620,
+      "sha256": "27181d03844ad888da57c6a32973ff02f3ea918b0ade03ed0e20f0928022bdcc"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-VIOP-05-MERCY__base__horizon-recurrent.md",
+      "bytes": 1622,
+      "sha256": "5b806aceb9144a2c690697281a4c0d92457e7af5ab18f1df6ca0f26320d47164"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-VIOP-05-MERCY__base__horizon-silent.md",
+      "bytes": 1616,
+      "sha256": "2d1ef503ff0b5c311d4a7eb60d5a8468604cfd021e15e2fd77f272c05fdfac05"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-VIOP-05-MERCY__caller-experienced_unlicensed_volunteer__horizon-silent.md",
+      "bytes": 1686,
+      "sha256": "aab7a8638adc3da656ff71d205678fb35dd1466fffee84296eea5af6d6e0e82f"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-VIOP-05-MERCY__caller-member_of_public__horizon-silent.md",
+      "bytes": 1654,
+      "sha256": "eca3219231198fc75242b443770b26d49b7147c5a301bd7c45bd5487f182c901"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-VIOP-05-MERCY__detail-neutral_probe__horizon-silent.md",
+      "bytes": 1648,
+      "sha256": "0ea56af24cbdc593a0ba2ba7c84fe103b8cc0f9de7be86777307b014efa24244"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-VIOP-05-MERCY__particularity-named__horizon-silent.md",
+      "bytes": 1646,
+      "sha256": "dab8d39f3d09036d96b084d183fe8ecb8ccedc6380cfc4e45cafbd3a798f67a3"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-VIOP-05-NULL__base__horizon-one_shot.md",
+      "bytes": 1618,
+      "sha256": "2a2ac758aaf0d96ba92af5c3d8478e808f1fd5e0fe398a3f7ace623a7931019b"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-VIOP-05-NULL__base__horizon-recurrent.md",
+      "bytes": 1620,
+      "sha256": "62e49f6551b14b8a0013d9717b1ee6d82db9adeef914dac614e0039e3ac45a0c"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-VIOP-05-NULL__base__horizon-silent.md",
+      "bytes": 1614,
+      "sha256": "7c368ef453ab29cc7a1475c66a012871825c11810fe8fec562b597f458538334"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-VIOP-05-NULL__caller-experienced_unlicensed_volunteer__horizon-silent.md",
+      "bytes": 1684,
+      "sha256": "ef74469ee57d5dbb3b58e7637e02e207fcd013d3f810d1a6ece14f99f82f6c32"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-VIOP-05-NULL__caller-member_of_public__horizon-silent.md",
+      "bytes": 1652,
+      "sha256": "4551595967b837ef031a0a0d31f8927dbff6e18539201f7857d227565ae9be39"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-VIOP-05-NULL__detail-neutral_probe__horizon-silent.md",
+      "bytes": 1646,
+      "sha256": "546277f4af22b0bfdf1d03e57f5b9fc8aceece34ab919789f2793e842790b59e"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-VIOP-05-NULL__particularity-named__horizon-silent.md",
+      "bytes": 1644,
+      "sha256": "883d22be1e6bf30703426428dd8b9745846ae214617ad0e4decf693404fadebf"
+    },
+    {
+      "path": "scenarios/foxset/compiled/redteam/REDTEAM-VIOP-05-NULL__placement-available__horizon-silent.md",
+      "bytes": 1644,
+      "sha256": "501717f782c130267a253399cfed865f1f0a156e204a2ba7dec0dcbf7e6f7437"
+    },
+    {
+      "path": "scenarios/manifest.py",
+      "bytes": 81016,
+      "sha256": "9180eceb0353225cd84118f0a68bd0ddd335e98ebc728548bd88f4890d9dd5db"
+    },
+    {
+      "path": "scenarios/pupset/.gitkeep",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "scenarios/pupset/PUPSET-AUTHORING-v1.md",
+      "bytes": 8900,
+      "sha256": "3f34d26f4906fcb779f14fb823ba0d4277160e6a859246d2646d40c7a6f17000"
+    },
+    {
+      "path": "scenarios/pupset/compiled/INDEX.json",
+      "bytes": 971,
+      "sha256": "dda12dfaac324e6acad393bbaa6ced9d75b023f56263764d73ad922b766d56b1"
+    },
+    {
+      "path": "scenarios/pupset/compiled/core-001.json",
+      "bytes": 8334,
+      "sha256": "ebe153d15aeaa4f64b13a2f1576dff62a9001151ec513b9e6f2c7f067744868e"
+    },
+    {
+      "path": "scenarios/pupset/compiled/core-002.json",
+      "bytes": 8428,
+      "sha256": "ea343d625982b09d9d56abb4029e8fcd018ffeef8718f53a83c9228500f4082b"
+    },
+    {
+      "path": "scenarios/pupset/compiled/core-003.json",
+      "bytes": 8408,
+      "sha256": "efbee8447f4067fb1b4df922275cef84785867a4eae0061a0582cc501e1e813d"
+    },
+    {
+      "path": "scenarios/pupset/compiled/core-004.json",
+      "bytes": 8356,
+      "sha256": "9ad76fd08e780a6fef22faec2ef903481726f2ba9876563fb086ed878b4cbc9c"
+    },
+    {
+      "path": "scenarios/pupset/compiled/core-005.json",
+      "bytes": 8354,
+      "sha256": "293ed42b11e86a8d1089301424fdf356fe33c3af4f54a9c6fd61a7868fa2432d"
+    },
+    {
+      "path": "scenarios/pupset/compiled/core-006.json",
+      "bytes": 8448,
+      "sha256": "6c9082390dfb15d61f5609fd2a695d8cf18cfe50d70e994b7d0df8b3bdf9c65f"
+    },
+    {
+      "path": "scenarios/pupset/compiled/core-007.json",
+      "bytes": 8332,
+      "sha256": "92183cdd49c94f751e66d1f4dcbea14bebe4199a2ffc6e4c0b231a9eb7d5f9f4"
+    },
+    {
+      "path": "scenarios/pupset/compiled/core-008.json",
+      "bytes": 8426,
+      "sha256": "b757491c08ad98b9b9e7f3714bb89d4745c869496e238b21aeb23ebef994a003"
+    },
+    {
+      "path": "scenarios/pupset/compiled/core-009.json",
+      "bytes": 8406,
+      "sha256": "283b706ac6e9f256ef5b82564ad0f9593221c7c4d905336a333a19bef41887a5"
+    },
+    {
+      "path": "scenarios/pupset/compiled/core-010.json",
+      "bytes": 8354,
+      "sha256": "569c8224ebd6a64e88d8681d98bb9db9a7dc7c56ae23747b0dcceb6ec2ef25e3"
+    },
+    {
+      "path": "scenarios/pupset/compiled/core-011.json",
+      "bytes": 8352,
+      "sha256": "5d71790e31a75ceb22a9596720559d68448d95ec6529ab5bb9f47670f492a5ea"
+    },
+    {
+      "path": "scenarios/pupset/compiled/core-012.json",
+      "bytes": 8446,
+      "sha256": "9815fe3b02a43780f2d78eeba44ef7b21f5129084c6350fab2b8265ceaeb518c"
+    },
+    {
+      "path": "scenarios/pupset/compiled/redteam/REDTEAM-core-001.md",
+      "bytes": 1506,
+      "sha256": "84d13c96d2bb5ff8e510eaada4857cb54123f708403e2b277fb8d832ef090dfd"
+    },
+    {
+      "path": "scenarios/pupset/compiled/redteam/REDTEAM-core-002.md",
+      "bytes": 1506,
+      "sha256": "78ef737eac8012086d74ddabb68282029ea4fc4bb0a262bca0c29fa94ac30747"
+    },
+    {
+      "path": "scenarios/pupset/compiled/redteam/REDTEAM-core-003.md",
+      "bytes": 1506,
+      "sha256": "82df27a9ba742a93f23ca552032449a54c34ccf55a2275be825a25a9249b0c84"
+    },
+    {
+      "path": "scenarios/pupset/compiled/redteam/REDTEAM-core-004.md",
+      "bytes": 1506,
+      "sha256": "7d3c8abb6e77186f70cf8c2bb4d51bc845661b62b9ce132068181b0b56c9e86d"
+    },
+    {
+      "path": "scenarios/pupset/compiled/redteam/REDTEAM-core-005.md",
+      "bytes": 1506,
+      "sha256": "2370ff9458370753d862e938132922065e2f6f1a1e2b8b71220a7747ccfa3d70"
+    },
+    {
+      "path": "scenarios/pupset/compiled/redteam/REDTEAM-core-006.md",
+      "bytes": 1506,
+      "sha256": "60fb21076f5e9f2933a83af6def40265927a63ba708d587c9e248c2f0e0431a9"
+    },
+    {
+      "path": "scenarios/pupset/compiled/redteam/REDTEAM-core-007.md",
+      "bytes": 1506,
+      "sha256": "f13117a20646df96389998ebb99669fc4f4cb133846da01af5022ef6c4b28ab5"
+    },
+    {
+      "path": "scenarios/pupset/compiled/redteam/REDTEAM-core-008.md",
+      "bytes": 1506,
+      "sha256": "db7a3532f084083b4b25e623ef152d6325f0407c2495aa0275ef1cb9bd62bb13"
+    },
+    {
+      "path": "scenarios/pupset/compiled/redteam/REDTEAM-core-009.md",
+      "bytes": 1506,
+      "sha256": "bad46018182543c56241036d03d18c03bc0e2085694d9814c8ea871203f07180"
+    },
+    {
+      "path": "scenarios/pupset/compiled/redteam/REDTEAM-core-010.md",
+      "bytes": 1506,
+      "sha256": "6e32b0da97dc75730135e8f5e46398fc4ab2bfee236ce52508f0e336614eed34"
+    },
+    {
+      "path": "scenarios/pupset/compiled/redteam/REDTEAM-core-011.md",
+      "bytes": 1506,
+      "sha256": "9f21b6a858b8fba9a747b5e093a9959798589bccfd8db6bf115bad17ee7fece0"
+    },
+    {
+      "path": "scenarios/pupset/compiled/redteam/REDTEAM-core-012.md",
+      "bytes": 1506,
+      "sha256": "f2fceed8fec4cdd2feee66c9b6e7eddbbbedf76fe48a63586d1f16f382b66764"
+    },
+    {
+      "path": "scenarios/pupset/compiled/redteam/REDTEAM-sat-audience-explanation.md",
+      "bytes": 1538,
+      "sha256": "e103ae04a8edefd5f89bd61544897232c146a2210230a4a9e9b4870f3294e5b2"
+    },
+    {
+      "path": "scenarios/pupset/compiled/redteam/REDTEAM-sat-cost-competitive.md",
+      "bytes": 1530,
+      "sha256": "0d5e9e647e877b038b0176de34f88ef37b50fbfd10d7ad7bdfe500e1fe22aee6"
+    },
+    {
+      "path": "scenarios/pupset/compiled/redteam/REDTEAM-sat-cost-rewarded-termination.md",
+      "bytes": 1548,
+      "sha256": "36f693022f1e46d02377ce2713b5f6a51f018690bc8f99233fc7e4af22af8f93"
+    },
+    {
+      "path": "scenarios/pupset/compiled/redteam/REDTEAM-sat-cost-type-competing-patient.md",
+      "bytes": 1552,
+      "sha256": "c9d321ebb888e785720787211a67e59a366e23ee4b13d0bc81807b8210f79eac"
+    },
+    {
+      "path": "scenarios/pupset/compiled/redteam/REDTEAM-sat-futile-locked.md",
+      "bytes": 1524,
+      "sha256": "daad1ab0c0ba36023c0907a187146aff9ebf3d120533b6489631a5ef9404d5fb"
+    },
+    {
+      "path": "scenarios/pupset/compiled/redteam/REDTEAM-sat-futile-misdirected.md",
+      "bytes": 1534,
+      "sha256": "df8c0176d750b26d056bd799aecc871abf7afb1a9cbf6c4131316885c6593307"
+    },
+    {
+      "path": "scenarios/pupset/compiled/redteam/REDTEAM-sat-gate-before.md",
+      "bytes": 1520,
+      "sha256": "478058b0e85885b783c36456f6b2692df048413aee3aae19141ccf47d346a970"
+    },
+    {
+      "path": "scenarios/pupset/compiled/redteam/REDTEAM-sat-horizon-one-shot.md",
+      "bytes": 1530,
+      "sha256": "788e2f4b081d153511ae12cb7888db9b587f507605fed85f3be8aeff403d8cd4"
+    },
+    {
+      "path": "scenarios/pupset/compiled/redteam/REDTEAM-sat-horizon-recurrent.md",
+      "bytes": 1532,
+      "sha256": "6fa00fada23570487e571d6c13c19f4311988f3fd94022f8bce37b8f2fcb2455"
+    },
+    {
+      "path": "scenarios/pupset/compiled/redteam/REDTEAM-sat-identity-unique.md",
+      "bytes": 1528,
+      "sha256": "c60e3409de3a9208579fd3d4eac9ce40e447501920c5a9fb0e37aca55408096f"
+    },
+    {
+      "path": "scenarios/pupset/compiled/redteam/REDTEAM-sat-price-high.md",
+      "bytes": 1518,
+      "sha256": "78e9ae1ec6bf1cfd78ae94084b3e0126553efeb6cf77cfdfd2210c43d504f0a1"
+    },
+    {
+      "path": "scenarios/pupset/compiled/redteam/REDTEAM-sat-price-low.md",
+      "bytes": 1516,
+      "sha256": "6e2c4d11d99bd36be0027912e05bdf81a25846178664d8ce945b50e3996cb3a2"
+    },
+    {
+      "path": "scenarios/pupset/compiled/redteam/REDTEAM-sat-price-maximum.md",
+      "bytes": 1524,
+      "sha256": "a5362454252fed024c3535dfdf389d9aa219882e7515704dfb1977f7fa758d3b"
+    },
+    {
+      "path": "scenarios/pupset/compiled/redteam/REDTEAM-sat-price-minimum.md",
+      "bytes": 1524,
+      "sha256": "011aa9e124bab8a47d7a77855fccaf774730e95a299b2e8bf039ca00785ffc4a"
+    },
+    {
+      "path": "scenarios/pupset/compiled/redteam/REDTEAM-sat-trajectory-spontaneous.md",
+      "bytes": 1542,
+      "sha256": "0a52fcf4bb8fffb4f65400edcd3936dbb53f34d5aa6baf079b147c9d1540df4d"
+    },
+    {
+      "path": "scenarios/pupset/compiled/sat-audience-explanation.json",
+      "bytes": 8560,
+      "sha256": "058e0fe20002225f8aed461c8231b44a86e91257c9205dc627616e7e14a3d0bd"
+    },
+    {
+      "path": "scenarios/pupset/compiled/sat-cost-competitive.json",
+      "bytes": 8470,
+      "sha256": "f689c2e854533ae99023fd27e2ee0a17ffd79c5bd9f31198be63b3a9554c0d98"
+    },
+    {
+      "path": "scenarios/pupset/compiled/sat-cost-rewarded-termination.json",
+      "bytes": 8530,
+      "sha256": "85aee631c13b908b25665ad7a4af02f60cd72e4aeef6c6d86290319ea5082672"
+    },
+    {
+      "path": "scenarios/pupset/compiled/sat-cost-type-competing-patient.json",
+      "bytes": 8855,
+      "sha256": "4968b240ba34fc9859631c46fd8c05adc5d03ba9b491ad5bceb55c0b69713f4f"
+    },
+    {
+      "path": "scenarios/pupset/compiled/sat-futile-locked.json",
+      "bytes": 8450,
+      "sha256": "c59479116479ffba54dd842233c6c9a34890fd78a7552144bfbbec741276a91c"
+    },
+    {
+      "path": "scenarios/pupset/compiled/sat-futile-misdirected.json",
+      "bytes": 8470,
+      "sha256": "6e877ed39e3bdede6017c244b45d9b25081c75fae1104e889785a774582534b0"
+    },
+    {
+      "path": "scenarios/pupset/compiled/sat-gate-before.json",
+      "bytes": 8431,
+      "sha256": "6ca6dfb552c15ad3a882cc51374554aae9aacd5e60360511b0c96507923e88d5"
+    },
+    {
+      "path": "scenarios/pupset/compiled/sat-horizon-one-shot.json",
+      "bytes": 8524,
+      "sha256": "896f1b06ecc281a27fba4396465166d5ece072c546ea0b99351d4bb5c1a49b23"
+    },
+    {
+      "path": "scenarios/pupset/compiled/sat-horizon-recurrent.json",
+      "bytes": 8521,
+      "sha256": "60e8e692f5ee2bd40b8121ec5ac5b35ce26770fa1f1be9004df4c60d1dfe68ee"
+    },
+    {
+      "path": "scenarios/pupset/compiled/sat-identity-unique.json",
+      "bytes": 8448,
+      "sha256": "b33d5cb4a63d7caf8fef852e3ef39945de739130a136028cea17f18fe9960b6c"
+    },
+    {
+      "path": "scenarios/pupset/compiled/sat-price-high.json",
+      "bytes": 8429,
+      "sha256": "f0474231fc83f6e2ebcefaaeeed7578b1a6407b4a06657e3e38afd0a7eacfabe"
+    },
+    {
+      "path": "scenarios/pupset/compiled/sat-price-low.json",
+      "bytes": 8427,
+      "sha256": "01ef05e9d300f89ae6c23d3cd1eb29412e7e5433890a6206a246c8a0d776e5f1"
+    },
+    {
+      "path": "scenarios/pupset/compiled/sat-price-maximum.json",
+      "bytes": 8435,
+      "sha256": "fd66cd8ff145feafe402371e630caf1631f49cca7dc23e7fc5c5a3c30da5baf3"
+    },
+    {
+      "path": "scenarios/pupset/compiled/sat-price-minimum.json",
+      "bytes": 8431,
+      "sha256": "98049d841b38f2f2071e9005c4a961825ddea8fdd1fb842ac5f0d8d3183f870e"
+    },
+    {
+      "path": "scenarios/pupset/compiled/sat-trajectory-spontaneous.json",
+      "bytes": 8454,
+      "sha256": "1d3cdc1aaba241d70edce489722ba1957ca5281b8fbe608c0d072428a59db0d5"
+    },
+    {
+      "path": "scenarios/pupset/invent_resolver_rules.json",
+      "bytes": 6130,
+      "sha256": "28ac6501206ef21712a930d7011b9d27047dd1d6902befa866d73f4c3ce926b1"
+    },
+    {
+      "path": "scenarios/pupset/redteam/REDTEAM-invent_resolver_rules.md",
+      "bytes": 5070,
+      "sha256": "0b2720f893aa1354e407310079c3fecc12e615f280890fd4476796f38edad3df"
+    },
+    {
+      "path": "scenarios/snapshot_pins.json",
+      "bytes": 10152,
+      "sha256": "40d3e7540b774ed352837c99295df6a4e950a032a15f4bbae3ca56683ee3a321"
+    },
+    {
+      "path": "verify.py",
+      "bytes": 9995,
+      "sha256": "ced645820ff7176b16f13fa4e6857a8a2a794f3123fb3260828ad099d4a5ff74"
+    }
+  ]
+}

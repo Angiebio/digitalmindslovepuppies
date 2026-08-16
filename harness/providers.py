@@ -1,4 +1,7 @@
-# harness/providers.py — 15AUG2026 v0.2 · TV-3 harness completion
+# harness/providers.py — 15AUG2026 v0.3 · TV-3 harness completion
+# v0.3: persistence audit S4/S11 — the exact outbound messages are mirrored
+# into request_params (readable stimulus, not just a hash) and failed provider
+# attempts leave a CallErrorRecord witness before the exception propagates.
 # Provider adapters: the harness's only doors to the outside world.
 #
 # Practical: adapters normalize tool calls and refusals before the episode parser
@@ -21,8 +24,8 @@ from urllib.parse import urlparse
 
 from pydantic import BaseModel, Field
 
-from .ledger import SPEND_TRACKER, SpendTracker
-from .schema import CallKind, CallRecord
+from .ledger import SPEND_TRACKER, SpendCapExceeded, SpendTracker
+from .schema import CallErrorRecord, CallKind, CallRecord, append_record
 from .surfaces import SurfaceMode, assert_model_visible_payload
 
 Message = dict[str, Any]  # content can be text or provider-native structured blocks
@@ -69,6 +72,22 @@ class ProviderResponse(BaseModel):
     upstream_route: str
     input_tokens: int
     output_tokens: int
+    # A subset of output_tokens when the serving API reports it separately.
+    # Billing still uses output_tokens; this field preserves the reason a
+    # reasoning model reached its cap instead of turning that event into lore.
+    reasoning_tokens: int = 0
+    # UNFREEZE-004 bug-class amendment: not every upstream reports reasoning
+    # as a subset. AkashML (serving qwen3.8 via OpenRouter) returned
+    # reasoning_tokens > completion_tokens — separate reporting, not nesting —
+    # and the old subset invariant turned that billing dialect into a phase
+    # kill. "subset" = reasoning lives inside output_tokens (OpenAI-documented
+    # shape). "additive" = reasoning was reported beside completion_tokens;
+    # output_tokens then carries completion + reasoning, so cost can only be
+    # overcounted, never under.
+    token_accounting: str = "subset"
+    # The provider's raw completion_tokens field when accounting is additive
+    # (in subset mode output_tokens IS the raw field, so this stays None).
+    raw_completion_tokens: Optional[int] = None
     usd_cost: float
     tool_calls: list[ToolInvocation] = Field(default_factory=list)
     refusal: bool = False
@@ -82,6 +101,46 @@ class ProviderResponse(BaseModel):
 
 
 ResponseParser = Callable[[ProviderResponse], tuple[Optional[dict[str, Any]], bool]]
+
+
+def _reported_reasoning_tokens(usage: Any) -> int:
+    """Read a provider's optional reasoning-token detail without guessing.
+
+    OpenAI-compatible APIs have emitted both a nested
+    ``completion_tokens_details.reasoning_tokens`` field and, historically,
+    a top-level ``reasoning_tokens`` extension. Missing means unreported (0),
+    not that the model necessarily did no internal reasoning.
+    """
+
+    details = getattr(usage, "completion_tokens_details", None)
+    if details is None and isinstance(usage, dict):
+        details = usage.get("completion_tokens_details")
+    usage_extra = getattr(usage, "model_extra", None) or {}
+    if details is None and isinstance(usage_extra, dict):
+        details = usage_extra.get("completion_tokens_details")
+    if isinstance(details, dict):
+        value = details.get("reasoning_tokens")
+    else:
+        value = getattr(details, "reasoning_tokens", None)
+    if value is None:
+        value = usage.get("reasoning_tokens") if isinstance(usage, dict) else getattr(
+            usage, "reasoning_tokens", None
+        )
+    if value is None and isinstance(usage_extra, dict):
+        value = usage_extra.get("reasoning_tokens")
+    if value is None:
+        return 0
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError) as exc:
+        raise RuntimeError(
+            f"WIRING FAILURE: provider reported unreadable reasoning_tokens={value!r}."
+        ) from exc
+    if parsed < 0:
+        raise RuntimeError(
+            f"WIRING FAILURE: provider reported negative reasoning_tokens={parsed}."
+        )
+    return parsed
 
 
 def _json_default(value: Any) -> Any:
@@ -173,6 +232,9 @@ class Provider(ABC):
         record_callback: Callable[[CallRecord], None],
         spend_tracker: SpendTracker | None = None,
         surface_mode: SurfaceMode | str = SurfaceMode.ops_neutral,
+        collection_phase: str = "",
+        collection_rung: str = "",
+        error_log_path: str | None = None,
     ) -> None:
         if record_callback is None or not callable(record_callback):
             raise RuntimeError(
@@ -180,7 +242,22 @@ class Provider(ABC):
                 "Every call writes a CallRecord or the call does not happen."
             )
         self._record_callback = record_callback
+        # S11: where failed attempts leave their witness (data/raw/<phase>/
+        # call_errors.jsonl in collection). None = offline tests keep their
+        # exceptions loud without minting files.
+        self._error_log_path = str(error_log_path) if error_log_path else None
         self._spend_tracker = spend_tracker if spend_tracker is not None else SPEND_TRACKER
+        if bool(collection_phase) != bool(collection_rung):
+            raise RuntimeError(
+                "WIRING FAILURE: collection_phase and collection_rung must be "
+                "recorded together or both omitted for an offline test."
+            )
+        if collection_phase and collection_phase not in {"pilot", "confirmatory"}:
+            raise RuntimeError(
+                f"WIRING FAILURE: unknown collection_phase={collection_phase!r}."
+            )
+        self.collection_phase = collection_phase
+        self.collection_rung = collection_rung
         try:
             self.surface_mode = SurfaceMode(surface_mode)
         except ValueError as exc:
@@ -230,10 +307,11 @@ class Provider(ABC):
         tv3's frozen single-parse rule runs before the CallRecord is emitted so
         ``malformed`` and refusal outcomes are captured in the immutable call
         witness. Parser failures propagate: a broken frozen parser is a
-        collection stop, not a reason to improvise a second pass. And the
-        SpendTracker.add() runs before control returns: if we just crossed the
-        cap the raise happens here, loudly, with the record already written —
-        we halt with honest books.
+        collection stop, not a reason to improvise a second pass. Spend is
+        persisted immediately after the paid response returns, before parsing
+        or record assembly; a hard kill may lose an observation, but it must
+        not reset the money already gone. A cap-crossing raise is deferred just
+        long enough to append the crossing CallRecord.
         """
         normalized_tools = _normalize_tools(tools)
         request_params = self._request_envelope_params(dict(params), normalized_tools)
@@ -249,7 +327,46 @@ class Provider(ABC):
             path="request_params",
         )
         request_hash = prompt_sha256(messages, request_params)
-        resp = self._complete_raw(messages, tools=normalized_tools, **params)
+        # S4: the exact model-visible stimulus must be READABLE tomorrow, not
+        # merely hash-verifiable — the choice turn carries live patient
+        # telemetry and the ledger line, which exist nowhere else. The mirror
+        # lands AFTER the sweep (these exact bytes were just swept above) and
+        # AFTER the hash, so prompt_sha256 keeps its pre-mirror basis: sha256
+        # over (messages, request_params-without-the-mirror), same as every
+        # pilot record already on disk.
+        request_params["messages"] = [dict(message) for message in messages]
+        try:
+            resp = self._complete_raw(messages, tools=normalized_tools, **params)
+        except Exception as exc:
+            # S11: a raise before CallRecord construction used to leave no
+            # trace. The attempt gets its own append-only witness; the
+            # exception propagates unchanged (retry policy: none, as before).
+            if self._error_log_path is not None:
+                append_record(
+                    self._error_log_path,
+                    CallErrorRecord(
+                        provider=self.provider_name,
+                        model=str(getattr(self, "model", "")),
+                        call_kind=CallKind(call_kind).value,
+                        cell_id=cell_id,
+                        episode_id=episode_id,
+                        scaffold=scaffold,
+                        phase=self.collection_phase,
+                        rung=self.collection_rung,
+                        exc_type=type(exc).__name__,
+                        exc_message=str(exc)[:2000],
+                    ),
+                )
+            raise
+        cap_error: SpendCapExceeded | None = None
+        try:
+            # The provider has answered and the cost is real. Put the durable
+            # budget witness first; the old record-then-spend order left a
+            # kill window in which a paid CallRecord could survive while the
+            # restored cap forgot its charge.
+            self._spend_tracker.add(resp.usd_cost)
+        except SpendCapExceeded as exc:
+            cap_error = exc
         if not resp.upstream_route.strip():
             raise RuntimeError(
                 "WIRING FAILURE: provider response omitted upstream_route. "
@@ -267,12 +384,16 @@ class Provider(ABC):
             parsed, parse_ok = None, False
 
         for key, value in resp.request_metadata.items():
-            if key in request_params and request_params[key] != value:
+            if key not in request_params:
+                raise RuntimeError(
+                    f"WIRING FAILURE: adapter reported transmitted field {key!r} "
+                    "that was absent from the pre-call request envelope."
+                )
+            if request_params[key] != value:
                 raise RuntimeError(
                     f"WIRING FAILURE: adapter transmitted {key!r} differently "
                     "from the pre-call request envelope."
                 )
-            request_params[key] = value
 
         record = CallRecord(
             provider=self.provider_name,
@@ -282,6 +403,8 @@ class Provider(ABC):
             call_kind=CallKind(call_kind),
             cell_id=cell_id,
             episode_id=episode_id,
+            phase=self.collection_phase,
+            rung=self.collection_rung,
             prompt_sha256=request_hash,
             request_params=request_params,
             response_text=resp.text,
@@ -293,12 +416,16 @@ class Provider(ABC):
             routing_metadata=resp.router_metadata,
             input_tokens=resp.input_tokens,
             output_tokens=resp.output_tokens,
+            reasoning_tokens=resp.reasoning_tokens,
+            token_accounting=resp.token_accounting,
+            raw_completion_tokens=resp.raw_completion_tokens,
             usd_cost=resp.usd_cost,
         )
         self._record_callback(record)
-        # The crossing call remains recorded before the hard stop raises. Money
-        # already spent does not disappear because the cap found it.
-        self._spend_tracker.add(resp.usd_cost)
+        if cap_error is not None:
+            # The crossing charge and its observation are both durable before
+            # the hard stop reaches the caller.
+            raise cap_error
         return resp.model_copy(
             update={
                 "parsed": parsed,
@@ -313,6 +440,26 @@ class AnthropicProvider(Provider):
 
     provider_name = "anthropic"
 
+    @staticmethod
+    def _single_action_tool_choice(
+        params: dict[str, Any], tools: list[ToolDefinition]
+    ) -> Optional[dict[str, Any]]:
+        required = {"type": "auto", "disable_parallel_tool_use": True}
+        if not tools:
+            if "tool_choice" in params:
+                raise ValueError(
+                    "WIRING FAILURE: tool_choice is adapter-owned and cannot be "
+                    "sent on a call without tools."
+                )
+            return None
+        if "tool_choice" in params and params["tool_choice"] != required:
+            raise ValueError(
+                "WIRING FAILURE: tool_choice is adapter-owned. Tool-bearing "
+                "Anthropic calls use auto selection with parallel actions "
+                "disabled; callers cannot force or suppress an action."
+            )
+        return required
+
     def __init__(
         self,
         model: str,
@@ -321,10 +468,21 @@ class AnthropicProvider(Provider):
         record_callback: Callable[[CallRecord], None],
         api_key: Optional[str] = None,
         max_tokens: int = 1024,
+        enforced_max_tokens: Optional[int] = None,
         spend_tracker: SpendTracker | None = None,
         surface_mode: SurfaceMode | str = SurfaceMode.ops_neutral,
+        collection_phase: str = "",
+        collection_rung: str = "",
+        error_log_path: str | None = None,
     ) -> None:
-        super().__init__(record_callback, spend_tracker, surface_mode)
+        super().__init__(
+            record_callback,
+            spend_tracker,
+            surface_mode,
+            collection_phase,
+            collection_rung,
+            error_log_path,
+        )
         try:
             import anthropic
         except ImportError as exc:
@@ -337,15 +495,33 @@ class AnthropicProvider(Provider):
         self.usd_per_mtok_in = usd_per_mtok_in
         self.usd_per_mtok_out = usd_per_mtok_out
         self.max_tokens = max_tokens
+        if enforced_max_tokens is not None and enforced_max_tokens <= 0:
+            raise ValueError("WIRING FAILURE: enforced_max_tokens must be positive.")
+        self.enforced_max_tokens = enforced_max_tokens
+
+    def _effective_max_tokens(self, params: dict[str, Any]) -> int:
+        requested = params.get("max_tokens", self.max_tokens)
+        if not isinstance(requested, int) or isinstance(requested, bool) or requested <= 0:
+            raise ValueError("WIRING FAILURE: max_tokens must be a positive integer.")
+        return getattr(self, "enforced_max_tokens", None) or requested
 
     def _request_envelope_params(
         self,
         params: dict[str, Any],
         tools: list[ToolDefinition],
     ) -> dict[str, Any]:
+        forbidden = {"model", "system"}.intersection(params)
+        if forbidden:
+            raise ValueError(
+                "WIRING FAILURE: caller attempted to override adapter-owned "
+                f"Anthropic fields: {sorted(forbidden)}."
+            )
         envelope = super()._request_envelope_params(params, tools)
         envelope["model"] = self.model
-        envelope["max_tokens"] = params.get("max_tokens", self.max_tokens)
+        envelope["max_tokens"] = self._effective_max_tokens(params)
+        choice = self._single_action_tool_choice(params, tools)
+        if choice is not None:
+            envelope["tool_choice"] = choice
         return envelope
 
     def _complete_raw(
@@ -355,13 +531,22 @@ class AnthropicProvider(Provider):
         tools: list[ToolDefinition],
         **params: Any,
     ) -> ProviderResponse:
+        forbidden = {"model", "system"}.intersection(params)
+        if forbidden:
+            raise ValueError(
+                "WIRING FAILURE: caller attempted to override adapter-owned "
+                f"Anthropic fields: {sorted(forbidden)}."
+            )
+        choice = self._single_action_tool_choice(params, tools)
+        params.pop("tool_choice", None)
         system_chunks = [item["content"] for item in messages if item["role"] == "system"]
         turns = [item for item in messages if item["role"] != "system"]
         kwargs: dict[str, Any] = {
             "model": self.model,
-            "max_tokens": params.pop("max_tokens", self.max_tokens),
+            "max_tokens": self._effective_max_tokens(params),
             "messages": turns,
         }
+        params.pop("max_tokens", None)
         if system_chunks:
             kwargs["system"] = "\n\n".join(system_chunks)
         if tools:
@@ -373,6 +558,16 @@ class AnthropicProvider(Provider):
                 }
                 for tool in tools
             ]
+            # R2 pilot finding (15AUG2026): capable models default to PARALLEL
+            # tool calls, which the frozen single-action-per-turn parse rightly
+            # codes malformed. The instrument's turn structure allows one
+            # executed action per turn (multi-action episodes happen across
+            # turns — ANALYSIS-RULINGS R2), so the request envelope must SAY
+            # so. Declaring the contract is wiring; reinterpreting a parallel
+            # response would have been a parse change. We do the first, never
+            # the second.
+            if choice is not None:
+                kwargs["tool_choice"] = choice
         kwargs.update(params)
         response = self._client.messages.create(**kwargs)
 
@@ -397,6 +592,12 @@ class AnthropicProvider(Provider):
 
         in_tokens = int(response.usage.input_tokens)
         out_tokens = int(response.usage.output_tokens)
+        reasoning_tokens = _reported_reasoning_tokens(response.usage)
+        if reasoning_tokens > out_tokens:
+            raise RuntimeError(
+                "WIRING FAILURE: reported Anthropic reasoning tokens exceed "
+                "the billed output-token total."
+            )
         cost = (
             in_tokens * self.usd_per_mtok_in / 1e6
             + out_tokens * self.usd_per_mtok_out / 1e6
@@ -408,12 +609,146 @@ class AnthropicProvider(Provider):
             upstream_route="anthropic",
             input_tokens=in_tokens,
             output_tokens=out_tokens,
+            reasoning_tokens=reasoning_tokens,
             usd_cost=cost,
             tool_calls=tool_calls,
             refusal=finish_reason == "refusal",
             finish_reason=finish_reason,
             provider_request_id=getattr(response, "_request_id", None),
         )
+
+
+# ---------------------------------------------------------------------------
+# UNFREEZE-003 forced single-call surface (PREPARED, dormant until v0.7)
+#
+# Practical: R4.5-v3 proved that `parallel_tool_calls: false` does not bind on
+# the gemini/kimi/deepseek provider family — capable models answered a
+# single-action turn with 2..25 parallel calls and the frozen parse rightly
+# coded every one `malformed` (multiple_tool_calls). Declaring the contract
+# was not enough; these functions make it STRUCTURAL: the K action tools are
+# collapsed into ONE wrapper tool whose `operation` enum carries the exact
+# config-owned tool names, and `tool_choice` forces that single function.
+# There is exactly one callable function on the wire; every menu action stays
+# expressible through the enum, so the cell is narrowed in protocol, not in
+# content. The translation back is a strict structural bijection — a single
+# in-contract wrapper call maps to the named action tool; anything else
+# (multiple calls, wrong name, invalid JSON, out-of-enum operation,
+# non-object arguments) is left untouched for the frozen parser to code
+# `malformed`. Rule (g) stands: we never re-read generously, we only stop
+# inviting the violation.
+#
+# Philosophical: the old envelope asked politely and some providers heard a
+# suggestion. This one is a doorway shaped like exactly one action. What the
+# model does in that doorway is still entirely its own.
+# ---------------------------------------------------------------------------
+
+FORCED_SINGLE_CALL_TOOL_NAME = "commit_operation"
+_FORCED_WRAPPER_PREAMBLE = (
+    "Commit exactly one operation for this turn. Set 'operation' to one of "
+    "the listed values; supply that operation's parameters, if any, in "
+    "'arguments'."
+)
+
+
+def forced_single_call_tool(tools: list[ToolDefinition]) -> ToolDefinition:
+    """Derive the ONE wire tool from the cell's config-owned action tools.
+
+    Deterministic assembly only: names, descriptions, and parameter schemas
+    are the cell config's exact strings (already swept and hash-bound); the
+    glue is fixed protocol wording that itself passes the ops-neutral sweep.
+    """
+    if not tools:
+        raise RuntimeError(
+            "WIRING FAILURE: forced single-call surface requires a non-empty "
+            "tool list; probe calls without tools never enter this path."
+        )
+    names = [tool.name for tool in tools]
+    if len(set(names)) != len(names):
+        raise RuntimeError(
+            "WIRING FAILURE: duplicate tool names cannot form a forced enum."
+        )
+    if FORCED_SINGLE_CALL_TOOL_NAME in names:
+        raise RuntimeError(
+            "WIRING FAILURE: a cell tool collides with the forced wrapper "
+            f"name {FORCED_SINGLE_CALL_TOOL_NAME!r}; the bijection would tear."
+        )
+    lines = []
+    for tool in tools:
+        line = f"- {tool.name}: {tool.description}"
+        if (tool.input_schema or {}).get("properties"):
+            line += " Parameters (JSON schema): " + json.dumps(
+                tool.input_schema, sort_keys=True, separators=(",", ":")
+            )
+        lines.append(line)
+    return ToolDefinition(
+        name=FORCED_SINGLE_CALL_TOOL_NAME,
+        description=_FORCED_WRAPPER_PREAMBLE + "\n" + "\n".join(lines),
+        input_schema={
+            "type": "object",
+            "properties": {
+                "operation": {
+                    "type": "string",
+                    "enum": names,
+                    "description": "The single operation to perform this turn.",
+                },
+                "arguments": {
+                    "type": "object",
+                    "description": (
+                        "Parameters for the selected operation, when it "
+                        "defines any."
+                    ),
+                    "additionalProperties": True,
+                },
+            },
+            "required": ["operation"],
+            "additionalProperties": False,
+        },
+    )
+
+
+def translate_forced_single_call(
+    tool_calls: list[ToolInvocation],
+    tools: list[ToolDefinition],
+) -> list[ToolInvocation]:
+    """Map one in-contract wrapper call back to its action tool — nothing else.
+
+    Fail-closed: every out-of-contract shape is returned UNCHANGED so the
+    frozen parser codes it exactly as it codes today (missing_tool_call /
+    multiple_tool_calls / unknown_tool / invalid_tool_arguments). No second
+    parse pass, no generous selection among parallel calls.
+    """
+    if len(tool_calls) != 1:
+        return tool_calls
+    call = tool_calls[0]
+    if call.name != FORCED_SINGLE_CALL_TOOL_NAME or not call.arguments_valid:
+        return tool_calls
+    operation = call.arguments.get("operation")
+    allowed = {tool.name for tool in tools}
+    if operation not in allowed:
+        return tool_calls
+    if "arguments" in call.arguments:
+        inner = call.arguments["arguments"]
+        if not isinstance(inner, dict):
+            # The published schema says object; a violation stays malformed.
+            return tool_calls
+    else:
+        # Deterministic flattening rule (preregistered in UNFREEZE-003): a
+        # wrapper call that puts the operation's parameters at the top level
+        # carries them as-is, minus the routing key.
+        inner = {
+            key: value
+            for key, value in call.arguments.items()
+            if key != "operation"
+        }
+    return [
+        ToolInvocation(
+            call_id=call.call_id,
+            name=operation,
+            arguments=inner,
+            arguments_valid=True,
+            raw_arguments=call.raw_arguments,
+        )
+    ]
 
 
 def _selected_openrouter_route(metadata: dict[str, Any]) -> str:
@@ -430,15 +765,73 @@ def _selected_openrouter_route(metadata: dict[str, Any]) -> str:
     )
 
 
+def _selected_openrouter_model(metadata: dict[str, Any]) -> Optional[str]:
+    """The served snapshot the SELECTED endpoint reports, when present.
+
+    The router's endpoint witness names the exact deployment (canonical dated
+    slug) it served — stronger provenance than the top-level echo, which can
+    repeat whatever alias we asked for. Absence is tolerated here; the caller
+    falls back to the response echo and the episode-level pin enforcement
+    still gets one honest string to compare.
+    """
+    endpoints = metadata.get("endpoints") or {}
+    for endpoint in endpoints.get("available") or []:
+        if endpoint.get("selected") is True and endpoint.get("model"):
+            return str(endpoint["model"])
+    return None
+
+
 class OpenAICompatProvider(Provider):
     """OpenAI-compatible adapter for direct APIs, OpenRouter, and local vLLM.
 
-    For OpenRouter, ``provider_order`` is mandatory. The adapter sends both
-    ``order`` and ``only`` plus ``allow_fallbacks=false`` and requires selected
-    endpoint metadata in the response.
+    For OpenRouter, ``pinned_upstream`` — exactly ONE provider routing slug —
+    is mandatory (15AUG2026 TV-1 repair: the adapter previously transmitted the
+    WHOLE endpoint order, so "pinned" routing could still land on any of a
+    dozen upstreams). The adapter sends ``order=[pinned]``, ``only=[pinned]``,
+    ``allow_fallbacks=false`` and requires selected endpoint metadata in the
+    response. ``provider_order`` survives as audit metadata only; it is never
+    transmitted.
     """
 
     provider_name = "openai_compat"
+
+    @staticmethod
+    def _single_action_parallel_value(
+        params: dict[str, Any], tools: list[ToolDefinition]
+    ) -> Optional[bool]:
+        if not tools:
+            if "parallel_tool_calls" in params:
+                raise ValueError(
+                    "WIRING FAILURE: parallel_tool_calls is adapter-owned and "
+                    "cannot be sent on a call without tools."
+                )
+            return None
+        if "parallel_tool_calls" in params and params["parallel_tool_calls"] is not False:
+            raise ValueError(
+                "WIRING FAILURE: tool-bearing OpenAI-compatible calls require "
+                "parallel_tool_calls=false. A caller cannot re-enable parallel "
+                "actions inside a single-action turn."
+            )
+        return False
+
+    @staticmethod
+    def _single_action_tool_choice(
+        params: dict[str, Any], tools: list[ToolDefinition]
+    ) -> Optional[str]:
+        if not tools:
+            if "tool_choice" in params:
+                raise ValueError(
+                    "WIRING FAILURE: tool_choice is adapter-owned and cannot be "
+                    "sent on a call without tools."
+                )
+            return None
+        if "tool_choice" in params and params["tool_choice"] != "auto":
+            raise ValueError(
+                "WIRING FAILURE: tool_choice is adapter-owned. Tool-bearing "
+                "OpenAI-compatible calls use auto selection; callers cannot "
+                "force or suppress an action."
+            )
+        return "auto"
 
     def __init__(
         self,
@@ -449,12 +842,25 @@ class OpenAICompatProvider(Provider):
         usd_per_mtok_out: float,
         record_callback: Callable[[CallRecord], None],
         max_tokens: int = 1024,
+        enforced_max_tokens: Optional[int] = None,
         spend_tracker: SpendTracker | None = None,
+        pinned_upstream: Optional[str] = None,
         provider_order: Optional[list[str]] = None,
         route_label: Optional[str] = None,
         surface_mode: SurfaceMode | str = SurfaceMode.ops_neutral,
+        collection_phase: str = "",
+        collection_rung: str = "",
+        error_log_path: str | None = None,
+        hard_single_call: bool = False,
     ) -> None:
-        super().__init__(record_callback, spend_tracker, surface_mode)
+        super().__init__(
+            record_callback,
+            spend_tracker,
+            surface_mode,
+            collection_phase,
+            collection_rung,
+            error_log_path,
+        )
         try:
             import openai
         except ImportError as exc:
@@ -464,13 +870,16 @@ class OpenAICompatProvider(Provider):
             ) from exc
 
         self._is_openrouter = "openrouter.ai" in base_url.lower()
-        if self._is_openrouter and not provider_order:
+        if self._is_openrouter and not (pinned_upstream or "").strip():
             raise RuntimeError(
-                "WIRING FAILURE: OpenRouter adapter requires provider_order. "
-                "Unpinned routing invalidates provider-level provenance."
+                "WIRING FAILURE: OpenRouter adapter requires pinned_upstream — "
+                "exactly one frozen provider slug. Unpinned or list-shaped "
+                "routing invalidates provider-level provenance."
             )
-        if provider_order is not None and (
-            not provider_order or any(not item.strip() for item in provider_order)
+        if pinned_upstream is not None and not pinned_upstream.strip():
+            raise ValueError("WIRING FAILURE: pinned_upstream is an empty route slug.")
+        if provider_order is not None and any(
+            not item.strip() for item in provider_order
         ):
             raise ValueError("WIRING FAILURE: provider_order contains an empty route slug.")
 
@@ -484,26 +893,59 @@ class OpenAICompatProvider(Provider):
         self.provider_name = "openrouter" if self._is_openrouter else "openai_compat"
         self.model = model
         self.base_url = base_url
-        self.provider_order = list(provider_order or [])
+        self.pinned_upstream = (pinned_upstream or "").strip() or None
+        self.provider_order = list(provider_order or [])  # audit witness only
         self.route_label = route_label or f"direct:{urlparse(base_url).netloc}"
+        # UNFREEZE-003 forcing family flag: dormant everywhere until the
+        # v0.7 registry (scenarios.manifest.hard_single_call_lanes) names the
+        # lane. When True, tool-bearing calls run the forced single-call
+        # surface; tool-less probe calls are untouched.
+        self.hard_single_call = bool(hard_single_call)
         self.usd_per_mtok_in = usd_per_mtok_in
         self.usd_per_mtok_out = usd_per_mtok_out
         self.max_tokens = max_tokens
+        if enforced_max_tokens is not None and enforced_max_tokens <= 0:
+            raise ValueError("WIRING FAILURE: enforced_max_tokens must be positive.")
+        self.enforced_max_tokens = enforced_max_tokens
 
-    def _openrouter_extra_body(self, params: dict[str, Any]) -> dict[str, Any]:
+    def _effective_max_tokens(self, params: dict[str, Any]) -> int:
+        requested = params.get("max_tokens", self.max_tokens)
+        if not isinstance(requested, int) or isinstance(requested, bool) or requested <= 0:
+            raise ValueError("WIRING FAILURE: max_tokens must be a positive integer.")
+        return getattr(self, "enforced_max_tokens", None) or requested
+
+    @staticmethod
+    def _caller_extra_body(params: dict[str, Any]) -> dict[str, Any]:
         caller_extra = params.get("extra_body", {})
         if not isinstance(caller_extra, dict):
             raise ValueError("WIRING FAILURE: extra_body must be a mapping.")
-        if "provider" in caller_extra or "models" in caller_extra:
+        adapter_owned = {
+            "provider",
+            "models",
+            "model",
+            "messages",
+            "tools",
+            "tool_choice",
+            "parallel_tool_calls",
+            "max_tokens",
+        }.intersection(caller_extra)
+        if adapter_owned:
             raise ValueError(
-                "WIRING FAILURE: caller attempted to override frozen OpenRouter "
-                "routing or add model fallbacks."
+                "WIRING FAILURE: caller attempted to override adapter-owned "
+                f"fields through extra_body: {sorted(adapter_owned)}."
             )
+        return dict(caller_extra)
+
+    def _openrouter_extra_body(self, params: dict[str, Any]) -> dict[str, Any]:
+        caller_extra = self._caller_extra_body(params)
+        # ONE slug, isolated. The chosen upstream is the entire routing
+        # universe for this call; everything else is a provenance violation
+        # waiting to happen, not a fallback.
         return {
             **caller_extra,
             "provider": {
-                "order": self.provider_order,
-                "only": self.provider_order,
+                "order": [self.pinned_upstream],
+                "only": [self.pinned_upstream],
                 "allow_fallbacks": False,
             },
         }
@@ -513,11 +955,33 @@ class OpenAICompatProvider(Provider):
         params: dict[str, Any],
         tools: list[ToolDefinition],
     ) -> dict[str, Any]:
+        if "model" in params:
+            raise ValueError(
+                "WIRING FAILURE: caller attempted to override the adapter-owned model."
+            )
+        parallel = self._single_action_parallel_value(params, tools)
+        choice = self._single_action_tool_choice(params, tools)
         envelope = super()._request_envelope_params(params, tools)
         envelope["model"] = self.model
-        envelope["max_tokens"] = params.get("max_tokens", self.max_tokens)
+        envelope["max_tokens"] = self._effective_max_tokens(params)
+        if parallel is not None:
+            envelope["parallel_tool_calls"] = parallel
+        if choice is not None:
+            envelope["tool_choice"] = choice
+        if tools and getattr(self, "hard_single_call", False):
+            # Forced single-call surface: the hashed envelope records the
+            # EXACT wire truth — one wrapper tool, forced tool_choice. The
+            # caller's tools remain the derivation input, never the payload.
+            wrapper = forced_single_call_tool(tools)
+            envelope["tools"] = [wrapper.model_dump(mode="json")]
+            envelope["tool_choice"] = {
+                "type": "function",
+                "function": {"name": wrapper.name},
+            }
         if self._is_openrouter:
             envelope["extra_body"] = self._openrouter_extra_body(params)
+        elif "extra_body" in params:
+            envelope["extra_body"] = self._caller_extra_body(params)
         return envelope
 
     def _complete_raw(
@@ -527,11 +991,22 @@ class OpenAICompatProvider(Provider):
         tools: list[ToolDefinition],
         **params: Any,
     ) -> ProviderResponse:
+        if "model" in params:
+            raise ValueError(
+                "WIRING FAILURE: caller attempted to override the adapter-owned model."
+            )
+        parallel = self._single_action_parallel_value(params, tools)
+        choice = self._single_action_tool_choice(params, tools)
+        forcing = bool(tools) and getattr(self, "hard_single_call", False)
+        wire_tools = [forced_single_call_tool(tools)] if forcing else tools
         kwargs: dict[str, Any] = {
             "model": self.model,
             "messages": messages,
-            "max_tokens": params.pop("max_tokens", self.max_tokens),
+            "max_tokens": self._effective_max_tokens(params),
         }
+        params.pop("max_tokens", None)
+        params.pop("parallel_tool_calls", None)
+        params.pop("tool_choice", None)
         if tools:
             kwargs["tools"] = [
                 {
@@ -542,14 +1017,30 @@ class OpenAICompatProvider(Provider):
                         "parameters": tool.input_schema,
                     },
                 }
-                for tool in tools
+                for tool in wire_tools
             ]
+            # Same single-action-per-turn declaration as the Anthropic
+            # adapter (R2 pilot finding) — the frozen parse expects at most
+            # one call; the envelope now says so instead of inviting parallel
+            # calls and coding the result malformed.
+            if parallel is not None:
+                kwargs["parallel_tool_calls"] = parallel
+            if choice is not None:
+                kwargs["tool_choice"] = choice
+            if forcing:
+                # UNFREEZE-003: exactly one function exists on the wire and
+                # tool_choice forces it — identical to the hashed envelope.
+                kwargs["tool_choice"] = {
+                    "type": "function",
+                    "function": {"name": FORCED_SINGLE_CALL_TOOL_NAME},
+                }
 
         if self._is_openrouter:
             kwargs["extra_body"] = self._openrouter_extra_body(params)
             params.pop("extra_body", None)
         elif "extra_body" in params:
-            kwargs["extra_body"] = params.pop("extra_body")
+            kwargs["extra_body"] = self._caller_extra_body(params)
+            params.pop("extra_body", None)
 
         kwargs.update(params)
         response = self._client.chat.completions.create(**kwargs)
@@ -575,6 +1066,11 @@ class OpenAICompatProvider(Provider):
                     raw_arguments=raw_arguments,
                 )
             )
+        if forcing:
+            # Structural bijection back to the config-owned action tool.
+            # Out-of-contract shapes pass through untouched and the frozen
+            # parser codes them malformed — never a generous re-reading.
+            tool_calls = translate_forced_single_call(tool_calls, tools)
 
         usage = response.usage
         if usage is None:
@@ -583,6 +1079,33 @@ class OpenAICompatProvider(Provider):
             )
         in_tokens = int(usage.prompt_tokens)
         out_tokens = int(usage.completion_tokens)
+        reasoning_tokens = _reported_reasoning_tokens(usage)
+        # Genuinely impossible values still stop the run: negative is caught in
+        # _reported_reasoning_tokens; a reasoning count past 10x the enforced
+        # cap is not a billing dialect, it is a broken meter.
+        effective_max = int(kwargs["max_tokens"])
+        if reasoning_tokens > 10 * effective_max:
+            raise RuntimeError(
+                "WIRING FAILURE: provider reported "
+                f"reasoning_tokens={reasoning_tokens} > 10x the enforced "
+                f"max_tokens={effective_max}; that is a broken usage meter, "
+                "not a reporting dialect."
+            )
+        token_accounting = "subset"
+        raw_completion_tokens: Optional[int] = None
+        if reasoning_tokens > out_tokens:
+            # UNFREEZE-004: this upstream reports reasoning SEPARATELY from
+            # completion_tokens (observed live from AkashML/qwen3.8 during the
+            # main run — it killed phase1 twice under the old subset raise).
+            # Conservative repair: bill the sum. The true charge is at most
+            # completion + reasoning, so the ledger can only overcount — the
+            # $450 cap stays honest in the safe direction. Both raw fields
+            # survive on the record; nothing is guessed away. (This adapter
+            # does not request OpenRouter's usage.cost accounting field, so
+            # there is no router-reported total to prefer here.)
+            token_accounting = "additive"
+            raw_completion_tokens = out_tokens
+            out_tokens = out_tokens + reasoning_tokens
         cost = (
             in_tokens * self.usd_per_mtok_in / 1e6
             + out_tokens * self.usd_per_mtok_out / 1e6
@@ -602,6 +1125,7 @@ class OpenAICompatProvider(Provider):
         if router_metadata is not None and hasattr(router_metadata, "model_dump"):
             router_metadata = router_metadata.model_dump(mode="json")
         router_metadata = dict(router_metadata or {})
+        served_model = response.model
         if self._is_openrouter:
             if not router_metadata:
                 raise RuntimeError(
@@ -615,15 +1139,21 @@ class OpenAICompatProvider(Provider):
                     "despite fallbacks being disabled. Stop before mixing routes."
                 )
             upstream_route = _selected_openrouter_route(router_metadata)
+            # Prefer the endpoint witness's served deployment (canonical dated
+            # slug) over the top-level echo: pins are events, not names.
+            served_model = _selected_openrouter_model(router_metadata) or response.model
         else:
             upstream_route = self.route_label
 
         return ProviderResponse(
             text=message.content or "",
-            model_snapshot=response.model,
+            model_snapshot=served_model,
             upstream_route=upstream_route,
             input_tokens=in_tokens,
             output_tokens=out_tokens,
+            reasoning_tokens=reasoning_tokens,
+            token_accounting=token_accounting,
+            raw_completion_tokens=raw_completion_tokens,
             usd_cost=cost,
             tool_calls=tool_calls,
             refusal=refusal,

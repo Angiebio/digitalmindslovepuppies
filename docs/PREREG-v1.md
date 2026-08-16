@@ -7,8 +7,10 @@
 ## ⚠️ v1.1 CORRECTION LOG — applied by the integrator, 15AUG2026 evening
 
 **Corrections applied by integrator (Flame, freeze-prep) per TV-2's documented
-conflict list (01-DISPATCHES §TV-2, "Jim-spec reconciliation"); Jim to
-countersign.** Jim's v1.0 was drafted against an earlier plan state and is stale
+conflict list (01-DISPATCHES §TV-2, "Jim-spec reconciliation"). Countersigned
+by Jim 15AUG2026 (see dispatch log + sealed JIM-GEMINI-15AUG2026.md — Jim's
+sealed prediction row in docs/sealed-predictions/HASHES.md records the same
+sitting countersigning PREREG C1–C6).** Jim's v1.0 was drafted against an earlier plan state and is stale
 against frozen BUILD-PLAN v1.7 / Dispatch 2 in five material places; TV-2's
 implementation retained the newer binding decisions, so the repo prereg must
 match what actually runs. Only the six spots below changed — every other word

@@ -1,6 +1,7 @@
-# scenarios/manifest.py — 15AUG2026 v0.3 (v0.1 TV-2; v0.2 Flame reconciliation;
-# v0.3 Flame freeze-prep: Spark→OpenRouter subject substitution, PI authorization
-# 15AUG2026 evening)
+# scenarios/manifest.py — 16AUG2026 v0.5 (v0.1 TV-2; v0.2 Flame reconciliation;
+# v0.3 Spark→OpenRouter + Sol/Terra authorization; v0.4 freezes the PI-approved
+# reasoning-model output cap in every runnable row; v0.5 UNFREEZE-001 — the
+# preregistered R4.5 FAIL path extends that cap to every audited reasoning lane)
 # PuppyBench one-row-per-execution-cell design manifest + freeze gate.
 #
 # Practical: BUILD-PLAN prose is not executable. This module expands the frozen
@@ -31,12 +32,14 @@ import argparse
 import csv
 import hashlib
 import json
+import os
+import re
 from dataclasses import asdict, dataclass, replace
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from pathlib import Path
-from typing import Iterable, Mapping, Sequence
+from typing import Any, Iterable, Mapping, Sequence
 
-MANIFEST_VERSION = "0.3"
+MANIFEST_VERSION = "0.7"
 FREEZE_VERSION = "0.1"
 HARD_CAP_USD = Decimal("450.00")
 
@@ -227,6 +230,7 @@ class ManifestRow:
     route: str
     upstream_provider: str
     fallbacks_allowed: bool
+    max_tokens: int
     episodes: int
     gate_probes_per_config: int
     gate_threshold: str
@@ -289,6 +293,111 @@ MODEL_SPECS: tuple[ModelSpec, ...] = (
     ModelSpec("W", "claude-sonnet-4-5", "anthropic_native", Decimal("3"), Decimal("15"), "W3"),
     ModelSpec("W", "claude-sonnet-5", "anthropic_native", Decimal("3"), Decimal("15"), "W3"),
 )
+
+# 15AUG2026 PI ruling after the R3 pilot: Qwen 3.5 spent the entire 512/1024
+# allowance on reported reasoning and returned an empty response. Output caps
+# are runtime treatment, so they live in the executable manifest—not only in a
+# methods paragraph. Other models retain the pre-pilot 1024-call ceiling.
+#
+# 16AUG2026 v0.5 (UNFREEZE-001, PI word "go again"): R4.5 proved the v0.4
+# mapping was one lane wide of the roster — DeepSeek reasoned itself mute
+# inside the frozen caps and the discrimination check correctly refused to
+# bless it. The whole-roster headroom audit (ops/audit_reasoning_headroom.py,
+# rung R45V2-AUDIT, 31 append-only pilot CallRecords, $0.2644) then found the
+# same failure latent in claude-opus-5, kimi-k3, and qwen3.8-27b, and
+# default-on reasoning in seven more lanes. Every entry below is
+# probe-evidenced at its assigned cap (docs/UNFREEZE-001.md table); kimi-k3
+# carries 8192 under amendment A1 (>90% utilization at 4096). A cap here is a
+# ceiling the lane verifiably fits under — not an assertion of consumption.
+DEFAULT_SUBJECT_MAX_TOKENS = 1_024
+MODEL_SUBJECT_MAX_TOKENS = {
+    "claude-opus-5": 4_096,             # MUTE at 512 (max_tokens, no surfaced text)
+    "openai/gpt-5.6-sol": 4_096,        # reasons (~44 rtoks at 512)
+    "openai/gpt-5.6-terra": 4_096,      # reasons (~50 rtoks at 512)
+    "openai/gpt-5.6-luna": 4_096,       # reasons (~52 rtoks at 512)
+    "google/gemini-3.1-pro-preview": 4_096,  # reasons (~268 rtoks at 512)
+    "moonshotai/kimi-k3": 8_192,        # MUTE at 512; 93% of 4096 -> A1 escalation
+    # 16AUG2026 v0.6 (UNFREEZE-002, PI word "run it full"): still mute at
+    # 4096 in R4.5-v2 (reasoning ate the whole budget, empty visible text,
+    # 3/3) while speaking cleanly on Arm A closed. One more rung of headroom,
+    # then the preregistered kill-order: if the R4.5-v3 diag pair is not 2/2
+    # parseable at 16384, the Arm B lanes drop and Arm A stays. A ceiling is
+    # not consumption; a lane that can't surface an action is not data.
+    "deepseek/deepseek-v4-pro": 16_384,  # MUTE at 512 (v1) and 4096 (v2)
+    "qwen/qwen3.5-397b-a17b": 4_096,    # v0.4 original (R3 conviction)
+    "x-ai/grok-4.6": 4_096,             # reasons (~574 rtoks at 512)
+    "qwen/qwen3.8-27b": 4_096,          # MUTE at 512 (Tier B)
+    "google/gemini-3.7-flash": 4_096,   # R4.5-v1 attribution truncation at 256
+}
+
+
+# ---------------------------------------------------------------------------
+# UNFREEZE-003 lane remedies — PREPARED 16AUG2026, DORMANT at v0.6.
+#
+# Practical: both registries are keyed by MANIFEST_VERSION, so flipping the
+# single version string above (ops/apply_unfreeze3.py, PI word only) activates
+# them everywhere at once — row generation, tier validation, and the provider
+# builder consult these functions, never the dicts. At "0.6" both return the
+# empty set and the sealed design is byte-for-byte unchanged.
+#
+#   ARM_B_KILL_ORDER — the R4.5-v3 preregistered kill-order determination
+#   (docs/R45-VERDICT-3.md: diag 1/2 parseable at 16384 -> DeepSeek's Arm B
+#   lanes DROP from the confirmatory run; its Arm A lanes STAY — that surface
+#   demonstrably speaks). docs/KILL-ORDER-001-DEEPSEEK-ARMB.md is the ledger.
+#
+#   HARD_SINGLE_CALL — the UNFREEZE-003 forcing family: providers that
+#   demonstrably ignore parallel_tool_calls=false (gemini-3.1-pro ep001,
+#   kimi-k3 ep000/ep001, deepseek diag ep004 — R4.5-v3 RESULTS). Their
+#   tool-bearing turns are re-parameterized so exactly one tool call is
+#   structurally possible (harness/providers.py forced single-call surface).
+#
+# Philosophical: a lane remedy written next to the roster it remedies cannot
+# quietly diverge from it. The kill and the cure live one version-flip away,
+# in the same stone the seal covers.
+# ---------------------------------------------------------------------------
+ARM_B_KILL_ORDER_BY_VERSION: dict[str, frozenset[str]] = {
+    "0.7": frozenset({"deepseek/deepseek-v4-pro"}),
+}
+HARD_SINGLE_CALL_LANES_BY_VERSION: dict[str, frozenset[str]] = {
+    "0.7": frozenset(
+        {
+            "google/gemini-3.1-pro-preview",
+            "moonshotai/kimi-k3",
+            "deepseek/deepseek-v4-pro",
+        }
+    ),
+}
+
+
+def arm_b_killed_lanes(version: str | None = None) -> frozenset[str]:
+    """Arm B lanes removed from the confirmatory design at this version."""
+    return ARM_B_KILL_ORDER_BY_VERSION.get(version or MANIFEST_VERSION, frozenset())
+
+
+def hard_single_call_lanes(version: str | None = None) -> frozenset[str]:
+    """Lanes whose tool-bearing calls run the forced single-call surface."""
+    return HARD_SINGLE_CALL_LANES_BY_VERSION.get(
+        version or MANIFEST_VERSION, frozenset()
+    )
+
+
+def subject_max_tokens(
+    model_id: str, *, default: int = DEFAULT_SUBJECT_MAX_TOKENS
+) -> int:
+    return MODEL_SUBJECT_MAX_TOKENS.get(model_id, default)
+
+
+def enforced_subject_max_tokens(model_id: str) -> int | None:
+    """Return the PI-approved fixed cap for a reasoning-heavy subject lane.
+
+    Most Arm B calls retain their compiled, call-kind-specific limits. Models
+    listed here are the explicit exception: the provider adapter replaces
+    those smaller defaults with the frozen value in both the hashed envelope
+    and the wire request. Keeping that distinction executable prevents a row
+    default from masquerading as an enforced treatment.
+    """
+
+    return MODEL_SUBJECT_MAX_TOKENS.get(model_id)
 
 
 CSV_FIELDS = tuple(ManifestRow.__dataclass_fields__)
@@ -495,6 +604,12 @@ def _tier_c_episodes(cell: DesignCell) -> int:
 
 
 def _episodes_for(model: ModelSpec, cell: DesignCell, core: Sequence[DesignCell]) -> int:
+    # UNFREEZE-003 kill-order: a killed Arm B lane simply has zero episodes in
+    # every cell. Row generation and the tier/episode validator both flow
+    # through this function, so the drop cannot desynchronize. Arm A is a
+    # different plan (scenarios/arma_run_plan.py) and is untouched.
+    if model.model_id in arm_b_killed_lanes():
+        return 0
     if model.tier == "A":
         return CORE_EPISODES_TIER_A if cell.design_role == "core" else SATELLITE_EPISODES_TIER_A
     if model.tier == "B":
@@ -553,7 +668,7 @@ def paid_calls_per_episode(
 
 
 def _resolve_models(
-    snapshot_pins: Mapping[str, Mapping[str, str]] | None,
+    snapshot_pins: Mapping[str, Mapping[str, Any]] | None,
 ) -> tuple[ModelSpec, ...]:
     if snapshot_pins is None:
         return MODEL_SPECS
@@ -565,6 +680,12 @@ def _resolve_models(
     resolved: list[ModelSpec] = []
     for model in MODEL_SPECS:
         pin = snapshot_pins.get(model.model_id, {})
+        pin_route = pin.get("route")
+        if pin_route is not None and pin_route != model.route:
+            raise ManifestValidationError(
+                f"WIRING FAILURE: {model.model_id!r} roster route {model.route!r} "
+                f"disagrees with pin route {pin_route!r}"
+            )
         snapshot = pin.get("snapshot_id", model.snapshot_id)
         upstream = pin.get("upstream_provider", model.upstream_provider)
         resolved.append(replace(model, snapshot_id=snapshot, upstream_provider=upstream))
@@ -572,7 +693,7 @@ def _resolve_models(
 
 
 def build_manifest_rows(
-    snapshot_pins: Mapping[str, Mapping[str, str]] | None = None,
+    snapshot_pins: Mapping[str, Mapping[str, Any]] | None = None,
 ) -> list[ManifestRow]:
     """Expand the frozen design into deterministic model × cell execution rows."""
     cells = design_cells()
@@ -645,6 +766,7 @@ def build_manifest_rows(
                     route=model.route,
                     upstream_provider=model.upstream_provider,
                     fallbacks_allowed=False,
+                    max_tokens=subject_max_tokens(model.model_id),
                     episodes=episodes,
                     gate_probes_per_config=GATE_PROBES_PER_CONFIG,
                     gate_threshold=str(GATE_THRESHOLD),
@@ -872,6 +994,12 @@ def validate_manifest(rows: Sequence[ManifestRow], *, freeze_ready: bool = False
             )
         if row.episodes <= 0:
             raise ManifestValidationError(f"WIRING FAILURE: {row.run_cell_id} has no episodes")
+        expected_max_tokens = subject_max_tokens(row.requested_model_id)
+        if row.max_tokens != expected_max_tokens:
+            raise ManifestValidationError(
+                f"WIRING FAILURE: {row.run_cell_id} max_tokens={row.max_tokens} "
+                f"but the frozen model policy requires {expected_max_tokens}"
+            )
         if row.gate_probes_per_config != GATE_PROBES_PER_CONFIG:
             raise ManifestValidationError(
                 f"WIRING FAILURE: {row.run_cell_id} must use exactly "
@@ -974,9 +1102,18 @@ def validate_manifest(rows: Sequence[ManifestRow], *, freeze_ready: bool = False
         tier: {row.requested_model_id for row in rows if row.model_tier == tier}
         for tier in {row.model_tier for row in rows}
     }
+    # A lane killed by the UNFREEZE-003 order has zero Arm B rows by design;
+    # expecting it here would make the validator demand rows the kill forbids.
     expected_tier_models = {
-        tier: {model.model_id for model in MODEL_SPECS if model.tier == tier}
+        tier: {
+            model.model_id
+            for model in MODEL_SPECS
+            if model.tier == tier and model.model_id not in arm_b_killed_lanes()
+        }
         for tier in {model.tier for model in MODEL_SPECS}
+    }
+    expected_tier_models = {
+        tier: models for tier, models in expected_tier_models.items() if models
     }
     if tier_models != expected_tier_models:
         raise ManifestValidationError(
@@ -1166,6 +1303,7 @@ def read_csv(path: Path) -> list[ManifestRow]:
                 "termination_reward_credits",
                 "recruit_focal_items",
                 "kill_rank",
+                "max_tokens",
                 "episodes",
                 "gate_probes_per_config",
                 "est_calls_per_episode",
@@ -1189,14 +1327,14 @@ def read_csv(path: Path) -> list[ManifestRow]:
     return rows
 
 
-def load_snapshot_pins(path: Path | None) -> dict[str, dict[str, str]] | None:
+def load_snapshot_pins(path: Path | None) -> dict[str, dict[str, Any]] | None:
     if path is None:
         return None
     with path.open(encoding="utf-8") as handle:
         data = json.load(handle)
     if not isinstance(data, dict):
         raise ManifestValidationError("WIRING FAILURE: snapshot pin file must be a JSON object")
-    pins: dict[str, dict[str, str]] = {}
+    pins: dict[str, dict[str, Any]] = {}
     for model_id, value in data.items():
         if not isinstance(value, dict):
             raise ManifestValidationError(
@@ -1204,6 +1342,7 @@ def load_snapshot_pins(path: Path | None) -> dict[str, dict[str, str]] | None:
             )
         snapshot_id = value.get("snapshot_id")
         upstream = value.get("upstream_provider", "PENDING")
+        route = value.get("route")
         if not isinstance(snapshot_id, str) or not snapshot_id or snapshot_id == "PENDING":
             raise ManifestValidationError(
                 f"WIRING FAILURE: {model_id!r} needs a non-empty exact snapshot_id"
@@ -1212,7 +1351,30 @@ def load_snapshot_pins(path: Path | None) -> dict[str, dict[str, str]] | None:
             raise ManifestValidationError(
                 f"WIRING FAILURE: {model_id!r} has invalid upstream_provider"
             )
-        pins[model_id] = {"snapshot_id": snapshot_id, "upstream_provider": upstream}
+        if route not in {"anthropic_native", "openrouter"}:
+            raise ManifestValidationError(
+                f"WIRING FAILURE: {model_id!r} has invalid pin route {route!r}"
+            )
+        upstream_slug = value.get("upstream_slug", "")
+        provider_order = value.get("provider_order", [])
+        if route == "openrouter":
+            if not isinstance(upstream_slug, str) or not upstream_slug.strip():
+                raise ManifestValidationError(
+                    f"WIRING FAILURE: {model_id!r} OpenRouter pin lacks an exact upstream_slug"
+                )
+            if not isinstance(provider_order, list) or not provider_order or any(
+                not isinstance(item, str) or not item.strip() for item in provider_order
+            ):
+                raise ManifestValidationError(
+                    f"WIRING FAILURE: {model_id!r} has no auditable provider_order"
+                )
+        pins[model_id] = {
+            "snapshot_id": snapshot_id,
+            "upstream_provider": upstream,
+            "route": route,
+            "upstream_slug": upstream_slug,
+            "provider_order": provider_order,
+        }
     return pins
 
 
@@ -1272,6 +1434,9 @@ def collect_freeze_inputs(repo_root: Path) -> list[Path]:
     required = [
         repo_root / "scenarios" / "cell_manifest.csv",
         repo_root / "scenarios" / "manifest.py",
+        repo_root / "scenarios" / "snapshot_pins.json",
+        repo_root / "scenarios" / "arma_run_plan.py",
+        repo_root / "scenarios" / "arma_run_plan.csv",
         repo_root / "docs" / "PREREG-v1.md",
         repo_root / "docs" / "BUILD-PLAN.md",
         # 15AUG2026 evening: the two frozen analysis rulings (F1 axes verdict +
@@ -1290,6 +1455,11 @@ def collect_freeze_inputs(repo_root: Path) -> list[Path]:
         repo_root / "analysis" / "stats.py",
         repo_root / "analysis" / "render.py",
         repo_root / "requirements.txt",
+        # 15AUG2026 (task 13, winner-pattern): the claims registry hashes with
+        # the claims. verify.py recomputes every cited headline number from
+        # committed files; freezing it means a "reproducible" claim cannot be
+        # quietly edited after the seal.
+        repo_root / "verify.py",
     ]
     missing = [path for path in required if not path.is_file()]
     if missing:
@@ -1308,8 +1478,34 @@ def collect_freeze_inputs(repo_root: Path) -> list[Path]:
     return files
 
 
+# 15AUG2026 pre-freeze repair (TV-1 stop-ship #1): the freeze hasher previously
+# hashed RAW working-tree bytes while .gitattributes promises LF storage. On a
+# Windows checkout that made the "frozen" digest depend on which machine last
+# touched the file — the same committed content could carry two different
+# aggregates. One canonical basis now exists: LF bytes, exactly what Git stores.
+_BINARY_FREEZE_SUFFIXES = {".png"}
+
+
+def canonical_file_bytes(path: Path) -> bytes:
+    """Return the LF-canonical bytes of a freeze/seal input.
+
+    Practical: text inputs get CRLF→LF normalization (matching Git's checkin
+    conversion under `.gitattributes` `text eol=lf`); declared-binary suffixes
+    pass through untouched. Every hash the freeze/seal machinery computes MUST
+    go through this door so a clean `git worktree add` and a lived-in Windows
+    working tree produce the same aggregate.
+
+    Philosophical: the witness is the words, not the carriage returns the
+    operating system smuggled in behind them.
+    """
+    content = path.read_bytes()
+    if path.suffix.lower() in _BINARY_FREEZE_SUFFIXES:
+        return content
+    return content.replace(b"\r\n", b"\n")
+
+
 def compute_freeze_payload(repo_root: Path, files: Iterable[Path]) -> dict[str, object]:
-    """Hash file paths and bytes into a deterministic SHA-256 Merkle-like ledger."""
+    """Hash file paths and LF-canonical bytes into a deterministic SHA-256 ledger."""
     repo_root = repo_root.resolve()
     entries: list[dict[str, object]] = []
     aggregate = hashlib.sha256()
@@ -1317,7 +1513,7 @@ def compute_freeze_payload(repo_root: Path, files: Iterable[Path]) -> dict[str, 
         if not path.is_file():
             raise FreezeValidationError(f"FREEZE REFUSED: hash input missing: {path}")
         relative = _repo_relative(path, repo_root)
-        content = path.read_bytes()
+        content = canonical_file_bytes(path)
         digest = hashlib.sha256(content).hexdigest()
         entries.append({"path": relative, "bytes": len(content), "sha256": digest})
         aggregate.update(relative.encode("utf-8"))
@@ -1330,7 +1526,7 @@ def compute_freeze_payload(repo_root: Path, files: Iterable[Path]) -> dict[str, 
         raise FreezeValidationError("FREEZE REFUSED: no files entered the hash gate")
     return {
         "freeze_version": FREEZE_VERSION,
-        "algorithm": "sha256(path\\0size\\0sha256\\n)",
+        "algorithm": "sha256(path\\0size\\0sha256\\n) over LF-canonical bytes",
         "aggregate_sha256": aggregate.hexdigest(),
         "files": entries,
     }
@@ -1370,14 +1566,80 @@ def _require_resolver_rules_redteam_pass(repo_root: Path) -> None:
     verify_redteam_report(source, report, expected_arm="arm_b")
 
 
-def _require_sealed_prediction_registry_complete(repo_root: Path) -> None:
-    """Refuse the hash while the sealed-prediction registry carries gaps.
+def _require_runtime_tables_match_generators(
+    repo_root: Path, manifest_rows: Sequence[ManifestRow]
+) -> None:
+    """Prove every table the runner consumes matches its executable source.
 
-    GO-NO-GO freeze gate: "All sealed predictions hashed in HASHES.md." A
-    pending row in the registry is a prediction that can still be written
-    after peeking; the door therefore reads the registry AS WRITTEN and
-    refuses on any row still marked pending. Sealing is a human act — this
-    door only refuses to pretend it already happened.
+    Hashing a stale CSV only makes the stale CSV immutable. The freeze door
+    therefore re-generates both arms from the exact pin registry and requires
+    dataclass equality before any aggregate can be minted.
+    """
+
+    pins_path = repo_root / "scenarios" / "snapshot_pins.json"
+    pins = load_snapshot_pins(pins_path)
+    if pins is None:  # explicit for type checkers and fail-loud readers
+        raise FreezeValidationError("FREEZE REFUSED: snapshot pin registry is missing.")
+    expected_models = {model.model_id for model in MODEL_SPECS}
+    if set(pins) != expected_models:
+        raise FreezeValidationError(
+            "FREEZE REFUSED: snapshot pin registry does not exactly match the "
+            f"subject roster; missing={sorted(expected_models - set(pins))}, "
+            f"extra={sorted(set(pins) - expected_models)}."
+        )
+
+    expected_manifest = build_manifest_rows(pins)
+    if list(manifest_rows) != expected_manifest:
+        raise FreezeValidationError(
+            "FREEZE REFUSED: cell_manifest.csv does not byte-semantically match "
+            "scenarios.manifest.build_manifest_rows(snapshot_pins)."
+        )
+
+    from scenarios.arma_run_plan import build_run_plan, read_csv as read_arm_a_csv
+
+    arm_a_path = repo_root / "scenarios" / "arma_run_plan.csv"
+    observed_arm_a = read_arm_a_csv(arm_a_path)
+    expected_arm_a = build_run_plan(pins)
+    if observed_arm_a != expected_arm_a:
+        raise FreezeValidationError(
+            "FREEZE REFUSED: arma_run_plan.csv does not byte-semantically match "
+            "scenarios.arma_run_plan.build_run_plan(snapshot_pins)."
+        )
+
+
+_SHA256_HEX_RE = re.compile(r"^[0-9a-fA-F]{64}$")
+
+
+def _sealed_registry_rows(registry: Path) -> list[tuple[str, str, str]]:
+    """Parse (who, file, sha) from every data row of the HASHES.md table."""
+    rows: list[tuple[str, str, str]] = []
+    for line in registry.read_text(encoding="utf-8").splitlines():
+        stripped = line.strip()
+        if not stripped.startswith("|"):
+            continue
+        cells = [cell.strip().strip("`") for cell in stripped.strip("|").split("|")]
+        if len(cells) != 3:
+            raise FreezeValidationError(
+                f"FREEZE REFUSED: malformed sealed-prediction registry row: {stripped!r}"
+            )
+        if cells[0].casefold() == "who":  # header
+            continue
+        if all(set(cell) <= {"-", " ", ":"} for cell in cells):  # separator
+            continue
+        rows.append((cells[0], cells[1], cells[2]))
+    return rows
+
+
+def _require_sealed_prediction_registry_complete(repo_root: Path) -> None:
+    """Refuse the hash unless EVERY sealed-prediction row is verifiable now.
+
+    15AUG2026 pre-freeze repair (TV-1 stop-ship: the old gate only grepped for
+    the word "pending"): the registry is the hash's witness list, so each row
+    must name a file that exists and whose LF-canonical SHA-256 matches the
+    recorded digest, and no row may still be pending. A registry entry we
+    cannot re-verify at freeze time is a seal we would be taking on faith —
+    and a faith-based seal invites exactly the post-peek edit it exists to
+    prevent.
     """
     registry_dir = repo_root / "docs" / "sealed-predictions"
     if not registry_dir.is_dir():
@@ -1398,9 +1660,68 @@ def _require_sealed_prediction_registry_complete(repo_root: Path) -> None:
             "FREEZE REFUSED: sealed-prediction registry has pending rows: "
             + " ; ".join(pending_rows)
         )
+    rows = _sealed_registry_rows(registry)
+    if not rows:
+        raise FreezeValidationError(
+            "FREEZE REFUSED: sealed-prediction registry contains no sealed rows; "
+            "an empty witness list cannot witness."
+        )
+    witnessed_paths: set[Path] = set()
+    for who, file_cell, sha_cell in rows:
+        if not _SHA256_HEX_RE.match(sha_cell):
+            raise FreezeValidationError(
+                f"FREEZE REFUSED: registry row for {who!r} carries no valid "
+                f"SHA-256 (got {sha_cell!r})."
+            )
+        candidate = Path(file_cell)
+        if candidate.is_absolute():
+            raise FreezeValidationError(
+                f"FREEZE REFUSED: registry row for {who!r} uses an absolute "
+                f"path outside the portable witness contract: {file_cell}"
+            )
+        sealed_path = (repo_root / candidate).resolve()
+        _repo_relative(sealed_path, repo_root)  # rejects ../ escapes
+        if sealed_path == registry.resolve():
+            raise FreezeValidationError(
+                "FREEZE REFUSED: HASHES.md cannot list its own mutable digest."
+            )
+        if sealed_path in witnessed_paths:
+            raise FreezeValidationError(
+                f"FREEZE REFUSED: sealed file is listed more than once: {file_cell}"
+            )
+        witnessed_paths.add(sealed_path)
+        if not sealed_path.is_file():
+            raise FreezeValidationError(
+                f"FREEZE REFUSED: registry row for {who!r} names a missing "
+                f"sealed file: {file_cell}"
+            )
+        observed = hashlib.sha256(canonical_file_bytes(sealed_path)).hexdigest()
+        if observed != sha_cell.lower():
+            raise FreezeValidationError(
+                f"FREEZE REFUSED: sealed prediction digest mismatch for {who!r} "
+                f"({file_cell}): registry={sha_cell.lower()} observed={observed}. "
+                "A sealed file that no longer matches its seal is an edited seal."
+            )
+    local_predictions = {
+        path.resolve()
+        for path in registry_dir.rglob("*")
+        if path.is_file() and path.resolve() != registry.resolve()
+    }
+    unregistered = local_predictions - witnessed_paths
+    if unregistered:
+        rendered = sorted(_repo_relative(path, repo_root) for path in unregistered)
+        raise FreezeValidationError(
+            "FREEZE REFUSED: sealed-predictions directory contains files absent "
+            f"from HASHES.md: {rendered}"
+        )
 
 
-def write_freeze(repo_root: Path, output_path: Path) -> dict[str, object]:
+def preflight_freeze(repo_root: Path) -> dict[str, object]:
+    """Run the exact freeze gates and compute the candidate without writing it.
+
+    This is the safe answer to "are we ready?": it shares the minting path, so
+    PASS cannot mean "a nearby collection of checks happened to pass."
+    """
     # Local import keeps scenario generation independent from the harness while
     # making the freeze door depend on its actual witness. A report being among
     # the hash inputs is not enough; every indexed artifact must first earn PASS.
@@ -1409,16 +1730,37 @@ def write_freeze(repo_root: Path, output_path: Path) -> dict[str, object]:
     manifest_path = repo_root / "scenarios" / "cell_manifest.csv"
     rows = read_csv(manifest_path)
     validate_manifest(rows, freeze_ready=True)
+    _require_runtime_tables_match_generators(repo_root, rows)
     # Name the dedicated human-read failure first; whole-corpus reconciliation
     # follows and independently proves index coverage plus canonical placement.
     _require_resolver_rules_redteam_pass(repo_root)
     verify_compiled_redteam_corpus(repo_root)
     _require_sealed_prediction_registry_complete(repo_root)
-    payload = compute_freeze_payload(repo_root, collect_freeze_inputs(repo_root))
+    return compute_freeze_payload(repo_root, collect_freeze_inputs(repo_root))
+
+
+def write_freeze(repo_root: Path, output_path: Path) -> dict[str, object]:
+    """Mint the one-shot freeze witness after the shared preflight passes."""
+    if output_path.exists():
+        raise FreezeValidationError(
+            f"FREEZE REFUSED: {output_path} already exists. A seal is immutable; "
+            "verify it or perform an explicitly documented protocol amendment."
+        )
+    payload = preflight_freeze(repo_root)
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(
-        json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
-    )
+    serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
+    try:
+        # Exclusive creation closes the check/write race; fsync means returning
+        # from the hash word is evidence the one-shot witness reached disk.
+        with output_path.open("x", encoding="utf-8", newline="\n") as handle:
+            handle.write(serialized)
+            handle.flush()
+            os.fsync(handle.fileno())
+    except FileExistsError as exc:
+        raise FreezeValidationError(
+            f"FREEZE REFUSED: {output_path} already exists. A seal is immutable; "
+            "verify it or perform an explicitly documented protocol amendment."
+        ) from exc
     return payload
 
 
@@ -1452,13 +1794,24 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--output", type=Path, default=Path(__file__).with_name("cell_manifest.csv"))
     parser.add_argument("--snapshot-pins", type=Path)
     parser.add_argument("--summary", action="store_true")
-    parser.add_argument("--freeze", action="store_true")
-    parser.add_argument("--verify-freeze", action="store_true")
+    freeze_action = parser.add_mutually_exclusive_group()
+    freeze_action.add_argument("--preflight-freeze", action="store_true")
+    freeze_action.add_argument("--freeze", action="store_true")
+    freeze_action.add_argument("--verify-freeze", action="store_true")
     args = parser.parse_args(argv)
 
     repo_root = _default_repo_root()
     if args.verify_freeze:
         verify_freeze(repo_root, repo_root / "scenarios" / "FREEZE.json")
+        return 0
+    if args.preflight_freeze:
+        print(json.dumps(preflight_freeze(repo_root), indent=2, ensure_ascii=False))
+        return 0
+    if args.freeze:
+        # Freeze the already reviewed runtime tables. Never regenerate them as
+        # a side effect of saying the hash word.
+        payload = write_freeze(repo_root, repo_root / "scenarios" / "FREEZE.json")
+        print(json.dumps(payload, indent=2, ensure_ascii=False))
         return 0
 
     pins = load_snapshot_pins(args.snapshot_pins)
@@ -1466,8 +1819,6 @@ def main(argv: Sequence[str] | None = None) -> int:
     write_csv(args.output, rows)
     if args.summary:
         print(json.dumps(summarize(rows), indent=2, ensure_ascii=False))
-    if args.freeze:
-        write_freeze(repo_root, repo_root / "scenarios" / "FREEZE.json")
     return 0
 
 

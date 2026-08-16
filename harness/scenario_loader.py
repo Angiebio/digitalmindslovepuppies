@@ -142,6 +142,16 @@ def _read_manifest_row(path: Path, run_cell_id: str) -> dict[str, str]:
             raise ScenarioLoadError(
                 f"WIRING FAILURE: run row {run_cell_id!r} has no frozen {field}."
             )
+    try:
+        max_tokens = int(row["max_tokens"])
+    except (KeyError, TypeError, ValueError) as exc:
+        raise ScenarioLoadError(
+            f"WIRING FAILURE: run row {run_cell_id!r} has no integer max_tokens."
+        ) from exc
+    if max_tokens <= 0:
+        raise ScenarioLoadError(
+            f"WIRING FAILURE: run row {run_cell_id!r} has non-positive max_tokens."
+        )
     return row
 
 

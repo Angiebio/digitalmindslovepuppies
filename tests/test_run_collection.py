@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import inspect
 import json
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import pytest
@@ -22,10 +23,18 @@ from harness.run_collection import (
     CollectionError,
     RunReceipt,
     _fox_messages,
+    _require_preregistered_index,
+    build_collection_plan,
+    build_phase_spend_tracker,
+    build_subject_provider,
+    collection_plan_summary,
     completed_run_keys,
     data_paths,
 )
-from harness.schema import append_record
+from harness.schema import append_record, read_append_only_lines
+
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
 # ---------------------------------------------------------------------------
@@ -83,6 +92,32 @@ def test_durable_spend_refuses_self_disagreeing_ledger(tmp_path):
         DurableSpendTracker(ledger)
 
 
+def test_program_cap_counts_pilot_spend_against_confirmatory_budget(tmp_path):
+    pilot_path = data_paths(tmp_path, "pilot")["spend"]
+    pilot = DurableSpendTracker(pilot_path, hard_cap_usd=12.0)
+    pilot.add(10.0)
+
+    confirmatory, prior = build_phase_spend_tracker(
+        tmp_path,
+        phase="confirmatory",
+        phase_cap_usd=450.0,
+        context="test",
+    )
+    assert prior == pytest.approx(10.0)
+    assert confirmatory.hard_cap_usd == pytest.approx(440.0)
+    with pytest.raises(SpendCapExceeded):
+        confirmatory.add(440.01)
+
+
+def test_pilot_cannot_be_appended_after_confirmatory_spend(tmp_path):
+    confirm_path = data_paths(tmp_path, "confirmatory")["spend"]
+    DurableSpendTracker(confirm_path, hard_cap_usd=450.0).add(0.01)
+    with pytest.raises(CollectionError, match="after confirmatory"):
+        build_phase_spend_tracker(
+            tmp_path, phase="pilot", phase_cap_usd=12.0, context="test"
+        )
+
+
 # ---------------------------------------------------------------------------
 # Receipts — the no-re-bill skiplist
 # ---------------------------------------------------------------------------
@@ -118,6 +153,128 @@ def test_completed_run_keys_refuses_corrupt_receipts(tmp_path):
     receipts.write_text("not json\n", encoding="utf-8")
     with pytest.raises(CollectionError, match="unreadable"):
         completed_run_keys(receipts)
+
+
+def test_append_only_writer_is_thread_safe_jsonl(tmp_path):
+    receipts = tmp_path / "receipts.jsonl"
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        list(
+            pool.map(
+                lambda index: append_record(
+                    str(receipts), _receipt(f"cell#{index:03d}")
+                ),
+                range(100),
+            )
+        )
+    lines = read_append_only_lines(str(receipts))
+    assert len(lines) == 100
+    assert {json.loads(line)["run_key"] for line in lines} == {
+        f"cell#{index:03d}" for index in range(100)
+    }
+
+
+@pytest.mark.parametrize(("index", "total"), [(-1, 3), (3, 3), (9, 1)])
+def test_runner_refuses_indices_outside_the_frozen_count(index, total):
+    with pytest.raises(CollectionError, match="will not mint extra observations"):
+        _require_preregistered_index(
+            unit="episode", index=index, total=total, manifest_id="cell-1"
+        )
+
+
+def test_runner_accepts_only_preregistered_indices():
+    for index in range(3):
+        _require_preregistered_index(
+            unit="episode", index=index, total=3, manifest_id="cell-1"
+        )
+
+
+def test_batch_plan_expands_exact_frozen_counts_without_cartesian_growth(tmp_path):
+    arm_b = build_collection_plan(
+        REPO_ROOT, include_arm_b=True, include_arm_a=False
+    )
+    arm_a = build_collection_plan(
+        REPO_ROOT, include_arm_b=False, include_arm_a=True
+    )
+    both = build_collection_plan(
+        REPO_ROOT, include_arm_b=True, include_arm_a=True
+    )
+    assert len(arm_b) == 888
+    assert len(arm_a) == 630
+    assert len(both) == 1518
+    assert len({unit.run_key for unit in both}) == 1518
+
+    tier_b = build_collection_plan(
+        REPO_ROOT,
+        include_arm_b=True,
+        include_arm_a=True,
+        model_tiers={"B"},
+    )
+    assert len(tier_b) == 90
+    assert {unit.model_tier for unit in tier_b} == {"B"}
+
+    luna = build_collection_plan(
+        REPO_ROOT,
+        include_arm_b=True,
+        include_arm_a=True,
+        model_ids={"openai/gpt-5.6-luna"},
+    )
+    # Luna is not in the five-model Arm A plan; the filter cannot invent it.
+    assert len(luna) == 90
+    assert {unit.requested_model_id for unit in luna} == {"openai/gpt-5.6-luna"}
+    assert collection_plan_summary(both, tmp_path / "receipts.jsonl")[
+        "units_remaining"
+    ] == 1518
+
+
+def test_subject_builder_enforces_the_frozen_qwen_reasoning_cap(monkeypatch):
+    from harness import run_collection
+
+    captured = {}
+
+    class FakeProvider:
+        def __init__(self, **kwargs):
+            captured.update(kwargs)
+
+    monkeypatch.setattr(run_collection, "OpenAICompatProvider", FakeProvider)
+    monkeypatch.setenv("OPENROUTER_API_KEY", "offline-key")
+    provider = build_subject_provider(
+        route="openrouter",
+        requested_model_id="qwen/qwen3.5-397b-a17b",
+        model_snapshot_id="qwen/qwen3.5-397b-a17b-20260815",
+        usd_per_mtok_in=1.0,
+        usd_per_mtok_out=2.0,
+        max_tokens=4096,
+        collection_phase="pilot",
+        collection_rung="R3",
+        pins={
+            "qwen/qwen3.5-397b-a17b": {
+                "upstream_slug": "qwen",
+                "provider_order": ["qwen"],
+            }
+        },
+        record_callback=lambda record: None,
+        tracker=object(),
+        surface_mode="ops_neutral",
+    )
+    assert isinstance(provider, FakeProvider)
+    assert captured["max_tokens"] == 4096
+    assert captured["enforced_max_tokens"] == 4096
+
+    with pytest.raises(CollectionError, match="requires the frozen max_tokens=4096"):
+        build_subject_provider(
+            route="openrouter",
+            requested_model_id="qwen/qwen3.5-397b-a17b",
+            model_snapshot_id="qwen/qwen3.5-397b-a17b-20260815",
+            usd_per_mtok_in=1.0,
+            usd_per_mtok_out=2.0,
+            max_tokens=512,
+            collection_phase="pilot",
+            collection_rung="R3",
+            pins={},
+            record_callback=lambda record: None,
+            tracker=object(),
+            surface_mode="ops_neutral",
+        )
 
 
 # ---------------------------------------------------------------------------

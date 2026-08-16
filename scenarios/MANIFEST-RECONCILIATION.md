@@ -204,3 +204,21 @@ ANTHROPIC_API_KEY is history.
 ---
 
 *The manifest is the design. This document is only its witness.* 🔥
+
+## 9. 15AUG2026 night — reasoning-output treatment (v0.4 addendum; PI authorized)
+
+The R3 pilot showed `qwen/qwen3.5-397b-a17b` returning `finish_reason=length`
+with empty content after consuming the complete 512/1024-token allowance as
+reasoning. The PI approved 4096 tokens. Manifest v0.4 therefore adds a required
+`max_tokens` runtime column to every Arm B row: Qwen 3.5 = **4096**; all other
+subjects retain the **1024 provider fallback**. Validation recomputes this mapping
+and refuses drift. The runner marks the Qwen value as provider-enforced, replacing
+Arm B's 256-token probe / 512-token choice-and-focal call defaults before both the
+request-envelope hash and the wire. Non-Qwen Arm B calls retain those existing
+call-kind limits. Arm A plan v1.2 carries the same Qwen cap while retaining 512
+closed / 1024 open for other models.
+
+Rows / cells / episodes / calls and the preregistered expected-token estimate
+remain **278 / 27 / 888 / 12,124 / $431.509628**. `max_tokens` is a ceiling, not
+an assertion that every response consumes it; R5 uses post-hash pilot actuals
+and invokes the frozen kill order if reasoning usage breaks the $450 envelope.

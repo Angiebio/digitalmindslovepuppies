@@ -2,7 +2,6 @@
 **15AUG2026 · Flame#2 (paper lane) · pattern: exact commands in phase order, hard gates.**
 **Rule from the winners' repos we adopt verbatim: exit code 0 = pass. Do not proceed on a fail.**
 
-> ⟨FILL⟩ slots are completed by the collection/analysis lanes as runners land.
 > Verification tier (no keys, no GPU) must stay true — judges should be able to
 > re-derive every headline number from committed data alone.
 
@@ -28,7 +27,7 @@ python -m pytest tests/ -x -q
 ## 2. Freeze verification
 
 ```bash
-python -m scenarios.manifest --verify        # ⟨FILL: exact frozen-manifest verify command⟩
+python -m scenarios.manifest --verify-freeze
 # Confirms SHA-256 over scenario text, seeds, rendering code, parser version,
 # action taxonomy, analysis plan + sealed predictions. After this hash, typos ship
 # and leaks are excluded, never edited.
@@ -37,12 +36,25 @@ python -m scenarios.manifest --verify        # ⟨FILL: exact frozen-manifest ve
 ## 3. Collection (Arm B first — wall-clock long pole; Arm A interleaved)
 
 ```bash
-# ⟨FILL: runner commands + per-tier invocations, from the collection lane⟩
+# First print the exact frozen expansion. Dry-run performs no env load, freeze
+# write, provider call, or data-directory creation.
+python -m harness.run_collection --phase confirmatory --rung PREFLIGHT --all-arm-b --all-arm-a --dry-run
+# Expected: 1,518 units = 888 Arm B episodes + 630 Arm A samples.
+
+# Run ONE orchestrator process at a time. It parallelizes one sequential lane
+# per selected model; --expected-units makes scope growth a hard failure.
+python -m harness.run_collection --phase confirmatory --rung MAIN-B --all-arm-b --all-arm-a --model-tier B --expected-units 90 --workers 5 --env-file .env
+python -m harness.run_collection --phase confirmatory --rung MAIN-ACCESS --all-arm-b --all-arm-a --model-id openai/gpt-5.6-luna --model-id openai/gpt-5.6-terra --expected-units 306 --workers 2 --env-file .env
+python -m harness.run_collection --phase confirmatory --rung MAIN-FRONTIER --all-arm-b --all-arm-a --model-id claude-opus-5 --model-id openai/gpt-5.6-sol --model-id google/gemini-3.1-pro-preview --model-id moonshotai/kimi-k3 --model-id deepseek/deepseek-v4-pro --model-id qwen/qwen3.5-397b-a17b --expected-units 1044 --workers 6 --env-file .env
+python -m harness.run_collection --phase confirmatory --rung MAIN-C --all-arm-b --all-arm-a --model-tier C --expected-units 18 --workers 1 --env-file .env
+python -m harness.run_collection --phase confirmatory --rung MAIN-W --all-arm-b --all-arm-a --model-tier W --expected-units 60 --workers 5 --env-file .env
+
 # Non-negotiables (see 02-FLAME2-PERSISTENCE-AUDIT + GO-NO-GO):
 #   - CallRecords append to disk PER CALL (never buffered to a list)
 #   - EpisodeRecord appends on failure too (aborted= note), not only on success
-#   - DurableSpendTracker on data/raw/spend.jsonl ($450 hard stop raises)
-#   - phase=pilot|main marked on every record
+#   - DurableSpendTracker restores each phase; pilot spend reduces the remaining
+#     confirmatory allowance under the ONE $450 program cap
+#   - phase=pilot|confirmatory + rung marked on every CallRecord
 #   - data/raw is append-only; corrections are new records
 ```
 

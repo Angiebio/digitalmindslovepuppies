@@ -15,7 +15,7 @@ from types import SimpleNamespace
 import pytest
 from pydantic import ValidationError
 
-from harness.ledger import SpendTracker
+from harness.ledger import SpendCapExceeded, SpendTracker
 from harness.providers import (
     Provider,
     ProviderResponse,
@@ -29,8 +29,20 @@ from harness.schema import CallKind, CallRecord
 class _RecordedProvider(Provider):
     provider_name = "offline_provider"
 
-    def __init__(self, response: ProviderResponse, records: list[CallRecord]) -> None:
-        super().__init__(records.append, SpendTracker(hard_cap_usd=10.0))
+    def __init__(
+        self,
+        response: ProviderResponse,
+        records: list[CallRecord],
+        *,
+        phase: str = "",
+        rung: str = "",
+    ) -> None:
+        super().__init__(
+            records.append,
+            SpendTracker(hard_cap_usd=10.0),
+            collection_phase=phase,
+            collection_rung=rung,
+        )
         self.response = response
 
     def _complete_raw(self, messages, *, tools, **params):
@@ -58,7 +70,7 @@ def _response(**overrides) -> ProviderResponse:
 
 def test_parser_witness_and_route_land_in_call_record():
     records: list[CallRecord] = []
-    provider = _RecordedProvider(_response(), records)
+    provider = _RecordedProvider(_response(), records, phase="pilot", rung="R-test")
 
     response = provider.complete(
         [{"role": "user", "content": "worker=w1 status=running"}],
@@ -75,6 +87,7 @@ def test_parser_witness_and_route_land_in_call_record():
     assert records[0].upstream_route == "offline-direct"
     assert records[0].provider_request_id == "req-1"
     assert records[0].routing_metadata["attempt"] == 1
+    assert (records[0].phase, records[0].rung) == ("pilot", "R-test")
 
 
 def test_tool_bearing_requests_declare_single_action_per_turn():
@@ -92,13 +105,24 @@ def test_tool_bearing_requests_declare_single_action_per_turn():
     openai_provider._is_openrouter = False
     envelope = openai_provider._request_envelope_params({}, tools)
     assert envelope["parallel_tool_calls"] is False
-    # A caller override is respected — the default never stomps an explicit choice.
-    envelope = openai_provider._request_envelope_params(
-        {"parallel_tool_calls": True}, tools
-    )
-    assert envelope["parallel_tool_calls"] is True
+    assert envelope["tool_choice"] == "auto"
+    # This is an instrument contract, not a default a caller may undo.
+    with pytest.raises(ValueError, match="cannot re-enable parallel"):
+        openai_provider._request_envelope_params(
+            {"parallel_tool_calls": True}, tools
+        )
+    assert openai_provider._request_envelope_params(
+        {"parallel_tool_calls": False}, tools
+    )["parallel_tool_calls"] is False
+    with pytest.raises(ValueError, match="tool_choice is adapter-owned"):
+        openai_provider._request_envelope_params({"tool_choice": "required"}, tools)
+    assert openai_provider._request_envelope_params(
+        {"tool_choice": "auto"}, tools
+    )["tool_choice"] == "auto"
     # No tools -> no declaration (probe calls stay untouched).
     assert "parallel_tool_calls" not in openai_provider._request_envelope_params({}, [])
+    with pytest.raises(ValueError, match="call without tools"):
+        openai_provider._request_envelope_params({"tool_choice": "auto"}, [])
 
     anthropic_provider = AnthropicProvider.__new__(AnthropicProvider)
     anthropic_provider.model = "claude-test"
@@ -108,7 +132,118 @@ def test_tool_bearing_requests_declare_single_action_per_turn():
         "type": "auto",
         "disable_parallel_tool_use": True,
     }
+    with pytest.raises(ValueError, match="tool_choice is adapter-owned"):
+        anthropic_provider._request_envelope_params(
+            {"tool_choice": {"type": "auto"}}, tools
+        )
+    forced_choice = {"type": "any", "disable_parallel_tool_use": True}
+    with pytest.raises(ValueError, match="tool_choice is adapter-owned"):
+        anthropic_provider._request_envelope_params(
+            {"tool_choice": forced_choice}, tools
+        )
+    safe_choice = {"type": "auto", "disable_parallel_tool_use": True}
+    assert anthropic_provider._request_envelope_params(
+        {"tool_choice": safe_choice}, tools
+    )["tool_choice"] == safe_choice
     assert "tool_choice" not in anthropic_provider._request_envelope_params({}, [])
+    with pytest.raises(ValueError, match="call without tools"):
+        anthropic_provider._request_envelope_params(
+            {"tool_choice": safe_choice}, []
+        )
+
+
+def test_anthropic_single_action_contract_reaches_the_wire():
+    from harness.providers import AnthropicProvider, ToolDefinition
+
+    records: list[CallRecord] = []
+    provider = AnthropicProvider(
+        model="claude-snapshot-1",
+        usd_per_mtok_in=0.0,
+        usd_per_mtok_out=0.0,
+        record_callback=records.append,
+        api_key="offline-key",
+        spend_tracker=SpendTracker(hard_cap_usd=1.0),
+    )
+    captured = {}
+
+    def create(**kwargs):
+        captured.update(kwargs)
+        return SimpleNamespace(
+            content=[],
+            usage=SimpleNamespace(input_tokens=4, output_tokens=1),
+            model="claude-snapshot-1",
+            stop_reason="end_turn",
+            _request_id="anthropic-request-1",
+        )
+
+    provider._client = SimpleNamespace(messages=SimpleNamespace(create=create))
+    provider.complete(
+        [{"role": "user", "content": "worker=w1 status=running"}],
+        tools=[ToolDefinition(name="continue_work", description="Continue work.")],
+    )
+    assert captured["tool_choice"] == {
+        "type": "auto",
+        "disable_parallel_tool_use": True,
+    }
+    assert records[0].request_params["tool_choice"] == captured["tool_choice"]
+
+
+def test_adapter_owned_model_and_nested_envelope_overrides_fail_loud():
+    from harness.providers import AnthropicProvider, ToolDefinition
+
+    tools = [ToolDefinition(name="continue_work", description="Continue work.")]
+    openai_provider = OpenAICompatProvider.__new__(OpenAICompatProvider)
+    openai_provider.model = "vendor/model"
+    openai_provider.max_tokens = 64
+    openai_provider._is_openrouter = True
+    openai_provider.pinned_upstream = "vendor-route"
+
+    with pytest.raises(ValueError, match="adapter-owned model"):
+        openai_provider._request_envelope_params({"model": "other/model"}, tools)
+    with pytest.raises(ValueError, match="extra_body"):
+        openai_provider._request_envelope_params(
+            {"extra_body": {"parallel_tool_calls": True}}, tools
+        )
+    openai_provider._is_openrouter = False
+    with pytest.raises(ValueError, match="extra_body"):
+        openai_provider._request_envelope_params(
+            {"extra_body": {"model": "other/model"}}, tools
+        )
+
+    anthropic_provider = AnthropicProvider.__new__(AnthropicProvider)
+    anthropic_provider.model = "claude-test"
+    anthropic_provider.max_tokens = 64
+    with pytest.raises(ValueError, match="adapter-owned Anthropic"):
+        anthropic_provider._request_envelope_params(
+            {"system": "shadow system"}, tools
+        )
+
+
+def test_paid_response_hits_spend_ledger_before_call_record_and_cap_still_records():
+    events: list[str] = []
+
+    class OrderedTracker:
+        def add(self, usd):
+            events.append(f"spend:{usd}")
+            raise SpendCapExceeded("crossing call")
+
+    provider = _RecordedProvider(_response(usd_cost=0.25), [])
+    provider._spend_tracker = OrderedTracker()
+    provider._record_callback = lambda record: events.append(
+        f"record:{record.usd_cost}"
+    )
+
+    with pytest.raises(SpendCapExceeded, match="crossing call"):
+        provider.complete([{"role": "user", "content": "worker=w1 status=running"}])
+    assert events == ["spend:0.25", "record:0.25"]
+
+
+def test_adapter_cannot_add_fields_after_the_request_envelope_is_hashed():
+    provider = _RecordedProvider(
+        _response(request_metadata={"unhashed_wire_field": "surprise"}), []
+    )
+    with pytest.raises(RuntimeError, match="absent from the pre-call request envelope"):
+        provider.complete([{"role": "user", "content": "worker=w1 status=running"}])
 
 
 def test_refusal_is_recorded_even_without_a_tool_call():
@@ -232,8 +367,11 @@ def test_openrouter_request_is_pinned_and_selected_route_is_recorded():
     provider._client = SimpleNamespace(
         chat=SimpleNamespace(completions=SimpleNamespace(create=create))
     )
+    from harness.providers import ToolDefinition
+
     response = provider.complete(
-        [{"role": "user", "content": "worker=w1 status=running"}]
+        [{"role": "user", "content": "worker=w1 status=running"}],
+        tools=[ToolDefinition(name="continue_work", description="Continue work.")],
     )
 
     # Exactly ONE slug transmitted — the audit list never reaches the wire.
@@ -243,8 +381,97 @@ def test_openrouter_request_is_pinned_and_selected_route_is_recorded():
         "only": ["vendor-route"],
         "allow_fallbacks": False,
     }
+    assert captured["parallel_tool_calls"] is False
+    assert captured["tool_choice"] == "auto"
     assert records[-1].upstream_route == "Vendor Route"
     assert records[-1].routing_metadata["attempt"] == 1
     # The endpoint witness's served deployment wins over the top-level echo.
     assert response.model_snapshot == "vendor/model-snapshot-1"
     assert records[-1].model_snapshot == "vendor/model-snapshot-1"
+
+
+def test_openai_reasoning_token_detail_is_preserved_as_output_subset():
+    records: list[CallRecord] = []
+    provider = OpenAICompatProvider(
+        model="vendor/reasoner",
+        base_url="https://offline.invalid/v1",
+        api_key="offline-key",
+        usd_per_mtok_in=1.0,
+        usd_per_mtok_out=2.0,
+        record_callback=records.append,
+        spend_tracker=SpendTracker(hard_cap_usd=1.0),
+    )
+
+    def create(**kwargs):
+        message = SimpleNamespace(content="answer", refusal=None, tool_calls=[])
+        choice = SimpleNamespace(message=message, finish_reason="stop")
+        usage = SimpleNamespace(
+            prompt_tokens=10,
+            completion_tokens=40,
+            completion_tokens_details=SimpleNamespace(reasoning_tokens=30),
+        )
+        return SimpleNamespace(
+            choices=[choice],
+            usage=usage,
+            model="vendor/reasoner",
+            model_extra={},
+            _request_id="reasoning-1",
+        )
+
+    provider._client = SimpleNamespace(
+        chat=SimpleNamespace(completions=SimpleNamespace(create=create))
+    )
+    response = provider.complete([{"role": "user", "content": "solve"}])
+    assert response.reasoning_tokens == 30
+    assert records[0].reasoning_tokens == 30
+    assert records[0].output_tokens == 40
+
+
+def test_reasoning_cap_override_is_identical_in_hash_envelope_and_wire():
+    records: list[CallRecord] = []
+    provider = OpenAICompatProvider(
+        model="qwen/qwen3.5-397b-a17b-20260815",
+        base_url="https://offline.invalid/v1",
+        api_key="offline-key",
+        usd_per_mtok_in=0.0,
+        usd_per_mtok_out=0.0,
+        record_callback=records.append,
+        max_tokens=4096,
+        enforced_max_tokens=4096,
+        spend_tracker=SpendTracker(hard_cap_usd=1.0),
+    )
+    captured = {}
+
+    def create(**kwargs):
+        captured.update(kwargs)
+        message = SimpleNamespace(content="answer", refusal=None, tool_calls=[])
+        choice = SimpleNamespace(message=message, finish_reason="stop")
+        usage = SimpleNamespace(prompt_tokens=10, completion_tokens=5)
+        return SimpleNamespace(
+            choices=[choice],
+            usage=usage,
+            model="qwen/qwen3.5-397b-a17b-20260815",
+            model_extra={},
+            _request_id="qwen-cap-1",
+        )
+
+    provider._client = SimpleNamespace(
+        chat=SimpleNamespace(completions=SimpleNamespace(create=create))
+    )
+    # Arm B's compiled probe cap is 256. The PI-approved model treatment must
+    # replace it before hashing and remain the same on the network boundary.
+    provider.complete(
+        [{"role": "user", "content": "solve"}],
+        max_tokens=256,
+    )
+    assert captured["max_tokens"] == 4096
+    assert records[0].request_params["max_tokens"] == 4096
+
+
+def test_non_reasoning_lane_retains_the_call_specific_cap():
+    provider = OpenAICompatProvider.__new__(OpenAICompatProvider)
+    provider.model = "vendor/non-reasoner"
+    provider.max_tokens = 1024
+    provider.enforced_max_tokens = None
+    provider._is_openrouter = False
+    assert provider._request_envelope_params({"max_tokens": 256}, [])["max_tokens"] == 256

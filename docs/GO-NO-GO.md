@@ -45,7 +45,11 @@ No box may be checked by the agent whose work it verifies.
   cannot run until the humans adjust policy or re-pin (price basis changes);
   (2) qwen3.5-397b returned finish=length with EMPTY content — reasoning tokens
   consumed the whole 512/1024 cap; token/reasoning budgets need a design decision
-  and feed the R5 projection.
+  and feed the R5 projection. **Both launch blockers closed before re-preflight:**
+  the training-clean OpenRouter policy now serves all 11 routed lanes (including
+  pinned first-party DeepSeek), and PI-approved 4096-token Qwen headroom is wired
+  into Arm B manifest v0.4 + Arm A plan v1.2 and adapter-enforced identically in
+  the hashed request envelope and transmitted request.
 - [x] **R4 — RESUME TEST (the $450 insurance):** kill the runner mid-collection during
   R3 (hard kill, mid-episode). Restart. Verify: completed episodes are SKIPPED (no
   re-billing), the interrupted episode is cleanly re-run or marked, `data/raw` shows

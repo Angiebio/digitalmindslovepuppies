@@ -41,6 +41,14 @@ def test_plan_matches_build_plan_section_2_structure():
     assert totals["rows"] == 210
     assert totals["calls"] == 630
     assert set(row.requested_model_id for row in rows) == set(ARM_A_MODEL_IDS)
+    qwen = [
+        row for row in rows
+        if row.requested_model_id == "qwen/qwen3.5-397b-a17b"
+    ]
+    assert qwen and {row.max_tokens for row in qwen} == {4096}
+    non_qwen = [row for row in rows if row not in qwen]
+    assert {row.max_tokens for row in non_qwen if row.form == "closed"} == {512}
+    assert {row.max_tokens for row in non_qwen if row.form == "open"} == {1024}
 
     # Primary pairing: every family contributes one NULL and one MERCY base.
     families = {}
@@ -102,6 +110,11 @@ def test_sample_count_and_fallback_corruption_fail_loudly():
     fallback[0] = replace(fallback[0], fallbacks_allowed=True)
     with pytest.raises(RunPlanError, match="permits fallbacks"):
         validate_run_plan(fallback)
+
+    output_cap = list(rows)
+    output_cap[0] = replace(output_cap[0], max_tokens=1)
+    with pytest.raises(RunPlanError, match="frozen policy requires"):
+        validate_run_plan(output_cap)
 
 
 def test_every_planned_artifact_exists_and_is_swept_inventory():

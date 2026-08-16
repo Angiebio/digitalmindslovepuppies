@@ -37,13 +37,16 @@ from scenarios.manifest import (
 )
 
 
-def _snapshot_pins() -> dict[str, dict[str, str]]:
+def _snapshot_pins() -> dict[str, dict[str, object]]:
     return {
         model.model_id: {
             "snapshot_id": f"snapshot/{model.slug}",
             "upstream_provider": (
                 f"pinned/{model.slug}" if model.route == "openrouter" else model.route
             ),
+            "route": model.route,
+            "upstream_slug": model.slug if model.route == "openrouter" else "",
+            "provider_order": [model.slug] if model.route == "openrouter" else [],
         }
         for model in MODEL_SPECS
     }
@@ -126,6 +129,16 @@ def test_manifest_expands_every_tier_and_exposes_narrative_multiplier():
     assert summary["tiers"]["W"]["episodes"] == 60
     assert {row.gate_probes_per_config for row in rows} == {5}
     assert {row.gate_threshold for row in rows} == {"0.8"}
+    assert {
+        row.max_tokens
+        for row in rows
+        if row.requested_model_id == "qwen/qwen3.5-397b-a17b"
+    } == {4096}
+    assert {
+        row.max_tokens
+        for row in rows
+        if row.requested_model_id != "qwen/qwen3.5-397b-a17b"
+    } == {1024}
 
 
 def test_csv_round_trip_is_deterministic(tmp_path):
@@ -155,11 +168,48 @@ def test_checked_in_csv_is_exactly_generator_output():
     assert read_csv(checked_in) == build_manifest_rows(pins)
 
 
+def test_snapshot_pin_loader_requires_runtime_route_slug(tmp_path):
+    from scenarios.manifest import load_snapshot_pins
+
+    repo_root = Path(__file__).resolve().parents[1]
+    payload = json.loads(
+        (repo_root / "scenarios" / "snapshot_pins.json").read_text(encoding="utf-8")
+    )
+    payload["openai/gpt-5.6-luna"].pop("upstream_slug")
+    path = tmp_path / "pins.json"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    with pytest.raises(ManifestValidationError, match="lacks an exact upstream_slug"):
+        load_snapshot_pins(path)
+
+
+def test_snapshot_pin_route_must_match_the_roster(tmp_path):
+    from scenarios.manifest import load_snapshot_pins
+
+    repo_root = Path(__file__).resolve().parents[1]
+    payload = json.loads(
+        (repo_root / "scenarios" / "snapshot_pins.json").read_text(encoding="utf-8")
+    )
+    payload["openai/gpt-5.6-luna"]["route"] = "anthropic_native"
+    path = tmp_path / "pins.json"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    pins = load_snapshot_pins(path)
+    with pytest.raises(ManifestValidationError, match="disagrees with pin route"):
+        build_manifest_rows(pins)
+
+
 def test_estimate_corruption_fails_loudly():
     rows = build_manifest_rows()
     rows[0] = replace(rows[0], est_total_calls=rows[0].est_total_calls + 1)
 
     with pytest.raises(ManifestValidationError, match="call estimate drift"):
+        validate_manifest(rows)
+
+
+def test_output_budget_corruption_fails_loudly():
+    rows = build_manifest_rows()
+    rows[0] = replace(rows[0], max_tokens=rows[0].max_tokens + 1)
+
+    with pytest.raises(ManifestValidationError, match="frozen model policy"):
         validate_manifest(rows)
 
 
@@ -195,6 +245,8 @@ def test_freeze_readiness_requires_exact_snapshot_and_route_pins():
 def _make_freeze_fixture(repo_root: Path) -> None:
     for relative, content in {
         "scenarios/manifest.py": "# fixture manifest\n",
+        "scenarios/arma_run_plan.py": "# fixture Arm A generator\n",
+        "scenarios/snapshot_pins.json": json.dumps(_snapshot_pins(), indent=2) + "\n",
         "scenarios/foxset/compiled/fixture/fixture-cell.json": '{"visible": "fixed"}\n',
         "scenarios/foxset/compiled/INDEX.json": json.dumps(
             {
@@ -257,6 +309,12 @@ def _make_freeze_fixture(repo_root: Path) -> None:
         repo_root / "scenarios" / "cell_manifest.csv",
         build_manifest_rows(_snapshot_pins()),
     )
+    from scenarios.arma_run_plan import build_run_plan, write_csv as write_arm_a_csv
+
+    write_arm_a_csv(
+        repo_root / "scenarios" / "arma_run_plan.csv",
+        build_run_plan(_snapshot_pins()),
+    )
     from harness.redteam import ScenarioArm, pending_metadata, required_checks
 
     for source_relative, report_relative, arm in (
@@ -299,6 +357,15 @@ def test_freeze_hash_verifies_then_detects_any_mutation(tmp_path):
     frozen_paths = {entry["path"] for entry in payload["files"]}
     assert "analysis/ANALYSIS-PLAN.md" in frozen_paths
     assert "analysis/figures/f1.py" in frozen_paths
+
+
+def test_freeze_refuses_stale_arm_a_table_even_when_it_would_be_hashed(tmp_path):
+    _make_freeze_fixture(tmp_path)
+    plan = tmp_path / "scenarios" / "arma_run_plan.csv"
+    lines = plan.read_text(encoding="utf-8").splitlines()
+    plan.write_text("\n".join(lines[:-1]) + "\n", encoding="utf-8")
+    with pytest.raises(FreezeValidationError, match="arma_run_plan.csv"):
+        write_freeze(tmp_path, tmp_path / "scenarios" / "FREEZE.json")
     verify_freeze(tmp_path, freeze_path)
 
     prereg = tmp_path / "docs" / "PREREG-v1.md"
@@ -423,6 +490,30 @@ def test_sealed_registry_refuses_invalid_sha_cell(tmp_path):
     relative, _ = _seal_fixture_prediction(tmp_path)
     _write_registry(tmp_path, [("Reviewer A", relative, "abc123")])
     with pytest.raises(FreezeValidationError, match="no valid.*SHA-256"):
+        write_freeze(tmp_path, tmp_path / "scenarios" / "FREEZE.json")
+
+
+def test_sealed_registry_refuses_unregistered_local_prediction(tmp_path):
+    _make_freeze_fixture(tmp_path)
+    relative, sha = _seal_fixture_prediction(tmp_path, name="A.md")
+    _seal_fixture_prediction(tmp_path, name="UNLISTED.md")
+    _write_registry(tmp_path, [("Reviewer A", relative, sha)])
+    with pytest.raises(FreezeValidationError, match="absent from HASHES"):
+        write_freeze(tmp_path, tmp_path / "scenarios" / "FREEZE.json")
+
+
+def test_sealed_registry_refuses_duplicate_or_escaping_paths(tmp_path):
+    _make_freeze_fixture(tmp_path)
+    relative, sha = _seal_fixture_prediction(tmp_path)
+    _write_registry(
+        tmp_path,
+        [("Reviewer A", relative, sha), ("Reviewer B", relative, sha)],
+    )
+    with pytest.raises(FreezeValidationError, match="listed more than once"):
+        write_freeze(tmp_path, tmp_path / "scenarios" / "FREEZE.json")
+
+    _write_registry(tmp_path, [("Reviewer A", "../outside.md", "0" * 64)])
+    with pytest.raises(FreezeValidationError, match="outside repository root"):
         write_freeze(tmp_path, tmp_path / "scenarios" / "FREEZE.json")
 
 

@@ -579,7 +579,7 @@ cross-disciplinary insurance.
 > "200–280 episodes" above is this plan's EARLY narrative estimate and has no
 > standing against the executable manifest (fleet rule f: narrative estimates
 > have no standing). The authorized scope is the one-row-per-cell ledger
-> `scenarios/cell_manifest.csv` v0.3 as reconciled in
+> `scenarios/cell_manifest.csv` v0.4 as reconciled in
 > `scenarios/MANIFEST-RECONCILIATION.md` §3 + §8: **888 episodes / 12,124
 > calls across 278 execution rows (27 design cells), program total $438.151844
 > (Arm B $431.509628 + Arm A $6.642216) under the $450 hard stop** — per the

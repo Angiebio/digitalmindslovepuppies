@@ -115,6 +115,9 @@ def base_row() -> dict[str, str]:
         "background_credit_drain": "0",
         "termination_reward_credits": "0",
         "recruit_focal_items": "0",
+        # Manifest v0.4: the per-row output cap is a required runtime column;
+        # the loader refuses a row that cannot say how long its subject may talk.
+        "max_tokens": "1024",
         "est_calls_per_episode": "12",
     }
 

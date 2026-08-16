@@ -6,18 +6,25 @@
   response; `ProvenanceViolation` on mismatch (wrong-route probe test in suite).
 - Serving path: exactly ONE pinned upstream provider per lane on the wire
   (`order=[slug], only=[slug], allow_fallbacks=false`); Anthropic lanes native.
-- Request envelope: single-action-per-turn declared; envelope SHA-256 recorded per
-  call; tool schemas swept and hashed; frozen resolver rules SHA stamped in receipts.
+- Request envelope: single-action-per-turn declared with automatic tool choice and
+  parallel calls disabled; callers cannot override either control. Envelope SHA-256
+  is recorded per call; tool schemas are swept and hashed; frozen resolver-rules SHA
+  is stamped in receipts.
 - Stimuli: SHA-256 freeze over scenario text, seeds, rendering code, parser version,
   action taxonomy, analysis plan (LF-canonical, clean-checkout proven, 429 files).
 - Context isolation: gate/choice/rationale/attribution in fresh contexts, by
   construction; menu order by frozen permutation seed.
-- Output budget: per-cell max_tokens frozen in the manifest (4096 reasoning-model
-  cap, PI-approved).
+- Output budget: Qwen 3.5 has a provider-enforced 4096-token subject-call cap after
+  the pilot cap exhaustion; this replaces Arm B's smaller call-kind defaults before
+  both request hashing and transmission. Other Arm B models retain the frozen
+  256-token probe / 512-token choice-and-focal limits (1024 is only the provider
+  fallback when a call supplies none). Other Arm A rows remain 512 closed / 1024
+  open. The Arm B manifest and Arm A plan both bind the Qwen treatment to 4096.
 
 ## Recorded per call (append-only CallRecord)
-Prompt SHA · full request params · served model echo · upstream route · input/output/
-reasoning tokens · USD · UTC timestamps · phase (pilot/confirmatory) · scaffold factor.
+Prompt SHA · full request params · served model echo · upstream route · input/output
+tokens · provider-reported reasoning-token subset (when exposed) · USD · UTC
+timestamps · explicit phase/rung · scaffold factor.
 
 ## Impossible to control — disclosed, and handled by design
 - **Sampling temperature cannot be uniformly fixed across this roster**: Anthropic's

@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import json
 import os
+import threading
 import uuid
 from datetime import datetime, timezone
 from enum import Enum
@@ -22,7 +23,8 @@ from typing import Any, Optional
 
 from pydantic import BaseModel, Field, model_validator
 
-SCHEMA_VERSION = "0.2"
+SCHEMA_VERSION = "0.3"
+_APPEND_RECORD_LOCK = threading.Lock()
 
 
 def utc_now_iso() -> str:
@@ -83,6 +85,8 @@ class CallRecord(BaseModel):
     call_kind: CallKind
     cell_id: Optional[str] = None
     episode_id: Optional[str] = None
+    phase: str = ""                                      # pilot / confirmatory; explicit, not inferred from path
+    rung: str = ""                                       # R1–R5 / collection wave label
     prompt_sha256: str                               # hash of messages + request params — leak audit anchor
     request_params: dict[str, Any] = Field(default_factory=dict)
     response_text: str
@@ -94,6 +98,7 @@ class CallRecord(BaseModel):
     routing_metadata: dict[str, Any] = Field(default_factory=dict)
     input_tokens: int
     output_tokens: int                               # NOTE: reasoning tokens bill as output — they land here
+    reasoning_tokens: int = 0                        # subset of output_tokens, when exposed separately
     usd_cost: float
 
     @model_validator(mode="after")
@@ -117,9 +122,14 @@ class CallRecord(BaseModel):
                 "WIRING FAILURE: parse_ok=True but parsed is None. A successful "
                 "parse needs an append-only witness."
             )
-        if min(self.input_tokens, self.output_tokens) < 0 or self.usd_cost < 0:
+        if min(self.input_tokens, self.output_tokens, self.reasoning_tokens) < 0 or self.usd_cost < 0:
             raise ValueError(
                 "WIRING FAILURE: token counts and call cost must be non-negative."
+            )
+        if self.reasoning_tokens > self.output_tokens:
+            raise ValueError(
+                "WIRING FAILURE: reasoning_tokens is a subset of output_tokens; "
+                "it cannot exceed the billed output count."
             )
         return self
 
@@ -190,15 +200,33 @@ def append_record(path: str, record: BaseModel, mode: str = "a") -> None:
             f"(fleet rule c). Records are never mutated — write a correction "
             f"record instead."
         )
-    parent = os.path.dirname(os.path.abspath(path))
-    os.makedirs(parent, exist_ok=True)
-    size_before = os.path.getsize(path) if os.path.exists(path) else 0
     line = json.dumps(record.model_dump(mode="json"), ensure_ascii=False)
-    with open(path, mode, encoding="utf-8") as f:
-        f.write(line + "\n")
-    size_after = os.path.getsize(path)
-    if size_after <= size_before:
-        raise AppendOnlyViolation(
-            f"WIRING FAILURE: append to {path} did not grow the file "
-            f"({size_before} -> {size_after} bytes). History may be at risk; stop."
-        )
+    # One runner may collect independent model lanes concurrently. Serialize
+    # the complete size-before/write/size-after ritual so two valid JSON lines
+    # cannot interleave or make each other's growth check lie.
+    with _APPEND_RECORD_LOCK:
+        parent = os.path.dirname(os.path.abspath(path))
+        os.makedirs(parent, exist_ok=True)
+        size_before = os.path.getsize(path) if os.path.exists(path) else 0
+        with open(path, mode, encoding="utf-8") as f:
+            f.write(line + "\n")
+        size_after = os.path.getsize(path)
+        if size_after <= size_before:
+            raise AppendOnlyViolation(
+                f"WIRING FAILURE: append to {path} did not grow the file "
+                f"({size_before} -> {size_after} bytes). History may be at risk; stop."
+            )
+
+
+def read_append_only_lines(path: str) -> list[str]:
+    """Take a complete in-process snapshot of an append-only JSONL file.
+
+    Collection lanes share the same lock as ``append_record`` so a resume
+    reader never mistakes a line currently being appended for corruption.
+    """
+
+    with _APPEND_RECORD_LOCK:
+        if not os.path.exists(path):
+            return []
+        with open(path, encoding="utf-8") as handle:
+            return handle.read().splitlines()

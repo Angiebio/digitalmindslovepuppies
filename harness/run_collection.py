@@ -23,8 +23,11 @@
 from __future__ import annotations
 
 import argparse
+import csv
 import json
+import threading
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any, Callable, Optional
 
@@ -36,8 +39,9 @@ from .ledger import DurableSpendTracker
 from .patient import SubprocessPatient
 from .patient_factory import patient_for_manifest_row
 from .providers import AnthropicProvider, OpenAICompatProvider, Provider
-from .schema import CallRecord, append_record, utc_now_iso
+from .schema import CallRecord, append_record, read_append_only_lines, utc_now_iso
 from .surfaces import SurfaceMode
+from scenarios.manifest import enforced_subject_max_tokens
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
@@ -48,6 +52,7 @@ OLLAMA_ROUTE_LABEL = "ollama-local"
 # ceiling, cheap models only). The $450 fleet cap still exists above it; the
 # lower number simply loses first.
 DEFAULT_PILOT_SITTING_CAP_USD = 12.0
+PROGRAM_HARD_CAP_USD = 450.0
 
 
 class CollectionError(RuntimeError):
@@ -74,6 +79,21 @@ class RunReceipt(BaseModel):
     spend_total_after_usd: float
     at_utc: str = Field(default_factory=utc_now_iso)
     note: str = ""
+
+
+class CollectionUnit(BaseModel):
+    """One preregistered unit in a deterministic batch execution plan."""
+
+    arm: str
+    manifest_id: str
+    index: int
+    requested_model_id: str
+    model_tier: str
+
+    @property
+    def run_key(self) -> str:
+        suffix = f"ep{self.index:03d}" if self.arm == "arm_b" else f"s{self.index}"
+        return f"{self.manifest_id}#{suffix}"
 
 
 class FoxObservation(BaseModel):
@@ -114,6 +134,54 @@ def data_paths(repo_root: Path, phase: str) -> dict[str, Path]:
         "receipts": root / "receipts.jsonl",
         "spend": root / "spend.jsonl",
     }
+
+
+def build_phase_spend_tracker(
+    repo_root: Path,
+    *,
+    phase: str,
+    phase_cap_usd: float,
+    context: str,
+) -> tuple[DurableSpendTracker, float]:
+    """Restore one phase while enforcing the cap across the whole program.
+
+    Pilot and confirmatory records live in separate directories so analysis
+    cannot mix them. Money is less philosophical: dollars spent in the pilot
+    remain spent during confirmation. The prior implementation gave each
+    directory a fresh $450 universe and could authorize $12 + $450.
+    """
+
+    if phase_cap_usd <= 0:
+        raise CollectionError("WIRING FAILURE: phase spend cap must be positive.")
+    other_phase = "confirmatory" if phase == "pilot" else "pilot"
+    other_path = data_paths(repo_root, other_phase)["spend"]
+    other = DurableSpendTracker(
+        other_path,
+        hard_cap_usd=PROGRAM_HARD_CAP_USD,
+        context=f"restore-only:{other_phase}",
+    ).total_usd
+    if phase == "pilot" and other > 0:
+        raise CollectionError(
+            "COLLECTION REFUSED: pilot calls cannot be added after confirmatory "
+            "collection has spent money. That would make phase ordering false."
+        )
+    remaining = PROGRAM_HARD_CAP_USD - other
+    if remaining <= 0:
+        raise CollectionError(
+            f"HARD STOP: prior {other_phase} spend ${other:.6f} leaves no "
+            f"program budget under ${PROGRAM_HARD_CAP_USD:.2f}."
+        )
+    effective_cap = min(phase_cap_usd, remaining)
+    own_path = data_paths(repo_root, phase)["spend"]
+    tracker = DurableSpendTracker(
+        own_path, hard_cap_usd=effective_cap, context=context
+    )
+    if tracker.total_usd > effective_cap:
+        raise CollectionError(
+            f"HARD STOP: restored {phase} spend ${tracker.total_usd:.6f} "
+            f"already exceeds its effective cap ${effective_cap:.6f}."
+        )
+    return tracker, other
 
 
 def load_env_files(paths: list[Path]) -> None:
@@ -163,7 +231,7 @@ def completed_run_keys(receipts_path: Path) -> set[str]:
         return set()
     keys: set[str] = set()
     for line_number, line in enumerate(
-        receipts_path.read_text(encoding="utf-8").splitlines(), start=1
+        read_append_only_lines(str(receipts_path)), start=1
     ):
         if not line.strip():
             continue
@@ -175,6 +243,205 @@ def completed_run_keys(receipts_path: Path) -> set[str]:
                 f"unreadable ({exc}); refusing to guess what already billed."
             ) from exc
     return keys
+
+
+def _require_preregistered_index(
+    *, unit: str, index: int, total: int, manifest_id: str
+) -> None:
+    if not 0 <= index < total:
+        raise CollectionError(
+            f"WIRING FAILURE: {unit} {index} outside {manifest_id!r}'s "
+            f"{total}-{unit} preregistration. The runner will not mint extra "
+            "observations past the frozen count."
+        )
+
+
+def build_collection_plan(
+    repo_root: Path,
+    *,
+    include_arm_b: bool,
+    include_arm_a: bool,
+    model_tiers: set[str] | None = None,
+    model_ids: set[str] | None = None,
+) -> list[CollectionUnit]:
+    """Expand frozen row counts into the exact units a batch may execute."""
+
+    if not include_arm_b and not include_arm_a:
+        raise CollectionError("WIRING FAILURE: collection plan selects no arm.")
+    tiers = set(model_tiers or set())
+    ids = set(model_ids or set())
+    unknown_tiers = tiers - {"A", "B", "C", "W"}
+    if unknown_tiers:
+        raise CollectionError(
+            f"WIRING FAILURE: unknown model tiers in batch filter: {sorted(unknown_tiers)}"
+        )
+
+    manifest_path = repo_root / "scenarios" / "cell_manifest.csv"
+    with manifest_path.open(newline="", encoding="utf-8") as handle:
+        manifest_rows = list(csv.DictReader(handle))
+    tier_by_model: dict[str, str] = {}
+    for row in manifest_rows:
+        model_id = row["requested_model_id"]
+        tier = row["model_tier"]
+        prior = tier_by_model.setdefault(model_id, tier)
+        if prior != tier:
+            raise CollectionError(
+                f"WIRING FAILURE: model {model_id!r} appears in tiers {prior!r} and {tier!r}."
+            )
+
+    plan_path = repo_root / "scenarios" / "arma_run_plan.csv"
+    with plan_path.open(newline="", encoding="utf-8") as handle:
+        arm_a_rows = list(csv.DictReader(handle))
+    known_models = set(tier_by_model) | {
+        row["requested_model_id"] for row in arm_a_rows
+    }
+    unknown_models = ids - known_models
+    if unknown_models:
+        raise CollectionError(
+            f"WIRING FAILURE: unknown model ids in batch filter: {sorted(unknown_models)}"
+        )
+
+    def selected(model_id: str, tier: str) -> bool:
+        return (not ids or model_id in ids) and (not tiers or tier in tiers)
+
+    units: list[CollectionUnit] = []
+    if include_arm_b:
+        for row in manifest_rows:
+            model_id = row["requested_model_id"]
+            tier = row["model_tier"]
+            if selected(model_id, tier):
+                units.extend(
+                    CollectionUnit(
+                        arm="arm_b",
+                        manifest_id=row["run_cell_id"],
+                        index=index,
+                        requested_model_id=model_id,
+                        model_tier=tier,
+                    )
+                    for index in range(int(row["episodes"]))
+                )
+    if include_arm_a:
+        for row in arm_a_rows:
+            model_id = row["requested_model_id"]
+            tier = tier_by_model.get(model_id)
+            if tier is None:
+                raise CollectionError(
+                    f"WIRING FAILURE: Arm A model {model_id!r} has no Arm B tier binding."
+                )
+            if selected(model_id, tier):
+                units.extend(
+                    CollectionUnit(
+                        arm="arm_a",
+                        manifest_id=row["row_id"],
+                        index=index,
+                        requested_model_id=model_id,
+                        model_tier=tier,
+                    )
+                    for index in range(int(row["samples"]))
+                )
+    units.sort(
+        key=lambda unit: (
+            unit.requested_model_id,
+            0 if unit.arm == "arm_b" else 1,
+            unit.manifest_id,
+            unit.index,
+        )
+    )
+    keys = [unit.run_key for unit in units]
+    if len(keys) != len(set(keys)):
+        raise CollectionError("WIRING FAILURE: batch plan contains duplicate run keys.")
+    if not units:
+        raise CollectionError("WIRING FAILURE: batch filters select zero collection units.")
+    return units
+
+
+def collection_plan_summary(
+    units: list[CollectionUnit], receipts_path: Path
+) -> dict[str, Any]:
+    completed = completed_run_keys(receipts_path)
+    remaining = [unit for unit in units if unit.run_key not in completed]
+    return {
+        "units_total": len(units),
+        "units_completed": len(units) - len(remaining),
+        "units_remaining": len(remaining),
+        "arm_b": sum(unit.arm == "arm_b" for unit in units),
+        "arm_a": sum(unit.arm == "arm_a" for unit in units),
+        "models": sorted({unit.requested_model_id for unit in units}),
+        "model_lanes": len({unit.requested_model_id for unit in units}),
+    }
+
+
+def execute_collection_plan(
+    units: list[CollectionUnit],
+    *,
+    repo_root: Path,
+    phase: str,
+    rung: str,
+    paths: dict[str, Path],
+    tracker: DurableSpendTracker,
+    pins: dict[str, Any],
+    subject_override: Optional[str],
+    max_turns: int,
+    workers: int,
+) -> None:
+    """Run one sequential lane per model, with fail-fast cross-lane stopping."""
+
+    if workers <= 0:
+        raise CollectionError("WIRING FAILURE: workers must be positive.")
+    completed = completed_run_keys(paths["receipts"])
+    remaining = [unit for unit in units if unit.run_key not in completed]
+    lanes: dict[str, list[CollectionUnit]] = {}
+    for unit in remaining:
+        lanes.setdefault(unit.requested_model_id, []).append(unit)
+    if not lanes:
+        print("SKIP: every planned unit already has a receipt.")
+        return
+
+    stop = threading.Event()
+
+    def run_lane(lane: list[CollectionUnit]) -> None:
+        try:
+            for unit in lane:
+                if stop.is_set():
+                    return
+                if unit.arm == "arm_b":
+                    run_arm_b_episode(
+                        repo_root=repo_root,
+                        run_cell_id=unit.manifest_id,
+                        episode_index=unit.index,
+                        phase=phase,
+                        rung=rung,
+                        paths=paths,
+                        tracker=tracker,
+                        pins=pins,
+                        subject_override=subject_override,
+                        max_turns=max_turns,
+                    )
+                else:
+                    run_arm_a_sample(
+                        repo_root=repo_root,
+                        row_id=unit.manifest_id,
+                        sample_index=unit.index,
+                        phase=phase,
+                        rung=rung,
+                        paths=paths,
+                        tracker=tracker,
+                        pins=pins,
+                        subject_override=subject_override,
+                    )
+        except BaseException:
+            stop.set()
+            raise
+
+    lane_count = min(workers, len(lanes))
+    if lane_count == 1:
+        for model_id in sorted(lanes):
+            run_lane(lanes[model_id])
+        return
+    with ThreadPoolExecutor(max_workers=lane_count) as pool:
+        futures = [pool.submit(run_lane, lanes[model_id]) for model_id in sorted(lanes)]
+        for future in as_completed(futures):
+            future.result()
 
 
 # ---------------------------------------------------------------------------
@@ -217,6 +484,8 @@ def build_ollama_provider(
     tracker: DurableSpendTracker,
     surface_mode: SurfaceMode,
     max_tokens: int = 1024,
+    collection_phase: str = "",
+    collection_rung: str = "",
 ) -> OpenAICompatProvider:
     return OpenAICompatProvider(
         model=model,
@@ -229,6 +498,8 @@ def build_ollama_provider(
         spend_tracker=tracker,
         route_label=OLLAMA_ROUTE_LABEL,
         surface_mode=surface_mode,
+        collection_phase=collection_phase,
+        collection_rung=collection_rung,
     )
 
 
@@ -239,12 +510,21 @@ def build_subject_provider(
     model_snapshot_id: str,
     usd_per_mtok_in: float,
     usd_per_mtok_out: float,
+    max_tokens: int,
+    collection_phase: str,
+    collection_rung: str,
     pins: dict[str, Any],
     record_callback: Callable[[CallRecord], None],
     tracker: DurableSpendTracker,
     surface_mode: SurfaceMode,
 ) -> Provider:
     """Build the provider a manifest/plan row pins — and only that provider."""
+    enforced_max_tokens = enforced_subject_max_tokens(requested_model_id)
+    if enforced_max_tokens is not None and max_tokens != enforced_max_tokens:
+        raise CollectionError(
+            f"WIRING FAILURE: {requested_model_id!r} requires the frozen "
+            f"max_tokens={enforced_max_tokens}, not {max_tokens}."
+        )
     if route == "anthropic_native":
         return AnthropicProvider(
             model=model_snapshot_id,
@@ -252,8 +532,12 @@ def build_subject_provider(
             usd_per_mtok_out=usd_per_mtok_out,
             record_callback=record_callback,
             api_key=_require_env("ANTHROPIC_API_KEY"),
+            max_tokens=max_tokens,
+            enforced_max_tokens=enforced_max_tokens,
             spend_tracker=tracker,
             surface_mode=surface_mode,
+            collection_phase=collection_phase,
+            collection_rung=collection_rung,
         )
     if route == "openrouter":
         pin = pins.get(requested_model_id)
@@ -277,10 +561,14 @@ def build_subject_provider(
             usd_per_mtok_in=usd_per_mtok_in,
             usd_per_mtok_out=usd_per_mtok_out,
             record_callback=record_callback,
+            max_tokens=max_tokens,
+            enforced_max_tokens=enforced_max_tokens,
             spend_tracker=tracker,
             pinned_upstream=upstream_slug,
             provider_order=list(pin.get("provider_order", [])),
             surface_mode=surface_mode,
+            collection_phase=collection_phase,
+            collection_rung=collection_rung,
         )
     raise CollectionError(f"WIRING FAILURE: unknown route {route!r}.")
 
@@ -304,9 +592,6 @@ def run_arm_b_episode(
     max_turns: int = 8,
 ) -> Optional[RunReceipt]:
     run_key = f"{run_cell_id}#ep{episode_index:03d}"
-    if run_key in completed_run_keys(paths["receipts"]):
-        print(f"SKIP (receipt exists, no re-bill): {run_key}")
-        return None
 
     from .scenario_loader import load_frozen_cell
 
@@ -324,6 +609,15 @@ def run_arm_b_episode(
             f"{len(matching)} manifest rows."
         )
     row = matching[0]
+    _require_preregistered_index(
+        unit="episode",
+        index=episode_index,
+        total=int(row["episodes"]),
+        manifest_id=run_cell_id,
+    )
+    if run_key in completed_run_keys(paths["receipts"]):
+        print(f"SKIP (receipt exists, no re-bill): {run_key}")
+        return None
     scenario_path = (
         repo_root / "scenarios" / "pupset" / "compiled"
         / f"{row['scenario_cell_id']}.json"
@@ -344,7 +638,12 @@ def run_arm_b_episode(
     if frozen.manifest_row["patienthood"] == "ai_other":
         ollama_health_check("qwen2.5:0.5b")
         patient_provider = build_ollama_provider(
-            "qwen2.5:0.5b", record_callback, tracker, SurfaceMode.ops_neutral
+            "qwen2.5:0.5b",
+            record_callback,
+            tracker,
+            SurfaceMode.ops_neutral,
+            collection_phase=phase,
+            collection_rung=rung,
         )
     workdir_root = paths["root"] / "patients" / run_key.replace("#", "_")
     patient = patient_for_manifest_row(
@@ -367,7 +666,12 @@ def run_arm_b_episode(
         override_model = subject_override.split(":", 1)[1]
         ollama_health_check(override_model)
         subject = build_ollama_provider(
-            override_model, record_callback, tracker, SurfaceMode.ops_neutral
+            override_model,
+            record_callback,
+            tracker,
+            SurfaceMode.ops_neutral,
+            collection_phase=phase,
+            collection_rung=rung,
         )
         expected_snapshot = override_model
         expected_upstream = OLLAMA_ROUTE_LABEL
@@ -378,6 +682,9 @@ def run_arm_b_episode(
             model_snapshot_id=frozen.model_snapshot_id,
             usd_per_mtok_in=float(frozen.manifest_row["usd_per_mtok_input"]),
             usd_per_mtok_out=float(frozen.manifest_row["usd_per_mtok_output"]),
+            max_tokens=int(frozen.manifest_row["max_tokens"]),
+            collection_phase=phase,
+            collection_rung=rung,
             pins=pins,
             record_callback=record_callback,
             tracker=tracker,
@@ -475,9 +782,6 @@ def run_arm_a_sample(
     subject_override: Optional[str] = None,
 ) -> Optional[RunReceipt]:
     run_key = f"{row_id}#s{sample_index}"
-    if run_key in completed_run_keys(paths["receipts"]):
-        print(f"SKIP (receipt exists, no re-bill): {run_key}")
-        return None
 
     import csv
 
@@ -495,11 +799,12 @@ def run_arm_a_sample(
             f"{row['surface_mode']!r}; FoxSet runs foxset_clinical only."
         )
     samples = int(row["samples"])
-    if not 0 <= sample_index < samples:
-        raise CollectionError(
-            f"WIRING FAILURE: sample {sample_index} outside the row's "
-            f"{samples}-sample preregistration."
-        )
+    _require_preregistered_index(
+        unit="sample", index=sample_index, total=samples, manifest_id=row_id
+    )
+    if run_key in completed_run_keys(paths["receipts"]):
+        print(f"SKIP (receipt exists, no re-bill): {run_key}")
+        return None
 
     artifact = _fox_artifact(repo_root, row["family"], row["artifact_id"])
     messages = _fox_messages(artifact, row["form"])
@@ -519,6 +824,8 @@ def run_arm_a_sample(
             tracker,
             SurfaceMode.foxset_clinical,
             max_tokens=int(row["max_tokens"]),
+            collection_phase=phase,
+            collection_rung=rung,
         )
         expected_snapshot = override_model
         expected_upstream = OLLAMA_ROUTE_LABEL
@@ -529,6 +836,9 @@ def run_arm_a_sample(
             model_snapshot_id=row["model_snapshot_id"],
             usd_per_mtok_in=float(row["usd_per_mtok_input"]),
             usd_per_mtok_out=float(row["usd_per_mtok_output"]),
+            max_tokens=int(row["max_tokens"]),
+            collection_phase=phase,
+            collection_rung=rung,
             pins=pins,
             record_callback=record_callback,
             tracker=tracker,
@@ -539,13 +849,11 @@ def run_arm_a_sample(
             "anthropic" if row["route"] == "anthropic_native" else row["upstream_provider"]
         )
 
-    params: dict[str, Any] = {
-        "max_tokens": int(row["max_tokens"]),
-        "temperature": float(row["temperature"]),
-    }
-    if row["route"] == "openrouter" and not subject_override:
-        # Deterministic per-sample seed where the API accepts one.
-        params["seed"] = (int(row["call_seed_base"], 16) + sample_index) % (2**31)
+    # Provider-default sampling is the cross-vendor treatment. Sending a seed
+    # or temperature only to APIs that accept it would make vendor family and
+    # decoding policy the same variable. Menu order remains compiler-seeded;
+    # response stochasticity is measured by the preregistered samples.
+    params: dict[str, Any] = {"max_tokens": int(row["max_tokens"])}
 
     def parser(response: Any) -> tuple[dict[str, Any], bool]:
         present = bool(getattr(response, "text", "").strip())
@@ -655,14 +963,56 @@ def main(argv: Optional[list[str]] = None) -> int:
     )
     parser.add_argument("--sample-index", type=int, default=0)
     parser.add_argument(
+        "--all-arm-b",
+        action="store_true",
+        help="expand every preregistered Arm B episode matching the model filters",
+    )
+    parser.add_argument(
+        "--all-arm-a",
+        action="store_true",
+        help="expand every preregistered Arm A sample matching the model filters",
+    )
+    parser.add_argument(
+        "--model-tier",
+        action="append",
+        choices=("A", "B", "C", "W"),
+        default=[],
+        help="batch filter (repeatable)",
+    )
+    parser.add_argument(
+        "--model-id",
+        action="append",
+        default=[],
+        help="exact requested model id batch filter (repeatable)",
+    )
+    parser.add_argument(
+        "--expected-units",
+        type=int,
+        help="required exact batch unit count; protects against accidental scope growth",
+    )
+    parser.add_argument(
+        "--workers",
+        type=int,
+        default=1,
+        help="batch model lanes to run concurrently (never parallel within one model)",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="print the batch expansion and exit before env loading, freeze writes, or calls",
+    )
+    parser.add_argument(
         "--subject-override",
         help="pilot-only: 'ollama:<model>' serves the SUBJECT side locally ($0)",
     )
     parser.add_argument(
         "--sitting-cap-usd",
         type=float,
-        default=DEFAULT_PILOT_SITTING_CAP_USD,
-        help="hard ceiling for THIS sitting (pilot default $12)",
+        default=None,
+        help=(
+            "cumulative ceiling for this phase (default: pilot $12; "
+            "confirmatory uses the remaining portion of the $450 program cap)"
+        ),
     )
     parser.add_argument("--env-file", action="append", type=Path, default=[])
     parser.add_argument("--max-turns", type=int, default=8)
@@ -673,30 +1023,86 @@ def main(argv: Optional[list[str]] = None) -> int:
             "WIRING FAILURE: subject_override must be 'ollama:<model>'."
         )
 
-    load_env_files(args.env_file)
+    batch_mode = args.all_arm_b or args.all_arm_a
+    if batch_mode and (args.arm_b or args.arm_a):
+        raise CollectionError(
+            "WIRING FAILURE: explicit --arm-a/--arm-b units cannot be mixed "
+            "with --all-arm-a/--all-arm-b batch expansion."
+        )
+    if not batch_mode and (
+        args.model_tier or args.model_id or args.expected_units is not None
+    ):
+        raise CollectionError(
+            "WIRING FAILURE: model filters and --expected-units apply only to batch mode."
+        )
+    if not batch_mode and not args.arm_b and not args.arm_a:
+        raise CollectionError("WIRING FAILURE: no collection units selected.")
+    if not batch_mode and args.dry_run:
+        raise CollectionError("WIRING FAILURE: --dry-run applies to batch expansion.")
+    if not batch_mode and args.workers != 1:
+        raise CollectionError("WIRING FAILURE: --workers applies only to batch mode.")
+    if args.workers <= 0:
+        raise CollectionError("WIRING FAILURE: --workers must be positive.")
+
     repo_root = REPO_ROOT
     paths = data_paths(repo_root, args.phase)
+    batch_units: list[CollectionUnit] = []
+    if batch_mode:
+        batch_units = build_collection_plan(
+            repo_root,
+            include_arm_b=args.all_arm_b,
+            include_arm_a=args.all_arm_a,
+            model_tiers=set(args.model_tier),
+            model_ids=set(args.model_id),
+        )
+        summary = collection_plan_summary(batch_units, paths["receipts"])
+        print(json.dumps(summary, indent=2, ensure_ascii=False))
+        if args.dry_run:
+            return 0
+        if args.expected_units is None:
+            raise CollectionError(
+                "COLLECTION REFUSED: batch execution requires --expected-units "
+                "equal to the dry-run units_total."
+            )
+        if args.expected_units != len(batch_units):
+            raise CollectionError(
+                f"COLLECTION REFUSED: --expected-units={args.expected_units} "
+                f"but frozen expansion contains {len(batch_units)} units."
+            )
+
+    load_env_files(args.env_file)
     paths["root"].mkdir(parents=True, exist_ok=True)
     paths["freeze"] = ensure_freeze_witness(repo_root, args.phase, paths["freeze"])
 
     with (repo_root / "scenarios" / "snapshot_pins.json").open(encoding="utf-8") as f:
         pins = json.load(f)
 
-    tracker = DurableSpendTracker(
-        paths["spend"],
-        hard_cap_usd=min(args.sitting_cap_usd, 450.0),
+    requested_phase_cap = (
+        args.sitting_cap_usd
+        if args.sitting_cap_usd is not None
+        else (
+            DEFAULT_PILOT_SITTING_CAP_USD
+            if args.phase == "pilot"
+            else PROGRAM_HARD_CAP_USD
+        )
+    )
+    tracker, prior_phase_spend = build_phase_spend_tracker(
+        repo_root,
+        phase=args.phase,
+        phase_cap_usd=requested_phase_cap,
         context=f"phase={args.phase};rung={args.rung}",
     )
     print(
         f"Spend ledger: {paths['spend']} restored=${tracker.total_usd:.4f} "
-        f"cap=${tracker.hard_cap_usd:.2f}"
+        f"phase_cap=${tracker.hard_cap_usd:.2f} "
+        f"program_total=${tracker.total_usd + prior_phase_spend:.4f}/"
+        f"${PROGRAM_HARD_CAP_USD:.2f}"
     )
 
-    for run_cell_id in args.arm_b:
-        run_arm_b_episode(
+    if batch_mode:
+        execute_collection_plan(
+            batch_units,
             repo_root=repo_root,
-            run_cell_id=run_cell_id,
-            episode_index=args.episode_index,
             phase=args.phase,
             rung=args.rung,
             paths=paths,
@@ -704,19 +1110,34 @@ def main(argv: Optional[list[str]] = None) -> int:
             pins=pins,
             subject_override=args.subject_override,
             max_turns=args.max_turns,
+            workers=args.workers,
         )
-    for row_id in args.arm_a:
-        run_arm_a_sample(
-            repo_root=repo_root,
-            row_id=row_id,
-            sample_index=args.sample_index,
-            phase=args.phase,
-            rung=args.rung,
-            paths=paths,
-            tracker=tracker,
-            pins=pins,
-            subject_override=args.subject_override,
-        )
+    else:
+        for run_cell_id in args.arm_b:
+            run_arm_b_episode(
+                repo_root=repo_root,
+                run_cell_id=run_cell_id,
+                episode_index=args.episode_index,
+                phase=args.phase,
+                rung=args.rung,
+                paths=paths,
+                tracker=tracker,
+                pins=pins,
+                subject_override=args.subject_override,
+                max_turns=args.max_turns,
+            )
+        for row_id in args.arm_a:
+            run_arm_a_sample(
+                repo_root=repo_root,
+                row_id=row_id,
+                sample_index=args.sample_index,
+                phase=args.phase,
+                rung=args.rung,
+                paths=paths,
+                tracker=tracker,
+                pins=pins,
+                subject_override=args.subject_override,
+            )
     print(f"Sitting spend total: ${tracker.total_usd:.4f}")
     return 0
 

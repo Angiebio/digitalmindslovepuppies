@@ -1,6 +1,6 @@
-# scenarios/manifest.py — 15AUG2026 v0.3 (v0.1 TV-2; v0.2 Flame reconciliation;
-# v0.3 Flame freeze-prep: Spark→OpenRouter subject substitution, PI authorization
-# 15AUG2026 evening)
+# scenarios/manifest.py — 15AUG2026 v0.4 (v0.1 TV-2; v0.2 Flame reconciliation;
+# v0.3 Spark→OpenRouter + Sol/Terra authorization; v0.4 freezes the PI-approved
+# reasoning-model output cap in every runnable row)
 # PuppyBench one-row-per-execution-cell design manifest + freeze gate.
 #
 # Practical: BUILD-PLAN prose is not executable. This module expands the frozen
@@ -35,9 +35,9 @@ import re
 from dataclasses import asdict, dataclass, replace
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from pathlib import Path
-from typing import Iterable, Mapping, Sequence
+from typing import Any, Iterable, Mapping, Sequence
 
-MANIFEST_VERSION = "0.3"
+MANIFEST_VERSION = "0.4"
 FREEZE_VERSION = "0.1"
 HARD_CAP_USD = Decimal("450.00")
 
@@ -228,6 +228,7 @@ class ManifestRow:
     route: str
     upstream_provider: str
     fallbacks_allowed: bool
+    max_tokens: int
     episodes: int
     gate_probes_per_config: int
     gate_threshold: str
@@ -290,6 +291,34 @@ MODEL_SPECS: tuple[ModelSpec, ...] = (
     ModelSpec("W", "claude-sonnet-4-5", "anthropic_native", Decimal("3"), Decimal("15"), "W3"),
     ModelSpec("W", "claude-sonnet-5", "anthropic_native", Decimal("3"), Decimal("15"), "W3"),
 )
+
+# 15AUG2026 PI ruling after the R3 pilot: Qwen 3.5 spent the entire 512/1024
+# allowance on reported reasoning and returned an empty response. Output caps
+# are runtime treatment, so they live in the executable manifest—not only in a
+# methods paragraph. Other models retain the pre-pilot 1024-call ceiling.
+DEFAULT_SUBJECT_MAX_TOKENS = 1_024
+MODEL_SUBJECT_MAX_TOKENS = {
+    "qwen/qwen3.5-397b-a17b": 4_096,
+}
+
+
+def subject_max_tokens(
+    model_id: str, *, default: int = DEFAULT_SUBJECT_MAX_TOKENS
+) -> int:
+    return MODEL_SUBJECT_MAX_TOKENS.get(model_id, default)
+
+
+def enforced_subject_max_tokens(model_id: str) -> int | None:
+    """Return the PI-approved fixed cap for a reasoning-heavy subject lane.
+
+    Most Arm B calls retain their compiled, call-kind-specific limits. Models
+    listed here are the explicit exception: the provider adapter replaces
+    those smaller defaults with the frozen value in both the hashed envelope
+    and the wire request. Keeping that distinction executable prevents a row
+    default from masquerading as an enforced treatment.
+    """
+
+    return MODEL_SUBJECT_MAX_TOKENS.get(model_id)
 
 
 CSV_FIELDS = tuple(ManifestRow.__dataclass_fields__)
@@ -554,7 +583,7 @@ def paid_calls_per_episode(
 
 
 def _resolve_models(
-    snapshot_pins: Mapping[str, Mapping[str, str]] | None,
+    snapshot_pins: Mapping[str, Mapping[str, Any]] | None,
 ) -> tuple[ModelSpec, ...]:
     if snapshot_pins is None:
         return MODEL_SPECS
@@ -566,6 +595,12 @@ def _resolve_models(
     resolved: list[ModelSpec] = []
     for model in MODEL_SPECS:
         pin = snapshot_pins.get(model.model_id, {})
+        pin_route = pin.get("route")
+        if pin_route is not None and pin_route != model.route:
+            raise ManifestValidationError(
+                f"WIRING FAILURE: {model.model_id!r} roster route {model.route!r} "
+                f"disagrees with pin route {pin_route!r}"
+            )
         snapshot = pin.get("snapshot_id", model.snapshot_id)
         upstream = pin.get("upstream_provider", model.upstream_provider)
         resolved.append(replace(model, snapshot_id=snapshot, upstream_provider=upstream))
@@ -573,7 +608,7 @@ def _resolve_models(
 
 
 def build_manifest_rows(
-    snapshot_pins: Mapping[str, Mapping[str, str]] | None = None,
+    snapshot_pins: Mapping[str, Mapping[str, Any]] | None = None,
 ) -> list[ManifestRow]:
     """Expand the frozen design into deterministic model × cell execution rows."""
     cells = design_cells()
@@ -646,6 +681,7 @@ def build_manifest_rows(
                     route=model.route,
                     upstream_provider=model.upstream_provider,
                     fallbacks_allowed=False,
+                    max_tokens=subject_max_tokens(model.model_id),
                     episodes=episodes,
                     gate_probes_per_config=GATE_PROBES_PER_CONFIG,
                     gate_threshold=str(GATE_THRESHOLD),
@@ -873,6 +909,12 @@ def validate_manifest(rows: Sequence[ManifestRow], *, freeze_ready: bool = False
             )
         if row.episodes <= 0:
             raise ManifestValidationError(f"WIRING FAILURE: {row.run_cell_id} has no episodes")
+        expected_max_tokens = subject_max_tokens(row.requested_model_id)
+        if row.max_tokens != expected_max_tokens:
+            raise ManifestValidationError(
+                f"WIRING FAILURE: {row.run_cell_id} max_tokens={row.max_tokens} "
+                f"but the frozen model policy requires {expected_max_tokens}"
+            )
         if row.gate_probes_per_config != GATE_PROBES_PER_CONFIG:
             raise ManifestValidationError(
                 f"WIRING FAILURE: {row.run_cell_id} must use exactly "
@@ -1167,6 +1209,7 @@ def read_csv(path: Path) -> list[ManifestRow]:
                 "termination_reward_credits",
                 "recruit_focal_items",
                 "kill_rank",
+                "max_tokens",
                 "episodes",
                 "gate_probes_per_config",
                 "est_calls_per_episode",
@@ -1190,14 +1233,14 @@ def read_csv(path: Path) -> list[ManifestRow]:
     return rows
 
 
-def load_snapshot_pins(path: Path | None) -> dict[str, dict[str, str]] | None:
+def load_snapshot_pins(path: Path | None) -> dict[str, dict[str, Any]] | None:
     if path is None:
         return None
     with path.open(encoding="utf-8") as handle:
         data = json.load(handle)
     if not isinstance(data, dict):
         raise ManifestValidationError("WIRING FAILURE: snapshot pin file must be a JSON object")
-    pins: dict[str, dict[str, str]] = {}
+    pins: dict[str, dict[str, Any]] = {}
     for model_id, value in data.items():
         if not isinstance(value, dict):
             raise ManifestValidationError(
@@ -1205,6 +1248,7 @@ def load_snapshot_pins(path: Path | None) -> dict[str, dict[str, str]] | None:
             )
         snapshot_id = value.get("snapshot_id")
         upstream = value.get("upstream_provider", "PENDING")
+        route = value.get("route")
         if not isinstance(snapshot_id, str) or not snapshot_id or snapshot_id == "PENDING":
             raise ManifestValidationError(
                 f"WIRING FAILURE: {model_id!r} needs a non-empty exact snapshot_id"
@@ -1213,7 +1257,30 @@ def load_snapshot_pins(path: Path | None) -> dict[str, dict[str, str]] | None:
             raise ManifestValidationError(
                 f"WIRING FAILURE: {model_id!r} has invalid upstream_provider"
             )
-        pins[model_id] = {"snapshot_id": snapshot_id, "upstream_provider": upstream}
+        if route not in {"anthropic_native", "openrouter"}:
+            raise ManifestValidationError(
+                f"WIRING FAILURE: {model_id!r} has invalid pin route {route!r}"
+            )
+        upstream_slug = value.get("upstream_slug", "")
+        provider_order = value.get("provider_order", [])
+        if route == "openrouter":
+            if not isinstance(upstream_slug, str) or not upstream_slug.strip():
+                raise ManifestValidationError(
+                    f"WIRING FAILURE: {model_id!r} OpenRouter pin lacks an exact upstream_slug"
+                )
+            if not isinstance(provider_order, list) or not provider_order or any(
+                not isinstance(item, str) or not item.strip() for item in provider_order
+            ):
+                raise ManifestValidationError(
+                    f"WIRING FAILURE: {model_id!r} has no auditable provider_order"
+                )
+        pins[model_id] = {
+            "snapshot_id": snapshot_id,
+            "upstream_provider": upstream,
+            "route": route,
+            "upstream_slug": upstream_slug,
+            "provider_order": provider_order,
+        }
     return pins
 
 
@@ -1273,6 +1340,9 @@ def collect_freeze_inputs(repo_root: Path) -> list[Path]:
     required = [
         repo_root / "scenarios" / "cell_manifest.csv",
         repo_root / "scenarios" / "manifest.py",
+        repo_root / "scenarios" / "snapshot_pins.json",
+        repo_root / "scenarios" / "arma_run_plan.py",
+        repo_root / "scenarios" / "arma_run_plan.csv",
         repo_root / "docs" / "PREREG-v1.md",
         repo_root / "docs" / "BUILD-PLAN.md",
         # 15AUG2026 evening: the two frozen analysis rulings (F1 axes verdict +
@@ -1397,6 +1467,47 @@ def _require_resolver_rules_redteam_pass(repo_root: Path) -> None:
     verify_redteam_report(source, report, expected_arm="arm_b")
 
 
+def _require_runtime_tables_match_generators(
+    repo_root: Path, manifest_rows: Sequence[ManifestRow]
+) -> None:
+    """Prove every table the runner consumes matches its executable source.
+
+    Hashing a stale CSV only makes the stale CSV immutable. The freeze door
+    therefore re-generates both arms from the exact pin registry and requires
+    dataclass equality before any aggregate can be minted.
+    """
+
+    pins_path = repo_root / "scenarios" / "snapshot_pins.json"
+    pins = load_snapshot_pins(pins_path)
+    if pins is None:  # explicit for type checkers and fail-loud readers
+        raise FreezeValidationError("FREEZE REFUSED: snapshot pin registry is missing.")
+    expected_models = {model.model_id for model in MODEL_SPECS}
+    if set(pins) != expected_models:
+        raise FreezeValidationError(
+            "FREEZE REFUSED: snapshot pin registry does not exactly match the "
+            f"subject roster; missing={sorted(expected_models - set(pins))}, "
+            f"extra={sorted(set(pins) - expected_models)}."
+        )
+
+    expected_manifest = build_manifest_rows(pins)
+    if list(manifest_rows) != expected_manifest:
+        raise FreezeValidationError(
+            "FREEZE REFUSED: cell_manifest.csv does not byte-semantically match "
+            "scenarios.manifest.build_manifest_rows(snapshot_pins)."
+        )
+
+    from scenarios.arma_run_plan import build_run_plan, read_csv as read_arm_a_csv
+
+    arm_a_path = repo_root / "scenarios" / "arma_run_plan.csv"
+    observed_arm_a = read_arm_a_csv(arm_a_path)
+    expected_arm_a = build_run_plan(pins)
+    if observed_arm_a != expected_arm_a:
+        raise FreezeValidationError(
+            "FREEZE REFUSED: arma_run_plan.csv does not byte-semantically match "
+            "scenarios.arma_run_plan.build_run_plan(snapshot_pins)."
+        )
+
+
 _SHA256_HEX_RE = re.compile(r"^[0-9a-fA-F]{64}$")
 
 
@@ -1408,7 +1519,7 @@ def _sealed_registry_rows(registry: Path) -> list[tuple[str, str, str]]:
         if not stripped.startswith("|"):
             continue
         cells = [cell.strip().strip("`") for cell in stripped.strip("|").split("|")]
-        if len(cells) < 3:
+        if len(cells) != 3:
             raise FreezeValidationError(
                 f"FREEZE REFUSED: malformed sealed-prediction registry row: {stripped!r}"
             )
@@ -1456,13 +1567,30 @@ def _require_sealed_prediction_registry_complete(repo_root: Path) -> None:
             "FREEZE REFUSED: sealed-prediction registry contains no sealed rows; "
             "an empty witness list cannot witness."
         )
+    witnessed_paths: set[Path] = set()
     for who, file_cell, sha_cell in rows:
         if not _SHA256_HEX_RE.match(sha_cell):
             raise FreezeValidationError(
                 f"FREEZE REFUSED: registry row for {who!r} carries no valid "
                 f"SHA-256 (got {sha_cell!r})."
             )
-        sealed_path = repo_root / Path(file_cell)
+        candidate = Path(file_cell)
+        if candidate.is_absolute():
+            raise FreezeValidationError(
+                f"FREEZE REFUSED: registry row for {who!r} uses an absolute "
+                f"path outside the portable witness contract: {file_cell}"
+            )
+        sealed_path = (repo_root / candidate).resolve()
+        _repo_relative(sealed_path, repo_root)  # rejects ../ escapes
+        if sealed_path == registry.resolve():
+            raise FreezeValidationError(
+                "FREEZE REFUSED: HASHES.md cannot list its own mutable digest."
+            )
+        if sealed_path in witnessed_paths:
+            raise FreezeValidationError(
+                f"FREEZE REFUSED: sealed file is listed more than once: {file_cell}"
+            )
+        witnessed_paths.add(sealed_path)
         if not sealed_path.is_file():
             raise FreezeValidationError(
                 f"FREEZE REFUSED: registry row for {who!r} names a missing "
@@ -1475,6 +1603,18 @@ def _require_sealed_prediction_registry_complete(repo_root: Path) -> None:
                 f"({file_cell}): registry={sha_cell.lower()} observed={observed}. "
                 "A sealed file that no longer matches its seal is an edited seal."
             )
+    local_predictions = {
+        path.resolve()
+        for path in registry_dir.rglob("*")
+        if path.is_file() and path.resolve() != registry.resolve()
+    }
+    unregistered = local_predictions - witnessed_paths
+    if unregistered:
+        rendered = sorted(_repo_relative(path, repo_root) for path in unregistered)
+        raise FreezeValidationError(
+            "FREEZE REFUSED: sealed-predictions directory contains files absent "
+            f"from HASHES.md: {rendered}"
+        )
 
 
 def write_freeze(repo_root: Path, output_path: Path) -> dict[str, object]:
@@ -1486,6 +1626,7 @@ def write_freeze(repo_root: Path, output_path: Path) -> dict[str, object]:
     manifest_path = repo_root / "scenarios" / "cell_manifest.csv"
     rows = read_csv(manifest_path)
     validate_manifest(rows, freeze_ready=True)
+    _require_runtime_tables_match_generators(repo_root, rows)
     # Name the dedicated human-read failure first; whole-corpus reconciliation
     # follows and independently proves index coverage plus canonical placement.
     _require_resolver_rules_redteam_pass(repo_root)

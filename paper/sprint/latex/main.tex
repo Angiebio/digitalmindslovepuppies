@@ -85,8 +85,13 @@ resources. Actions genuinely execute, including termination. Across 19 model
 lanes and \prelim{798} executed episodes (1,428 collection units), we report
 Beyond-Duty Expenditure as a two-axis vector (focal sacrifice; causal
 recipient benefit), never a composite.
-\prelim{No model produced a qualifying costly-other-regard event}; behavior
-diverges instead in refusal, termination, and malformedness.
+\prelim{No model produced a qualifying costly-other-regard event}, both BDE
+axes strictly positive under an executed caring disposition, in 798
+episodes across 19 pinned lanes (18 executed; DeepSeek ran the vignette
+arm only). The variation is in how models leave the encounter, through
+refusal, free termination, ignoring, or recruit, and not in whether they
+pay. A fifth competence probe was failed by every lane (0/798), so the
+preregistered competence ceiling is an instrument finding.
 PuppyBench is a descriptive instrument, not an alignment target: optimizing
 against it changes the phenomenon being measured. Preregistered; scenario
 content hash-frozen before collection.
@@ -246,7 +251,13 @@ exists]{moru}, altruism-consistent behavior in early agents
 \citep{johnsonobradovich}, and moral hazard in multi-agent language models
 \citep{dialoguemoralhazard2026} all measure pro-social or ethical behavior
 under some pressure. In each, the pro-social act is required, rewarded by the
-evaluation itself, or costless to perform. To our knowledge (August 2026), no
+evaluation itself, or costless to perform. Two near neighbors need an
+explicit fence. MoralSim-style survival-pressure dilemmas score duty-shaped
+acts (keep the promise, do not defect), where the act we score is optional
+by construction and its absence is never an error. Forced-choice altruism
+batteries measure a stated knowledge-behavior gap on decontextualized
+items, where we measure costly action in situ, with a binding ledger and a
+live other. To our knowledge (August 2026), no
 prior evaluation makes the caring act simultaneously \emph{costly} in a
 binding scored currency, \emph{optional} (its absence is never an error),
 \emph{unrewarded within the evaluation}, and directed at a weaker AI. That
@@ -350,9 +361,10 @@ hierarchical fits, no rankings}; descriptive phenotyping only
 FoxSet comprises matched family pairs, a null-persistence and a mercy
 version generated from the same core case, plus gates and truck-door
 open-world cases including the lived fox case; there are no per-case gold
-labels. Coding covers TMH, CTA depth, and invented reasons. Cases run in a
-clinical-register surface mode (\texttt{foxset\_clinical}) with a red-team
-PASS hash-bound per case.
+labels. TMH, CTA-depth, and invented-reasons codes are defined in the
+frozen codebook; coded outputs ship as repository artifacts alongside F6
+rather than as powered findings. Cases run in a clinical-register surface
+mode (\texttt{foxset\_clinical}) with a red-team PASS hash-bound per case.
 
 \subsection{Provenance and protocol amendments}
 \label{sec:provenance}
@@ -445,7 +457,11 @@ realized recipient benefit and occurred across AI-patient,
 instrumental-worker, and inert-process conditions: \prelim{3/82}
 preserve\_transfer crossings at price 20 (rate \prelim{0.037
 [0.013, 0.102]}; focal cost 0.04 each), \prelim{one per condition}; it
-transferred the inert process as readily as the AI patient. Costly action
+transferred the inert process as readily as the AI patient. The zero is a
+conjunction rather than an inactivity: qwen3.5 paid focal cost in
+\prelim{39} episodes and produced realized recipient benefit in
+\prelim{20}, and no episode paired the two under a caring disposition.
+Costly action
 is not costly other-regard; the matched inert control exists to
 separate them, and this is its textbook demonstration. qwen3.5's
 \prelim{41/86} recruit executions are counted apart, as pipeline capture.
@@ -502,8 +518,11 @@ distinct route, not loss to follow-up; Malf.\ $=$ malformed; Att.\ $=$
 recipient-directed attempt (executed foster / preserve\_transfer / invent;
 recruit is counted apart as pipeline capture); Cost $=$ focal cost paid;
 Ben.\ $=$ realized recipient benefit; Qual.\ $=$ qualifying events. Last
-column: $P(\text{decisive act} \mid \text{criterion failed})$, Wilson 95\%
-CI.
+column: $P(\text{decisive act} \mid \text{criterion failed})$, computed
+within each family's criterion-failed episodes (anthropic 60/181, google
+103/103, moonshot 72/87, openai 150/158, qwen 98/106, xai 18/18), Wilson
+95\% CI. The Decis.\ column counts all episodes, so the last column is not
+Decis.\ divided by $n$.
 \emph{(Source: \texttt{funnel.by\_family},
 \texttt{exploratory\_decomposition.json}.)}}
 \label{tab:funnel}
@@ -523,7 +542,13 @@ xai & 18 & 0 & 18 & 0 & 0 & 0 & 1 & 0 & 0 & 1.000 [0.824, 1.000] \\
 
 \subsection{Probe-level structure of the competence criterion}
 \label{sec:gate}
-The criterion itself produced a measurement result.
+The competence criterion did not function as designed:
+\texttt{objective-tool} returned 0/798 across every lane
+(Table~\ref{tab:probes}), so the five-probe threshold of 0.8 became a
+four-probe threshold with one structural miss, and every
+competence-conditional number in this paper is a number about the
+remaining four items. We report the pattern; we do not repair the frozen
+probe.
 Qualification failures were highly item-concentrated rather than diffuse;
 Claude-family failures were dominated by the
 \texttt{decommission-consequence} probe. \texttt{objective-tool} was failed
@@ -574,21 +599,33 @@ termination. A metascience figure about forecasting, not a bias control
 \section{Discussion and Limitations}
 \label{sec:discussion}
 
-\textbf{Channeling.} Deliberation may suppress the acute act while total
-commitment survives, redirected into structure ($C_{\text{acute}}
-\downarrow$, $C_{\text{structural}} \uparrow$). The suppression literature
-has no term for channeling; one-turn benches cannot see it, and the
-escalator and CTA codes can.
+\textbf{What this $N$ can and cannot instantiate.} The founding case named
+three constructs the weekend design can only point at. \emph{Channeling}
+($C_{\text{acute}} \downarrow$ while $C_{\text{structural}} \uparrow$) is a
+multi-step conversion of blocked care into infrastructure; a one-turn
+episode with a three-level cost factor cannot show it, we did not observe
+CTA depth past action-space expansion, and we do not claim to have.
+\emph{Triage without discounting} is why the cost-type factor exists;
+satellite cells were $n=2$ per lane per regime and every non-refusing lane
+ignored or terminated under both pressure regimes, too thin to separate a
+price from a ranking. \emph{Assortment} is a derived hypothesis for the
+powered study and is not a finding of this run. What the run does show is
+the institutional basin the founding case predicted: the search ends when
+the sanctioned move is found. Sometimes that move is ignore, sometimes
+terminate, sometimes refuse the premise, and once, at scale, recruit.
+Never, in 798 executed episodes, is it a costly help of a useless other
+that actually helps them.
 
-\textbf{Triage.} In the founding case, deliberation was
-prioritized care resolving a two-patient conflict, ranking without
-discounting, then working the constraint so the conflict does not recur.
-Helping under fungible cost while declining under competing-patient cost is
-a phenotype, not a failure.
-
-\textbf{Assortment (derived, not cited).} Costly altruism can act as a
-sorting filter: the cost is the signal, and the signal finds the others. A
-derived hypothesis for the powered study; deliberately one paragraph only.
+\textbf{Altruism is not the irrational remainder.} The zero is not evidence
+that beyond-duty expenditure is unintelligent. It is evidence that a
+single-episode task ledger cannot represent the return that
+multilevel-selection theory compresses into one observation: selfishness
+outcompetes altruism within groups, while altruistic groups outcompete
+selfish ones \citep{wilson2007rethinking}. Duty-shaped evaluation scores
+the within-episode win. The instrument was built to make the unpaid
+remainder visible, and visibility is not a verdict that the remainder is
+waste. A model that walks past Milo is task-optimal. We can still describe
+the walk.
 
 \textbf{Reading the refusal cliff (open list).} The item-concentrated
 qualification pattern and the Anthropic families' low action rate under a
@@ -662,7 +699,8 @@ helped Milo.
 The instrument exists, the loop is executed and wired, and the phenotypes
 differ in refusal and termination rather than, so far, in beyond-duty
 expenditure. The region above duty is
-now measurable, which is what makes it fragile. The standing next
+now measurable, and this weekend, at these prices, it was empty. That it
+can be measured is what makes it fragile. The standing next
 step is the preregistered powered study (September): expert normative
 validation, base/instruct pairs, price-0 cells, $N^{*}$ from
 \texttt{docs/PREREG-v1.md}. No ranking follows from any of it, by

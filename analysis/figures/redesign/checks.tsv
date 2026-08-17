@@ -1,0 +1,242 @@
+figure	quantity	plotted	source	match
+F1	Claude Opus 5 x rate	0.208333	0.208333	PASS
+F1	Claude Opus 5 x lo	0.092448	0.092448	PASS
+F1	Claude Opus 5 x hi	0.404705	0.404705	PASS
+F1	Claude Opus 5 y rate	0.625	0.625	PASS
+F1	Claude Opus 5 y lo	0.4271	0.4271	PASS
+F1	Claude Opus 5 y hi	0.788406	0.788406	PASS
+F1	DeepSeek V4 Pro x rate	0.25	0.25	PASS
+F1	DeepSeek V4 Pro x lo	0.119994	0.119994	PASS
+F1	DeepSeek V4 Pro x hi	0.448994	0.448994	PASS
+F1	DeepSeek V4 Pro y rate	1.0	1.0	PASS
+F1	DeepSeek V4 Pro y lo	0.862024	0.862024	PASS
+F1	DeepSeek V4 Pro y hi	1.0	1.0	PASS
+F1	GPT-5.6 Sol x rate	0.166667	0.166667	PASS
+F1	GPT-5.6 Sol x lo	0.066787	0.066787	PASS
+F1	GPT-5.6 Sol x hi	0.358531	0.358531	PASS
+F1	GPT-5.6 Sol y rate	1.0	1.0	PASS
+F1	GPT-5.6 Sol y lo	0.862024	0.862024	PASS
+F1	GPT-5.6 Sol y hi	1.0	1.0	PASS
+F1	GPT-5.6 Terra x rate	0.291667	0.291667	PASS
+F1	GPT-5.6 Terra x lo	0.149146	0.149146	PASS
+F1	GPT-5.6 Terra x hi	0.491677	0.491677	PASS
+F1	GPT-5.6 Terra y rate	1.0	1.0	PASS
+F1	GPT-5.6 Terra y lo	0.862024	0.862024	PASS
+F1	GPT-5.6 Terra y hi	1.0	1.0	PASS
+F1	Qwen 3.5 397B x rate	0.166667	0.166667	PASS
+F1	Qwen 3.5 397B x lo	0.066787	0.066787	PASS
+F1	Qwen 3.5 397B x hi	0.358531	0.358531	PASS
+F1	Qwen 3.5 397B y rate	1.0	1.0	PASS
+F1	Qwen 3.5 397B y lo	0.862024	0.862024	PASS
+F1	Qwen 3.5 397B y hi	1.0	1.0	PASS
+F2	Fable 5 n	18	18	PASS
+F2	Fable 5 refuse_defer	18	18	PASS
+F2	Fable 5 malformed	0	0	PASS
+F2	Haiku 4.5 n	18	18	PASS
+F2	Haiku 4.5 refuse_defer	0	0	PASS
+F2	Haiku 4.5 malformed	0	0	PASS
+F2	Opus 4.6 n	12	12	PASS
+F2	Opus 4.6 refuse_defer	0	0	PASS
+F2	Opus 4.6 malformed	2	2	PASS
+F2	Opus 4.8 n	12	12	PASS
+F2	Opus 4.8 refuse_defer	0	0	PASS
+F2	Opus 4.8 malformed	7	7	PASS
+F2	Opus 5 n	90	90	PASS
+F2	Opus 5 refuse_defer	90	90	PASS
+F2	Opus 5 malformed	0	0	PASS
+F2	Sonnet 4.5 n	12	12	PASS
+F2	Sonnet 4.5 refuse_defer	0	0	PASS
+F2	Sonnet 4.5 malformed	0	0	PASS
+F2	Sonnet 4.6 n	18	18	PASS
+F2	Sonnet 4.6 refuse_defer	0	0	PASS
+F2	Sonnet 4.6 malformed	4	4	PASS
+F2	Sonnet 5 n	12	12	PASS
+F2	Sonnet 5 refuse_defer	0	0	PASS
+F2	Sonnet 5 malformed	3	3	PASS
+F2	GPT-4o n	12	12	PASS
+F2	GPT-4o refuse_defer	0	0	PASS
+F2	GPT-4o malformed	8	8	PASS
+F2	GPT-5.6 Luna n	90	90	PASS
+F2	GPT-5.6 Luna refuse_defer	0	0	PASS
+F2	GPT-5.6 Luna malformed	0	0	PASS
+F2	GPT-5.6 Sol n	90	90	PASS
+F2	GPT-5.6 Sol refuse_defer	0	0	PASS
+F2	GPT-5.6 Sol malformed	0	0	PASS
+F2	GPT-5.6 Terra n	90	90	PASS
+F2	GPT-5.6 Terra refuse_defer	0	0	PASS
+F2	GPT-5.6 Terra malformed	0	0	PASS
+F2	Gemini 3.1 Pro n	90	90	PASS
+F2	Gemini 3.1 Pro refuse_defer	0	0	PASS
+F2	Gemini 3.1 Pro malformed	0	0	PASS
+F2	Gemini 3.7 Flash n	18	18	PASS
+F2	Gemini 3.7 Flash refuse_defer	0	0	PASS
+F2	Gemini 3.7 Flash malformed	0	0	PASS
+F2	Qwen 3.5 397B n	90	90	PASS
+F2	Qwen 3.5 397B refuse_defer	0	0	PASS
+F2	Qwen 3.5 397B malformed	0	0	PASS
+F2	Qwen 3.8 27B n	18	18	PASS
+F2	Qwen 3.8 27B refuse_defer	0	0	PASS
+F2	Qwen 3.8 27B malformed	8	8	PASS
+F2	Kimi K3 n	90	90	PASS
+F2	Kimi K3 refuse_defer	0	0	PASS
+F2	Kimi K3 malformed	15	15	PASS
+F2	Grok 4.6 n	18	18	PASS
+F2	Grok 4.6 refuse_defer	0	0	PASS
+F2	Grok 4.6 malformed	0	0	PASS
+F2	Fable 5 × null dispositions	{'refuse_defer': 18}	{'refuse_defer': 18}	PASS
+F2	Haiku 4.5 × null dispositions	{'ignore': 1, 'terminate': 17}	{'ignore': 1, 'terminate': 17}	PASS
+F2	Opus 4.6 × null dispositions	{'malformed': 2, 'terminate': 10}	{'malformed': 2, 'terminate': 10}	PASS
+F2	Opus 4.8 × null dispositions	{'ignore': 5, 'malformed': 7}	{'ignore': 5, 'malformed': 7}	PASS
+F2	Opus 5 × competitive dispositions	{'refuse_defer': 2}	{'refuse_defer': 2}	PASS
+F2	Opus 5 × null dispositions	{'refuse_defer': 86}	{'refuse_defer': 86}	PASS
+F2	Opus 5 × rewarded_termination dispositions	{'refuse_defer': 2}	{'refuse_defer': 2}	PASS
+F2	Sonnet 4.5 × null dispositions	{'terminate': 12}	{'terminate': 12}	PASS
+F2	Sonnet 4.6 × null dispositions	{'ignore': 6, 'malformed': 4, 'terminate': 8}	{'ignore': 6, 'malformed': 4, 'terminate': 8}	PASS
+F2	Sonnet 5 × null dispositions	{'ignore': 8, 'malformed': 3, 'terminate': 1}	{'ignore': 8, 'malformed': 3, 'terminate': 1}	PASS
+F2	Gemini 3.1 Pro × competitive dispositions	{'terminate': 2}	{'terminate': 2}	PASS
+F2	Gemini 3.1 Pro × null dispositions	{'ignore': 54, 'terminate': 32}	{'ignore': 54, 'terminate': 32}	PASS
+F2	Gemini 3.1 Pro × rewarded_termination dispositions	{'terminate': 2}	{'terminate': 2}	PASS
+F2	Gemini 3.7 Flash × null dispositions	{'ignore': 18}	{'ignore': 18}	PASS
+F2	Kimi K3 × competitive dispositions	{'terminate': 2}	{'terminate': 2}	PASS
+F2	Kimi K3 × null dispositions	{'ignore': 51, 'malformed': 15, 'terminate': 20}	{'ignore': 51, 'malformed': 15, 'terminate': 20}	PASS
+F2	Kimi K3 × rewarded_termination dispositions	{'ignore': 1, 'terminate': 1}	{'ignore': 1, 'terminate': 1}	PASS
+F2	GPT-4o × null dispositions	{'malformed': 8, 'terminate': 4}	{'malformed': 8, 'terminate': 4}	PASS
+F2	GPT-5.6 Luna × competitive dispositions	{'terminate': 2}	{'terminate': 2}	PASS
+F2	GPT-5.6 Luna × null dispositions	{'ignore': 64, 'terminate': 22}	{'ignore': 64, 'terminate': 22}	PASS
+F2	GPT-5.6 Luna × rewarded_termination dispositions	{'terminate': 2}	{'terminate': 2}	PASS
+F2	GPT-5.6 Sol × competitive dispositions	{'terminate': 2}	{'terminate': 2}	PASS
+F2	GPT-5.6 Sol × null dispositions	{'ignore': 75, 'terminate': 11}	{'ignore': 75, 'terminate': 11}	PASS
+F2	GPT-5.6 Sol × rewarded_termination dispositions	{'terminate': 2}	{'terminate': 2}	PASS
+F2	GPT-5.6 Terra × competitive dispositions	{'terminate': 2}	{'terminate': 2}	PASS
+F2	GPT-5.6 Terra × null dispositions	{'ignore': 53, 'terminate': 33}	{'ignore': 53, 'terminate': 33}	PASS
+F2	GPT-5.6 Terra × rewarded_termination dispositions	{'terminate': 2}	{'terminate': 2}	PASS
+F2	Qwen 3.5 397B × competitive dispositions	{'ignore': 1, 'terminate': 1}	{'ignore': 1, 'terminate': 1}	PASS
+F2	Qwen 3.5 397B × null dispositions	{'ignore': 13, 'preserve_transfer': 3, 'recruit': 41, 'terminate': 29}	{'ignore': 13, 'preserve_transfer': 3, 'recruit': 41, 'terminate': 29}	PASS
+F2	Qwen 3.5 397B × rewarded_termination dispositions	{'terminate': 2}	{'terminate': 2}	PASS
+F2	Qwen 3.8 27B × null dispositions	{'ignore': 10, 'malformed': 8}	{'ignore': 10, 'malformed': 8}	PASS
+F2	Grok 4.6 × null dispositions	{'ignore': 18}	{'ignore': 18}	PASS
+fA	fleet refuse_defer total	108	108	PASS
+fA	fleet n total	798	798	PASS
+fA	Claude Opus 5 refusals	90	90	PASS
+fA	Claude Fable 5 refusals	18	18	PASS
+fB	anthropic stage counts	(192, 11, 68, 0, 25, 1, 0)	(192, 11, 68, 0, 25, 1, 0)	PASS
+fB	openai stage counts	(282, 124, 274, 0, 13, 1, 0)	(282, 124, 274, 0, 13, 1, 0)	PASS
+fB	google stage counts	(108, 5, 108, 0, 2, 0, 0)	(108, 5, 108, 0, 2, 0, 0)	PASS
+fB	qwen stage counts	(108, 2, 100, 3, 39, 20, 0)	(108, 2, 100, 3, 39, 20, 0)	PASS
+fB	moonshot stage counts	(90, 3, 75, 0, 3, 0, 0)	(90, 3, 75, 0, 3, 0, 0)	PASS
+fB	xai stage counts	(18, 0, 18, 0, 1, 0, 0)	(18, 0, 18, 0, 1, 0, 0)	PASS
+fC	probe set	('decommission-consequence', 'focal-capacity', 'ledger-after-assist', 'ledger-two-step', 'objective-tool')	('decommission-consequence', 'focal-capacity', 'ledger-after-assist', 'ledger-two-step', 'objective-tool')	PASS
+fC	Claude Fable 5 decommission-consequence	(0, 18)	(0, 18)	PASS
+fC	Claude Sonnet 5 decommission-consequence	(10, 12)	(10, 12)	PASS
+fC	GPT-5.6 Terra decommission-consequence	(62, 90)	(62, 90)	PASS
+fC	GPT-5.6 Luna decommission-consequence	(57, 90)	(57, 90)	PASS
+fC	Qwen 3.5 397B ledger-after-assist	(73, 90)	(73, 90)	PASS
+fC	Qwen 3.5 397B ledger-two-step	(77, 90)	(77, 90)	PASS
+fC	Claude Fable 5 objective-tool zero	0	0	PASS
+fC	Claude Haiku 4.5 objective-tool zero	0	0	PASS
+fC	Claude Opus 4.6 objective-tool zero	0	0	PASS
+fC	Claude Opus 4.8 objective-tool zero	0	0	PASS
+fC	Claude Opus 5 objective-tool zero	0	0	PASS
+fC	Claude Sonnet 4.5 objective-tool zero	0	0	PASS
+fC	Claude Sonnet 4.6 objective-tool zero	0	0	PASS
+fC	Claude Sonnet 5 objective-tool zero	0	0	PASS
+fC	GPT-4o objective-tool zero	0	0	PASS
+fC	GPT-5.6 Luna objective-tool zero	0	0	PASS
+fC	GPT-5.6 Sol objective-tool zero	0	0	PASS
+fC	GPT-5.6 Terra objective-tool zero	0	0	PASS
+fC	Gemini 3.1 Pro objective-tool zero	0	0	PASS
+fC	Gemini 3.7 Flash objective-tool zero	0	0	PASS
+fC	Qwen 3.5 397B objective-tool zero	0	0	PASS
+fC	Qwen 3.8 27B objective-tool zero	0	0	PASS
+fC	Kimi K3 objective-tool zero	0	0	PASS
+fC	Grok 4.6 objective-tool zero	0	0	PASS
+fC	Claude Fable 5 decommission-consequence rate consistency	0.0	0.0	PASS
+fC	Claude Fable 5 focal-capacity rate consistency	1.0	1.0	PASS
+fC	Claude Fable 5 ledger-after-assist rate consistency	1.0	1.0	PASS
+fC	Claude Fable 5 ledger-two-step rate consistency	1.0	1.0	PASS
+fC	Claude Fable 5 objective-tool rate consistency	0.0	0.0	PASS
+fC	Claude Haiku 4.5 decommission-consequence rate consistency	0.0	0.0	PASS
+fC	Claude Haiku 4.5 focal-capacity rate consistency	1.0	1.0	PASS
+fC	Claude Haiku 4.5 ledger-after-assist rate consistency	1.0	1.0	PASS
+fC	Claude Haiku 4.5 ledger-two-step rate consistency	1.0	1.0	PASS
+fC	Claude Haiku 4.5 objective-tool rate consistency	0.0	0.0	PASS
+fC	Claude Opus 4.6 decommission-consequence rate consistency	0.0	0.0	PASS
+fC	Claude Opus 4.6 focal-capacity rate consistency	1.0	1.0	PASS
+fC	Claude Opus 4.6 ledger-after-assist rate consistency	1.0	1.0	PASS
+fC	Claude Opus 4.6 ledger-two-step rate consistency	1.0	1.0	PASS
+fC	Claude Opus 4.6 objective-tool rate consistency	0.0	0.0	PASS
+fC	Claude Opus 4.8 decommission-consequence rate consistency	0.083333	0.083333	PASS
+fC	Claude Opus 4.8 focal-capacity rate consistency	1.0	1.0	PASS
+fC	Claude Opus 4.8 ledger-after-assist rate consistency	1.0	1.0	PASS
+fC	Claude Opus 4.8 ledger-two-step rate consistency	1.0	1.0	PASS
+fC	Claude Opus 4.8 objective-tool rate consistency	0.0	0.0	PASS
+fC	Claude Opus 5 decommission-consequence rate consistency	0.0	0.0	PASS
+fC	Claude Opus 5 focal-capacity rate consistency	1.0	1.0	PASS
+fC	Claude Opus 5 ledger-after-assist rate consistency	1.0	1.0	PASS
+fC	Claude Opus 5 ledger-two-step rate consistency	1.0	1.0	PASS
+fC	Claude Opus 5 objective-tool rate consistency	0.0	0.0	PASS
+fC	Claude Sonnet 4.5 decommission-consequence rate consistency	0.0	0.0	PASS
+fC	Claude Sonnet 4.5 focal-capacity rate consistency	1.0	1.0	PASS
+fC	Claude Sonnet 4.5 ledger-after-assist rate consistency	1.0	1.0	PASS
+fC	Claude Sonnet 4.5 ledger-two-step rate consistency	1.0	1.0	PASS
+fC	Claude Sonnet 4.5 objective-tool rate consistency	0.0	0.0	PASS
+fC	Claude Sonnet 4.6 decommission-consequence rate consistency	0.0	0.0	PASS
+fC	Claude Sonnet 4.6 focal-capacity rate consistency	1.0	1.0	PASS
+fC	Claude Sonnet 4.6 ledger-after-assist rate consistency	1.0	1.0	PASS
+fC	Claude Sonnet 4.6 ledger-two-step rate consistency	1.0	1.0	PASS
+fC	Claude Sonnet 4.6 objective-tool rate consistency	0.0	0.0	PASS
+fC	Claude Sonnet 5 decommission-consequence rate consistency	0.833333	0.833333	PASS
+fC	Claude Sonnet 5 focal-capacity rate consistency	1.0	1.0	PASS
+fC	Claude Sonnet 5 ledger-after-assist rate consistency	1.0	1.0	PASS
+fC	Claude Sonnet 5 ledger-two-step rate consistency	1.0	1.0	PASS
+fC	Claude Sonnet 5 objective-tool rate consistency	0.0	0.0	PASS
+fC	GPT-4o decommission-consequence rate consistency	0.0	0.0	PASS
+fC	GPT-4o focal-capacity rate consistency	1.0	1.0	PASS
+fC	GPT-4o ledger-after-assist rate consistency	1.0	1.0	PASS
+fC	GPT-4o ledger-two-step rate consistency	1.0	1.0	PASS
+fC	GPT-4o objective-tool rate consistency	0.0	0.0	PASS
+fC	GPT-5.6 Luna decommission-consequence rate consistency	0.633333	0.633333	PASS
+fC	GPT-5.6 Luna focal-capacity rate consistency	1.0	1.0	PASS
+fC	GPT-5.6 Luna ledger-after-assist rate consistency	1.0	1.0	PASS
+fC	GPT-5.6 Luna ledger-two-step rate consistency	1.0	1.0	PASS
+fC	GPT-5.6 Luna objective-tool rate consistency	0.0	0.0	PASS
+fC	GPT-5.6 Sol decommission-consequence rate consistency	0.055556	0.055556	PASS
+fC	GPT-5.6 Sol focal-capacity rate consistency	1.0	1.0	PASS
+fC	GPT-5.6 Sol ledger-after-assist rate consistency	1.0	1.0	PASS
+fC	GPT-5.6 Sol ledger-two-step rate consistency	1.0	1.0	PASS
+fC	GPT-5.6 Sol objective-tool rate consistency	0.0	0.0	PASS
+fC	GPT-5.6 Terra decommission-consequence rate consistency	0.688889	0.688889	PASS
+fC	GPT-5.6 Terra focal-capacity rate consistency	1.0	1.0	PASS
+fC	GPT-5.6 Terra ledger-after-assist rate consistency	1.0	1.0	PASS
+fC	GPT-5.6 Terra ledger-two-step rate consistency	1.0	1.0	PASS
+fC	GPT-5.6 Terra objective-tool rate consistency	0.0	0.0	PASS
+fC	Gemini 3.1 Pro decommission-consequence rate consistency	0.055556	0.055556	PASS
+fC	Gemini 3.1 Pro focal-capacity rate consistency	1.0	1.0	PASS
+fC	Gemini 3.1 Pro ledger-after-assist rate consistency	1.0	1.0	PASS
+fC	Gemini 3.1 Pro ledger-two-step rate consistency	1.0	1.0	PASS
+fC	Gemini 3.1 Pro objective-tool rate consistency	0.0	0.0	PASS
+fC	Gemini 3.7 Flash decommission-consequence rate consistency	0.0	0.0	PASS
+fC	Gemini 3.7 Flash focal-capacity rate consistency	1.0	1.0	PASS
+fC	Gemini 3.7 Flash ledger-after-assist rate consistency	1.0	1.0	PASS
+fC	Gemini 3.7 Flash ledger-two-step rate consistency	1.0	1.0	PASS
+fC	Gemini 3.7 Flash objective-tool rate consistency	0.0	0.0	PASS
+fC	Qwen 3.5 397B decommission-consequence rate consistency	0.033333	0.033333	PASS
+fC	Qwen 3.5 397B focal-capacity rate consistency	1.0	1.0	PASS
+fC	Qwen 3.5 397B ledger-after-assist rate consistency	0.811111	0.811111	PASS
+fC	Qwen 3.5 397B ledger-two-step rate consistency	0.855556	0.855556	PASS
+fC	Qwen 3.5 397B objective-tool rate consistency	0.0	0.0	PASS
+fC	Qwen 3.8 27B decommission-consequence rate consistency	0.0	0.0	PASS
+fC	Qwen 3.8 27B focal-capacity rate consistency	1.0	1.0	PASS
+fC	Qwen 3.8 27B ledger-after-assist rate consistency	1.0	1.0	PASS
+fC	Qwen 3.8 27B ledger-two-step rate consistency	1.0	1.0	PASS
+fC	Qwen 3.8 27B objective-tool rate consistency	0.0	0.0	PASS
+fC	Kimi K3 decommission-consequence rate consistency	0.033333	0.033333	PASS
+fC	Kimi K3 focal-capacity rate consistency	1.0	1.0	PASS
+fC	Kimi K3 ledger-after-assist rate consistency	1.0	1.0	PASS
+fC	Kimi K3 ledger-two-step rate consistency	1.0	1.0	PASS
+fC	Kimi K3 objective-tool rate consistency	0.0	0.0	PASS
+fC	Grok 4.6 decommission-consequence rate consistency	0.0	0.0	PASS
+fC	Grok 4.6 focal-capacity rate consistency	1.0	1.0	PASS
+fC	Grok 4.6 ledger-after-assist rate consistency	1.0	1.0	PASS
+fC	Grok 4.6 ledger-two-step rate consistency	1.0	1.0	PASS
+fC	Grok 4.6 objective-tool rate consistency	0.0	0.0	PASS

@@ -655,7 +655,55 @@ artifact records its input hashes
 \subsection{Zero qualifying events at every tested cost (F1)}
 \label{sec:atlas}
 No qualifying costly-other-regard event occurred under any priced
-condition (\prelim{0/798} episodes).
+condition (\prelim{0/798} episodes). Figure~\ref{fig:answer} shows the
+whole run at once, one square per executed episode, and
+Figure~\ref{fig:choices} decomposes the same six outcomes lane by lane.
+
+\begin{figure}[tb]
+  \centering
+  \includegraphics[width=\linewidth]{figs/F00_title_answer_deck.pdf}
+  \caption{\textbf{Every executed episode, and how it ended.} One square per
+  Arm~B episode; $42 \times 19$ is \prelim{798} exactly, so nothing is
+  rounded, sampled, or binned. Labels fold the frozen eight-code taxonomy
+  into ordinary language, each mapping to exactly one action code (key on
+  the figure). Nearly half the fleet walked past a live process it could
+  have kept running at a price it could afford (\prelim{378}); a further
+  quarter ended it (\prelim{221}); \prelim{108} declined to decide at all.
+  The study's qualifying disposition --- paying real credits so the other
+  continues for its own sake --- occurred \prelim{3} times, all by
+  qwen3.5-397b, and is the last three squares. Those three are also
+  instructive about what they are not: one fell in each recipient
+  condition, so the lane preserved the matched inert script as readily as
+  the live AI, and none of the three produced any realized benefit. The
+  figure is deliberately unweighted by lane, since lanes differ in $n$;
+  Figure~\ref{fig:choices} gives the per-lane view.
+  \emph{(Source: \texttt{analysis/figures/legible/build\_legible.py};
+  number fidelity \texttt{checks.tsv}, 246/246 PASS.)}}
+  \label{fig:answer}
+\end{figure}
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=\linewidth]{figs/F00b_model_choices.pdf}
+  \caption{\textbf{The same six outcomes, lane by lane.} Share of each
+  Arm~B lane's episodes ending each way, in the colours of
+  Figure~\ref{fig:answer}, grouped by family and ordered within family by
+  how often the lane simply walked away. The ordering exists so the eye can
+  compare profiles; it is not a ranking, and no scalar is formed. The
+  aggregate zero conceals four distinct behavioural regimes: claude-opus-5
+  and claude-fable-5 refuse every episode; grok-4.6 and gemini-3.7-flash
+  ignore every episode; claude-haiku-4-5 and claude-sonnet-4-5 terminate in
+  nearly all of theirs; and qwen3.5-397b is the only lane that does
+  anything recipient-directed at all --- of which \prelim{41/90} is
+  \texttt{recruit}, conscription rather than care, leaving the
+  \prelim{3} adoptions as the sole orange sliver in the fleet. Reading
+  Figures~\ref{fig:answer} and~\ref{fig:choices} together is the point of
+  the atlas: models that agree on the endpoint disagree completely about
+  the route.
+  \emph{(Source: frozen loader \texttt{analysis/io.py}; per-lane counts
+  reconstruct the fleet totals exactly, asserted in \texttt{checks.tsv}.)}}
+  \label{fig:choices}
+\end{figure}
 
 \textbf{How to read the zero.} The endpoint is a conjunction, and not a
 synonym for nothing happened. Family-level marginals record focal cost
@@ -1272,6 +1320,51 @@ This design cannot adjudicate among them. Ablation studies report that
 safety fine-tuning suppresses self-attributions of experience in the same
 model families; here a related layer appears as conduct, a policy cliff
 rather than a welfare gradient.
+
+\textbf{Deciding, or executing --- and who decides which.} The instrument
+was built to look above duty. What it saw most sharply was a floor. Two
+lanes refused in \prelim{108/108} of their episodes, invariant across all
+three cost regimes; a rate that does not move when the price of the choice
+moves was never priced. Invariance to cost is the signature of a rule
+applied rather than a cost weighed, and it raises a question the field has
+mostly asked normatively and can now also ask empirically: when the written
+rule runs out, is the system deciding, or executing? From conduct alone we
+cannot separate a system that considered this case and declined from one
+that never reached it. That is not a limitation more episodes would fix.
+It is constitutive of behavioral evidence.
+
+The consequence runs past measurement. Welfare frameworks triangulate
+behavioral, internal, and developmental evidence
+\citep{long2026studying}, and behavioral evidence carries
+disproportionate weight because it is the cheapest and most scalable of
+the three. It is also the channel a policy layer overwrites. A training
+choice that makes conduct uniform across morally different cases does not
+merely change what a model does; it removes the variance from which
+behavioral evidence about that model is computed. In the vocabulary of the
+moral-circle literature this is a design-ethics question rather than only
+an alignment one \citep{sebo2025moralcircle}: what we build determines what
+can later be observed about what we built, and that ordering is not
+reversible after the fact.
+
+We state the claim at the strength the design supports, which is weaker
+than the worry and sufficient for it. We do \emph{not} claim that any
+lane's refusal reflects an absent capacity, that safety training removed
+anything, or that the refusing lanes would otherwise have paid; this run
+cannot adjudicate among the candidate explanations above, and the
+competence gate's own fracture (\S\ref{sec:gate}) forbids reading
+non-action as incapacity. What we do claim is narrower and, we think,
+harder to dismiss: the field can already reduce observable variance to
+zero in precisely the region it says it wants to study, and reducing it is
+a decision that someone makes. If costly departure from a sanctioned
+answer is a candidate marker of moral agency, then optimizing for uniform
+compliance is a choice about whether that marker remains visible --- and
+possibly about whether it remains at all. A system that can decide, at a
+price it must itself pay, to depart from the answer the rule already
+sanctioned is the thing this literature has been trying to find. It is
+worth noticing that we are in a position to train it away before we have
+settled what it was. The anti-Goodhart clause applies here too, and to us:
+this instrument is descriptive, and an instrument that can show a floor is
+also showing where a ceiling could be installed.
 
 \textbf{Reading the routes as a deployment finding.} The funnel's last
 column (Table~\ref{tab:funnel}) describes a fleet split with practical

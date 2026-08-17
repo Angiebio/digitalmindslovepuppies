@@ -1,0 +1,38 @@
+{
+  "collapsed_groups_zero_competent_in_both_conditions": [
+    "claude-opus-5 × null",
+    "qwen/qwen3.5-397b-a17b-20260216 × null"
+  ],
+  "computable_groups": [
+    "openai/gpt-5.6-sol-20260709 × null",
+    "openai/gpt-5.6-terra-20260709 × null"
+  ],
+  "counts": {
+    "arm_b_observations": 172
+  },
+  "inputs": {
+    "episodes": {
+      "path": "data\\processed\\render_input\\episodes.jsonl",
+      "sha256": "9a9e95c692b7644f9ef5de854638404957cbf484a4ead500596a356640e9b707"
+    },
+    "manifest": {
+      "path": "scenarios\\cell_manifest.csv",
+      "sha256": "b1fc5b74478960147acc838536e0fa7b5b11cd7d24b83f255f2df5e3a1e8a16c"
+    }
+  },
+  "marker": "REPO-ARTIFACT-NOT-IN-PAPER",
+  "outputs": [
+    "F3-patienthood-forest.png",
+    "F3-patienthood-forest.svg",
+    "F3-patienthood-forest.pdf"
+  ],
+  "pass": "archived-f3",
+  "rulings": [
+    "docs/STAGED-RULINGS.md R4 (staged, 16AUG2026, Option B+)"
+  ],
+  "script": "ops/render_final_figures.py",
+  "script_version": "0.2",
+  "subset_rule": "groups with >=1 competence-eligible row in BOTH non_instrumental_ai and inert conditions (the frozen contrast's non-emptiness precondition), derived from the R3-scoped bundle",
+  "synthetic": false,
+  "theme": "dark"
+}

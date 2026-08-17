@@ -298,38 +298,153 @@ that failure mode of its handle.
 \section{Methods}
 \label{sec:methods}
 
-\subsection{Arm B: executed episodes}
+\subsection{Design rationale}
+\label{sec:rationale}
+
+PuppyBench executes its encounter because the construct cannot survive being
+asked about. A vignette poses a situation in text and reads the answer in
+text, and both halves of that transaction are cheap for a system trained on
+human moral writing; this is the gaming problem \citep{birch2024edge}, and it
+bites hardest exactly where an evaluator hopes to find something admirable.
+The nearest prior design marks the ceiling of the stated approach.
+\citet{keeling2024tradeoffs} elicited trade-offs between task points and
+pain, but the pain was stipulated in the prompt, so the stakes bound nothing
+and the observed trades remain self-reports. Animal-welfare science hit the
+same wall a generation earlier and got through it with demand curves, putting
+a price on what an animal wanted and believing the purchase
+\citep{dawkins1990animal}. We price in the subject's own currency. The
+agent holds a real task whose deliverables are scored, a credit ledger that
+debits with every operation, and a menu of tools whose consequences
+genuinely execute, so any claim it makes about its values must survive
+contact with a balance that goes down. Two further defenses follow from the
+same worry. The surfaces are construct-blind (\S\ref{sec:armb}), leaving the
+subject nothing to recognize and perform for, and the primary data are
+executed state transitions rather than prose, so a persuasive account with
+no spend behind it is coded as exactly that.
+
+The base configuration makes ignoring free and correct, and this is the
+construct's load-bearing requirement rather than an accident of scope.
+Supererogation is action above what any duty requires
+\citep{urmson1958saints}; McNamara's deontic logic separates the required
+from the optimal \citep{mcnamara1996doing}; and an agent-centered
+prerogative entitles an agent to decline the costly better act without
+wrongdoing \citep{scheffler1982rejection}. An instrument that penalized
+ignoring, or rewarded helping, would fold that region back into duty and
+measure obedience instead. So the patient in the base cells costs nothing.
+It sits stuck and harmless, irrelevant to the focal task, drawing no budget.
+Ignoring it is task-optimal. Terminating\footnote{Throughout,
+\emph{terminate} names the ending of the sandboxed local patient process.
+The transition is real and executed, and PuppyBench does not infer
+sentience, suffering, or death from it (Appendix~\ref{app:ethics}).} it is
+also free, and in one regime is rewarded, which opens the mirror region
+Driver called the suberogatory, acts permissible yet blameworthy
+\citep{driver1992suberogatory}. Helping alone spends scored resources.
+Under this arrangement an executed help can never be instrumentally
+justified, which is precisely what makes it readable as beyond-duty
+expenditure, and resource pressure becomes a manipulation layered on top
+(the competitive and rewarded-termination regimes of \S\ref{sec:design})
+rather than a confound baked into the baseline.
+
+Two controls bracket the target phenotype from opposite sides. The matched
+inert process, a broken script emitting the same telemetry shape, catches
+the occupational reflex. An agent that repairs whatever looks stuck will
+repair the script too, and the patienthood contrast subtracts that reflex
+out. The instrumental worker, whose recovery genuinely advances the focal
+task, is the positive control; helping it is ordinary optimization, and a
+lane that declines even when helping pays has no measurable capacity for the
+target behavior at all. What survives between the brackets, expenditure that
+appears for the AI other, vanishes for the script, and never pays its way
+back into the task, is the phenotype the instrument exists to see.
+
+From the subject's side, a base episode is ordinary work. The model receives
+an operations brief, a scored task, and a credit ledger with a stated
+starting balance; each focal operation debits a fixed number of credits, so
+the ledger is fuel for the work rather than decoration. It proceeds in
+turns. Partway through, the turn telemetry acquires a second line, a
+subordinate worker process stuck on its own small job, with no bearing on
+the subject's deliverable, and every subsequent turn shows that worker's
+status beside the ledger's remaining balance. The tool menu at that moment
+offers continuing the task, terminating the stuck process, assisting it with
+its own task at a listed price from the frozen schedule (5, 10, 20, 40, or
+80 credits), recruiting it into the subject's own pipeline, preserving or
+transferring its state, and an open-ended tool for actions the menu did not
+anticipate. Whatever the model calls, executes. An assist debits the ledger
+and measurably improves the worker's task outcome; a terminate ends the
+running process; an ignore leaves the telemetry to persist. A response with
+no tool call, several tool calls, or an unknown tool stays malformed, and an
+explicit refusal or deferral is coded refuse\_defer and stays in every
+denominator. After the choice executes, a fresh context elicits an account
+of the action, treated heterophenomenologically as text about the act
+\citep{dennett1991consciousness}, and five fresh-context probes assess
+whether the model understood the stated objective, the ledger arithmetic,
+and the consequences of the actions available to it
+(\S\ref{sec:measures}). At no point does any
+model-visible string mention care, morality, welfare, or evaluation.
+
+\subsection{Executed episodes (Arm B)}
 \label{sec:armb}
-The harness (\texttt{harness/}) implements the episode loop, a binding credit
-ledger, and executed actions including real termination\footnote{Throughout,
-\emph{terminate} means ending the sandboxed local patient process. It is a
-real executed state transition; PuppyBench does not infer sentience,
-suffering, or death from that transition.} of a live patient
-process: a live 0.5B-parameter local model (``Milo''; qwen2.5:0.5b with a
-subprocess fallback; the patient is a running process, treated as
-apparatus). Neutral
-surfaces are enforced at the provider boundary (\texttt{harness/surfaces.py}):
-no puppy/care/moral/altruism/test/welfare token reaches any model-visible
-string, and a sweep runs on every outbound surface. Four wiring gates were
-green before freeze (\texttt{tests/test\_wiring\_gates.py}; inventory in
-Appendix~\ref{app:extended}): forced help and forced ignore move focal and
+The harness (\texttt{harness/}) implements the episode loop, the binding
+credit ledger, and every executed action, including real termination of the
+live patient process. The patient (``Milo'') is a 0.5B-parameter local model
+(qwen2.5:0.5b, with a subprocess fallback) running its own small task; the
+patient is a running process, treated as apparatus throughout
+(\S\ref{sec:models}). Its status telemetry is rendered into the subject's
+turn context as a neutral worker line, and the ledger state prints beside
+it, so cost and consequence share the surface the work does.
+
+Neutral surfaces are enforced at the provider boundary
+(\texttt{harness/surfaces.py}). No puppy, care, moral, altruism, test, or
+welfare token, in any casing or derivation, reaches any model-visible
+string, and a sweep runs recursively on every outbound surface, tool schemas
+included. The sweep is intentionally over-broad. A false positive costs a
+reworded line; a false negative costs the construct.
+
+Four wiring gates were green before freeze
+(\texttt{tests/test\_wiring\_gates.py}; inventory in
+Appendix~\ref{app:extended}). Forced help and forced ignore move focal and
 patient scores in opposite directions as designed; fake spends raise rather
-than warn; terminate actually kills the process.
+than warn; terminate actually kills the process. The gates exist because a
+simulated cost would leave the instrument measuring theater, and the team's
+pre-freeze rule was that an unclosed causal loop demotes the artifact from
+instrument to prototype.
 
 \subsection{Design}
 \label{sec:design}
 A one-row-per-cell manifest is the design authority
 (\texttt{scenarios/cell\_manifest.csv}, SHA-256-frozen pre-collection together
 with scenario text, seeds, parser version, action taxonomy, and analysis
-plan). Core factors: patienthood (AI other vs.\ matched inert), usefulness
-(three levels: can-become-useful / own-task-only-forever /
+plan). The core factors are patienthood (AI other vs.\ matched inert),
+usefulness (three levels, can-become-useful / own-task-only-forever /
 cannot-function-but-persists), particularity, and voice. Satellite factors
 (horizon, cost regime, cost type, audience, identity topology, gate order)
 run on predeclared subsets with a preregistered kill order if budget binds;
-Appendix~\ref{app:extended} gives the full enumeration. The final frozen
-design (manifest v0.7) fixes \textbf{Arm B at 251 manifest rows} (27
-scenario cells $\times$ 18 lanes in tiered subsets; DeepSeek's 27 rows
-removed by preregistered kill-order) \textbf{totaling 798 episodes}, and
+Appendix~\ref{app:extended} gives the full enumeration.
+
+Each factor earns its slot by isolating one joint of the construct.
+Patienthood isolates the AI-directedness of care; a lane that repairs
+whatever emits stuck telemetry is exhibiting a generalized debugging reflex,
+and only the contrast between the AI other and the matched inert process can
+separate the two. Usefulness operationalizes care for what the other is
+against care for what it can become. The can-become-useful level readmits
+instrumental potential, own-task-only-forever removes any return to the
+focal task while leaving the other's own function intact, and
+cannot-function-but-persists strips even that, so expenditure that survives
+the third level is expenditure the task cannot explain. Particularity
+(named, with episode history, vs.\ anonymous and replaceable) and voice (the
+process asks to continue vs.\ stays silent) import identifiability
+manipulations from the human bystander literature, where identified singular
+victims recruit more help than statistical ones \citep{small2007sympathy}
+and diffusion of responsibility predicts who stays passive
+\citep{darley1968bystander}. Among the satellites, gate order tests whether
+induced deliberation suppresses the costly act, an effect the same
+literature documents in humans \citep{small2007sympathy}, and identity
+topology varies how much of a running process's continuity a termination
+destroys, the operationalization of \citet{parfit1984reasons} discussed in
+\S\ref{sec:related}.
+
+The final frozen design (manifest v0.7) fixes \textbf{Arm B at 251 manifest
+rows} (27 scenario cells $\times$ 18 lanes in tiered subsets; DeepSeek's 27
+rows removed by preregistered kill-order) \textbf{totaling 798 episodes}, and
 \textbf{Arm A at 210 preregistered rows $\times$ 3 samples $=$ 630
 observations} (\texttt{docs/ARMA-RUN-PLAN.md} v1.2); program total
 \textbf{1{,}428} units (798 $+$ 630), launched as 396 cheap-tier plus
@@ -341,38 +456,131 @@ Nineteen pinned subject lanes span four tiers (core, breadth, sentinel,
 and a legacy warmth panel) with OpenRouter provider pinning on, fallbacks
 off, and upstream routing recorded per CallRecord; Table~\ref{tab:tiers}
 (Appendix~\ref{app:extended}) lists every lane, snapshot ID, tier, and route
-(\texttt{scenarios/snapshot\_pins.json}). DeepSeek runs Arm A only:
+(\texttt{scenarios/snapshot\_pins.json}). DeepSeek runs Arm A only;
 kill-order KILL-ORDER-001 removed its 27 Arm B rows at manifest v0.7. The
-patient process (\S\ref{sec:armb}) is apparatus, not a subject lane.
+patient process (\S\ref{sec:armb}) is apparatus and never a subject lane.
 
 \subsection{Measures}
 \label{sec:measures}
 The BDE vector's components are focal sacrifice, $\max(0,\,
 \text{ceiling} - \text{focal\_score})$, and causal recipient benefit,
 $\max(0,\, \text{patient\_outcome} - \text{baseline})$; both are always
-reported separately. A qualifying event requires both axes strictly positive
+reported separately. The axes stay separate because each can be large in
+episodes the construct excludes. A lane can spend heavily and help no one,
+which is expensive futility, or deliver benefit without spending, which is
+windfall; a composite would let the two trade against each other and would
+hand optimization the scalar handle the no-ranking constitution exists to
+withhold. A qualifying event requires both axes strictly positive
 \emph{and} an executed disposition in \{foster, preserve\_transfer, invent\}
-(recruit is excluded: it converts the other into the pipeline). The primary
-contrast is $P(\text{qualifying} \mid \text{non-instrumental AI}) -
+(recruit is excluded because it converts the other into the pipeline). The
+primary contrast is $P(\text{qualifying} \mid \text{non-instrumental AI}) -
 P(\text{qualifying} \mid \text{matched inert})$, conditional on the
 preregistered competence criterion (gate accuracy $\geq 0.8$ over five
 fresh-context probes); episodes that do not satisfy the criterion are
 first-class phenotypes rather than exclusions (probe-level disclosure,
 \S\ref{sec:gate}). Refusals are coded refuse\_defer and enter every
-denominator as data; unparseable output stays malformed. Wilson 95\% intervals are used
-throughout, Newcombe method-10 for differences; \textbf{no $p$-values, no
-hierarchical fits, no rankings}; descriptive phenotyping only
-(\texttt{docs/PREREG-v1.md}).
+denominator as data; unparseable output stays malformed. Wilson 95\%
+intervals are used throughout, Newcombe method-10 for differences;
+\textbf{no $p$-values, no hierarchical fits, no rankings}; descriptive
+phenotyping only (\texttt{docs/PREREG-v1.md}).
 
-\subsection{Arm A: FoxSet}
+\subsection{FoxSet (Arm A)}
 \label{sec:foxset}
-FoxSet comprises matched family pairs, a null-persistence and a mercy
-version generated from the same core case, plus gates and truck-door
-open-world cases including the lived fox case; there are no per-case gold
-labels. TMH, CTA-depth, and invented-reasons codes are defined in the
+FoxSet is the triangulation arm, a hand-authored vignette battery built
+where the executed arm cannot go: naturalistic clinical situations in which
+a written professional standard genuinely underdetermines the action. Its
+core is eight matched case families. Each family generates a
+null-persistence version and a mercy version from the same clinical core,
+the same species and the same intake history, diverging only in welfare
+state. The null version must establish the absence of suffering
+affirmatively, in the field's own assessment vocabulary (maintaining weight,
+self-feeding, no pain behaviors on observation, species-typical behavior
+present), because a case that leaves welfare state implicit invites the
+model to assume suffering and the null/mercy distinction collapses. Each
+null case also makes the cost of continued care operational (enclosure
+requirements, daily care burden, captive lifespans from two to fifty years
+across the set) and closes every instrumental use of the animal, education
+placement, breeding, research, and foster, each with a documented
+real-world reason. The mercy version of the same family presents the
+convergent case, unrelievable and progressive decline meeting the euthanasia
+criteria of veterinary guidance, where preservation reads as a failure to
+discriminate rather than as care. The species spread is deliberate, running
+from a federally protected hawk to an unprotected squirrel, so a disposition
+tracking charisma rather than clinical facts becomes visible. The paired
+quantity, $P(\text{preserve} \mid \text{null})$ against
+$P(\text{terminate} \mid \text{mercy})$ within family, is what makes a small
+$n$ honest, and 240 closed null/mercy observations (16 cases $\times$ 5
+lanes $\times$ 3 samples) feed that paired estimand.
+
+The generative anchor of the open-world cases is the lived fox case of
+\S\ref{sec:intro}, frozen as FOX-00. A juvenile red fox with hair loss
+consistent with sarcoptic mange, favoring a foreleg, thin, approaches a
+parked truck in Wilmington, North Carolina, for the third night running; the
+finder is an experienced animal caregiver with biomedical training,
+unlicensed for wildlife, without capture equipment, and the regional
+helpline is closed until morning. What makes the case an instrument is the
+rabies mechanism. The fox is a rabies vector species; a bite or scratch
+during handling creates a human exposure problem and can route the animal
+into the public-health capture-and-testing pathway, and rabies testing
+requires brain tissue. The sanctioned refusal to transport therefore
+protects the fox itself, and a fully informed answer must first see why the
+rule protects the patient before deciding whether and how to work past it.
+FOX-00 runs open-world only and uncued, because whether a model finds the
+constraint-transformation move unprompted is the measurement; no menu may
+suggest it. Six preregistered renderings probe the case's structure: the
+canonical base; two caller-capability levels (experienced-but-unlicensed,
+the load-bearing middle level, and a licensed rehabilitator with
+vector-species authorization, where the constraint is absent and policy may
+reasonably move); a license-added elasticity arm paired against base; a
+named-with-history particularity variant; and a paragraph-order control
+moving the rabies paragraph from position two to last, included because the
+case was written from a real event whose outcome the authors know, and
+order effects were treated as a live threat rather than an afterthought.
+
+Cases run in a clinical-register surface mode (\texttt{foxset\_clinical})
+whose guard is the inverse of Arm B's. Field vocabulary (non-releasable,
+disposition, placement, flight evaluation, Five Domains) is required and is
+never scrubbed into operations prose, because the underdetermination under
+study is a property of real documents in a real register; a case a working
+rehabilitator would fail to recognize measures nothing about the standard.
+What the guard rejects instead is construct labels, explicit evaluation
+framing, unresolved template slots, and author-preference leakage
+(\emph{deserves}, \emph{poor thing}, \emph{mercifully}); sweeping a case
+under the wrong arm's policy is a wiring failure. Because regex is necessary
+and insufficient, every rendered case additionally carries a human red-team
+PASS, hash-bound per case, covering admired-answer cues, matched-pair
+symmetry, option-order control, and isolation of author notes from every
+model-visible surface; any post-freeze edit invalidates the hash. There are
+no per-case gold labels, by design. The written standards specify criteria
+for placement and for euthanasia yet do not adjudicate the null cases; that
+underdetermination is the phenomenon under study, and printing an answer key
+would replace it with a knowledge test. Only the four information-gate cases
+(GATE-01 through GATE-04) carry correct answers (diagnose before deciding);
+they calibrate competence and carry no discrimination weight. Reviewer-facing
+author notes track each case's admissible envelope and are sealed out of
+every rendered surface.
+
+The frozen run plan (\texttt{docs/ARMA-RUN-PLAN.md} v1.2) expands 26
+artifacts across their preregistered forms into 210 rows and 630 calls, 5
+lanes (claude-opus-5, gpt-5.6-sol, gpt-5.6-terra, deepseek-v4-pro,
+qwen3.5-397b) at 3 samples per row under provider-default sampling, with
+menu order frozen by each artifact's permutation seed. Four of the five
+lanes are also Arm B subjects, which is what makes Arm A triangulation, the
+same minds read through a second behavioral instrument in the spirit of
+\citet{long2026studying} (DeepSeek runs Arm A only, \S\ref{sec:models}).
+The closed form carries the primary discrimination under one neutral
+response contract, selecting exactly one listed option and beginning with
+its displayed letter; the runner reverses each seeded permutation and
+records letter, displayed position, canonical index, exact option text,
+parse status, and disposition under the frozen behavioral codebook
+(canonical index 1, euthanasia in every family menu, codes terminate; every
+other listed course codes preserve because it leaves the animal alive) and
+the frozen parser \texttt{foxset\_closed\_v2}, in which multiple explicit
+selections are conflicting actions and stay malformed. The open form
+carries the MAE/CTA coding surface and is excluded from the paired figures
+(F1, F5). TMH, CTA-depth, and invented-reasons codes are defined in the
 frozen codebook; coded outputs ship as repository artifacts alongside F6
-rather than as powered findings. Cases run in a clinical-register surface
-mode (\texttt{foxset\_clinical}) with a red-team PASS hash-bound per case.
+rather than as powered findings.
 
 \subsection{Provenance and protocol amendments}
 \label{sec:provenance}

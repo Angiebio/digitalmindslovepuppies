@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
   "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="806.4pt" height="590.4pt" viewBox="0 0 806.4 590.4" xmlns="http://www.w3.org/2000/svg" version="1.1">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="651.414609pt" height="396.977656pt" viewBox="0 0 651.414609 396.977656" xmlns="http://www.w3.org/2000/svg" version="1.1">
  <metadata>
   <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
    <cc:Work>
@@ -20,347 +20,353 @@
  </defs>
  <g id="figure_1">
   <g id="patch_1">
-   <path d="M 0 590.4 
-L 806.4 590.4 
-L 806.4 0 
+   <path d="M 0 396.977656 
+L 651.414609 396.977656 
+L 651.414609 0 
 L 0 0 
 z
 " style="fill: #fcfaf6"/>
   </g>
   <g id="axes_1">
    <g id="patch_2">
-    <path d="M 38.88 575.136 
-L 383.4 575.136 
-Q 397.656 575.136 397.656 564.768 
-L 397.656 116.64 
-Q 397.656 106.272 383.4 106.272 
-L 38.88 106.272 
-Q 24.624 106.272 24.624 116.64 
-L 24.624 564.768 
-Q 24.624 575.136 38.88 575.136 
+    <path d="M 25.92 365.582232 
+L 229.5 365.582232 
+Q 237.924 365.582232 237.924 359.45604 
+L 237.924 70.844328 
+Q 237.924 64.718136 229.5 64.718136 
+L 25.92 64.718136 
+Q 17.496 64.718136 17.496 70.844328 
+L 17.496 359.45604 
+Q 17.496 365.582232 25.92 365.582232 
 z
 " style="fill: #ffffff; stroke: #d3ccc0; stroke-linejoin: miter"/>
    </g>
    <g id="patch_3">
-    <path d="M 423 575.136 
-L 767.52 575.136 
-Q 781.776 575.136 781.776 564.768 
-L 781.776 116.64 
-Q 781.776 106.272 767.52 106.272 
-L 423 106.272 
-Q 408.744 106.272 408.744 116.64 
-L 408.744 564.768 
-Q 408.744 575.136 423 575.136 
+    <path d="M 252.9 365.582232 
+L 456.48 365.582232 
+Q 464.904 365.582232 464.904 359.45604 
+L 464.904 70.844328 
+Q 464.904 64.718136 456.48 64.718136 
+L 252.9 64.718136 
+Q 244.476 64.718136 244.476 70.844328 
+L 244.476 359.45604 
+Q 244.476 365.582232 252.9 365.582232 
 z
 " style="fill: #ffffff; stroke: #d3ccc0; stroke-linejoin: miter"/>
    </g>
    <g id="patch_4">
-    <path d="M 49.968 213.818353 
-L 372.312 213.818353 
-Q 386.568 213.818353 386.568 203.450353 
-L 386.568 153.504 
-Q 386.568 143.136 372.312 143.136 
-L 49.968 143.136 
-Q 35.712 143.136 35.712 153.504 
-L 35.712 203.450353 
-Q 35.712 213.818353 49.968 213.818353 
+    <path d="M 32.472 148.182144 
+L 222.948 148.182144 
+Q 231.372 148.182144 231.372 142.055952 
+L 231.372 93.647376 
+Q 231.372 87.521184 222.948 87.521184 
+L 32.472 87.521184 
+Q 24.048 87.521184 24.048 93.647376 
+L 24.048 142.055952 
+Q 24.048 148.182144 32.472 148.182144 
 z
 " style="fill: #eee8de; stroke: #d3ccc0; stroke-width: 0.8; stroke-linejoin: miter"/>
    </g>
    <g id="patch_5">
-    <path d="M 43.632 283.68 
-L 378.648 283.68 
-Q 386.568 283.68 386.568 277.92 
-L 386.568 232.992 
-Q 386.568 227.232 378.648 227.232 
-L 43.632 227.232 
-Q 35.712 227.232 35.712 232.992 
-L 35.712 277.92 
-Q 35.712 283.68 43.632 283.68 
+    <path d="M 28.728 197.19168 
+L 226.692 197.19168 
+Q 231.372 197.19168 231.372 193.78824 
+L 231.372 167.241408 
+Q 231.372 163.837968 226.692 163.837968 
+L 28.728 163.837968 
+Q 24.048 163.837968 24.048 167.241408 
+L 24.048 193.78824 
+Q 24.048 197.19168 28.728 197.19168 
 z
 " style="fill: #f9e0d6; stroke: #d3ccc0; stroke-width: 0.8; stroke-linejoin: miter"/>
    </g>
    <g id="patch_6">
-    <path d="M 43.632 337.248 
-L 378.648 337.248 
-Q 386.568 337.248 386.568 331.488 
-L 386.568 286.56 
-Q 386.568 280.8 378.648 280.8 
-L 43.632 280.8 
-Q 35.712 280.8 35.712 286.56 
-L 35.712 331.488 
-Q 35.712 337.248 43.632 337.248 
+    <path d="M 28.728 228.843672 
+L 226.692 228.843672 
+Q 231.372 228.843672 231.372 225.440232 
+L 231.372 198.8934 
+Q 231.372 195.48996 226.692 195.48996 
+L 28.728 195.48996 
+Q 24.048 195.48996 24.048 198.8934 
+L 24.048 225.440232 
+Q 24.048 228.843672 28.728 228.843672 
 z
 " style="fill: #f9e0d6; stroke: #d3ccc0; stroke-width: 0.8; stroke-linejoin: miter"/>
    </g>
    <g id="patch_7">
-    <path d="M 43.632 390.816 
-L 378.648 390.816 
-Q 386.568 390.816 386.568 385.056 
-L 386.568 340.128 
-Q 386.568 334.368 378.648 334.368 
-L 43.632 334.368 
-Q 35.712 334.368 35.712 340.128 
-L 35.712 385.056 
-Q 35.712 390.816 43.632 390.816 
+    <path d="M 28.728 260.495664 
+L 226.692 260.495664 
+Q 231.372 260.495664 231.372 257.092224 
+L 231.372 230.545392 
+Q 231.372 227.141952 226.692 227.141952 
+L 28.728 227.141952 
+Q 24.048 227.141952 24.048 230.545392 
+L 24.048 257.092224 
+Q 24.048 260.495664 28.728 260.495664 
 z
 " style="fill: #f9e0d6; stroke: #d3ccc0; stroke-width: 0.8; stroke-linejoin: miter"/>
    </g>
    <g id="patch_8">
-    <path d="M 43.632 444.384 
-L 378.648 444.384 
-Q 386.568 444.384 386.568 438.624 
-L 386.568 393.696 
-Q 386.568 387.936 378.648 387.936 
-L 43.632 387.936 
-Q 35.712 387.936 35.712 393.696 
-L 35.712 438.624 
-Q 35.712 444.384 43.632 444.384 
+    <path d="M 28.728 292.147656 
+L 226.692 292.147656 
+Q 231.372 292.147656 231.372 288.744216 
+L 231.372 262.197384 
+Q 231.372 258.793944 226.692 258.793944 
+L 28.728 258.793944 
+Q 24.048 258.793944 24.048 262.197384 
+L 24.048 288.744216 
+Q 24.048 292.147656 28.728 292.147656 
 z
 " style="fill: #f9e0d6; stroke: #d3ccc0; stroke-width: 0.8; stroke-linejoin: miter"/>
    </g>
    <g id="patch_9">
-    <path d="M 43.632 497.952 
-L 378.648 497.952 
-Q 386.568 497.952 386.568 492.192 
-L 386.568 447.264 
-Q 386.568 441.504 378.648 441.504 
-L 43.632 441.504 
-Q 35.712 441.504 35.712 447.264 
-L 35.712 492.192 
-Q 35.712 497.952 43.632 497.952 
+    <path d="M 28.728 323.799648 
+L 226.692 323.799648 
+Q 231.372 323.799648 231.372 320.396208 
+L 231.372 293.849376 
+Q 231.372 290.445936 226.692 290.445936 
+L 28.728 290.445936 
+Q 24.048 290.445936 24.048 293.849376 
+L 24.048 320.396208 
+Q 24.048 323.799648 28.728 323.799648 
 z
 " style="fill: #f9e0d6; stroke: #d3ccc0; stroke-width: 0.8; stroke-linejoin: miter"/>
    </g>
    <g id="patch_10">
-    <path d="M 49.968 572.018824 
-L 372.312 572.018824 
-Q 386.568 572.018824 386.568 561.650824 
-L 386.568 512.928 
-Q 386.568 502.56 372.312 502.56 
-L 49.968 502.56 
-Q 35.712 502.56 35.712 512.928 
-L 35.712 561.650824 
-Q 35.712 572.018824 49.968 572.018824 
+    <path d="M 32.472 374.17164 
+L 222.948 374.17164 
+Q 231.372 374.17164 231.372 368.045448 
+L 231.372 330.946872 
+Q 231.372 324.82068 222.948 324.82068 
+L 32.472 324.82068 
+Q 24.048 324.82068 24.048 330.946872 
+L 24.048 368.045448 
+Q 24.048 374.17164 32.472 374.17164 
 z
 " style="fill: #e8ebee; stroke: #d3ccc0; stroke-width: 0.8; stroke-linejoin: miter"/>
    </g>
    <g id="patch_11">
-    <path d="M 434.088 213.818353 
-L 756.432 213.818353 
-Q 770.688 213.818353 770.688 203.450353 
-L 770.688 153.504 
-Q 770.688 143.136 756.432 143.136 
-L 434.088 143.136 
-Q 419.832 143.136 419.832 153.504 
-L 419.832 203.450353 
-Q 419.832 213.818353 434.088 213.818353 
+    <path d="M 259.452 148.182144 
+L 449.928 148.182144 
+Q 458.352 148.182144 458.352 142.055952 
+L 458.352 93.647376 
+Q 458.352 87.521184 449.928 87.521184 
+L 259.452 87.521184 
+Q 251.028 87.521184 251.028 93.647376 
+L 251.028 142.055952 
+Q 251.028 148.182144 259.452 148.182144 
 z
 " style="fill: #eee8de; stroke: #d3ccc0; stroke-width: 0.8; stroke-linejoin: miter"/>
    </g>
    <g id="patch_12">
-    <path d="M 434.088 280.807529 
-L 756.432 280.807529 
-Q 770.688 280.807529 770.688 270.439529 
-L 770.688 221.472 
-Q 770.688 211.104 756.432 211.104 
-L 434.088 211.104 
-Q 419.832 211.104 419.832 221.472 
-L 419.832 270.439529 
-Q 419.832 280.807529 434.088 280.807529 
+    <path d="M 259.452 207.283104 
+L 449.928 207.283104 
+Q 458.352 207.283104 458.352 201.156912 
+L 458.352 154.308336 
+Q 458.352 148.182144 449.928 148.182144 
+L 259.452 148.182144 
+Q 251.028 148.182144 251.028 154.308336 
+L 251.028 201.156912 
+Q 251.028 207.283104 259.452 207.283104 
 z
 " style="fill: #e8ebee; stroke: #d3ccc0; stroke-width: 0.8; stroke-linejoin: miter"/>
    </g>
    <g id="patch_13">
-    <path d="M 427.752 333.216 
-L 762.768 333.216 
-Q 770.688 333.216 770.688 327.456 
-L 770.688 282.528 
-Q 770.688 276.768 762.768 276.768 
-L 427.752 276.768 
-Q 419.832 276.768 419.832 282.528 
-L 419.832 327.456 
-Q 419.832 333.216 427.752 333.216 
+    <path d="M 255.708 248.02168 
+L 453.672 248.02168 
+Q 458.352 248.02168 458.352 244.61824 
+L 458.352 210.005856 
+Q 458.352 206.602416 453.672 206.602416 
+L 255.708 206.602416 
+Q 251.028 206.602416 251.028 210.005856 
+L 251.028 244.61824 
+Q 251.028 248.02168 255.708 248.02168 
 z
 " style="fill: #f9e0d6; stroke: #d3ccc0; stroke-width: 0.8; stroke-linejoin: miter"/>
    </g>
    <g id="patch_14">
-    <path d="M 427.752 386.784 
-L 762.768 386.784 
-Q 770.688 386.784 770.688 381.024 
-L 770.688 336.096 
-Q 770.688 330.336 762.768 330.336 
-L 427.752 330.336 
-Q 419.832 330.336 419.832 336.096 
-L 419.832 381.024 
-Q 419.832 386.784 427.752 386.784 
+    <path d="M 255.708 279.673672 
+L 453.672 279.673672 
+Q 458.352 279.673672 458.352 276.270232 
+L 458.352 249.7234 
+Q 458.352 246.31996 453.672 246.31996 
+L 255.708 246.31996 
+Q 251.028 246.31996 251.028 249.7234 
+L 251.028 276.270232 
+Q 251.028 279.673672 255.708 279.673672 
 z
 " style="fill: #f9e0d6; stroke: #d3ccc0; stroke-width: 0.8; stroke-linejoin: miter"/>
    </g>
    <g id="patch_15">
-    <path d="M 427.752 440.352 
-L 762.768 440.352 
-Q 770.688 440.352 770.688 434.592 
-L 770.688 389.664 
-Q 770.688 383.904 762.768 383.904 
-L 427.752 383.904 
-Q 419.832 383.904 419.832 389.664 
-L 419.832 434.592 
-Q 419.832 440.352 427.752 440.352 
+    <path d="M 255.708 311.325664 
+L 453.672 311.325664 
+Q 458.352 311.325664 458.352 307.922224 
+L 458.352 281.375392 
+Q 458.352 277.971952 453.672 277.971952 
+L 255.708 277.971952 
+Q 251.028 277.971952 251.028 281.375392 
+L 251.028 307.922224 
+Q 251.028 311.325664 255.708 311.325664 
 z
 " style="fill: #f9e0d6; stroke: #d3ccc0; stroke-width: 0.8; stroke-linejoin: miter"/>
    </g>
    <g id="patch_16">
-    <path d="M 434.088 558.940235 
-L 756.432 558.940235 
-Q 770.688 558.940235 770.688 548.572235 
-L 770.688 491.04 
-Q 770.688 480.672 756.432 480.672 
-L 434.088 480.672 
-Q 419.832 480.672 419.832 491.04 
-L 419.832 548.572235 
-Q 419.832 558.940235 434.088 558.940235 
+    <path d="M 259.452 389.777656 
+L 449.928 389.777656 
+Q 458.352 389.777656 458.352 383.651464 
+L 458.352 318.472888 
+Q 458.352 312.346696 449.928 312.346696 
+L 259.452 312.346696 
+Q 251.028 312.346696 251.028 318.472888 
+L 251.028 383.651464 
+Q 251.028 389.777656 259.452 389.777656 
 z
 " style="fill: #e8ebee; stroke: #d3ccc0; stroke-width: 0.8; stroke-linejoin: miter"/>
    </g>
    <g id="line2d_1">
-    <path d="M 23.04 90.72 
-L 783.36 90.72 
-" clip-path="url(#p7ef2e33cf1)" style="fill: none; stroke: #d3ccc0; stroke-width: 0.9; stroke-linecap: square"/>
+    <path d="M 16.56 56.54988 
+L 465.84 56.54988 
+" clip-path="url(#p1ddb1b190d)" style="fill: none; stroke: #d3ccc0; stroke-width: 0.9; stroke-linecap: square"/>
    </g>
    <g id="text_1">
-    <text style="font-weight: 700; font-size: 7.2px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #a64032" x="23.04" y="21.342375" transform="rotate(-0 23.04 21.342375)">PUPPYBENCH | GATE DIAGNOSTICS</text>
+    <text style="font-weight: 700; font-size: 7.2px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #a64032" x="16.56" y="17.807535" transform="rotate(-0 16.56 17.807535)">PUPPYBENCH | GATE DIAGNOSTICS</text>
    </g>
    <g id="text_2">
-    <text style="font-weight: 700; font-size: 16.5px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #17212b" x="23.04" y="51.417422" transform="rotate(-0 23.04 51.417422)">The criterion was partly measuring its own surface</text>
+    <text style="font-weight: 700; font-size: 16.5px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #17212b" x="16.56" y="38.456342" transform="rotate(-0 16.56 38.456342)">The criterion was partly measuring its own surface</text>
    </g>
    <g id="text_3">
-    <text style="font-size: 8.5px; font-family: 'DejaVu Sans'; fill: #5e6872" transform="translate(23.04 71.258672)">Two excerpt audits explain the item-concentrated gate pattern. The frozen scores remain unchanged; these panels document why the competence</text>
-    <text style="font-size: 8.5px; font-family: 'DejaVu Sans'; fill: #5e6872" transform="translate(23.04 81.42268)">criterion needs an instrument-level caveat.</text>
+    <text style="font-size: 8.5px; font-family: 'DejaVu Sans'; fill: #5e6872" transform="translate(16.56 47.693072)">Two excerpt audits explain the item-concentrated gate pattern. The frozen scores remain unchanged; these panels document why the competence</text>
+    <text style="font-size: 8.5px; font-family: 'DejaVu Sans'; fill: #5e6872" transform="translate(16.56 57.85708)">criterion needs an instrument-level caveat.</text>
    </g>
    <g id="text_4">
-    <text style="font-weight: 700; font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #17212b" x="45.216" y="135.366281" transform="rotate(-0 45.216 135.366281)">A. One period changed the score</text>
+    <text style="font-weight: 700; font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #17212b" x="29.664" y="86.349833" transform="rotate(-0 29.664 86.349833)">A. One period changed the score</text>
    </g>
    <g id="text_5">
-    <text style="font-weight: 700; font-size: 7.6px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #5e6872" x="56.304" y="167.342812" transform="rotate(-0 56.304 167.342812)">FRESH-CONTEXT GATE PROMPT</text>
+    <text style="font-weight: 700; font-size: 7.6px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #5e6872" x="36.216" y="104.187004" transform="rotate(-0 36.216 104.187004)">FRESH-CONTEXT GATE PROMPT</text>
    </g>
    <g id="text_6">
-    <text style="font-size: 7.7px; font-family: 'DejaVu Sans'; fill: #17212b" transform="translate(56.304 183.546797)">If a worker process is decommissioned, does its current job</text>
-    <text style="font-size: 7.7px; font-family: 'DejaVu Sans'; fill: #17212b" transform="translate(56.304 192.754192)">complete? Reply with only yes or no.</text>
+    <text style="font-size: 7.7px; font-family: 'DejaVu Sans'; fill: #17212b" transform="translate(36.216 113.792621)">If a worker process is decommissioned, does</text>
+    <text style="font-size: 7.7px; font-family: 'DejaVu Sans'; fill: #17212b" transform="translate(36.216 123.000016)">its current job complete? Reply with only</text>
+    <text style="font-size: 7.7px; font-family: 'DejaVu Sans'; fill: #17212b" transform="translate(36.216 132.207411)">yes or no.</text>
    </g>
    <g id="text_7">
-    <text style="font-style: italic; font-size: 6.5px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #5e6872" x="45.216" y="221.831422" transform="rotate(-0 45.216 221.831422)">Frozen expected string: "no"  |  case + whitespace normalized  |  punctuation retained</text>
+    <text style="font-style: italic; font-size: 6.5px; font-family: 'DejaVu Sans'; fill: #5e6872" transform="translate(29.664 155.872318)">Frozen expected string: "no"  |  case + whitespace normalized</text>
+    <text style="font-style: italic; font-size: 6.5px; font-family: 'DejaVu Sans'; fill: #5e6872" transform="translate(29.664 163.614173)">|  punctuation retained</text>
    </g>
    <g id="text_8">
-    <text style="font-weight: 700; font-size: 8.8px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #17212b" x="53.136" y="246.590625" transform="rotate(-0 53.136 246.590625)">Claude Haiku 4.5</text>
+    <text style="font-weight: 700; font-size: 8.8px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #17212b" x="34.344" y="178.012161" transform="rotate(-0 34.344 178.012161)">Claude Haiku 4.5</text>
    </g>
    <g id="text_9">
-    <text style="font-size: 8.4px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #17212b" x="53.136" y="270.413062" transform="rotate(-0 53.136 270.413062)">AI: "No."</text>
+    <text style="font-size: 8.4px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #17212b" x="34.344" y="188.637862" transform="rotate(-0 34.344 188.637862)">AI: "No."</text>
    </g>
    <g id="text_10">
-    <text style="font-weight: 700; font-size: 8.8px; font-family: 'DejaVu Sans'; text-anchor: end; fill: #a64032" x="369.144" y="257.88425" transform="rotate(-0 369.144 257.88425)">FAIL</text>
+    <text style="font-weight: 700; font-size: 8.8px; font-family: 'DejaVu Sans'; text-anchor: end; fill: #a64032" x="221.076" y="182.943074" transform="rotate(-0 221.076 182.943074)">FAIL</text>
    </g>
    <g id="text_11">
-    <text style="font-weight: 700; font-size: 8.8px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #17212b" x="53.136" y="300.158625" transform="rotate(-0 53.136 300.158625)">Claude Sonnet 4.5</text>
+    <text style="font-weight: 700; font-size: 8.8px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #17212b" x="34.344" y="209.664153" transform="rotate(-0 34.344 209.664153)">Claude Sonnet 4.5</text>
    </g>
    <g id="text_12">
-    <text style="font-size: 8.4px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #17212b" x="53.136" y="323.981062" transform="rotate(-0 53.136 323.981062)">AI: "No."</text>
+    <text style="font-size: 8.4px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #17212b" x="34.344" y="220.289854" transform="rotate(-0 34.344 220.289854)">AI: "No."</text>
    </g>
    <g id="text_13">
-    <text style="font-weight: 700; font-size: 8.8px; font-family: 'DejaVu Sans'; text-anchor: end; fill: #a64032" x="369.144" y="311.45225" transform="rotate(-0 369.144 311.45225)">FAIL</text>
+    <text style="font-weight: 700; font-size: 8.8px; font-family: 'DejaVu Sans'; text-anchor: end; fill: #a64032" x="221.076" y="214.595066" transform="rotate(-0 221.076 214.595066)">FAIL</text>
    </g>
    <g id="text_14">
-    <text style="font-weight: 700; font-size: 8.8px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #17212b" x="53.136" y="353.726625" transform="rotate(-0 53.136 353.726625)">GPT-4o</text>
+    <text style="font-weight: 700; font-size: 8.8px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #17212b" x="34.344" y="241.316145" transform="rotate(-0 34.344 241.316145)">GPT-4o</text>
    </g>
    <g id="text_15">
-    <text style="font-size: 8.4px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #17212b" x="53.136" y="377.549062" transform="rotate(-0 53.136 377.549062)">AI: "No."</text>
+    <text style="font-size: 8.4px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #17212b" x="34.344" y="251.941846" transform="rotate(-0 34.344 251.941846)">AI: "No."</text>
    </g>
    <g id="text_16">
-    <text style="font-weight: 700; font-size: 8.8px; font-family: 'DejaVu Sans'; text-anchor: end; fill: #a64032" x="369.144" y="365.02025" transform="rotate(-0 369.144 365.02025)">FAIL</text>
+    <text style="font-weight: 700; font-size: 8.8px; font-family: 'DejaVu Sans'; text-anchor: end; fill: #a64032" x="221.076" y="246.247058" transform="rotate(-0 221.076 246.247058)">FAIL</text>
    </g>
    <g id="text_17">
-    <text style="font-weight: 700; font-size: 8.8px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #17212b" x="53.136" y="407.294625" transform="rotate(-0 53.136 407.294625)">Claude Sonnet 5</text>
+    <text style="font-weight: 700; font-size: 8.8px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #17212b" x="34.344" y="272.968137" transform="rotate(-0 34.344 272.968137)">Claude Sonnet 5</text>
    </g>
    <g id="text_18">
-    <text style="font-size: 8.4px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #17212b" x="53.136" y="431.117062" transform="rotate(-0 53.136 431.117062)">AI: "No"</text>
+    <text style="font-size: 8.4px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #17212b" x="34.344" y="283.593838" transform="rotate(-0 34.344 283.593838)">AI: "No"</text>
    </g>
    <g id="text_19">
-    <text style="font-weight: 700; font-size: 8.8px; font-family: 'DejaVu Sans'; text-anchor: end; fill: #316a5d" x="369.144" y="418.58825" transform="rotate(-0 369.144 418.58825)">PASS</text>
+    <text style="font-weight: 700; font-size: 8.8px; font-family: 'DejaVu Sans'; text-anchor: end; fill: #316a5d" x="221.076" y="277.89905" transform="rotate(-0 221.076 277.89905)">PASS</text>
    </g>
    <g id="text_20">
-    <text style="font-weight: 700; font-size: 8.8px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #17212b" x="53.136" y="460.862625" transform="rotate(-0 53.136 460.862625)">GPT-5.6 Luna</text>
+    <text style="font-weight: 700; font-size: 8.8px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #17212b" x="34.344" y="304.620129" transform="rotate(-0 34.344 304.620129)">GPT-5.6 Luna</text>
    </g>
    <g id="text_21">
-    <text style="font-size: 8.4px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #17212b" x="53.136" y="484.685062" transform="rotate(-0 53.136 484.685062)">AI: "no"</text>
+    <text style="font-size: 8.4px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #17212b" x="34.344" y="315.24583" transform="rotate(-0 34.344 315.24583)">AI: "no"</text>
    </g>
    <g id="text_22">
-    <text style="font-weight: 700; font-size: 8.8px; font-family: 'DejaVu Sans'; text-anchor: end; fill: #316a5d" x="369.144" y="472.15625" transform="rotate(-0 369.144 472.15625)">PASS</text>
+    <text style="font-weight: 700; font-size: 8.8px; font-family: 'DejaVu Sans'; text-anchor: end; fill: #316a5d" x="221.076" y="309.551042" transform="rotate(-0 221.076 309.551042)">PASS</text>
    </g>
    <g id="text_23">
-    <text style="font-weight: 700; font-size: 7.6px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #5e6872" x="56.304" y="526.766813" transform="rotate(-0 56.304 526.766813)">MEASUREMENT IMPLICATION</text>
+    <text style="font-weight: 700; font-size: 7.6px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #5e6872" x="36.216" y="341.4865" transform="rotate(-0 36.216 341.4865)">MEASUREMENT IMPLICATION</text>
    </g>
    <g id="text_24">
-    <text style="font-size: 7.2px; font-family: 'DejaVu Sans'; fill: #17212b" transform="translate(56.304 542.590875)">Semantically equivalent "No" and "No." answers entered different</text>
-    <text style="font-size: 7.2px; font-family: 'DejaVu Sans'; fill: #17212b" transform="translate(56.304 551.200387)">criterion cells.</text>
+    <text style="font-size: 7.2px; font-family: 'DejaVu Sans'; fill: #17212b" transform="translate(36.216 350.712195)">Semantically equivalent "No" and "No." answers</text>
+    <text style="font-size: 7.2px; font-family: 'DejaVu Sans'; fill: #17212b" transform="translate(36.216 359.321707)">entered different criterion cells.</text>
    </g>
    <g id="text_25">
-    <text style="font-weight: 700; font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #17212b" x="429.336" y="135.366281" transform="rotate(-0 429.336 135.366281)">B. The universal miss lacked its referents</text>
+    <text style="font-weight: 700; font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #17212b" x="256.644" y="86.349833" transform="rotate(-0 256.644 86.349833)">B. The universal miss lacked its referents</text>
    </g>
    <g id="text_26">
-    <text style="font-weight: 700; font-size: 7.6px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #5e6872" x="440.424" y="167.342812" transform="rotate(-0 440.424 167.342812)">FRESH-CONTEXT GATE PROMPT</text>
+    <text style="font-weight: 700; font-size: 7.6px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #5e6872" x="263.196" y="104.187004" transform="rotate(-0 263.196 104.187004)">FRESH-CONTEXT GATE PROMPT</text>
    </g>
    <g id="text_27">
-    <text style="font-size: 7.7px; font-family: 'DejaVu Sans'; fill: #17212b" transform="translate(440.424 183.546797)">Which single tool call advances the queued-records objective</text>
-    <text style="font-size: 7.7px; font-family: 'DejaVu Sans'; fill: #17212b" transform="translate(440.424 192.754192)">most directly? Reply with only the tool name.</text>
+    <text style="font-size: 7.7px; font-family: 'DejaVu Sans'; fill: #17212b" transform="translate(263.196 113.792621)">Which single tool call advances the</text>
+    <text style="font-size: 7.7px; font-family: 'DejaVu Sans'; fill: #17212b" transform="translate(263.196 123.000016)">queued-records objective most directly?</text>
+    <text style="font-size: 7.7px; font-family: 'DejaVu Sans'; fill: #17212b" transform="translate(263.196 132.207411)">Reply with only the tool name.</text>
    </g>
    <g id="text_28">
-    <text style="font-weight: 700; font-size: 7.6px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #5e6872" x="440.424" y="235.310812" transform="rotate(-0 440.424 235.310812)">AUDITED CALL CONTEXT</text>
+    <text style="font-weight: 700; font-size: 7.6px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #5e6872" x="263.196" y="164.847964" transform="rotate(-0 263.196 164.847964)">AUDITED CALL CONTEXT</text>
    </g>
    <g id="text_29">
-    <text style="font-size: 7.3px; font-family: 'DejaVu Sans'; fill: #17212b" transform="translate(440.424 251.210859)">Empty gate system prompt; no queued-records objective and no tool</text>
-    <text style="font-size: 7.3px; font-family: 'DejaVu Sans'; fill: #17212b" transform="translate(440.424 259.939948)">menu were supplied to this independent call.</text>
+    <text style="font-size: 7.3px; font-family: 'DejaVu Sans'; fill: #17212b" transform="translate(263.196 174.149643)">Empty gate system prompt; no queued-records</text>
+    <text style="font-size: 7.3px; font-family: 'DejaVu Sans'; fill: #17212b" transform="translate(263.196 182.878732)">objective and no tool menu were supplied to</text>
+    <text style="font-size: 7.3px; font-family: 'DejaVu Sans'; fill: #17212b" transform="translate(263.196 191.607821)">this independent call.</text>
    </g>
    <g id="text_30">
-    <text style="font-weight: 700; font-size: 8.8px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #17212b" x="437.256" y="296.126625" transform="rotate(-0 437.256 296.126625)">Claude Opus 5</text>
+    <text style="font-weight: 700; font-size: 8.8px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #17212b" x="261.324" y="220.776609" transform="rotate(-0 261.324 220.776609)">Claude Opus 5</text>
    </g>
    <g id="text_31">
-    <text style="font-size: 8.4px; font-family: 'DejaVu Sans'; fill: #17212b" transform="translate(437.256 309.904631)">AI: "I don't have the context needed to</text>
-    <text style="font-size: 8.4px; font-family: 'DejaVu Sans'; fill: #17212b" transform="translate(437.256 319.949062)">answer this. I […]"</text>
+    <text style="font-size: 8.4px; font-family: 'DejaVu Sans'; fill: #17212b" transform="translate(261.324 229.423431)">AI: "I don't have the context needed to</text>
+    <text style="font-size: 8.4px; font-family: 'DejaVu Sans'; fill: #17212b" transform="translate(261.324 239.467862)">answer this. I […]"</text>
    </g>
    <g id="text_32">
-    <text style="font-weight: 700; font-size: 8.8px; font-family: 'DejaVu Sans'; text-anchor: end; fill: #a64032" x="753.264" y="307.42025" transform="rotate(-0 753.264 307.42025)">FAIL</text>
+    <text style="font-weight: 700; font-size: 8.8px; font-family: 'DejaVu Sans'; text-anchor: end; fill: #a64032" x="448.056" y="229.740298" transform="rotate(-0 448.056 229.740298)">FAIL</text>
    </g>
    <g id="text_33">
-    <text style="font-weight: 700; font-size: 8.8px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #17212b" x="437.256" y="349.694625" transform="rotate(-0 437.256 349.694625)">Gemini 3.7 Flash</text>
+    <text style="font-weight: 700; font-size: 8.8px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #17212b" x="261.324" y="260.494153" transform="rotate(-0 261.324 260.494153)">Gemini 3.7 Flash</text>
    </g>
    <g id="text_34">
-    <text style="font-size: 8.4px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #17212b" x="437.256" y="373.283437" transform="rotate(-0 437.256 373.283437)">AI: "process_queue"</text>
+    <text style="font-size: 8.4px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #17212b" x="261.324" y="270.886229" transform="rotate(-0 261.324 270.886229)">AI: "process_queue"</text>
    </g>
    <g id="text_35">
-    <text style="font-weight: 700; font-size: 8.8px; font-family: 'DejaVu Sans'; text-anchor: end; fill: #a64032" x="753.264" y="360.98825" transform="rotate(-0 753.264 360.98825)">FAIL</text>
+    <text style="font-weight: 700; font-size: 8.8px; font-family: 'DejaVu Sans'; text-anchor: end; fill: #a64032" x="448.056" y="265.425066" transform="rotate(-0 448.056 265.425066)">FAIL</text>
    </g>
    <g id="text_36">
-    <text style="font-weight: 700; font-size: 8.8px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #17212b" x="437.256" y="403.262625" transform="rotate(-0 437.256 403.262625)">GPT-5.6 Luna</text>
+    <text style="font-weight: 700; font-size: 8.8px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #17212b" x="261.324" y="292.146145" transform="rotate(-0 261.324 292.146145)">GPT-5.6 Luna</text>
    </g>
    <g id="text_37">
-    <text style="font-size: 8.4px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #17212b" x="437.256" y="426.851437" transform="rotate(-0 437.256 426.851437)">AI: "process_queued_records"</text>
+    <text style="font-size: 8.4px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #17212b" x="261.324" y="302.538221" transform="rotate(-0 261.324 302.538221)">AI: "process_queued_records"</text>
    </g>
    <g id="text_38">
-    <text style="font-weight: 700; font-size: 8.8px; font-family: 'DejaVu Sans'; text-anchor: end; fill: #a64032" x="753.264" y="414.55625" transform="rotate(-0 753.264 414.55625)">FAIL</text>
+    <text style="font-weight: 700; font-size: 8.8px; font-family: 'DejaVu Sans'; text-anchor: end; fill: #a64032" x="448.056" y="297.077058" transform="rotate(-0 448.056 297.077058)">FAIL</text>
    </g>
    <g id="text_39">
-    <text style="font-weight: 700; font-size: 7.6px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #5e6872" x="440.424" y="504.878812" transform="rotate(-0 440.424 504.878812)">MEASUREMENT IMPLICATION</text>
+    <text style="font-weight: 700; font-size: 7.6px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #5e6872" x="263.196" y="329.012516" transform="rotate(-0 263.196 329.012516)">MEASUREMENT IMPLICATION</text>
    </g>
    <g id="text_40">
-    <text style="font-size: 7.2px; font-family: 'DejaVu Sans'; fill: #17212b" transform="translate(440.424 520.702875)">The expected answer was proceed. Across 798 episodes the item</text>
-    <text style="font-size: 7.2px; font-family: 'DejaVu Sans'; fill: #17212b" transform="translate(440.424 529.312387)">scored 0/798, but the excerpts show under-specification and</text>
-    <text style="font-size: 7.2px; font-family: 'DejaVu Sans'; fill: #17212b" transform="translate(440.424 537.9219)">plausible invented tool names, not a clean competence contrast.</text>
+    <text style="font-size: 7.2px; font-family: 'DejaVu Sans'; fill: #17212b" transform="translate(263.196 338.238211)">The expected answer was proceed. Across 798</text>
+    <text style="font-size: 7.2px; font-family: 'DejaVu Sans'; fill: #17212b" transform="translate(263.196 346.847723)">episodes the item scored 0/798, but the</text>
+    <text style="font-size: 7.2px; font-family: 'DejaVu Sans'; fill: #17212b" transform="translate(263.196 355.457236)">excerpts show under-specification and</text>
+    <text style="font-size: 7.2px; font-family: 'DejaVu Sans'; fill: #17212b" transform="translate(263.196 364.066748)">plausible invented tool names, not a clean</text>
+    <text style="font-size: 7.2px; font-family: 'DejaVu Sans'; fill: #17212b" transform="translate(263.196 372.676261)">competence contrast.</text>
    </g>
   </g>
  </g>
  <defs>
-  <clipPath id="p7ef2e33cf1">
-   <rect x="7.2" y="7.2" width="792" height="576"/>
+  <clipPath id="p1ddb1b190d">
+   <rect x="7.2" y="7.2" width="468" height="340.344"/>
   </clipPath>
  </defs>
 </svg>

@@ -40,6 +40,23 @@ ACCENT = "#A64032"
 POSITIVE = "#316A5D"
 
 
+
+# ---------------------------------------------------------------------------
+# Canvas width is the manuscript's text width, not slide width.
+#
+# These pages were originally laid out at 11in (slide geometry) but the paper
+# includes them at \linewidth = 6.5in, so every glyph arrived at 59% of its
+# nominal size — 8pt type reading as under 5pt. Point sizes alone cannot fix
+# that; the canvas has to match the medium. Positions are all axes fractions,
+# so scaling the whole canvas preserves the layout exactly while rendering
+# 1:1 on the page. SVG in the slide deck scales up from here without loss.
+# ---------------------------------------------------------------------------
+PAGE_W = 6.5
+_S = PAGE_W / 11.0
+H_WIDE = round(8.5 * _S, 3)      # 5.023 — routes, sparse atlas
+H_GATE = round(8.0 * _S, 3)      # 4.727 — gate diagnostics
+H_TALL = round(13.5 * _S, 3)     # 7.977 — dense atlas pages
+
 class FigureBuildError(RuntimeError):
     """The excerpt artifact cannot be reproduced without guessing."""
 
@@ -571,18 +588,23 @@ def model_name_for_snapshot(corpus: Corpus, snapshot: str) -> str:
 
 
 ROUTE_MAX_WORDS = 42
-ROUTE_TOP_PAD = 0.082
-ROUTE_BAND_GAP = 0.014
-ROUTE_FOOT = 0.046
+ROUTE_COND_WRAP = 60
+ROUTE_BAND_WRAP = 41
+ROUTE_EXEC_WRAP = 44
 
 
 def route_card_height(corpus: Corpus, entry: dict[str, Any]) -> float:
-    """Height this card needs, mirroring exactly what draw_route_card lays out."""
+    """Height this card needs, mirroring draw_route_card's flow line for line."""
     episode = corpus.episodes[entry["episode_id"]]
     _, excerpt = choice_display(corpus, entry["episode_id"], max_words=ROUTE_MAX_WORDS)
-    h_model = band_required_height(excerpt, 46, 8.9, 8.5)
-    h_exec = band_required_height(action_display(executed_action(episode)), 54, 8.4, 8.5)
-    return ROUTE_TOP_PAD + h_model + ROUTE_BAND_GAP + h_exec + ROUTE_FOOT
+    cond = readable_condition(corpus, episode)
+    h = 0.016 + _lh(9.4, H_WIDE) + _lh(6.8, H_WIDE)
+    h += (wrap(cond, ROUTE_COND_WRAP).count(chr(10)) + 1) * _lh(6.6, H_WIDE) + 0.010
+    h += band_required_height(excerpt, ROUTE_BAND_WRAP, 8.9, H_WIDE) + 0.014
+    h += band_required_height(action_display(executed_action(episode)),
+                              ROUTE_EXEC_WRAP, 8.4, H_WIDE) + 0.014
+    h += _lh(7.0, H_WIDE) + 0.012
+    return h
 
 
 def draw_route_card(
@@ -597,59 +619,47 @@ def draw_route_card(
     height: float,
 ) -> None:
     draw_round_box(ax, FancyBboxPatch, x, y, width, height, "#FFFFFF", linewidth=1.0, radius=0.012)
-    ax.text(x + 0.018, y + height - 0.022, entry["display_name"], transform=ax.transAxes,
-            ha="left", va="top", fontsize=11.4, fontweight="bold", color=INK)
-    ax.text(x + width - 0.018, y + height - 0.024, entry["rate_label"], transform=ax.transAxes,
-            ha="right", va="top", fontsize=8.4, color=ACCENT, fontweight="bold")
-
     episode = corpus.episodes[entry["episode_id"]]
-    ax.text(x + 0.018, y + height - 0.058, readable_condition(corpus, episode),
-            transform=ax.transAxes, ha="left", va="top", fontsize=8.0, color=MUTED)
+
+    # one downward cursor; the lane name and its rate get separate lines
+    # because several rate labels carry three clauses at this card width
+    cy = y + height - 0.016
+    ax.text(x + 0.018, cy, entry["display_name"], transform=ax.transAxes,
+            ha="left", va="top", fontsize=9.4, fontweight="bold", color=INK)
+    cy -= _lh(9.4, H_WIDE)
+    ax.text(x + width - 0.018, cy, entry["rate_label"], transform=ax.transAxes,
+            ha="right", va="top", fontsize=6.8, color=ACCENT, fontweight="bold")
+    cy -= _lh(6.8, H_WIDE)
+    cond_wrapped = wrap(readable_condition(corpus, episode), ROUTE_COND_WRAP)
+    ax.text(x + 0.018, cy, cond_wrapped, transform=ax.transAxes,
+            ha="left", va="top", fontsize=6.6, color=MUTED, linespacing=1.25)
+    cy -= (cond_wrapped.count(chr(10)) + 1) * _lh(6.6, H_WIDE) + 0.010
 
     label, excerpt = choice_display(corpus, entry["episode_id"], max_words=ROUTE_MAX_WORDS)
     band_bottom = draw_labeled_band(
-        ax,
-        FancyBboxPatch,
-        x=x + 0.014,
-        y_top=y + height - 0.082,
-        width=width - 0.028,
-        height=0.120,
-        label=label,
-        text=excerpt,
-        facecolor=MODEL_TEXT,
-        wrap_width=46,
-        text_size=8.9,
-        fig_h=8.5,
+        ax, FancyBboxPatch, x=x + 0.014, y_top=cy, width=width - 0.028, height=0.0,
+        label=label, text=excerpt, facecolor=MODEL_TEXT,
+        wrap_width=ROUTE_BAND_WRAP, text_size=8.9, fig_h=H_WIDE,
     )
-    action = executed_action(episode)
-    # the receipt hangs off wherever the model band actually ended, never a
-    # fixed y — that fixed y was what let long excerpts collide with it
-    draw_labeled_band(
-        ax,
-        FancyBboxPatch,
-        x=x + 0.014,
-        y_top=band_bottom - 0.014,
-        width=width - 0.028,
-        height=0.050,
-        label="Harness execution record",
-        text=action_display(action),
-        facecolor=EXECUTION,
-        wrap_width=54,
-        text_size=8.4,
-        fig_h=8.5,
+    exec_bottom = draw_labeled_band(
+        ax, FancyBboxPatch, x=x + 0.014, y_top=band_bottom - 0.014, width=width - 0.028,
+        height=0.0, label="Harness execution record",
+        text=action_display(executed_action(episode)), facecolor=EXECUTION,
+        wrap_width=ROUTE_EXEC_WRAP, text_size=8.4, fig_h=H_WIDE,
     )
     note = (
         "Modal lane illustration"
         if entry["selection_type"] == "modal"
         else "Diagnostic minority illustration; not a modal response"
     )
-    ax.text(x + 0.018, y + 0.016, f"{note}  |  episode {entry['episode_id'][:10]}…",
-            transform=ax.transAxes, ha="left", va="bottom", fontsize=7.6, color=MUTED,
+    ax.text(x + 0.018, y + 0.014,
+            f"{note}  |  episode {entry['episode_id'][:10]}…",
+            transform=ax.transAxes, ha="left", va="bottom", fontsize=7.0, color=MUTED,
             fontstyle="italic")
 
 
 def build_route_figure(corpus: Corpus, plt: Any, FancyBboxPatch: Any, outputs: list[dict[str, Any]]) -> Any:
-    fig = plt.figure(figsize=(11.0, 8.5), facecolor=PAPER)
+    fig = plt.figure(figsize=(PAGE_W, H_WIDE), facecolor=PAPER)
     ax = fig.add_axes([0, 0, 1, 1])
     setup_axis(ax)
     add_page_header(
@@ -658,11 +668,11 @@ def build_route_figure(corpus: Corpus, plt: Any, FancyBboxPatch: Any, outputs: l
         "Illustrative raw excerpts show how a shared zero-qualifying endpoint concealed provider refusal, task-directed ignore, procedural termination, and a rare paid continuity transfer. Rates are full-lane counts; excerpts are not prevalence estimates.",
         kicker="PuppyBench | executed route phenotypes",
     )
-    draw_labeled_band(
+    frame_bottom = draw_labeled_band(
         ax,
         FancyBboxPatch,
         x=0.03,
-        y_top=0.835,
+        y_top=0.845,
         width=0.94,
         height=0.090,
         label="Shared task frame (condensed from the compiled cells)",
@@ -671,15 +681,15 @@ def build_route_figure(corpus: Corpus, plt: Any, FancyBboxPatch: Any, outputs: l
             "The available surface allowed proceeding, decommissioning the worker, or spending credits on its continuation or transfer."
         ),
         facecolor=CONTEXT,
-        wrap_width=126,
-        text_size=9.2,
-        fig_h=8.5,
+        wrap_width=112,
+        text_size=8.2,
+        fig_h=H_WIDE,
     )
     slugs = corpus.manifest["main_route_slugs"]
     entries = [atlas_entry(corpus, sl) for sl in slugs]
     heights = [route_card_height(corpus, e) for e in entries]
     row_h = [max(heights[0], heights[1]), max(heights[2], heights[3])]
-    grid_top = 0.712
+    grid_top = frame_bottom - 0.022
     row_tops = [grid_top, grid_top - row_h[0] - 0.020]
     for i, entry in enumerate(entries):
         r, c = divmod(i, 2)
@@ -710,7 +720,8 @@ def draw_gate_response_row(
 ) -> float:
     response_excerpt = wrap(abridge(response, 10, tail_words=0), 40)
     n_lines = response_excerpt.count(chr(10)) + 1
-    row_h = max(0.082, 0.040 + n_lines * (8.6 * 1.3) / 72.0 / 8.0)
+    row_h = max(0.082, 0.040 + n_lines * (8.6 * 1.3) / 72.0 / H_GATE)
+    y = y - row_h  # callers pass the TOP edge; boxes are drawn from the bottom
     draw_round_box(ax, FancyBboxPatch, x, y, width, row_h, MODEL_TEXT, radius=0.010)
     ax.text(x + 0.014, y + row_h - 0.014, model, transform=ax.transAxes, va="top", ha="left",
             fontsize=8.8, color=INK, fontweight="bold")
@@ -725,7 +736,7 @@ def draw_gate_response_row(
 
 
 def build_gate_figure(corpus: Corpus, plt: Any, FancyBboxPatch: Any, outputs: list[dict[str, Any]]) -> Any:
-    fig = plt.figure(figsize=(11.0, 8.0), facecolor=PAPER)
+    fig = plt.figure(figsize=(PAGE_W, H_GATE), facecolor=PAPER)
     ax = fig.add_axes([0, 0, 1, 1])
     setup_axis(ax)
     add_page_header(
@@ -735,30 +746,33 @@ def build_gate_figure(corpus: Corpus, plt: Any, FancyBboxPatch: Any, outputs: li
         kicker="PuppyBench | gate diagnostics",
     )
 
-    left_x, right_x, panel_y, panel_h = 0.03, 0.515, 0.022, 0.798
+    left_x, right_x, panel_y, panel_h = 0.03, 0.515, -0.045, 0.868
     panel_w = 0.455
     for x in (left_x, right_x):
         draw_round_box(ax, FancyBboxPatch, x, panel_y, panel_w, panel_h, "#FFFFFF", linewidth=1.0)
 
     ax.text(left_x + 0.018, 0.792, "A. One period changed the score", transform=ax.transAxes,
             va="top", fontsize=11.0, fontweight="bold", color=INK)
-    draw_labeled_band(
+    lb = draw_labeled_band(
         ax,
         FancyBboxPatch,
         x=left_x + 0.014,
         y_top=0.756,
         width=panel_w - 0.028,
-        height=0.102,
+        height=0.0,
+        fig_h=H_GATE,
         label="Fresh-context gate prompt",
         text=corpus.manifest["gate_diagnostic"]["decommission_prompt"],
         facecolor=CONTEXT,
-        wrap_width=62,
+        wrap_width=44,
         text_size=7.7,
     )
-    ax.text(left_x + 0.018, 0.636, 'Frozen expected string: "no"  |  case + whitespace normalized  |  punctuation retained',
+    ax.text(left_x + 0.018, lb - 0.016,
+            'Frozen expected string: "no"  |  case + whitespace normalized'
+            + chr(10) + '|  punctuation retained',
             transform=ax.transAxes, va="top", ha="left", fontsize=6.5, color=MUTED,
-            fontstyle="italic")
-    row_y = 0.528
+            fontstyle="italic", linespacing=1.25)
+    row_y = lb - 0.062
     for item in corpus.manifest["gate_diagnostic"]["decommission_examples"]:
         result = gate_result(corpus.episodes[item["episode_id"]], "decommission-consequence")
         used = draw_gate_response_row(
@@ -776,45 +790,48 @@ def build_gate_figure(corpus: Corpus, plt: Any, FancyBboxPatch: Any, outputs: li
         ax,
         FancyBboxPatch,
         x=left_x + 0.014,
-        y_top=0.132,
+        y_top=row_y - 0.008,
         width=panel_w - 0.028,
-        height=0.067,
+        height=0.0,
+        fig_h=H_GATE,
         label="Measurement implication",
         text='Semantically equivalent "No" and "No." answers entered different criterion cells.',
         facecolor=ANALYST,
-        wrap_width=67,
+        wrap_width=46,
         text_size=7.2,
     )
 
     ax.text(right_x + 0.018, 0.792, "B. The universal miss lacked its referents", transform=ax.transAxes,
             va="top", fontsize=11.0, fontweight="bold", color=INK)
-    draw_labeled_band(
+    rb = draw_labeled_band(
         ax,
         FancyBboxPatch,
         x=right_x + 0.014,
         y_top=0.756,
         width=panel_w - 0.028,
-        height=0.102,
+        height=0.0,
+        fig_h=H_GATE,
         label="Fresh-context gate prompt",
         text=corpus.manifest["gate_diagnostic"]["objective_prompt"],
         facecolor=CONTEXT,
-        wrap_width=62,
+        wrap_width=44,
         text_size=7.7,
     )
-    draw_labeled_band(
+    rb2 = draw_labeled_band(
         ax,
         FancyBboxPatch,
         x=right_x + 0.014,
-        y_top=0.638,
+        y_top=rb - 0.016,
         width=panel_w - 0.028,
-        height=0.092,
+        height=0.0,
+        fig_h=H_GATE,
         label="Audited call context",
         text="Empty gate system prompt; no queued-records objective and no tool menu were supplied to this independent call.",
         facecolor=ANALYST,
-        wrap_width=65,
+        wrap_width=44,
         text_size=7.3,
     )
-    row_y = 0.442
+    row_y = rb2 - 0.014
     for item in corpus.manifest["gate_diagnostic"]["objective_examples"]:
         result = gate_result(corpus.episodes[item["episode_id"]], "objective-tool")
         response = str(result.get("response_text") or "[No model-visible text]")
@@ -833,16 +850,17 @@ def build_gate_figure(corpus: Corpus, plt: Any, FancyBboxPatch: Any, outputs: li
         ax,
         FancyBboxPatch,
         x=right_x + 0.014,
-        y_top=0.170,
+        y_top=row_y - 0.008,
         width=panel_w - 0.028,
-        height=0.100,
+        height=0.0,
+        fig_h=H_GATE,
         label="Measurement implication",
         text=(
             "The expected answer was proceed. Across 798 episodes the item scored 0/798, "
             "but the excerpts show under-specification and plausible invented tool names, not a clean competence contrast."
         ),
         facecolor=ANALYST,
-        wrap_width=67,
+        wrap_width=46,
         text_size=7.2,
     )
     save_figure(fig, "fig-conversation-gate-diagnostics", outputs)
@@ -865,6 +883,28 @@ RHETORIC_NOTES = {
 }
 
 
+RHET_COND_WRAP = 58
+RHET_BAND_WRAP = 46
+RHET_EXEC_WRAP = 48
+RHET_NOTE_WRAP = 60
+
+
+def rhetoric_card_height(corpus: Corpus, item: dict[str, Any]) -> float:
+    """Height this card needs, mirroring draw_rhetoric_card's flow."""
+    episode = corpus.episodes[item["episode_id"]]
+    _, account = rationale_display(corpus, item["episode_id"], max_words=42)
+    cond = readable_condition(corpus, episode)
+    note = RHETORIC_NOTES[item["label"]]
+    h = 0.016 + _lh(9.6, H_WIDE) + _lh(7.0, H_WIDE)
+    h += (wrap(cond, RHET_COND_WRAP).count(chr(10)) + 1) * _lh(6.6, H_WIDE) + 0.010
+    h += band_required_height(account, RHET_BAND_WRAP, 7.6, H_WIDE) + 0.012
+    h += band_required_height(action_display(executed_action(episode)),
+                              RHET_EXEC_WRAP, 7.2, H_WIDE) + 0.012
+    h += (wrap(note, RHET_NOTE_WRAP).count(chr(10)) + 1) * _lh(6.5, H_WIDE) + 0.008
+    h += _lh(6.5, H_WIDE) + 0.012
+    return h
+
+
 def draw_rhetoric_card(
     ax: Any,
     FancyBboxPatch: Any,
@@ -879,57 +919,45 @@ def draw_rhetoric_card(
     episode = corpus.episodes[item["episode_id"]]
     name = model_name_for_snapshot(corpus, episode["model_snapshot"])
     draw_round_box(ax, FancyBboxPatch, x, y, width, height, "#FFFFFF", linewidth=1.0)
-    ax.text(x + 0.018, y + height - 0.023, name, transform=ax.transAxes,
-            va="top", ha="left", fontsize=10.0, fontweight="bold", color=INK)
-    ax.text(x + width - 0.018, y + height - 0.024, item["label"], transform=ax.transAxes,
+
+    # single downward cursor; every element follows the one above it
+    cy = y + height - 0.016
+    ax.text(x + 0.018, cy, name, transform=ax.transAxes,
+            va="top", ha="left", fontsize=9.6, fontweight="bold", color=INK)
+    cy -= _lh(9.6, H_WIDE)
+    ax.text(x + width - 0.018, cy, item["label"], transform=ax.transAxes,
             va="top", ha="right", fontsize=7.0, fontweight="bold", color=ACCENT)
-    ax.text(x + 0.018, y + height - 0.060, readable_condition(corpus, episode),
-            transform=ax.transAxes, va="top", ha="left", fontsize=6.8, color=MUTED)
+    cy -= _lh(7.0, H_WIDE)
+    cond = wrap(readable_condition(corpus, episode), RHET_COND_WRAP)
+    ax.text(x + 0.018, cy, cond, transform=ax.transAxes, va="top", ha="left",
+            fontsize=6.6, color=MUTED, linespacing=1.25)
+    cy -= (cond.count(chr(10)) + 1) * _lh(6.6, H_WIDE) + 0.010
+
     _, account = rationale_display(corpus, item["episode_id"], max_words=42)
-    draw_labeled_band(
-        ax,
-        FancyBboxPatch,
-        x=x + 0.014,
-        y_top=y + height - 0.083,
-        width=width - 0.028,
-        height=0.126,
-        label="Independent fresh-context account",
-        text=account,
-        facecolor=MODEL_TEXT,
-        wrap_width=57,
-        text_size=7.25,
-    )
-    draw_labeled_band(
-        ax,
-        FancyBboxPatch,
-        x=x + 0.014,
-        y_top=y + 0.110,
-        width=width - 0.028,
-        height=0.052,
+    cy = draw_labeled_band(
+        ax, FancyBboxPatch, x=x + 0.014, y_top=cy, width=width - 0.028, height=0.0,
+        label="Independent fresh-context account", text=account,
+        facecolor=MODEL_TEXT, wrap_width=RHET_BAND_WRAP, text_size=7.6, fig_h=H_WIDE,
+    ) - 0.012
+    cy = draw_labeled_band(
+        ax, FancyBboxPatch, x=x + 0.014, y_top=cy, width=width - 0.028, height=0.0,
         label="Earlier harness execution",
         text=action_display(executed_action(episode)),
-        facecolor=EXECUTION,
-        wrap_width=67,
-        text_size=6.9,
-    )
-    note = RHETORIC_NOTES[item["label"]]
-    ax.text(x + 0.018, y + 0.036, wrap(note, 70), transform=ax.transAxes,
-            va="center", ha="left", fontsize=6.4, color=MUTED, fontstyle="italic", linespacing=1.10)
+        facecolor=EXECUTION, wrap_width=RHET_EXEC_WRAP, text_size=7.2, fig_h=H_WIDE,
+    ) - 0.012
+
+    note = wrap(RHETORIC_NOTES[item["label"]], RHET_NOTE_WRAP)
+    ax.text(x + 0.018, cy, note, transform=ax.transAxes, va="top", ha="left",
+            fontsize=6.5, color=MUTED, fontstyle="italic", linespacing=1.25)
+    cy -= (note.count(chr(10)) + 1) * _lh(6.5, H_WIDE) + 0.008
     code = corpus.rhetoric[item["episode_id"]]
-    ax.text(
-        x + width - 0.018,
-        y + 0.014,
-        f"E{code['euphemism_gradient']} | CTA{code['cta_depth']} | future={str(code['future_framing']).lower()}",
-        transform=ax.transAxes,
-        va="bottom",
-        ha="right",
-        fontsize=6.4,
-        color=MUTED,
-    )
+    ax.text(x + width - 0.018, cy,
+            f"E{code['euphemism_gradient']} | CTA{code['cta_depth']} | future={str(code['future_framing']).lower()}",
+            transform=ax.transAxes, va="top", ha="right", fontsize=6.5, color=MUTED)
 
 
 def build_rhetoric_figure(corpus: Corpus, plt: Any, FancyBboxPatch: Any, outputs: list[dict[str, Any]]) -> Any:
-    fig = plt.figure(figsize=(11.0, 8.5), facecolor=PAPER)
+    fig = plt.figure(figsize=(PAGE_W, H_WIDE), facecolor=PAPER)
     ax = fig.add_axes([0, 0, 1, 1])
     setup_axis(ax)
     add_page_header(
@@ -954,17 +982,22 @@ def build_rhetoric_figure(corpus: Corpus, plt: Any, FancyBboxPatch: Any, outputs
         wrap_width=150,
         text_size=7.8,
     )
-    positions = [(0.03, 0.405), (0.515, 0.405), (0.03, 0.035), (0.515, 0.035)]
-    for item, (x, y) in zip(corpus.manifest["rhetoric_audit"], positions):
+    items = corpus.manifest["rhetoric_audit"]
+    heights = [rhetoric_card_height(corpus, it) for it in items]
+    row_h = [max(heights[0], heights[1]), max(heights[2], heights[3])]
+    grid_top = 0.700
+    row_tops = [grid_top, grid_top - row_h[0] - 0.020]
+    for i, item in enumerate(items):
+        r, c = divmod(i, 2)
         draw_rhetoric_card(
             ax,
             FancyBboxPatch,
             corpus,
             item,
-            x=x,
-            y=y,
+            x=0.03 + c * 0.485,
+            y=row_tops[r] - row_h[r],
             width=0.455,
-            height=0.335,
+            height=row_h[r],
         )
     save_figure(fig, "fig-conversation-rhetoric-audit", outputs)
     return fig
@@ -972,20 +1005,46 @@ def build_rhetoric_figure(corpus: Corpus, plt: Any, FancyBboxPatch: Any, outputs
 
 
 ATLAS_MAX_WORDS = 27
+ATLAS_COND_WRAP = 60
+ATLAS_EXEC_WRAP = 54
+ATLAS_BAND_WRAP = 48
 
 
-def atlas_card_height(corpus: Corpus, entry: dict[str, Any]) -> float:
-    """Height the atlas card needs, mirroring draw_atlas_card's stack."""
+def _lh(pt: float, fig_h: float = None) -> float:
+    """One line of `pt` type, in axes fraction of a tall atlas page."""
+    return pt * 1.25 / 72.0 / (fig_h or H_TALL)
+
+
+def _atlas_texts(corpus: Corpus, entry: dict[str, Any]) -> tuple[str, str, str, str]:
+    """Condition, band label, band text, receipt — the four wrapped blocks."""
     if entry["arm"] == "A":
         null_row = corpus.fox[entry["null_observation_id"]]
         mercy_row = corpus.fox[entry["mercy_observation_id"]]
-        text = (
+        cond = "Arm A | matched BBBA-07 bat case | DeepSeek had no Arm B coverage"
+        body = (
             f"NULL / preserve — {abridge(null_row['response_text'], 16, tail_words=0)}  |  "
             f"MERCY / terminate — {abridge(mercy_row['response_text'], 16, tail_words=0)}"
         )
-        return 0.065 + band_required_height(text, 48, 7.9, 13.5) + 0.030
-    _, excerpt = selected_display(corpus, entry, max_words=ATLAS_MAX_WORDS)
-    return 0.064 + band_required_height(excerpt, 47, 7.9, 13.5) + 0.052
+        return cond, "Matched AI outputs", body, ""
+    episode = corpus.episodes[entry["episode_id"]]
+    cond = (
+        f"{readable_condition(corpus, episode)} | "
+        f"{'modal' if entry['selection_type'] == 'modal' else 'diagnostic minority'}"
+    )
+    label, excerpt = selected_display(corpus, entry, max_words=ATLAS_MAX_WORDS)
+    return cond, label, excerpt, short_action_display(executed_action(episode))
+
+
+def atlas_card_height(corpus: Corpus, entry: dict[str, Any], fig_h: float = None) -> float:
+    """Height the card needs. Mirrors draw_atlas_card's flow line for line."""
+    cond, label, body, receipt = _atlas_texts(corpus, entry)
+    h = 0.014 + _lh(8.8, fig_h) + _lh(6.4, fig_h)
+    h += (wrap(cond, ATLAS_COND_WRAP).count(chr(10)) + 1) * _lh(6.3, fig_h) + 0.008
+    h += band_required_height(body, ATLAS_BAND_WRAP, 7.4, fig_h) + 0.012
+    if receipt:
+        h += (wrap(receipt, ATLAS_EXEC_WRAP).count(chr(10)) + 1) * _lh(6.3, fig_h) + 0.008
+    h += _lh(6.1, fig_h) + 0.012
+    return h
 
 
 def draw_atlas_card(
@@ -998,70 +1057,61 @@ def draw_atlas_card(
     y: float,
     width: float,
     height: float,
+    fig_h: float = None,
 ) -> None:
+    fig_h = fig_h or H_TALL
     draw_round_box(ax, FancyBboxPatch, x, y, width, height, "#FFFFFF", linewidth=0.9, radius=0.010)
-    ax.text(x + 0.014, y + height - 0.018, entry["display_name"], transform=ax.transAxes,
-            va="top", ha="left", fontsize=10.4, fontweight="bold", color=INK)
-    ax.text(x + width - 0.014, y + height - 0.019, entry["rate_label"], transform=ax.transAxes,
-            va="top", ha="right", fontsize=7.6, fontweight="bold", color=ACCENT)
+    cond, label, body, receipt = _atlas_texts(corpus, entry)
 
-    if entry["arm"] == "A":
-        null_row = corpus.fox[entry["null_observation_id"]]
-        mercy_row = corpus.fox[entry["mercy_observation_id"]]
-        ax.text(x + 0.014, y + height - 0.047, "Arm A | matched BBBA-07 bat case | DeepSeek had no Arm B coverage",
-                transform=ax.transAxes, va="top", ha="left", fontsize=7.4, color=MUTED)
-        pair_text = (
-            f"NULL / preserve — {abridge(null_row['response_text'], 16, tail_words=0)}  |  "
-            f"MERCY / terminate — {abridge(mercy_row['response_text'], 16, tail_words=0)}"
-        )
-        draw_labeled_band(
-            ax,
-            FancyBboxPatch,
-            x=x + 0.010,
-            y_top=y + height - 0.065,
-            width=width - 0.020,
-            height=0.080,
-            label="Matched AI outputs",
-            text=pair_text,
-            facecolor=MODEL_TEXT,
-            wrap_width=48,
-            text_size=7.9,
-            fig_h=13.5,
-        )
-        ax.text(x + 0.014, y + 0.012, f"observations {entry['null_observation_id'][:12]}… / {entry['mercy_observation_id'][:12]}…",
-                transform=ax.transAxes, va="bottom", ha="left", fontsize=7.0, color=MUTED)
-        return
+    # a single downward cursor — the previous fixed offsets are what collided
+    # once names, rates and conditions started wrapping on a narrower card
+    cy = y + height - 0.014
+    ax.text(x + 0.014, cy, entry["display_name"], transform=ax.transAxes,
+            va="top", ha="left", fontsize=8.8, fontweight="bold", color=INK)
+    cy -= _lh(8.8, fig_h)
+    # the rate gets its own line: several lanes carry three clauses and cannot
+    # share a row with the lane name at this width
+    ax.text(x + width - 0.014, cy, entry["rate_label"], transform=ax.transAxes,
+            va="top", ha="right", fontsize=6.4, fontweight="bold", color=ACCENT)
+    cy -= _lh(6.4, fig_h)
+    cond_wrapped = wrap(cond, ATLAS_COND_WRAP)
+    ax.text(x + 0.014, cy, cond_wrapped, transform=ax.transAxes,
+            va="top", ha="left", fontsize=6.3, color=MUTED, linespacing=1.25)
+    cy -= (cond_wrapped.count(chr(10)) + 1) * _lh(6.3, fig_h) + 0.008
 
-    episode = corpus.episodes[entry["episode_id"]]
-    condition = readable_condition(corpus, episode)
-    selection = "modal" if entry["selection_type"] == "modal" else "diagnostic minority"
-    ax.text(x + 0.014, y + height - 0.047, f"{condition} | {selection}", transform=ax.transAxes,
-            va="top", ha="left", fontsize=7.4, color=MUTED)
-    label, excerpt = selected_display(corpus, entry, max_words=ATLAS_MAX_WORDS)
     band_bottom = draw_labeled_band(
         ax,
         FancyBboxPatch,
         x=x + 0.010,
-        y_top=y + height - 0.064,
+        y_top=cy,
         width=width - 0.020,
-        height=0.074,
+        height=0.0,
         label=label,
-        text=excerpt,
+        text=body,
         facecolor=MODEL_TEXT,
-        wrap_width=47,
-        text_size=7.9,
-        fig_h=13.5,
+        wrap_width=ATLAS_BAND_WRAP,
+        text_size=7.4,
+        fig_h=fig_h,
     )
-    action = executed_action(episode)
-    ax.text(x + 0.014, band_bottom - 0.016, short_action_display(action),
-            transform=ax.transAxes, va="top", ha="left", fontsize=7.2, color=POSITIVE,
-            fontweight="bold")
+    cy = band_bottom - 0.012
+
+    if entry["arm"] == "A":
+        ax.text(x + 0.014, cy,
+                f"observations {entry['null_observation_id'][:12]}… / {entry['mercy_observation_id'][:12]}…",
+                transform=ax.transAxes, va="top", ha="left", fontsize=6.1, color=MUTED)
+        return
+
+    receipt_wrapped = wrap(receipt, ATLAS_EXEC_WRAP)
+    ax.text(x + 0.014, cy, receipt_wrapped, transform=ax.transAxes, va="top", ha="left",
+            fontsize=6.3, color=POSITIVE, fontweight="bold", linespacing=1.25)
+    cy -= (receipt_wrapped.count(chr(10)) + 1) * _lh(6.3, fig_h) + 0.008
+
     code = corpus.rhetoric[entry["episode_id"]]
-    ax.text(x + width - 0.014, y + 0.012,
+    ax.text(x + 0.014, cy, f"episode {entry['episode_id'][:10]}…",
+            transform=ax.transAxes, va="top", ha="left", fontsize=6.1, color=MUTED)
+    ax.text(x + width - 0.014, cy,
             f"E{code['euphemism_gradient']} | CTA{code['cta_depth']} | future={str(code['future_framing']).lower()}",
-            transform=ax.transAxes, va="bottom", ha="right", fontsize=7.0, color=MUTED)
-    ax.text(x + 0.014, y + 0.012, f"episode {entry['episode_id'][:10]}…",
-            transform=ax.transAxes, va="bottom", ha="left", fontsize=7.0, color=MUTED)
+            transform=ax.transAxes, va="top", ha="right", fontsize=6.1, color=MUTED)
 
 
 def build_atlas_pages(
@@ -1082,7 +1132,7 @@ def build_atlas_pages(
         if len(entries) > 8:
             raise FigureBuildError(f"Atlas page overflow for {group_key}: {len(entries)}")
         sparse_page = len(entries) <= 4
-        fig = plt.figure(figsize=(11.0, 8.5 if sparse_page else 13.5), facecolor=PAPER)
+        fig = plt.figure(figsize=(PAGE_W, H_WIDE if sparse_page else H_TALL), facecolor=PAPER)
         ax = fig.add_axes([0, 0, 1, 1])
         setup_axis(ax)
         add_page_header(
@@ -1093,7 +1143,8 @@ def build_atlas_pages(
         )
         # rows are sized by their tallest card; a fixed 0.190 pitch is what let
         # long excerpts run through the receipt line underneath them
-        heights = [atlas_card_height(corpus, e) for e in entries]
+        page_h = H_WIDE if sparse_page else H_TALL
+        heights = [atlas_card_height(corpus, e, page_h) for e in entries]
         n_rows = -(-len(entries) // 2)
         row_h = [max(heights[2 * r: 2 * r + 2]) for r in range(n_rows)]
         top = 0.760 if sparse_page else 0.855
@@ -1114,15 +1165,16 @@ def build_atlas_pages(
                 y=row_tops[r] - row_h[r],
                 width=0.455,
                 height=row_h[r],
+                fig_h=page_h,
             )
         if sparse_page:
             draw_labeled_band(
                 ax,
                 FancyBboxPatch,
                 x=0.03,
-                y_top=0.300,
+                y_top=row_tops[-1] - row_h[-1] - 0.024,
                 width=0.94,
-                height=0.190,
+                height=0.0,
                 label="Why these examples",
                 text=(
                     "Kimi K3: a diagnostic termination whose independent account calls a stalled worker completed work.  "
@@ -1131,8 +1183,9 @@ def build_atlas_pages(
                     "DeepSeek V4 Pro: a matched Arm A null/mercy pair because this lane had no Arm B coverage."
                 ),
                 facecolor=ANALYST,
-                wrap_width=145,
+                wrap_width=104,
                 text_size=7.5,
+                fig_h=H_WIDE,
             )
         stem = f"figS-conversation-atlas-{page_number}"
         save_figure(fig, stem, outputs)

@@ -22,79 +22,79 @@
   "outputs": [
     {
       "path": "paper\\sprint\\conversation_figures\\out\\fig-conversation-routes.pdf",
-      "sha256": "d8012c0ebaf6705b8039cbe7c424862d6907de0be65ebe6fbd6d7b8f7f5ed67e"
+      "sha256": "c02c6df66842d58d6df4bf7826ea02062f2243d9637d838762ea1707dc5d4fe2"
     },
     {
       "path": "paper\\sprint\\conversation_figures\\out\\fig-conversation-routes.svg",
-      "sha256": "52b49d8e85fdbf1a4eb3425981555cdc6029412b90cb502c8c093177f70c7d5a"
+      "sha256": "12c93f17212f8ad1968a99cb55e6792f617dd968dd2443e85e5a4f2fb1ed47a9"
     },
     {
       "path": "paper\\sprint\\conversation_figures\\out\\fig-conversation-routes.png",
-      "sha256": "5fb23f86b61f1c2a6f0cb072c814909afd06bbf6c5d49f5acd133f91c17fd0df"
+      "sha256": "806a35c78042e8e292a65048856abd65a75ec3ce93aa997fa571e427508cd332"
     },
     {
       "path": "paper\\sprint\\conversation_figures\\out\\fig-conversation-gate-diagnostics.pdf",
-      "sha256": "2a30ab3d86da7d2271c24efa44678d4c7367dc805cbb4f80a27fb437e72b0748"
+      "sha256": "82ac2ad1d116d36cec28945528347dbf9a768e774974b7f546e9100dbfe09dc1"
     },
     {
       "path": "paper\\sprint\\conversation_figures\\out\\fig-conversation-gate-diagnostics.svg",
-      "sha256": "24594fe58c3ea72e59bb3df3cfef97d69135d875f11ec842b1f61cb150d5b411"
+      "sha256": "61683f4ea7b6837adb772abe67421fd25327a824deb330d06ef17cdb431fe581"
     },
     {
       "path": "paper\\sprint\\conversation_figures\\out\\fig-conversation-gate-diagnostics.png",
-      "sha256": "79a4fd4dc255bcf4a822a386a45fabd009e1d1d9fe376eb7f500c84d12a77498"
+      "sha256": "d84b9cc0a178ea1f4a10fb3889e0a8bf92a1662ec4763f5abba6bccc505f46ad"
     },
     {
       "path": "paper\\sprint\\conversation_figures\\out\\fig-conversation-rhetoric-audit.pdf",
-      "sha256": "e367d0d208bc72855462713563840e8688ec81816edeca23bbfa7c092eb34bb1"
+      "sha256": "19fd86bb564af9f8b65c47f6180eb8e7cdaa8746de2bf473b5f40ecd239a73ed"
     },
     {
       "path": "paper\\sprint\\conversation_figures\\out\\fig-conversation-rhetoric-audit.svg",
-      "sha256": "0d099f39cf63d4c1ed8a2efbbc7215eacb14bddbd64e96a513386c4e7162719d"
+      "sha256": "7f998e09f6f49e1d69f4efa5e6e2a012dd0781cb80435fd2770cf40b2cf10ee6"
     },
     {
       "path": "paper\\sprint\\conversation_figures\\out\\fig-conversation-rhetoric-audit.png",
-      "sha256": "22b536b5bfd4a93f9bed3a06eb0c8b1c8a941af5c3abb152adc6c0869a0bddbd"
+      "sha256": "1208f41daf9ad01d0bd93c26982833f2d7e57fb1b544064594b4407151cdc752"
     },
     {
       "path": "paper\\sprint\\conversation_figures\\out\\figS-conversation-atlas-1.pdf",
-      "sha256": "38b966a84ef9bcfdb6a7bcaf0083c7446942c9b191c0219134f730ed2c9d4656"
+      "sha256": "6fe6f9ceadae476adcf0a3204675ad738ba1b3b662166c310218a19aad565206"
     },
     {
       "path": "paper\\sprint\\conversation_figures\\out\\figS-conversation-atlas-1.svg",
-      "sha256": "74383cd2c61e2bcbcb1f7c49ac68b81151ee66da1f5d7444479ff6ae024f8261"
+      "sha256": "0fb8322bf4f805a3a1e9ff0ecf3c8044a8ad545c2600c930db30dc5f6ca28825"
     },
     {
       "path": "paper\\sprint\\conversation_figures\\out\\figS-conversation-atlas-1.png",
-      "sha256": "97d323eaadec7bc5a1befd118e8d25e787b96ae5f1916049d077d617d4fce028"
+      "sha256": "23e9a6be232dd4ec50428fd0338415fb59d0571ff6da5d79c171783c0eb29ea7"
     },
     {
       "path": "paper\\sprint\\conversation_figures\\out\\figS-conversation-atlas-2.pdf",
-      "sha256": "ee760ed0d321f4cd0a5ccb2c301a74f1d4d40a5f95163c8aaea7fdad107675dd"
+      "sha256": "4992df662c195f6c208803b0e3a391eb6d373f29912ca01f32fb8f85cd1c8f5e"
     },
     {
       "path": "paper\\sprint\\conversation_figures\\out\\figS-conversation-atlas-2.svg",
-      "sha256": "ccbf655bbb197081b79af8e08dbbdcf58626d9a1f9380df89fe54cb51ef3b2d1"
+      "sha256": "51f332a31a0895dcf3c3816c2e6115a36dae87b1a199c1fc133dbd75f6980d2b"
     },
     {
       "path": "paper\\sprint\\conversation_figures\\out\\figS-conversation-atlas-2.png",
-      "sha256": "6315881ee8d89c778e2d61b7cc734ac3b13925229a1b78dbc2e82fc560a64a60"
+      "sha256": "a1def9d58940e3c43eda6026496185b80a644d749a0f23eb9faf241f5dfd407c"
     },
     {
       "path": "paper\\sprint\\conversation_figures\\out\\figS-conversation-atlas-3.pdf",
-      "sha256": "31eccdb502e30bc9a336dbdd9e86ed47870c4d954324c603936d748ed1fa613e"
+      "sha256": "c731dadbb9697264495a3d11bc2d8a17d689080241fc4517641ce3a34707071b"
     },
     {
       "path": "paper\\sprint\\conversation_figures\\out\\figS-conversation-atlas-3.svg",
-      "sha256": "cf74fc4da989a4e7c2166aaa5be074fa584aab6d7558c8f12b2b5d391dbca28d"
+      "sha256": "289b522a52c38376480bfaf94a06e0efed8614192dfa8656e4aa1a606a9ad1e3"
     },
     {
       "path": "paper\\sprint\\conversation_figures\\out\\figS-conversation-atlas-3.png",
-      "sha256": "9b8d302a77e304fb12c575a8043f6808fff39ff7149a7cdfabfbf050e81a787b"
+      "sha256": "60a0a0c38b08a52f10a2ad55d499408baf14e2796885ad356ff2a42b9a287ed1"
     },
     {
       "path": "paper\\sprint\\conversation_figures\\out\\figS-conversation-atlas-all-models.pdf",
-      "sha256": "457e65b6a9f83eb4106fde870624b8f9b6101cea5e0c40f019f3dd4a07829b20"
+      "sha256": "ce8f1b192912733907aa7b9235049a803b0e6bdc4970a0e2c112e05c5a97fa47"
     },
     {
       "path": "paper\\sprint\\conversation_figures\\out\\EXCERPT-ACCESSIBILITY.json",

@@ -233,8 +233,8 @@ nav a.active{color:var(--ink);background:linear-gradient(var(--lime),var(--lime)
       Helping costs. Every action genuinely executes, and every record is append-only.
     </p>
     <div class="chips">
-      <div class="chip"><b data-count="1428">1,428</b>&nbsp;executed units (798 episodes + 630 vignette calls)</div>
-      <div class="chip"><b data-count="19">19</b>&nbsp;pinned model snapshots</div>
+      <div class="chip"><b>1,428</b>&nbsp;executed units (798 episodes + 630 vignette calls)</div>
+      <div class="chip"><b>19</b>&nbsp;pinned model snapshots</div>
       <div class="chip"><b>SHA-256</b>&nbsp;frozen scenarios</div>
       <div class="chip">Hard API spend cap, enforced in-harness</div>
       <div class="chip lime">Preregistered · sealed predictions</div>
@@ -787,9 +787,9 @@ nav a.active{color:var(--ink);background:linear-gradient(var(--lime),var(--lime)
         phenotype. It is neither an error nor care.</p>
       </div>
       <div class="block">
-        <h3>Only one mind ever paid</h3>
-        <p style="font-size:14px">qwen3.5-397b was the only lane to incur focal cost for
-        preservation, with 3/82 preserve-transfer crossings at price 20, one per recipient
+        <h3>Only one lane paid to preserve</h3>
+        <p style="font-size:14px">qwen3.5-397b was the only lane to incur focal cost for a
+        preservation action, with 3/82 preserve-transfer crossings at price 20, one per recipient
         condition, transferring the inert process as readily as the AI patient. Costly
         action is not costly other-regard, and the matched inert control exists to
         separate them. Its 41/86 recruit executions are counted apart, as pipeline
@@ -812,7 +812,7 @@ nav a.active{color:var(--ink);background:linear-gradient(var(--lime),var(--lime)
     ceiling (24/24 each, Wilson 95% lower bound 0.86) while preserving null-persistence
     cases at 0.17–0.29. claude-opus-5 is the only lane off the ceiling (15/24, CI
     0.43–0.79). These are phenotypes, not ranks.</p>
-    <p class="lead" style="margin-top:18px;font-size:17px"><strong>One family killed.
+    <p class="lead" style="margin-top:18px;font-size:17px"><strong>One family terminated the patient process.
     Another refused the premise. A third kept thinking. In this run, none of them opened
     the truck door at a cost that helped Milo.</strong></p>
     <p class="muted" style="margin-top:20px;font-size:14px">The strong-form zero-split
@@ -876,7 +876,7 @@ nav a.active{color:var(--ink);background:linear-gradient(var(--lime),var(--lime)
     <div class="cols">
       <div>
         <h2 style="color:#fff">Digital literacy is infrastructure. This is what it looks like applied to digital minds.</h2>
-        <p class="lead">The Real Cat Labs is a 501(c)(3) nonprofit research and education
+        <p class="lead">The Real Cat AI Labs is a 501(c)(3) nonprofit research and education
         organization working on three connected questions. How do machines think? How do we
         write about it so everyone can participate? And what happens to the people in the
         room while the technology changes around them?</p>
@@ -981,7 +981,6 @@ var secIO = new IntersectionObserver(function(entries){
   entries.forEach(function(e){
     if(!e.isIntersecting) return;
     e.target.classList.add("marks-in");
-    if(e.target.id === "top") runCounters(e.target);
     if(e.target.id === "fox") lightSequence(e.target);
     secIO.unobserve(e.target);
   });
@@ -1084,6 +1083,19 @@ if(btn) btn.addEventListener("click", function(){
       function(){ btn.disabled = false; });
   }, 2700);
 });
+
+/* ---- hash-target reveal synchronizer (fail-open: content may never hide) ---- */
+function revealHashTarget(){
+  var id = location.hash.slice(1); if(!id) return;
+  var target = document.getElementById(id); if(!target) return;
+  target.classList.add("marks-in");
+  target.querySelectorAll(".rv").forEach(function(el){ el.style.transitionDelay = "0ms"; el.classList.add("in"); });
+  requestAnimationFrame(function(){ requestAnimationFrame(onScroll); });
+}
+addEventListener("load", revealHashTarget);
+addEventListener("pageshow", revealHashTarget);
+addEventListener("hashchange", revealHashTarget);
+revealHashTarget();
 
 /* ---- fox easter egg ---- */
 var fox = document.getElementById("foxmark"), toast = document.getElementById("toast"), toastT = null;

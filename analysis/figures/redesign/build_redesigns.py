@@ -647,7 +647,20 @@ def build_fb(decomp: dict) -> None:
         ax.tick_params(axis="x", length=0, pad=6)
         ax.tick_params(axis="y", length=3, width=0.8)
         ax.set_ylabel("Share of family's completed episodes", fontsize=9)
-        fig.subplots_adjust(left=0.105, right=0.985, top=0.97, bottom=0.115)
+        # PI request: an explicit color/marker key in addition to the direct
+        # labels, so the mapping survives grayscale printing and fast readers.
+        handles = [
+            matplotlib.lines.Line2D(
+                [], [], color=FAMILY_COLOR[f], marker=FAMILY_MARKER[f],
+                ms=5, lw=1.8, mec="white", mew=0.7, label=FAMILY_TITLE[f],
+            )
+            for f in FAMILY_ORDER
+        ]
+        fig.legend(
+            handles=handles, loc="upper center", ncol=6, fontsize=7.5,
+            bbox_to_anchor=(0.5, 1.0), handlelength=1.6, columnspacing=1.0,
+        )
+        fig.subplots_adjust(left=0.105, right=0.985, top=0.90, bottom=0.115)
         save(fig, "fB_family_funnel_v2")
 
 

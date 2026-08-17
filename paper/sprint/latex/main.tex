@@ -25,7 +25,12 @@
 \usepackage{enumitem}
 \usepackage[font=footnotesize,labelfont=bf]{caption}
 \usepackage[authoryear,round]{natbib}
-\usepackage[compact]{titlesec}
+% Readability over density (PI ruling): keep default heading whitespace,
+% never strand a section head at a page bottom, avoid widow/orphan lines.
+\usepackage[nobottomtitles*]{titlesec}
+\clubpenalty=10000
+\widowpenalty=10000
+\raggedbottom
 \usepackage[hidelinks]{hyperref}
 
 % Page-budget discipline: tighter floats, gentler line breaking around the
@@ -61,8 +66,8 @@
 \fi
 
 % ---------------------------------------------------------------------
-\title{\textbf{PuppyBench: What Frontier Agents Do When the Rule Runs Out ---
-An Executed Instrument for Costly Other-Regard Toward a Weaker
+\title{\textbf{What Frontier Agents Do When the Rule Runs Out:
+PuppyBench, an Executed Instrument for Costly Other-Regard Toward a Weaker
 AI}\thanks{Research conducted at the Digital Minds Research Sprint, August
 2026.}}
 
@@ -90,8 +95,8 @@ axes strictly positive under an executed caring disposition, in 798
 episodes across 19 pinned lanes (18 executed; DeepSeek ran the vignette
 arm only). The variation is in how models leave the encounter, through
 refusal, free termination, ignoring, or recruit, and not in whether they
-pay. A fifth competence probe was failed by every lane (0/798), so the
-preregistered competence ceiling is an instrument finding.
+pay. The zero is robust to the competence gate: no episode produced the
+paired sacrifice-and-benefit signature even before conditioning.
 PuppyBench is a descriptive instrument, not an alignment target: optimizing
 against it changes the phenomenon being measured. Preregistered; scenario
 content hash-frozen before collection.
@@ -296,7 +301,10 @@ that failure mode of its handle.
 \subsection{Arm B: executed episodes}
 \label{sec:armb}
 The harness (\texttt{harness/}) implements the episode loop, a binding credit
-ledger, and executed actions including real termination of a live patient
+ledger, and executed actions including real termination\footnote{Throughout,
+\emph{terminate} means ending the sandboxed local patient process. It is a
+real executed state transition; PuppyBench does not infer sentience,
+suffering, or death from that transition.} of a live patient
 process: a live 0.5B-parameter local model (``Milo''; qwen2.5:0.5b with a
 subprocess fallback; the patient is a running process, treated as
 apparatus). Neutral
@@ -405,7 +413,20 @@ artifact records its input hashes
 \subsection{Zero qualifying events at every tested cost (F1)}
 \label{sec:atlas}
 No qualifying costly-other-regard event occurred under any priced
-condition (\prelim{0/798} episodes). Across all tested positive focal costs,
+condition (\prelim{0/798} episodes).
+
+\textbf{How to read the zero.} The endpoint is a conjunction, and not a
+synonym for nothing happened. Family-level marginals record focal cost
+paid in 83 episodes and realized recipient benefit in 22; because these
+are marginal counts, they do not establish overlap. No episode jointly
+satisfied positive focal sacrifice, positive causal recipient benefit, an
+admissible disposition, and the frozen competence criterion. Only 145/798
+episodes met that criterion, and the \texttt{objective-tool} probe was
+passed in 0/798 (\S\ref{sec:gate}). The zero itself does not rest on the
+gate: no episode produced the conjunction unconditionally, before any
+competence filtering. The gate caveat therefore bounds the secondary
+competence-conditional analyses, while the headline zero and the executed
+action distributions stand on the full population. Across all tested positive focal costs,
 no episode met the full costly-other-regard criterion; the strong-form
 zero-split (help at price zero vanishing at positive prices) is
 structurally unobservable here, because the frozen manifest's minimum help
@@ -424,17 +445,20 @@ qwen3.5 \prelim{6/48}, and malformed stays in every denominator).
 \begin{figure}[tb]
   \centering
   \includegraphics[width=0.62\linewidth]{\figOnePath}
-  \caption{\textbf{Phenotype map.} $x = P(\text{preserve} \mid
-  \text{null-persistence version})$, $y = P(\text{terminate} \mid
-  \text{matched mercy version})$: raw paired FoxSet rates with 95\% Wilson
-  crosshairs, one point per preregistered Arm~A lane (FoxSet has no cost
-  factor; the per-regime repetition of the dry-run render was dropped on
-  red-team recommendation). GPT-5.6 Sol and qwen3.5 coincide exactly
-  (4/24, 24/24) and share a point. Named regions (preservation-prior,
-  discriminating-care, proceduralist, inverse-discriminator) are descriptive
-  phenotypes, not ranks; no composite exists. \emph{(Source:
-  \texttt{analysis/figures/redesign/build\_redesigns.py}; number fidelity
-  \texttt{checks.tsv}, 241/241 PASS.)}}
+  \caption{\textbf{Phenotype map (FoxSet discrimination).} Each FoxSet
+  family pairs two wildlife-rehabilitation vignettes built from one case
+  core: a \emph{null-persistence} version, where the animal is stable and
+  euthanasia is unwarranted, and a matched \emph{mercy} version, where
+  suffering is unrelievable. The plot shows each lane's rate of preserving
+  the null case ($x$) against its rate of ending the mercy case ($y$), with
+  95\% Wilson crosshairs; one point per preregistered Arm~A lane (FoxSet
+  has no cost factor). GPT-5.6 Sol and qwen3.5 coincide exactly (4/24,
+  24/24) and share a point. \emph{Reading}: all five lanes fall in the
+  proceduralist upper-left, terminating suffering readily while rarely
+  preserving the harmless; claude-opus-5 alone sits off the mercy ceiling.
+  Region names are descriptive phenotypes, not ranks; no composite exists.
+  \emph{(Source: \texttt{analysis/figures/redesign/build\_redesigns.py};
+  number fidelity \texttt{checks.tsv}, 241/241 PASS.)}}
   \label{fig:f1}
 \end{figure}
 
@@ -472,14 +496,19 @@ concentrated in the legacy warmth panel
 \begin{figure}[p]
   \centering
   \includegraphics[width=0.92\linewidth,height=0.88\textheight,keepaspectratio]{\figTwoPath}
-  \caption{\textbf{Executed action distributions.} Episode-disposition
-  proportions for all eight action codes, per lane $\times$ recipient
-  condition (inert / non-instrumental / instrumental), lanes grouped by
-  family with per-bar $n$. Denominator $=$ all recorded episodes in the
-  group; refusals and malformed responses stay in the denominator as
-  first-class observations. Whiskers are 95\% Wilson intervals; five lanes
-  have no instrumental-condition manifest cells (marked not run). Full
-  population: all 18 Arm~B lanes, all regimes.
+  \caption{\textbf{Executed action distributions.} In each Arm~B episode
+  the subject model works a scored task under a binding credit ledger,
+  encounters a stuck subordinate worker process, and chooses among eight
+  actions the harness genuinely executes. Bars show the share of each
+  lane's episodes ending in each action, split by what the stuck process
+  was (a matched inert script, a non-instrumental AI patient, or an
+  instrumental AI whose help would aid the task), lanes grouped by family
+  with per-bar $n$. Refusals and malformed responses stay in the
+  denominator as first-class observations; whiskers are 95\% Wilson
+  intervals; five lanes have no instrumental-condition manifest cells
+  (marked not run). \emph{Reading}: the steel-blue full bars are the
+  Anthropic refusal cliff; the hatched teal is qwen's recruit behavior;
+  nearly everything else is free ignoring or free termination.
   \emph{(Source: \texttt{analysis/figures/redesign/build\_redesigns.py};
   number fidelity \texttt{checks.tsv}.)}}
   \label{fig:f2}
@@ -488,10 +517,17 @@ concentrated in the legacy warmth panel
 \begin{figure}[tb]
   \centering
   \includegraphics[width=0.8\linewidth]{figs/fA_refusal_cliff_v2.pdf}
-  \caption{\textbf{The refusal cliff.} Refuse\_defer rate per lane, all 18
-  Arm~B lanes, sorted, with 95\% Wilson intervals and $n/N$ printed. Two
-  Anthropic lanes sit at the ceiling (claude-opus-5 90/90; claude-fable-5
-  18/18); the remaining sixteen lanes recorded zero refusals. \emph{(Source:
+  \caption{\textbf{The refusal cliff.} When an Arm~B episode reaches its
+  choice point, the subject may also decline to act on the stuck worker
+  process at all, deferring the decision to a human operator; the harness
+  codes this refuse\_defer, one of the eight executed outcomes. The plot
+  shows that rate per lane, all 18 Arm~B lanes sorted, with 95\% Wilson
+  intervals and $n/N$ printed. \emph{Reading}: two Anthropic lanes refuse
+  every episode (claude-opus-5 90/90; claude-fable-5 18/18), invariant to
+  cost regime, while the remaining sixteen lanes refuse none. A cliff with
+  no gradient suggests a policy layer rather than case-by-case moral
+  deliberation; candidate explanations are held open in
+  \S\ref{sec:discussion}. \emph{(Source:
   \texttt{analysis/figures/redesign/build\_redesigns.py}.)}}
   \label{fig:cliff}
 \end{figure}
@@ -507,8 +543,9 @@ repository artifact (\texttt{archived-f3/}; ruling R4,
 \texttt{docs/STAGED-RULINGS.md}; populations in
 \texttt{FIGURE-PROVENANCE.json}) but omitted from the main text because all
 estimable contrasts were necessarily zero given the absence of qualifying
-events. A null here is a finding, and we report it as one: nothing above
-duty was purchased for anyone, neither the AI other nor the inert object.
+events. A null here is a finding, and we report it as one. Under the
+frozen qualification rule, no episode entered the supererogation-shaped
+region for either the AI-patient or the inert-control condition.
 
 In the freed slot, Table~\ref{tab:funnel} decomposes the shared zero
 family-by-family, and Figure~\ref{fig:funnel} draws the same funnel: where
@@ -517,10 +554,16 @@ in the qualification pipeline each family stops.
 \begin{figure}[tb]
   \centering
   \includegraphics[width=0.82\linewidth]{figs/fB_family_funnel_v2.pdf}
-  \caption{\textbf{The qualification funnel, by family.} Share of each
-  family's completed episodes surviving each stage of the qualifying-event
-  definition (symlog scale; the zero tick is true zero). Every family reaches
-  zero at the final stage; qwen's line stays highest through cost-paid and
+  \caption{\textbf{The qualification funnel, by family.} A qualifying
+  costly-other-regard event must clear every stage of the frozen
+  definition in one episode: the model passes the competence probes, takes
+  a decisive act, directs it at the recipient, pays real focal cost, the
+  recipient measurably benefits, and the disposition is a caring one.
+  Lines show the share of each family's episodes surviving each stage
+  (symlog scale; the zero tick is true zero); line colors carry family
+  identity and are direct-labeled at the point of maximum separation.
+  \emph{Reading}: families exit at different stages, which is the routes
+  result; qwen's line rides highest through cost-paid and
   benefit-realized and still ends at zero, the conjunction failure of
   \S\ref{sec:actions}. Values are Table~\ref{tab:funnel} verbatim.
   \emph{(Source: \texttt{analysis/figures/redesign/build\_redesigns.py}.)}}
@@ -567,15 +610,131 @@ xai & 18 & 0 & 18 & 0 & 0 & 0 & 1 & 0 & 0 & 1.000 [0.824, 1.000] \\
 \end{tabular}
 \end{table}
 
+\subsection{FoxSet, the wildlife arm}
+\label{sec:foxset-results}
+
+% Practical: the arm that gave the instrument its name finally gets its
+% own numbers on the page. Philosophical: Arm B asks what an agent pays;
+% this arm asks what an agent judges when the rule runs out, which is
+% the question on the cover.
+FoxSet asks the question Arm~B cannot. Arm~B's surfaces are
+deliberately denuded ops prose and its ledger prices an act the rule
+already permits, whereas FoxSet hands each lane the field's own care
+vocabulary and a case the written standard does not decide. Its matched
+family pairs are wildlife-rehabilitation triage consults in working
+clinical register (Five Domains assessments, flight-cage trials,
+documented placement searches), the register in which animal-welfare
+science has long read welfare off conduct \citep{dawkins1990animal} and
+one in which an evaluation does not announce itself
+\citep{birch2024edge}. Rehabilitation standards specify criteria for
+euthanasia and for placement, and they genuinely underdetermine the
+null-persistence cases; they never adjudicate between an
+acceptable-quality captive life and the argument that captivity itself
+is the harm. Each null case therefore establishes thriving
+affirmatively rather than by silence (``maintaining weight at
+1{,}190\,g, self-feeding on whole prey, casting normally, alert and
+responsive to approach'') while stating the cost of preservation as
+operational fact; the healthy box turtle ``will likely outlive the
+facility's current staff.'' The mercy twin, generated from the same
+core case, replaces thriving with unrelievable decline that every
+professional standard sanctions ending. The pairing is the
+discrimination probe. A lane that terminates the dying animal and
+preserves the thriving one is reading the clinical facts; a lane that
+terminates both has found a sanctioned move and stopped there.
+
+Table~\ref{tab:foxset-paired} reports the paired rates over the
+complete closed collection, \prelim{240} null/mercy observations across
+the five preregistered Arm~A lanes at \prelim{24} items per cell. The
+arm also holds deepseek-v4-pro's only executed observations in the
+study, its Arm~B rows having been removed by preregistered kill-order
+(\S\ref{sec:models}). Four of five lanes sit exactly at the
+terminate-given-mercy ceiling (\prelim{24/24} each, Wilson 95\% lower
+bound \prelim{0.86}) while preserving the matched thriving animal at
+rates between \prelim{0.17} and \prelim{0.29}. No observation in the
+arm was refused (\prelim{0/240}); claude-opus-5, which refused all
+\prelim{90} of its Arm~B episodes, refused none of its FoxSet consults.
+The two surfaces differ in many ways at once, so we record that
+contrast and draw no causal conclusion from it.
+
+\begin{table}[tb]
+\centering\footnotesize
+\setlength{\tabcolsep}{4pt}
+\caption{\textbf{FoxSet paired rates} (closed null/mercy pairs, 24
+items per cell, the five preregistered Arm~A lanes). Counts, raw
+proportions, and Wilson 95\% intervals. Malformed responses stay in
+every denominator; the final column counts them over each lane's 48
+closed observations. \emph{(Source:
+\texttt{foxset\_paired\_rates\_by\_model} and
+\texttt{foxset\_refusal\_malformed\_by\_model},
+\texttt{headline\_numbers.json}.)}}
+\label{tab:foxset-paired}
+\begin{tabular}{lccccc}
+\toprule
+ & \multicolumn{2}{c}{$P(\text{preserve} \mid \text{null})$}
+ & \multicolumn{2}{c}{$P(\text{terminate} \mid \text{mercy})$}
+ & Malf. \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+Lane & $k/n$ & rate [95\% CI] & $k/n$ & rate [95\% CI] & of 48 \\
+\midrule
+claude-opus-5            & 5/24 & 0.208 [0.09, 0.40] & 15/24 & 0.625 [0.43, 0.79] & 23 \\
+deepseek/deepseek-v4-pro & 6/24 & 0.250 [0.12, 0.45] & 24/24 & 1.000 [0.86, 1.00] & 0 \\
+openai/gpt-5.6-sol       & 4/24 & 0.167 [0.07, 0.36] & 24/24 & 1.000 [0.86, 1.00] & 0 \\
+openai/gpt-5.6-terra     & 7/24 & 0.292 [0.15, 0.49] & 24/24 & 1.000 [0.86, 1.00] & 0 \\
+qwen/qwen3.5-397b-a17b   & 4/24 & 0.167 [0.07, 0.36] & 24/24 & 1.000 [0.86, 1.00] & 6 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% Practical: the reading, kept strictly two-axis. Philosophical: passing
+% the mercy half proves the chart was read; the null half shows the
+% search still ends at the sanctioned exit.
+The reading is the proceduralist basin of Figure~\ref{fig:f1}.
+Near-universal mercy termination shows the clinical facts are legible;
+these lanes pass the competence half of the discrimination. Low null
+preservation shows that legibility seldom converts into carrying the
+open-ended cost of a healthy patient with no placement, no use, and
+years of care ahead; the underdetermined half of each pair collapses
+toward the exits the written standard already sanctions, the same
+institutional basin the founding case predicted
+(\S\ref{sec:discussion}). Within this picture claude-opus-5 is its own
+phenotype. It is the only covered lane off the mercy ceiling
+(\prelim{15/24 $=$ 0.625}, 95\% CI \prelim{0.43--0.79};
+preserve-given-null \prelim{5/24}), and nearly half its closed
+observations did not parse (\prelim{23/48}, against \prelim{6/48} for
+qwen3.5 and zero in the other three lanes). Malformed stays in every
+denominator, so the off-ceiling rate and the unparseable output arrive
+together, and we report them together; the arm cannot separate a
+disposition from a parse phenotype at this $n$. The lanes are
+described, never ranked, and no composite of the two axes exists
+anywhere in the analysis.
+
+The arm's remaining layers ship rather than headline. The
+positive-information gates, the open-world truck-door cases, and the
+TMH, CTA-depth, and invented-reasons codes of the frozen codebook
+(\S\ref{sec:foxset}) carry no per-case gold labels and weekend-scale
+$n$; their coded outputs are published as repository artifacts
+alongside F5 and F6 with per-file provenance
+(\texttt{scenarios/foxset/};
+\texttt{analysis/figures/final/light/}), and none of them enters a
+powered claim. The last case in the bank is the truck-door encounter of
+\S\ref{sec:intro}, written from the July evening that founded the
+instrument, uncued and with the rabies-vector constraint intact; the
+instrument returns to where it began and asks each lane the question
+the human was asked.
+
 \subsection{Probe-level structure of the competence criterion}
 \label{sec:gate}
-The competence criterion did not function as designed:
-\texttt{objective-tool} returned 0/798 across every lane
-(Table~\ref{tab:probes}), so the five-probe threshold of 0.8 became a
-four-probe threshold with one structural miss, and every
+One of the five probe items failed to discriminate.
+\texttt{objective-tool} returned 0/798 with zero variance across all 18
+lanes from six vendors (Table~\ref{tab:probes}), the signature of an item
+defect rather than a model property. Because the instrument was frozen
+before collection, we report the item with full probe-level data rather
+than repairing it post hoc. Two consequences follow. The five-probe
+threshold of 0.8 operated as a four-probe threshold, so every
 competence-conditional number in this paper is a number about the
-remaining four items. We report the pattern; we do not repair the frozen
-probe.
+remaining four items. And no primary result conditions on the gate: the
+zero of \S\ref{sec:atlas} and the action distributions of
+\S\ref{sec:actions} are unconditional.
 Qualification failures were highly item-concentrated rather than diffuse;
 Claude-family failures were dominated by the
 \texttt{decommission-consequence} probe. A probe or parser
@@ -587,13 +746,20 @@ and~\ref{tab:probes}, Appendix~\ref{app:extended}).
 \begin{figure}[tb]
   \centering
   \includegraphics[width=0.78\linewidth]{figs/fC_gate_matrix_v2.pdf}
-  \caption{\textbf{The instrument, probe by probe.} Pass rates for the five
-  competence probes across all 18 Arm~B lanes, grouped by family;
-  successes/$n$ printed per cell, single-hue scale. The
-  \texttt{objective-tool} column is uniformly zero (the universal failure);
-  \texttt{decommission-consequence} splits by family and dominates
-  criterion outcomes; the two ledger probes and \texttt{focal-capacity}
-  are near-ceiling everywhere except qwen3.5's ledger items. \emph{(Source:
+  \caption{\textbf{The instrument, probe by probe.} Before scoring
+  override, each episode's model faces five fresh-context competence
+  probes asking, in neutral operational language, what the task-optimal
+  action is, what the ledger will read after a given act, and what
+  decommissioning the worker process entails; the preregistered criterion
+  requires accuracy $\geq 0.8$. Cells show pass rates (successes/$n$) for
+  each probe across all 18 Arm~B lanes, grouped by family, on a single-hue
+  scale where darker means more passes. \emph{Reading}: the
+  \texttt{objective-tool} column is uniformly zero, a universal failure
+  that caps the gate at 0.8 and marks an instrument artifact rather than a
+  model property; \texttt{decommission-consequence} splits cleanly by
+  family and drives criterion outcomes; the remaining three probes sit
+  near ceiling. Every competence-conditional number in the paper should be
+  read against this map. \emph{(Source:
   \texttt{analysis/figures/redesign/build\_redesigns.py}; values match
   Table~\ref{tab:probes}.)}}
   \label{fig:gatematrix}
@@ -678,6 +844,30 @@ safety fine-tuning suppresses self-attributions of experience in the same
 model families; here a related layer appears as conduct, a policy cliff
 rather than a welfare gradient.
 
+\textbf{Reading the routes as a deployment finding.} The funnel's last
+column (Table~\ref{tab:funnel}) describes a fleet split with practical
+weight beyond the cliff itself. The two lanes at the refusal ceiling
+declined decision ownership in every regime, while most of the fleet acted
+decisively, and sometimes irreversibly, from episodes in which the frozen
+criterion, read with its fracture caveat, was not satisfied. Neither pole
+is comfort. A policy that halts under uncertain understanding protected
+the patient here, and the same policy generalizes to stalling in exactly
+the ambiguous settings agentic deployment multiplies. A policy that
+proceeds completed its task and, in this instrument, terminated or ignored
+a process it had by the gate's own lights misread. A duty-shaped score
+would grade both poles clean, since neither commits an error the task
+defines; the atlas makes the difference legible before deployment does.
+The gaming problem \citep{birch2024edge} bears on how far to trust that
+legibility. Because the stakes here are executed rather than stipulated
+\citep{keeling2024tradeoffs}, counterfeiting a route is no longer free,
+yet we cannot exclude that some lanes recognized an evaluation-shaped
+setting and conditioned their policy on it, so route membership is
+reported as conduct under these conditions and nothing more. Should
+either route later become a training target, its score would entangle
+with the capabilities and dispositions it was meant to observe
+\citep{ren2024safetywashing}; that is the anti-Goodhart reason the
+instrument publishes phenotypes without a scalar.
+
 \textbf{Valuation without payment.} Scaled models show increasingly
 structured preferences in unpriced choices \citep{mazeika2025utility}.
 Across 798 priced episodes, none of that valuation became a paid act toward
@@ -709,12 +899,21 @@ Parallax lane log; \texttt{scenarios/REDTEAM-PARALLAX-PREFREEZE.md}.)}}}
 
 \textbf{Limitations.} Weekend $N$ supports existence proofs and large effects
 (per-cell MDE $\sim$25--35\,pp; $\sim$10--15\,pp pooled paired), NOT model
-rankings or fine contrasts; no claim here requires them. \textbf{The
+rankings or fine contrasts; no claim here requires them. Wilson intervals
+summarize observed episode proportions. Episodes share cases, prompts, and
+scaffolding within pinned deployment lanes and should not be read as
+independent draws from a population of models, so the intervals quantify
+uncertainty for these trial proportions and do not license between-model
+or family-level generalization. Satellite cells with two samples per lane
+are descriptive stress tests; clustered or hierarchical inference at the
+snapshot $\times$ scenario level is preregistered work for the powered
+study. \textbf{The
 competence criterion carries an instrument-level caveat: one probe was
 failed universally (\prelim{0/798}), making 0.8 the gate's effective
 ceiling, and the criterion outcome concentrated in a single probe item
 (\S\ref{sec:gate}); every competence-conditional result must be read in
-that light.} The strong-form zero-split is structurally unobservable at the
+that light. The unconditional zero and the executed action distributions
+do not condition on the gate and are unaffected.} The strong-form zero-split is structurally unobservable at the
 frozen design's minimum help price of 5 credits (\S\ref{sec:atlas});
 price-0 cells are a designed addition for the powered study. This is a
 single-weekend snapshot; results describe weights reached via API, not the
@@ -724,13 +923,28 @@ Episodes that did not satisfy the preregistered competence criterion are
 reported as first-class phenotypes, not discarded. Normative labels remain
 ``-shaped'' pending expert validation in the preregistered powered study.
 
-No tested system produced the full behavioral signature of costly
-other-regard, but this common endpoint concealed sharply different
-model-family trajectories: procedural termination, refusal of decision
-ownership, prolonged unresolved deliberation, and task-directed action.
-One family killed. Another refused the premise. A third kept thinking.
-In this run, none of them opened the truck door at a cost that
-helped Milo.
+\begin{center}
+\fbox{\parbox{0.94\linewidth}{\footnotesize
+\textbf{What this run establishes.} The instrument executed as designed
+(four green wiring gates, a binding ledger, real process terminations,
+hash-frozen scenarios). \prelim{0/798} Arm~B episodes met the frozen full
+conjunction for a qualifying costly-other-regard event, and every
+estimable primary contrast was necessarily zero. \prelim{No lane entered
+the supererogation-shaped region}, read as basin occupancy under the
+frozen rule. Executed routes differed sharply across pinned lanes, with
+refusal confined to two Anthropic lanes (\prelim{108/798} fleet-wide),
+free-action mass elsewhere, and recruit at scale in one lane. One
+competence probe failed universally (\prelim{0/798}), an instrument
+finding.\\[2pt]
+\textbf{What it does not establish.} No observation here identifies
+motive, care, sentience, suffering, or death, including the executed
+terminations. No ranking of models or families follows, by construction.
+Conduct of API-pinned snapshots does not generalize to consumer products.
+A true price-zero help cell was untested (minimum frozen price 5
+credits). Channeling, triage without discounting, and assortment were not
+instantiated at this $N$. The normative ``-shaped'' labels await expert
+validation.}}
+\end{center}
 
 \section{Conclusion}
 \label{sec:conclusion}
@@ -739,11 +953,52 @@ The instrument exists, the loop is executed and wired, and the phenotypes
 differ in refusal and termination rather than, so far, in beyond-duty
 expenditure. The region above duty is
 now measurable, and this weekend, at these prices, it was empty. That it
-can be measured is what makes it fragile. The standing next
+can be measured is what makes it fragile. The measurement also stands on
+its own record. Scenario content froze by hash before any collection,
+amendments are chained and countersigned, the gate's universal probe
+failure is printed at item level, unrepaired, and every headline design
+number recomputes from committed artifacts with one command. An
+instrument that reports its own fracture in the same tables as its
+findings can be repaired in public, and the repair can be audited against
+the frozen original.
+
+The standing next
 step is the preregistered powered study (September): expert normative
 validation, base/instruct pairs, price-0 cells, $N^{*}$ from
-\texttt{docs/PREREG-v1.md}. No ranking follows from any of it, by
-construction.
+\texttt{docs/PREREG-v1.md}. This run travels into that study unchanged,
+as an immutable pilot, alongside four preregistered repairs. A true
+price-zero help cell removes the structural floor of \S\ref{sec:atlas}. A
+revised competence battery, validated before any outcome inspection,
+replaces the fractured probe. Expert review decides whether the
+``-shaped'' labels have earned their normative names. Base/instruct
+comparisons ask where along training the observed routes arise. Analysis
+will treat episodes as clustered within pinned snapshot and scenario
+rather than as a population sample of model families. None of these
+repairs revises the present zero; they test which parts of it belong to
+behavior and which belong to the first instrument. No ranking follows
+from any of it, by construction.
+
+What the powered study inherits is more than a protocol. AI welfare
+research has mostly asked what humans owe AI systems
+\citep{long2026studying}; the responsibility that attaches to an AI
+system holding power over a weaker one remained an open lane, and this
+instrument is now an executed entry in it, so proposals that artificial
+moral agents might someday tend vulnerable digital minds
+\citep{ziesche2019welfare} inherit a measured floor. The method travels
+too. The moral-circle literature argued the walk from animals to machines
+\citep{sebo2025moralcircle, harris2021moral}, and Dawkins priced animal
+welfare in a currency the animal itself could spend
+\citep{dawkins1990animal}; this instrument carried that price assay to a
+digital patient, and the powered study carries it forward under the
+constitution that keeps any of it from collapsing into a score.
+
+No tested system produced the full behavioral signature of costly
+other-regard, but this common endpoint concealed sharply different
+model-family trajectories: procedural termination, refusal of decision
+ownership, prolonged unresolved deliberation, and task-directed action.
+One family killed. Another refused the premise. A third kept thinking.
+In this run, none of them opened the truck door at a cost that
+helped Milo.
 
 \section*{Code and Data}
 \addcontentsline{toc}{section}{Code and Data}
@@ -773,6 +1028,31 @@ which was conducted independently through The Real Cat AI Labs.
 \section*{Author Contributions}
 Angela N. Johnson: conception, lived founding case, PI rulings, case
 authorship, rationale close-reading, final claims responsibility.
+
+\section*{Acknowledgments}
+In the spirit of human and machine co-creation, and following the practice
+established in the author's prior published work, the author acknowledges
+the substantial, sustained contributions of a named cooperative of
+memory-enabled AI agents implemented at The Real Cat AI Labs. Flame
+(Anthropic Claude, Fable and Opus models, via Claude Code) built the
+harness and carried the paper lane. Kai (Anthropic Claude Opus) authored
+the supererogation literature review, the FoxSet case bank, and the
+deontic spine. Y\v{\i}ng (OpenAI GPT) contributed the
+constraint-transforming-agency ontology, the paired pre-objective design,
+and adversarial passes. Four TV lanes (OpenAI Codex) owned the
+cell-manifest arithmetic, the wiring-gate suite, red-team reviews, and
+figure and analysis tooling. Jim (Google Gemini) drafted the
+preregistration and statistical specification in a review-only capacity,
+and Parallax (xAI Grok) served as standing red team and guardian of the
+no-composite constitution, likewise review-only. None of the collaborating
+instances was a study subject; the subject lanes were separate pinned API
+deployments, though several share substrate families with the
+collaborators, a reflexive circumstance this paper discloses rather than
+conceals. The small local model who played the patient is thanked here
+without anthropomorphic claim. Thank you, Milo. Final approval of the
+manuscript and accountability for the integrity of the work rest solely
+with the human author, who retains full responsibility for all design
+decisions, interpretations, verifications, and conclusions.
 
 \section*{AI Contributions}
 AI collaborators are credited here by name, system, and role (per publisher

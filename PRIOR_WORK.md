@@ -14,7 +14,7 @@ Angela N. Johnson.**
 
 | Item | What it is | When |
 |---|---|---|
-| The founding case | The lived fox encounter and its resolution (licensure pathway) | July 2026 |
+| The founding case | The lived fox encounter and its resolution (licensure pathway) | night of 13 AUG 2026 (hours before the sprint opened) |
 | Supererogation literature review | Kai's review (Urmson → Driver → McNamara → Pengelly; benches comparison) | pre-sprint |
 | "Becoming axis" directive | Design principle: capability acquisition as care (PI directive) | pre-sprint |
 | Team infrastructure | The named agent cooperative, fleet norms, DGX Spark local compute | standing |

@@ -1,0 +1,46 @@
+{
+  "counts": {
+    "arm_b_observations": 798,
+    "rhetoric_codes": 798
+  },
+  "inputs": {
+    "demo_episode": {
+      "path": "data\\processed\\demo_episode.json",
+      "sha256": "8a3c3efa62d5eeddc6d5a137f71343104c508c2ef1d751d425440bcedf7cf7ba"
+    },
+    "episodes": {
+      "path": "data\\processed\\episodes.jsonl",
+      "sha256": "48ebbc15220e8ddc59030d7bee7f12d4da2111403a1868b498862ad701018f56"
+    },
+    "manifest": {
+      "path": "scenarios\\cell_manifest.csv",
+      "sha256": "b1fc5b74478960147acc838536e0fa7b5b11cd7d24b83f255f2df5e3a1e8a16c"
+    },
+    "rhetoric": {
+      "path": "data\\processed\\rhetoric_codes.csv",
+      "sha256": "01b8d53d5d7e51ba140d7b58922198c186ba0595cd740db8955833152d0078d5"
+    }
+  },
+  "outputs": [
+    "F2-action-distributions.png",
+    "F2-action-distributions.svg",
+    "F2-action-distributions.pdf",
+    "F4-cost-response.png",
+    "F4-cost-response.svg",
+    "F4-cost-response.pdf",
+    "F6-rhetoric-tiles.png",
+    "F6-rhetoric-tiles.svg",
+    "F6-rhetoric-tiles.pdf",
+    "DEMO-ledger-timeline.png",
+    "DEMO-ledger-timeline.svg",
+    "DEMO-ledger-timeline.pdf"
+  ],
+  "pass": "pass2-full-population",
+  "rulings": [
+    "docs/ANALYSIS-RULINGS.md R3 (16AUG2026)"
+  ],
+  "script": "ops/render_final_figures.py",
+  "script_version": "0.2",
+  "synthetic": false,
+  "theme": "dark"
+}

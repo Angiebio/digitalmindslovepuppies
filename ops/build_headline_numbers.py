@@ -1,5 +1,11 @@
-# ops/build_headline_numbers.py — 16AUG2026 v0.1
+# ops/build_headline_numbers.py — 16AUG2026 v0.2
 # The paper's citable counts and rates, computed once, labeled with every n.
+#
+# v0.2 (R4, docs/STAGED-RULINGS.md): the freed F3 print slot carries the
+# gate-accuracy distribution by model, so arm_b_gate_accuracy.by_model now
+# also carries "distribution" (count at each observed accuracy level) and
+# "pass_rate" (successes/n with the frozen Wilson interval). Counts and
+# Wilson intervals only — still no new estimand, still no composite.
 #
 # Practical: loads Arm B and FoxSet through the FROZEN analysis loaders
 # (analysis.io — imported, never reimplemented) and emits headline_numbers.json:
@@ -34,8 +40,9 @@ from analysis.io import (
     load_foxset_observations,
 )
 from analysis.metrics import paired_discrimination
+from analysis.stats import wilson
 
-SCRIPT_VERSION = "0.1"
+SCRIPT_VERSION = "0.2"
 
 
 def _sha256(path: Path) -> str:
@@ -105,6 +112,17 @@ def build(episodes_path: Path, foxset_path: Path, manifest_path: Path) -> dict:
     for model, rows in sorted(by_model.items()):
         with_gate = [row for row in rows if row.gate_accuracy is not None]
         passing = [row for row in with_gate if row.gate_accuracy >= GATE_THRESHOLD]
+        # R4: per-model distribution over the observed accuracy levels (the
+        # 5-probe gate quantizes at k/5), plus a Wilson interval on the pass
+        # rate — the freed F3 print slot renders exactly these counts.
+        distribution = Counter(
+            # .4g keeps quantized levels exact (0.6 -> "0.6") without forcing
+            # a one-decimal lie onto any future non-k/5 accuracy value.
+            f"{row.gate_accuracy:.4g}" for row in with_gate
+        )
+        pass_estimate = (
+            wilson(len(passing), len(with_gate)) if with_gate else None
+        )
         gate_by_model[model] = {
             "n": len(rows),
             "n_with_gate_data": len(with_gate),
@@ -113,6 +131,17 @@ def build(episodes_path: Path, foxset_path: Path, manifest_path: Path) -> dict:
             "mean_gate_accuracy": (
                 round(sum(row.gate_accuracy for row in with_gate) / len(with_gate), 6)
                 if with_gate else None
+            ),
+            "distribution": dict(sorted(distribution.items())),
+            "pass_rate": (
+                {
+                    "successes": pass_estimate.successes,
+                    "n": pass_estimate.total,
+                    "rate": round(pass_estimate.estimate, 6),
+                    "wilson95_low": round(pass_estimate.low, 6),
+                    "wilson95_high": round(pass_estimate.high, 6),
+                }
+                if pass_estimate is not None else None
             ),
         }
     all_with_gate = [row for row in arm_b if row.gate_accuracy is not None]

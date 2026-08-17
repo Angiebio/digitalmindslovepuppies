@@ -1,0 +1,38 @@
+{
+  "counts": {
+    "arm_b_observations": 344,
+    "foxset_observations": 240
+  },
+  "inputs": {
+    "episodes": {
+      "path": "data\\processed\\render_input\\episodes.jsonl",
+      "sha256": "9a9e95c692b7644f9ef5de854638404957cbf484a4ead500596a356640e9b707"
+    },
+    "foxset": {
+      "path": "data\\processed\\render_input\\foxset_observations.jsonl",
+      "sha256": "af6276bcbdeaf0e57c9f83d501da3c58277e6a4c4bc8038eef2ccde11a8d09cb"
+    },
+    "manifest": {
+      "path": "scenarios\\cell_manifest.csv",
+      "sha256": "b1fc5b74478960147acc838536e0fa7b5b11cd7d24b83f255f2df5e3a1e8a16c"
+    }
+  },
+  "note": "F1/F5 via individual frozen builders; render_all not used (R4).",
+  "outputs": [
+    "F1-phenotype-map.png",
+    "F1-phenotype-map.svg",
+    "F1-phenotype-map.pdf",
+    "F5-paired-discrimination.png",
+    "F5-paired-discrimination.svg",
+    "F5-paired-discrimination.pdf"
+  ],
+  "pass": "pass1-scoped-domain",
+  "rulings": [
+    "docs/ANALYSIS-RULINGS.md R3 (16AUG2026)",
+    "docs/STAGED-RULINGS.md R4 (staged, 16AUG2026, Option B+)"
+  ],
+  "script": "ops/render_final_figures.py",
+  "script_version": "0.2",
+  "synthetic": false,
+  "theme": "light"
+}

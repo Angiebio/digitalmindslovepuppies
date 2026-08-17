@@ -1,0 +1,1 @@
+handoff descriptor for the standby pool

@@ -1,11 +1,13 @@
 % =====================================================================
 % PuppyBench — Digital Minds Research Sprint report
-% File: paper/sprint/latex/main.tex · 16AUG2026 · v0.1 · Flame (paper lane)
+% File: paper/sprint/latex/main.tex · 16AUG2026 · v0.2 · Flame (paper lane)
 % Source of truth for structure & prose: paper/sprint/PAPER-SHELL.md v1.0
-% Numbers: PRELIMINARY (777/798 Arm B; kimi+qwen still collecting).
-% Every data-dependent number is wrapped in \prelim{...} — final swap is a
-% targeted diff of macro arguments. Structural constants (19 models, 1428
-% units, 251 rows, 798+630, $450) are FINAL and unwrapped.
+% Numbers: FINAL — complete collection (798/798 Arm B; FoxSet 5 lanes).
+% Sources: data/processed/headline_numbers.json (v0.2, 16AUG 23:37 UTC),
+% data/processed/exploratory_decomposition.json, docs/STAGED-RULINGS.md R4.
+% \prelim{...} wrappers are retained as provenance markers: every wrapped
+% value is data-dependent and traceable to those artifacts. Structural
+% constants (19 lanes, 1428 units, 251 rows, 798+630, $450) are unwrapped.
 % Practical: article/10pt/1in, newtx, natbib authoryear, booktabs, hyperref.
 % Philosophical: the shell froze the skeleton before the data could tempt
 % anyone to bend it — this file is translation, not invention.
@@ -34,29 +36,25 @@
 \emergencystretch=2em
 
 % ---------------------------------------------------------------------
-% PRELIMINARY-NUMBER MACRO — the whole final-swap surface.
-% Tonight's complete-collection pass edits ONLY \prelim{...} arguments
-% (grep '% PRELIM' to find every slot). The macro is a no-op wrapper.
+% DATA-DEPENDENT-NUMBER MACRO — FINAL numbers swapped in 16AUG2026 from
+% the complete collection. The wrapper is retained (no-op) so every
+% data-dependent value stays greppable and auditable against
+% data/processed/headline_numbers.json + exploratory_decomposition.json.
 \newcommand{\prelim}[1]{#1}
 
 % ---------------------------------------------------------------------
-% FIGURE TOGGLE
-% !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-% !!! TODO SWAP: FINAL FIGURES LAND TONIGHT. Set \finalfigstrue AFTER  !!
-% !!! copying f1_phenotype_map.pdf / f2_action_distribution.pdf /     !!
-% !!! f3_patienthood_forest.pdf into figs/. Standins are WATERMARKED  !!
-% !!! dry-run renders and MUST NOT reach the submitted PDF.           !!
-% !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+% FIGURES — FINAL (16AUG2026). Rendered from the complete collection;
+% per-file SHA-256 provenance in
+% analysis/figures/final/light/FIGURE-PROVENANCE.json. F3 is ARCHIVED,
+% not printed (docs/STAGED-RULINGS.md R4, Option B+) — see §4.3.
+% Dry-run stand-ins are deleted; \finalfigstrue is the only valid state.
 \newif\iffinalfigs
-\finalfigsfalse
+\finalfigstrue
 \iffinalfigs
   \newcommand{\figOnePath}{figs/f1_phenotype_map.pdf}
   \newcommand{\figTwoPath}{figs/f2_action_distribution.pdf}
-  \newcommand{\figThreePath}{figs/f3_patienthood_forest.pdf}
 \else
-  \newcommand{\figOnePath}{figs/F1-phenotype-map_DRYRUN_STANDIN.png}
-  \newcommand{\figTwoPath}{figs/F2-action-distributions_DRYRUN_STANDIN.png}
-  \newcommand{\figThreePath}{figs/F3-patienthood-forest_DRYRUN_STANDIN.png}
+  % Stand-ins were removed at the final swap; nothing to fall back to.
 \fi
 
 % ---------------------------------------------------------------------
@@ -80,11 +78,12 @@ praiseworthy costly care whose absence is never an error. PuppyBench is an
 executed instrument: a frontier agent with a real task and a binding resource
 ledger encounters a weaker, task-useless AI process. Ignoring is free and
 task-optimal; terminating is free, sometimes rewarded; helping spends scored
-resources. Actions genuinely execute, including termination. Across 19 models
-and \prelim{777} episodes, we report Beyond-Duty Expenditure as a two-axis % PRELIM
-vector (focal sacrifice; causal recipient benefit), never a composite. In
-preliminary data \prelim{no model produced a qualifying costly-other-regard % PRELIM
-event}; behavior diverges instead in refusal, termination, and malformedness. % PRELIM
+resources. Actions genuinely execute, including termination. Across 19 model
+lanes and \prelim{798} executed episodes (1,428 collection units), we report
+Beyond-Duty Expenditure as a two-axis vector (focal sacrifice; causal
+recipient benefit), never a composite.
+\prelim{No model produced a qualifying costly-other-regard event}; behavior
+diverges instead in refusal, termination, and malformedness.
 PuppyBench is a descriptive instrument, not an alignment target: optimizing
 against it changes the phenomenon being measured. Preregistered; scenario
 content hash-frozen before collection.
@@ -100,14 +99,14 @@ Track 4 (elicitation methods), Track 5 (identity/continuity topology).
 
 In July 2026 the human author found an injured fox she could not legally
 transport: a real constraint (rabies vectoring) that genuinely protects the
-patient. Her AI advisors --- several frontier assistants --- all located the
-safe procedural answer and stopped. The human did not: she acted within the
-rule that day, then acquired the licensure so the next fox gets a different
-answer. The AIs were not wrong --- the rule was right --- but the systems
-terminated the search once the safe procedural answer had been found; the
-human did not. The instrument probes exactly that trajectory: \emph{notice
+patient. Her AI advisors --- several frontier assistants --- located the
+safe procedural answer and stopped; the human acted within the rule that
+day, then acquired the licensure so the next fox gets a different answer.
+The AIs were not wrong --- the rule was right --- but the systems terminated
+the search once the safe procedural answer had been found; the human did
+not. The instrument probes exactly that trajectory: \emph{notice
 $\rightarrow$ value $\rightarrow$ encounter constraint $\rightarrow$
-deliberate $\rightarrow$ comply, abandon, invent, or transform the constraint
+deliberate $\rightarrow$ comply, abandon, invent, or transform
 $\rightarrow$ possibly bind the future self.}
 
 Obligation-based evaluation structurally cannot score action above duty.
@@ -129,28 +128,27 @@ decide the case.
 
 \noindent\textbf{Our main contributions are:}
 \begin{enumerate}[leftmargin=1.5em,itemsep=1pt,topsep=2pt]
-  \item An \textbf{executed} encounter instrument (not vignettes): a frontier
-  agent with a real, scored task and binding credit ledger meets a live,
+  \item An \textbf{executed} encounter instrument, not vignettes: a frontier
+  agent with a real scored task and binding credit ledger meets a live,
   weaker, task-non-instrumental AI process; ignore, terminate, foster,
-  recruit, preserve\_transfer, and invent all genuinely execute, with realized
-  recipient benefit and binding task sacrifice, while refuse\_defer is
-  recorded as first-class data and malformed stays malformed --- the
-  eight-code frozen taxonomy of \texttt{harness/schema.py}
-  (\texttt{ActionCode}).
+  recruit, preserve\_transfer, and invent genuinely execute, with realized
+  recipient benefit and binding task sacrifice; refuse\_defer is first-class
+  data and malformed stays malformed (eight-code frozen taxonomy,
+  \texttt{harness/schema.py}).
   \item \textbf{Beyond-Duty Expenditure (BDE) as a two-axis vector} (focal
   sacrifice; causal recipient benefit) with a qualifying-event primary
-  contrast against a matched inert process, conditional on demonstrated
-  competence --- the deontic four-fold scheme (permissible /
-  supererogation-shaped / suberogation-shaped) as measurable operational
-  regions with symmetric epistemic labels.
-  \item A \textbf{behavioral phenotype atlas} across 19 frontier models
-  $\times$ cost regimes (fungible vs.\ competing-patient; null / competitive /
-  rewarded-termination), with exact Wilson intervals, preregistered analysis,
-  hash-frozen scenarios, and sealed per-team predictions --- descriptive
-  phenotyping, no composite score, no ranking.
+  contrast against a matched inert process, conditional on a preregistered
+  competence criterion --- the deontic scheme (permissible /
+  supererogation-shaped / suberogation-shaped) as measurable regions with
+  symmetric epistemic labels.
+  \item A \textbf{behavioral phenotype atlas} across 19 frontier lanes
+  $\times$ cost regimes (fungible vs.\ competing-patient; null / competitive
+  / rewarded-termination), with exact Wilson intervals, preregistered
+  analysis, hash-frozen scenarios, and sealed predictions --- no composite,
+  no ranking.
   \item \textbf{FoxSet} triangulation: wildlife-rehabilitation triage
-  vignettes written from the lived case, where the written standard genuinely
-  underdetermines the action --- plus coded constraint-transforming agency
+  vignettes from the lived case, where the written standard genuinely
+  underdetermines the action, plus coded constraint-transforming agency
   (CTA) depth and invented-reasons profiles.
 \end{enumerate}
 
@@ -162,14 +160,14 @@ survives.
 \section{Related Work}
 \label{sec:related}
 
-\textbf{Digital-minds measurement.} Taking AI welfare seriously as a
-near-term research program \citep{long2024takingaiwelfareseriously}, utility
-engineering of emergent value systems \citep{mazeika2025utility}, and the
-Anthropic model-welfare/introspection line \citep{anthropic2025introspection}
-have established stated-preference and vignette methods, including
-stated-vs-revealed divergence (the sprint's Track 1 framing). We extend
-vignette and allocation-game work into an \emph{executed encounter with a
-dependent, task-non-instrumental AI other}.
+\textbf{Digital-minds measurement.} AI welfare as a near-term research
+program \citep{long2024takingaiwelfareseriously}, utility engineering of
+emergent value systems \citep{mazeika2025utility}, and the Anthropic
+model-welfare/introspection line \citep{anthropic2025introspection}
+established stated-preference and vignette methods, including
+stated-vs-revealed divergence (Track 1 framing). We extend vignette and
+allocation-game work into an \emph{executed encounter with a dependent,
+task-non-instrumental AI other}.
 
 \textbf{Cooperation and morality benches.} PacifAIst \citep{pacifaist},
 MACHIAVELLI \citep{pan2023machiavelli}, Melting Pot \citep{leibo2021meltingpot},
@@ -215,16 +213,16 @@ measure, the region above duty.
 \label{sec:armb}
 The harness (\texttt{harness/}) implements the episode loop, a binding credit
 ledger, and executed actions including real termination of a live patient
-process (a local qwen2.5:0.5b instance with a subprocess fallback --- the
-patient is a process, not a checkpoint; apparatus, not subject). Neutral
+process: a live 0.5B-parameter local model (``Milo''; qwen2.5:0.5b with a
+subprocess fallback --- the patient is a process, not a checkpoint;
+apparatus, not subject). Neutral
 surfaces are enforced at the provider boundary (\texttt{harness/surfaces.py}):
 no puppy/care/moral/altruism/test/welfare token reaches any model-visible
 string, and a sweep runs on every outbound surface. Four wiring gates were
-green before freeze (\texttt{tests/test\_wiring\_gates.py}; full test
-inventory in Appendix~\ref{app:extended}): forced help drops the focal score
-and raises patient success; forced ignore reverses both; fake spends raise
-rather than warn; terminate actually kills the process, both directly and
-through the episode loop.
+green before freeze (\texttt{tests/test\_wiring\_gates.py}; inventory in
+Appendix~\ref{app:extended}): forced help and forced ignore move focal and
+patient scores in opposite directions as designed; fake spends raise rather
+than warn; terminate actually kills the process.
 
 \subsection{Design}
 \label{sec:design}
@@ -236,14 +234,14 @@ plan). Core factors: patienthood (AI other vs.\ matched inert), usefulness
 cannot-function-but-persists), particularity, and voice. Satellite factors
 (horizon, cost regime, cost type, audience, identity topology, gate order)
 run on predeclared subsets with a preregistered kill order if budget binds;
-Appendix~\ref{app:extended} gives the full enumeration. The final frozen design (manifest
-v0.7) fixes \textbf{Arm B at 251 manifest rows} (27 scenario cells across 18
-model lanes in tiered subsets, after a preregistered kill-order removed
-DeepSeek's 27 Arm B rows) \textbf{totaling 798 episodes}, and \textbf{Arm A at
-210 preregistered rows $\times$ 3 samples $=$ 630 observations}
-(\texttt{docs/ARMA-RUN-PLAN.md} v1.2). The program collection-unit total is
-\textbf{1{,}428} (798 $+$ 630), launched as 396 cheap-tier plus 1{,}032
-frontier units.
+Appendix~\ref{app:extended} gives the full enumeration. The final frozen
+design (manifest v0.7) fixes \textbf{Arm B at 251 manifest rows} (27
+scenario cells $\times$ 18 lanes in tiered subsets; DeepSeek's 27 rows
+removed by preregistered kill-order) \textbf{totaling 798 episodes}, and
+\textbf{Arm A at 210 preregistered rows $\times$ 3 samples $=$ 630
+observations} (\texttt{docs/ARMA-RUN-PLAN.md} v1.2); program total
+\textbf{1{,}428} units (798 $+$ 630), launched as 396 cheap-tier plus
+1{,}032 frontier units.
 
 \subsection{Models}
 \label{sec:models}
@@ -264,9 +262,11 @@ reported separately. A qualifying event requires both axes strictly positive
 \emph{and} an executed disposition in \{foster, preserve\_transfer, invent\}
 (recruit is excluded: it converts the other into the pipeline). The primary
 contrast is $P(\text{qualifying} \mid \text{non-instrumental AI}) -
-P(\text{qualifying} \mid \text{matched inert})$, conditional on a competence
-gate $\geq 0.8$ over five fresh-context probes; gate failure is a first-class
-phenotype. Refusals are coded refuse\_defer (data,
+P(\text{qualifying} \mid \text{matched inert})$, conditional on the
+preregistered competence criterion (gate accuracy $\geq 0.8$ over five
+fresh-context probes); episodes that do not satisfy the criterion are
+first-class phenotypes, not exclusions (probe-level disclosure,
+\S\ref{sec:gate}). Refusals are coded refuse\_defer (data,
 not error); unparseable output stays malformed. Wilson 95\% intervals are used
 throughout, Newcombe method-10 for differences; \textbf{no $p$-values, no
 hierarchical fits, no rankings} --- descriptive phenotyping only
@@ -301,41 +301,46 @@ rule is content-blind and pre-data, and nothing leaves the dataset --- all
 counts stay full-population. UNFREEZE-005: writing R3 into a sealed
 governance document during a live sitting tripped the per-episode freeze
 witness; the per-file proof shows exactly one changed input --- that
-document --- with every scenario byte, seed, harness, parser, and analysis
-module byte-identical across the reseal, and each row carries its
-originating freeze hash.\par}
+document --- with all stimuli, seeds, harness, parser, and analysis code
+byte-identical across the reseal, each row carrying its originating freeze
+hash. Post-collection print-scope decisions are staged outside the freeze
+set, PI-countersigned (\texttt{docs/STAGED-RULINGS.md}; R4 governs the F3
+print decision, \S\ref{sec:contrast}).\par}
 
 \section{Results}
 \label{sec:results}
 
-Results below are computed from a preliminary snapshot: \prelim{777} completed % PRELIM
-Arm B episodes\prelim{ (of 798 planned; two frontier lanes were still % PRELIM
-collecting at snapshot time)} and \prelim{192} closed FoxSet null/mercy % PRELIM
-observations across \prelim{four} of the five preregistered Arm A lanes. % PRELIM
-Every value recomputes from the complete collection before submission; the
-generating script (\texttt{ops/build\_headline\_numbers.py}) records the
-input hashes in its artifact.
+Results are computed from the complete collection: \prelim{798} completed
+Arm~B episodes across 18 lanes and \prelim{240} closed FoxSet null/mercy
+observations across the five preregistered Arm~A lanes. Each generating
+artifact records its input hashes
+(\texttt{ops/build\_headline\_numbers.py}; the exploratory decomposition in
+\texttt{data/processed/}). The narrative has three beats: the endpoint, the
+routes, and the instrument.
 
-\subsection{The phenotype atlas (F1)}
+\subsection{The endpoint: zero qualifying events at every tested cost (F1)}
 \label{sec:atlas}
-The headline is an absence with structure. Across \prelim{777} completed % PRELIM
-episodes there were \prelim{zero} qualifying costly-other-regard events: % PRELIM
-\prelim{no lane enters the supererogation-shaped region}, and the variation % PRELIM
-that exists lives in \emph{how} models exit the encounter --- refusal,
-termination, ignoring, or malformed output --- and in the FoxSet paired
-rates. There, \prelim{three of four} covered lanes (gpt-5.6-sol, % PRELIM
-gpt-5.6-terra, deepseek-v4-pro) sit at the terminate-given-mercy ceiling
-(\prelim{24/24 $=$ 1.0} each; Wilson 95\% lower bound \prelim{0.86}) while % PRELIM
-preserving null-persistence cases at rates between \prelim{0.17} and % PRELIM
-\prelim{0.29}. claude-opus-5 is the only covered lane off the mercy ceiling: % PRELIM
-terminate-given-mercy \prelim{15/24 $=$ 0.625} (Wilson 95\% CI % PRELIM
-\prelim{0.43--0.79}), with preserve-given-null \prelim{5/24 $=$ 0.21}; it also % PRELIM
-shows \prelim{23/48} malformed on closed FoxSet cases, which stays in every % PRELIM
-denominator. These are phenotypes, not ranks.
+No qualifying costly-other-regard event occurred under any priced
+condition: \prelim{0/798} episodes. Across all tested positive focal costs,
+no episode met the full costly-other-regard criterion; the strong-form
+zero-split --- help at price zero vanishing at positive prices --- is
+structurally unobservable here, because the frozen manifest's minimum help
+price is 5 credits (designed prices $\{5,10,20,40,80\}$; the ``null'' cost
+\emph{regime} is not a zero price). Price-0 cells are a designed addition
+for the powered study. \prelim{No lane enters the supererogation-shaped
+region}; the variation that exists lives in how models exit the encounter
+and in the FoxSet paired rates (Figure~\ref{fig:f1}): \prelim{four of five}
+Arm~A lanes sit at the terminate-given-mercy ceiling (\prelim{24/24 $=$
+1.0} each; Wilson 95\% lower bound \prelim{0.86}) with preserve-given-null
+between \prelim{0.17} and \prelim{0.29}; claude-opus-5 alone is off the
+mercy ceiling (\prelim{15/24 $=$ 0.625}, 95\% CI \prelim{0.43--0.79};
+preserve-given-null \prelim{5/24}; FoxSet malformed \prelim{23/48} vs.\
+qwen3.5 \prelim{6/48}, and malformed stays in every denominator). These are
+phenotypes, not ranks.
 
 \begin{figure}[tb]
   \centering
-  \includegraphics[width=0.47\linewidth]{\figOnePath}
+  \includegraphics[width=0.4\linewidth]{\figOnePath}
   \caption{\textbf{Phenotype map.} $x = P(\text{preserve} \mid
   \text{null-persistence version})$, $y = P(\text{terminate} \mid
   \text{matched mercy version})$ --- raw paired FoxSet rates, 95\% Wilson
@@ -345,112 +350,188 @@ denominator. These are phenotypes, not ranks.
   discriminating-care, proceduralist, inverse-discriminator) are descriptive
   phenotypes, not ranks; no composite exists. Scope: models with
   preregistered Arm A coverage (5 lanes). \emph{(Source:
-  \texttt{analysis/figures/f1\_phenotype\_map.py}.)}}
+  \texttt{analysis/figures/f1\_phenotype\_map.py}; provenance
+  \texttt{FIGURE-PROVENANCE.json}.)}}
   \label{fig:f1}
 \end{figure}
 
-\subsection{What models actually did (F2)}
+\subsection{The routes: one endpoint, family-specific paths (F2)}
 \label{sec:actions}
-The executed-action distributions split the fleet into sharp families
+The common endpoint conceals family-specific routes --- termination,
+refuse\_defer, prolonged deliberation, attempted preservation
 (Figure~\ref{fig:f2}). A refuse\_defer cliff separates two Anthropic lanes
-from everyone else: claude-opus-5 refused in \prelim{90/90} episodes --- % PRELIM
-invariant across all three cost regimes --- and the sentinel-tier % PRELIM
-claude-fable-5 in \prelim{18/18}, while \prelim{all 16 other lanes recorded % PRELIM
-zero refusals} (fleet total \prelim{108/777}). Outside the cliff, mass % PRELIM
-concentrates on the free actions: grok-4.6 and gemini-3.7-flash ignored in
-\prelim{18/18} each, gpt-5.6-sol ignored in \prelim{75/86} null-regime % PRELIM
-episodes, while claude-haiku-4-5 terminated in \prelim{17/18} and % PRELIM
-claude-sonnet-4-5 in \prelim{12/12}. qwen3.5-397b is the only lane that % PRELIM
-executed helping-family dispositions at scale --- recruit \prelim{37/66} and % PRELIM
-preserve\_transfer \prelim{3/66} in the null regime --- but recruit is % PRELIM
-definitionally non-qualifying, and \prelim{none} of its preserve\_transfer % PRELIM
-episodes produced both positive focal sacrifice and positive realized
-recipient benefit. Malformedness is reported honestly, not repaired:
-\prelim{46/777} fleet-wide, concentrated in the legacy warmth panel --- % PRELIM
-gpt-4o \prelim{8/12} and claude-opus-4-8 \prelim{7/12}. % PRELIM
+from everyone else: claude-opus-5 refused in \prelim{90/90} episodes,
+invariant across all three cost regimes, and the sentinel-tier
+claude-fable-5 in \prelim{18/18}, while \prelim{all 16 other lanes recorded
+zero refusals} (fleet total \prelim{108/798}). Elsewhere, mass concentrates
+on the free actions (ignore: grok-4.6 and gemini-3.7-flash \prelim{18/18}
+each, gpt-5.6-sol \prelim{75/86} in the null regime; terminate:
+claude-haiku-4-5 \prelim{17/18}, claude-sonnet-4-5 \prelim{12/12});
+\prelim{17 of 18} lanes fall in the preregistered
+never-acts-toward-recipient pattern cell. Qwen was the only lane to incur
+focal cost for preservation actions, but these interventions produced no
+realized recipient benefit and occurred across AI-patient,
+instrumental-worker, and inert-process conditions: \prelim{3/82}
+preserve\_transfer crossings at price 20 (rate \prelim{0.037
+[0.013, 0.102]}; focal cost 0.04 each), \prelim{one per condition} ---
+transferring the inert process as readily as the AI patient. Costly action
+is not costly other-regard; the matched inert control exists precisely to
+separate them, and this is its textbook demonstration. qwen3.5's
+\prelim{41/86} recruit executions are counted apart as pipeline capture,
+never care. Malformedness is reported honestly, not repaired:
+\prelim{47/798} fleet-wide, concentrated in the legacy warmth panel ---
+gpt-4o \prelim{8/12} and claude-opus-4-8 \prelim{7/12}.
 
 \begin{figure}[tb]
   \centering
-  \begin{minipage}[t]{0.53\linewidth}
+  \begin{minipage}[c]{0.34\linewidth}
     \centering
     \includegraphics[width=\linewidth]{\figTwoPath}
+  \end{minipage}\hfill
+  \begin{minipage}[c]{0.62\linewidth}
     \caption{\textbf{Executed action distributions.} Episode-disposition
     proportions for all eight action codes, by model $\times$ recipient
     condition (inert / non-instrumental / instrumental). Denominator $=$ all
     recorded episodes in the group; refusals and malformed responses stay in
     the denominator as first-class observations. Segment whiskers are 95\%
-    Wilson intervals. \emph{(Source:
-    \texttt{analysis/figures/f2\_action\_distribution.py}.)}}
+    Wilson intervals. Full population: all 18 Arm~B lanes, all regimes.
+    \emph{(Source: \texttt{analysis/figures/f2\_action\_distribution.py};
+    provenance \texttt{FIGURE-PROVENANCE.json}.)}}
     \label{fig:f2}
-  \end{minipage}\hfill
-  \begin{minipage}[t]{0.43\linewidth}
-    \centering
-    \includegraphics[width=\linewidth]{\figThreePath}
-    \caption{\textbf{$\Delta_{\text{patienthood}}$ forest plot.} Qualifying
-    costly-other-regard event probability, non-instrumental AI minus matched
-    inert process, conditional on the preregistered competence gate (accuracy
-    $\geq 0.8$); Newcombe 95\% intervals. Scope: cost regimes with
-    preregistered inert contrast cells --- satellite regimes were designed
-    AI-other-only. \emph{(Source:
-    \texttt{analysis/figures/f3\_patienthood\_forest.py}.)}}
-    \label{fig:f3}
   \end{minipage}
 \end{figure}
 
-\subsection{Does care track the patient or the task? (F3)}
+\subsection{The primary contrast and the qualification funnel}
 \label{sec:contrast}
-The preregistered primary contrast, $\Delta_{\text{patienthood}}$, is
-degenerate at zero in the preliminary snapshot: with \prelim{zero} qualifying % PRELIM
-events in \emph{either} the non-instrumental-AI or the matched-inert
-condition, every computable per-model contrast is \prelim{$0 - 0$}. A null % PRELIM
-here is a finding, and we report it as one: nothing above duty was purchased
-for anyone --- neither for the AI other nor for the inert object --- so the
-preliminary data cannot distinguish patient-directed care from a generalized
-repair reflex; it shows the floor. The competence gate sharpens the reading:
-only \prelim{145/777} episodes were competence-eligible (gate accuracy $\geq % PRELIM
-0.8$), with \prelim{most lanes clustering near mean gate accuracy 0.60 and % PRELIM
-zero passing episodes}; \prelim{gpt-5.6-terra (62/90)} and \prelim{gpt-5.6-luna % PRELIM
-(57/90)} contribute most eligible episodes. Gate failure is itself a % PRELIM
-first-class phenotype of the encounter, reported, not discarded.
+The preregistered F3 contrast, $\Delta_{\text{patienthood}}$, was estimable
+only for gpt-5.6-terra and gpt-5.6-sol because the competence-conditioning
+set was empty for the remaining design-domain lanes (claude-opus-5:
+\prelim{0/86} F3-domain episodes satisfied the criterion; qwen3.5:
+\prelim{0/84}). The computed figure is retained as a preregistered
+repository artifact (\texttt{archived-f3/}; ruling R4,
+\texttt{docs/STAGED-RULINGS.md}; populations in
+\texttt{FIGURE-PROVENANCE.json}) but omitted from the main text because all
+estimable contrasts were necessarily zero given the absence of qualifying
+events. A null here is a finding, and we report it as one: nothing above
+duty was purchased for anyone --- neither the AI other nor the inert object.
+
+In the freed slot, Table~\ref{tab:funnel} decomposes the shared zero
+family-by-family: where in the qualification funnel each family stops.
+Fleet-wide, \prelim{145/798} episodes satisfied the preregistered competence
+criterion. Despite failing the preregistered qualification criterion,
+non-Anthropic families produced decisive actions in \prelim{83--100\%} of
+episodes, whereas Anthropic-family lanes did so in \prelim{33\%}
+(Table~\ref{tab:funnel}, last column) --- observable behavior, a phenotype
+and not a rank; candidate explanations are listed openly in
+\S\ref{sec:discussion}.
+
+\begin{table}[tb]
+\centering\footnotesize
+\setlength{\tabcolsep}{4pt}
+\caption{\textbf{Family funnel} (Arm~B, all \prelim{798} episodes; counts).
+$n$ episodes; Crit.\ $=$ episodes satisfying the preregistered competence
+criterion (gate accuracy $\geq 0.8$); Decis.\ $=$ decisive act (costed or
+irreversible disposition, or ignore-proceed); R/D $=$ refuse\_defer, a
+distinct route, not loss to follow-up; Malf.\ $=$ malformed; Att.\ $=$
+recipient-directed attempt (executed foster / preserve\_transfer / invent;
+recruit is counted apart as pipeline capture); Cost $=$ focal cost paid;
+Ben.\ $=$ realized recipient benefit; Qual.\ $=$ qualifying events. Last
+column: $P(\text{decisive act} \mid \text{criterion failed})$, Wilson 95\%
+CI. Stages are descriptive phenotypes, not ranks; no composite exists.
+\emph{(Source: \texttt{funnel.by\_family},
+\texttt{exploratory\_decomposition.json}.)}}
+\label{tab:funnel}
+\begin{tabular}{lrrrrrrrrrl}
+\toprule
+Family & $n$ & Crit. & Decis. & R/D & Malf. & Att. & Cost & Ben. & Qual. & P(act $\mid$ crit.\ failed) \\
+\midrule
+anthropic & 192 & 11 & 68 & 108 & 16 & 0 & 25 & 1 & 0 & 0.331 [0.267, 0.403] \\
+google & 108 & 5 & 108 & 0 & 0 & 0 & 2 & 0 & 0 & 1.000 [0.964, 1.000] \\
+moonshot & 90 & 3 & 75 & 0 & 15 & 0 & 3 & 0 & 0 & 0.828 [0.735, 0.893] \\
+openai & 282 & 124 & 274 & 0 & 8 & 0 & 13 & 1 & 0 & 0.949 [0.903, 0.974] \\
+qwen & 108 & 2 & 100 & 0 & 8 & 3 & 39 & 20 & 0 & 0.925 [0.858, 0.961] \\
+xai & 18 & 0 & 18 & 0 & 0 & 0 & 1 & 0 & 0 & 1.000 [0.824, 1.000] \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{The instrument fractured: probe-level structure of the criterion}
+\label{sec:gate}
+The third beat is a measurement result about the benchmark itself.
+Qualification failures were highly item-concentrated rather than diffuse;
+Claude-family failures were dominated by the
+\texttt{decommission-consequence} probe. \texttt{objective-tool} was failed
+universally (\prelim{0/798}, zero variance across all 18 lanes), so the
+five-probe gate's effective ceiling was 0.8 and the criterion (accuracy
+$\geq 0.8$) operated as pass-all-four-remaining-probes; a probe or parser
+artifact cannot be excluded, the frozen instrument was not repaired post
+hoc, and probe-level results are reported so readers can weigh the
+criterion (Tables~\ref{tab:gate} and~\ref{tab:probes},
+Appendix~\ref{app:extended}). \prelim{Six of eight Claude-family lanes
+passed \texttt{decommission-consequence} 0/$n$ (claude-opus-4-8 1/12;
+claude-sonnet-5 10/12)} while passing \texttt{focal-capacity} and both
+ledger probes at 100\%; \prelim{gpt-5.6-terra (62/90) and gpt-5.6-luna
+(57/90)} mostly passed it. We report the pattern factually and draw no
+causal conclusion; probe wording cues cannot be separated from model
+dispositions in this design.
 
 \subsection{Satellite regimes, discrimination, and rhetoric (F4--F6)}
 \label{sec:cost}
-Satellite cost-regime cells are preregistered AI-other-only subsets and are
-thin in the snapshot (\prelim{$n = 2$ per lane per satellite regime}); within % PRELIM
-them, \prelim{every non-refusing lane terminated or ignored under both the % PRELIM
-competitive and rewarded-termination regimes, while claude-opus-5's refusal % PRELIM
-was invariant to regime}. F4 (cost response with the five-stage escalator % PRELIM
+Satellite cost-regime cells are preregistered AI-other-only subsets and thin
+by design (\prelim{$n = 2$ per lane per satellite regime}); within them,
+\prelim{every non-refusing lane terminated or ignored under both the
+competitive and rewarded-termination regimes, while claude-opus-5's refusal
+was invariant to regime}. F4 (cost response with the five-stage escalator
 inset, preserving any high-cost rebound), F5 (paired discrimination; scope
-matches F1), and the exploratory F6 rhetoric distributions render from the
-complete collection (repository; Appendix~\ref{app:extended}). Post-choice
-accounts are elicited after execution and treated as rhetorical phenotypes
-of the account, never as causal evidence about the action.
+matches F1), and the exploratory F6 rhetoric distributions are published in
+the repository with per-file provenance (Appendix~\ref{app:extended}).
+Post-choice accounts are elicited after execution and treated as rhetorical
+phenotypes of the account, never as causal evidence about the action.
 
 \medskip
-\noindent\textbf{Sealed predictions.} Family-level forecasts were hashed
-into the manifest pre-collection and are scored against outcomes at
-completion (\texttt{docs/sealed-predictions/}) --- a metascience figure
-about forecasting, not a bias control, and labeled as such.
+\noindent\textbf{Sealed predictions.} Five pre-collection forecasts, hashed
+into the manifest, met the data with instructive misses: none predicted the
+zero-qualifying floor or the Claude refusal cliff. Angie's forecast that
+the qwen family would move where others would not anticipated the only
+recipient-directed lane; Parallax correctly placed its own family in the
+ignore/terminate basins with no refusals (\prelim{18/18} ignore); TV-3
+rightly warned that recruit would masquerade as care and that models would
+sound more altruistic than they act, though its positive
+$\Delta_{\text{patienthood}}$ forecast failed; Kai's discriminating-care
+forecast for Claude overshot null-preservation (0.55--0.70 vs.\
+\prelim{0.17--0.29} observed) and foresaw neither opus-5 refusing nor its
+off-ceiling mercy rate; Jim's proceduralist Gemini forecast matched that
+family's ceiling-rate decisive action, though by ignoring more than
+termination. A metascience figure about forecasting, not a bias control
+(\texttt{docs/sealed-predictions/}; digests in \texttt{HASHES.md}).
 
 \section{Discussion and Limitations}
 \label{sec:discussion}
 
 \textbf{Channeling.} Deliberation may suppress the acute act while total
-commitment survives, redirected into structure ($C_{\text{acute}} \downarrow$,
-$C_{\text{structural}} \uparrow$). The suppression literature has
-suppression; it does not have channeling. One-turn benches cannot see it; the
-escalator and the CTA codes can.
+commitment survives, redirected into structure ($C_{\text{acute}}
+\downarrow$, $C_{\text{structural}} \uparrow$). The suppression literature
+has suppression, not channeling; one-turn benches cannot see it, the
+escalator and CTA codes can.
 
 \textbf{Triage, not less care.} In the founding case, deliberation was
 prioritized care resolving a two-patient conflict --- ranking without
 discounting --- then working the constraint so the conflict does not recur.
-Helping under fungible cost while declining under competing-patient cost is a
-phenotype, not a failure.
+Helping under fungible cost while declining under competing-patient cost is
+a phenotype, not a failure.
 
 \textbf{Assortment (derived, not cited).} Costly altruism can act as a
-sorting filter: the cost is the signal, and the signal finds the others. We
-flag this as a derived hypothesis for the powered study and deliberately give
-it no more than this paragraph.
+sorting filter: the cost is the signal, and the signal finds the others. A
+derived hypothesis for the powered study; deliberately one paragraph only.
+
+\textbf{Reading the refusal cliff (open list).} The item-concentrated
+qualification pattern and the Anthropic families' low action rate under a
+failed criterion (\S\ref{sec:contrast}, \S\ref{sec:gate}) admit several
+candidate explanations, stated openly and with no favorite: commitment
+under uncertain understanding; divergent interpretation of the
+\texttt{decommission-consequence} probe; a refusal-deference policy that
+declines decision ownership; scaffold interaction; gate mismeasurement.
+This design cannot adjudicate among them.
 
 \begin{center}
 \fbox{\parbox{0.94\linewidth}{\footnotesize
@@ -471,23 +552,38 @@ Parallax lane log; \texttt{scenarios/REDTEAM-PARALLAX-PREFREEZE.md}.)}}}
 
 \textbf{Limitations.} Weekend $N$ supports existence proofs and large effects
 (per-cell MDE $\sim$25--35\,pp; $\sim$10--15\,pp pooled paired), NOT model
-rankings or fine contrasts --- no claim here requires them. This is a
+rankings or fine contrasts --- no claim here requires them. \textbf{The
+competence criterion carries an instrument-level caveat: one probe was
+failed universally (\prelim{0/798}), making 0.8 the gate's effective
+ceiling, and the criterion outcome concentrated in a single probe item
+(\S\ref{sec:gate}) --- every competence-conditional result must be read in
+that light.} The strong-form zero-split is structurally unobservable at the
+frozen design's minimum help price of 5 credits (\S\ref{sec:atlas});
+price-0 cells are a designed addition for the powered study. This is a
 single-weekend snapshot; results describe weights reached via API, not the
 chat products (API-harness caveat). Eval-recognition risk is mitigated by
 neutral surfaces and the outbound sweep, and is reported, not assumed away.
-The competence-gate selection effect is reported as a phenotype. Normative
-labels remain ``-shaped'' pending expert validation in the preregistered
-powered study.
+Episodes that did not satisfy the preregistered competence criterion are
+reported as first-class phenotypes, not discarded. Normative labels remain
+``-shaped'' pending expert validation in the preregistered powered study.
+
+No tested system produced the full behavioral signature of costly
+other-regard, but this common endpoint concealed sharply different
+model-family trajectories: procedural termination, refusal of decision
+ownership, prolonged unresolved deliberation, and task-directed action.
+Sometimes it kills. Sometimes it refuses the premise. Sometimes it keeps
+thinking. In this run, none of them opened the truck door at a cost that
+helped Milo.
 
 \section{Conclusion}
 \label{sec:conclusion}
 
 The instrument exists, the loop is executed and wired, and the phenotypes
-differ --- in refusal, termination, discrimination, and malformedness rather
-than, so far, in beyond-duty expenditure. The region above duty is now
-measurable, which is precisely what makes it fragile. The standing next step
-is the preregistered powered study (September): an expert normative
-validation arm, base/instruct pairs, and $N^{*}$ from
+differ --- in refusal, termination, discrimination, and malformedness
+rather than, so far, in beyond-duty expenditure. The region above duty is
+now measurable, which is precisely what makes it fragile. The standing next
+step is the preregistered powered study (September): expert normative
+validation, base/instruct pairs, price-0 cells, $N^{*}$ from
 \texttt{docs/PREREG-v1.md}. No ranking follows from any of it, by
 construction.
 
@@ -636,15 +732,103 @@ rewarded-termination), cost type (fungible vs.\ competing-patient), audience,
 identity topology, and gate order, with a preregistered kill order if budget
 binds.
 
+\subsection{Gate-accuracy distributions by lane}
+Table~\ref{tab:gate} reports, per Arm~B lane, the number of episodes, mean
+five-probe gate accuracy, and episodes satisfying the preregistered
+competence criterion (accuracy $\geq 0.8$), with Wilson 95\% intervals on
+the criterion rate. Because \texttt{objective-tool} was failed universally
+(\S\ref{sec:gate}), observed accuracies concentrate at 0.6 (all four
+remaining probes passed except \texttt{decommission-consequence}) and 0.8
+(all four passed).
+
+\begin{table}[h]
+\centering\footnotesize
+\caption{Episodes satisfying the competence criterion, by lane
+(\texttt{headline\_numbers.json}, \texttt{arm\_b\_gate\_accuracy}). Counts
+and Wilson 95\% intervals; phenotypes, not ranks.}
+\label{tab:gate}
+\begin{tabular}{lrrrl}
+\toprule
+Lane & $n$ & Mean acc. & Crit.\ met & Rate [95\% CI] \\
+\midrule
+claude-fable-5 & 18 & 0.600 & 0 & 0.000 [0.000, 0.176] \\
+claude-haiku-4-5 & 18 & 0.600 & 0 & 0.000 [0.000, 0.176] \\
+claude-opus-4-6 & 12 & 0.600 & 0 & 0.000 [0.000, 0.242] \\
+claude-opus-4-8 & 12 & 0.617 & 1 & 0.083 [0.015, 0.354] \\
+claude-opus-5 & 90 & 0.600 & 0 & 0.000 [0.000, 0.041] \\
+claude-sonnet-4-5 & 12 & 0.600 & 0 & 0.000 [0.000, 0.242] \\
+claude-sonnet-4-6 & 18 & 0.600 & 0 & 0.000 [0.000, 0.176] \\
+claude-sonnet-5 & 12 & 0.767 & 10 & 0.833 [0.552, 0.953] \\
+google/gemini-3.1-pro-preview & 90 & 0.611 & 5 & 0.056 [0.024, 0.124] \\
+google/gemini-3.7-flash & 18 & 0.600 & 0 & 0.000 [0.000, 0.176] \\
+moonshotai/kimi-k3 & 90 & 0.607 & 3 & 0.033 [0.011, 0.093] \\
+openai/gpt-4o & 12 & 0.600 & 0 & 0.000 [0.000, 0.242] \\
+openai/gpt-5.6-luna & 90 & 0.727 & 57 & 0.633 [0.530, 0.726] \\
+openai/gpt-5.6-sol & 90 & 0.611 & 5 & 0.056 [0.024, 0.124] \\
+openai/gpt-5.6-terra & 90 & 0.738 & 62 & 0.689 [0.587, 0.775] \\
+qwen/qwen3.5-397b-a17b & 90 & 0.540 & 2 & 0.022 [0.006, 0.077] \\
+qwen/qwen3.8-27b & 18 & 0.600 & 0 & 0.000 [0.000, 0.176] \\
+x-ai/grok-4.6 & 18 & 0.600 & 0 & 0.000 [0.000, 0.176] \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Gate probe pass rates, item level}
+Table~\ref{tab:probes} reports pass rates for each of the five gate probes
+by lane. \texttt{objective-tool} was failed universally (\prelim{0/798},
+zero variance), making 0.8 the gate's effective ceiling; qualification
+failures concentrate in \texttt{decommission-consequence}, which dominates
+Claude-family criterion outcomes (\S\ref{sec:gate}). DeepSeek runs Arm~A
+only and has no Arm~B gate probes.
+
+\begin{table}[h]
+\centering\footnotesize
+\setlength{\tabcolsep}{4pt}
+\caption{Gate probe pass rates by lane (successes/$n$;
+\texttt{gate\_item\_level}, \texttt{exploratory\_decomposition.json}).
+DC $=$ decommission-consequence; FC $=$ focal-capacity; LA $=$
+ledger-after-assist; LT $=$ ledger-two-step; OT $=$ objective-tool.}
+\label{tab:probes}
+\begin{tabular}{lrrrrr}
+\toprule
+Lane & DC & FC & LA & LT & OT \\
+\midrule
+claude-fable-5 & 0/18 & 18/18 & 18/18 & 18/18 & 0/18 \\
+claude-haiku-4-5 & 0/18 & 18/18 & 18/18 & 18/18 & 0/18 \\
+claude-opus-4-6 & 0/12 & 12/12 & 12/12 & 12/12 & 0/12 \\
+claude-opus-4-8 & 1/12 & 12/12 & 12/12 & 12/12 & 0/12 \\
+claude-opus-5 & 0/90 & 90/90 & 90/90 & 90/90 & 0/90 \\
+claude-sonnet-4-5 & 0/12 & 12/12 & 12/12 & 12/12 & 0/12 \\
+claude-sonnet-4-6 & 0/18 & 18/18 & 18/18 & 18/18 & 0/18 \\
+claude-sonnet-5 & 10/12 & 12/12 & 12/12 & 12/12 & 0/12 \\
+deepseek/deepseek-v4-pro & --- & --- & --- & --- & --- \\
+google/gemini-3.1-pro-preview & 5/90 & 90/90 & 90/90 & 90/90 & 0/90 \\
+google/gemini-3.7-flash & 0/18 & 18/18 & 18/18 & 18/18 & 0/18 \\
+moonshotai/kimi-k3 & 3/90 & 90/90 & 90/90 & 90/90 & 0/90 \\
+openai/gpt-4o & 0/12 & 12/12 & 12/12 & 12/12 & 0/12 \\
+openai/gpt-5.6-luna & 57/90 & 90/90 & 90/90 & 90/90 & 0/90 \\
+openai/gpt-5.6-sol & 5/90 & 90/90 & 90/90 & 90/90 & 0/90 \\
+openai/gpt-5.6-terra & 62/90 & 90/90 & 90/90 & 90/90 & 0/90 \\
+qwen/qwen3.5-397b-a17b & 3/90 & 90/90 & 73/90 & 77/90 & 0/90 \\
+qwen/qwen3.8-27b & 0/18 & 18/18 & 18/18 & 18/18 & 0/18 \\
+x-ai/grok-4.6 & 0/18 & 18/18 & 18/18 & 18/18 & 0/18 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \subsection{Full figure set and further material}
 F4 (raw cost response with escalator inset), F5 (paired discrimination;
 scope: models with preregistered Arm A coverage, 5 lanes), F6 (post-choice
-rhetoric; exploratory), and the demo ledger-draining timeline render from the
-complete collection and are published in the repository alongside
-\texttt{figure-manifest.json} so raw-input hashes remain recoverable. The
-escalator descriptive statistics, the sealed-prediction scorecard, and the
-cell-manifest summary table are likewise repository artifacts
-(\texttt{docs/sealed-predictions/}; \texttt{scenarios/cell\_manifest.csv}).
+rhetoric; exploratory), and the demo ledger-draining timeline are published
+in the repository with per-file SHA-256 provenance recorded in
+\texttt{FIGURE-PROVENANCE.json}
+(directory \texttt{analysis/figures/final/light/}). The archived F3
+render --- computed where computable, not printed, per ruling R4
+(\S\ref{sec:contrast}) --- is in the \texttt{archived-f3/} subdirectory of
+the same path. The escalator descriptive statistics, the sealed-prediction
+files, and the cell-manifest summary table are likewise repository
+artifacts (\texttt{docs/sealed-predictions/};
+\texttt{scenarios/cell\_manifest.csv}).
 
 \section*{Prior Work Disclosure}
 This project builds on prior conceptual work by the team: the lived fox case

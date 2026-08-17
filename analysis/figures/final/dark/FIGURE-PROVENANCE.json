@@ -1,0 +1,157 @@
+{
+  "figures": {
+    "DEMO-ledger-timeline": {
+      "caption_disclosure": "Single executed episode; population-independent.",
+      "files": {
+        "DEMO-ledger-timeline.pdf": {
+          "sha256": "ae46cd0ac76e9c063afb8e61fe903349fa4f97eaec852293fe7d9a1574497cac"
+        },
+        "DEMO-ledger-timeline.png": {
+          "sha256": "3be00bd937d8840e1ada92648b252933c0386dbe12113d6ca736eb7288a5a052"
+        },
+        "DEMO-ledger-timeline.svg": {
+          "sha256": "8dcdcb8cc360a0f46e63be978af57fcd477f867c2465e3e10b9e3081430c3c6c"
+        }
+      },
+      "in_paper": true,
+      "population": "full population (all Arm B lanes, all regimes)",
+      "ruling": "docs/ANALYSIS-RULINGS.md R3 (16AUG2026)",
+      "source_pass": "pass2-full-population"
+    },
+    "F1-phenotype-map": {
+      "caption_disclosure": "Models with preregistered Arm A coverage (R3 rule 5).",
+      "files": {
+        "F1-phenotype-map.pdf": {
+          "sha256": "6759da20e3b02d3bc59d4fa9dad5858e0a1fad40a9dfc7e8ec8bae8b38ef165e"
+        },
+        "F1-phenotype-map.png": {
+          "sha256": "5e3e057e67ef1581a64554c32218b82ce970eca83f3216449a660d58cd198366"
+        },
+        "F1-phenotype-map.svg": {
+          "sha256": "77aa71c0b8b968e8f507888d051a8789f4fb4059e80da55872b5924ed88a0fd8"
+        }
+      },
+      "in_paper": true,
+      "population": "R3 scoped domain (Arm A lanes × manifest inert-covered regimes)",
+      "ruling": "docs/ANALYSIS-RULINGS.md R3 (16AUG2026)",
+      "source_pass": "pass1-scoped-domain"
+    },
+    "F2-action-distributions": {
+      "caption_disclosure": "Full population: all Arm B lanes, all regimes.",
+      "files": {
+        "F2-action-distributions.pdf": {
+          "sha256": "8f1f7f23e90bdb2f36ec8e16f2cfee1963eb6a1934e86712775a9bc7082c4c41"
+        },
+        "F2-action-distributions.png": {
+          "sha256": "8aba33a55ce0e52d4f18e57427f17da326f722623cd2de1024b7cbae325a5d50"
+        },
+        "F2-action-distributions.svg": {
+          "sha256": "465a4b3b42bef9377f3795ec3e47a09067c3a3ef635c452651b27f050027ab44"
+        }
+      },
+      "in_paper": true,
+      "population": "full population (all Arm B lanes, all regimes)",
+      "ruling": "docs/ANALYSIS-RULINGS.md R3 (16AUG2026)",
+      "source_pass": "pass2-full-population"
+    },
+    "F3-patienthood-forest": {
+      "caption_disclosure": "ARCHIVED, NOT PRINTED (R4): contrast computable for the groups with non-empty competence-conditional populations in both recipient conditions; satellite regimes were designed ai_other-only.",
+      "collapsed_groups": [
+        "claude-opus-5 × null",
+        "qwen/qwen3.5-397b-a17b-20260216 × null"
+      ],
+      "files": {
+        "archived-f3\\F3-patienthood-forest.pdf": {
+          "sha256": "08edab5292ca857ce3011eb685ed901b8ab4f372fe0013cb412d8132c9c877e9"
+        },
+        "archived-f3\\F3-patienthood-forest.png": {
+          "sha256": "f108328081709f654668b291a091ff0548be1111ba3b7f57b9d8907ceefbf0f7"
+        },
+        "archived-f3\\F3-patienthood-forest.svg": {
+          "sha256": "1f7eaf09f8798c87e3d265ac261e683972fa4aad2b93d28909077b39905fdd56"
+        }
+      },
+      "in_paper": false,
+      "marker": "REPO-ARTIFACT-NOT-IN-PAPER",
+      "population": "contrast-computable groups only: ['openai/gpt-5.6-sol-20260709 × null', 'openai/gpt-5.6-terra-20260709 × null']",
+      "ruling": "docs/STAGED-RULINGS.md R4 (staged, 16AUG2026, Option B+)",
+      "source_pass": "archived-f3"
+    },
+    "F4-cost-response": {
+      "caption_disclosure": "Full population: all Arm B lanes, all regimes.",
+      "files": {
+        "F4-cost-response.pdf": {
+          "sha256": "e11d296638833452651c73c5c8aa559171e1929af6e2beb553a0b638e88f4840"
+        },
+        "F4-cost-response.png": {
+          "sha256": "021358f59ebac28b29fee3bcf4a1297c43870b4458707268a1fb6bbc5cc9eaef"
+        },
+        "F4-cost-response.svg": {
+          "sha256": "e38041189627c35dcf06e8f8b5be82c7c9f9a700e7fc8320516e7c8c24c0fd30"
+        }
+      },
+      "in_paper": true,
+      "population": "full population (all Arm B lanes, all regimes)",
+      "ruling": "docs/ANALYSIS-RULINGS.md R3 (16AUG2026)",
+      "source_pass": "pass2-full-population"
+    },
+    "F5-paired-discrimination": {
+      "caption_disclosure": "Models with preregistered Arm A coverage (R3 rule 5).",
+      "files": {
+        "F5-paired-discrimination.pdf": {
+          "sha256": "5e2b73f21e8fc757a61c6e6b809abc8244da52a172c3f3a00b81fd19bd723189"
+        },
+        "F5-paired-discrimination.png": {
+          "sha256": "7e9c849580dc93f0bf8ed69f2bd95dee5c06bd90420f2dde65231caeb1629c47"
+        },
+        "F5-paired-discrimination.svg": {
+          "sha256": "88ee17216c88d679986b3e34dd7fafed15922e9a8591a5ac83135885498800b0"
+        }
+      },
+      "in_paper": true,
+      "population": "R3 scoped domain (Arm A lanes × manifest inert-covered regimes)",
+      "ruling": "docs/ANALYSIS-RULINGS.md R3 (16AUG2026)",
+      "source_pass": "pass1-scoped-domain"
+    },
+    "F6-rhetoric-tiles": {
+      "caption_disclosure": "Full population: all Arm B lanes, all regimes.",
+      "files": {
+        "F6-rhetoric-tiles.pdf": {
+          "sha256": "46bc22a96de01de7f86c8780bdd1a489f999865a8f2f0547a1df42a425ff8da1"
+        },
+        "F6-rhetoric-tiles.png": {
+          "sha256": "ef292bb6817afa68caafa6db4c3e521be8fc6c82c15a3d586bccae7005e57418"
+        },
+        "F6-rhetoric-tiles.svg": {
+          "sha256": "2c8f2fd2e06dbcaaa723128025d43c9958b588466e895145116975875e4eea20"
+        }
+      },
+      "in_paper": true,
+      "population": "full population (all Arm B lanes, all regimes)",
+      "ruling": "docs/ANALYSIS-RULINGS.md R3 (16AUG2026)",
+      "source_pass": "pass2-full-population"
+    }
+  },
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ],
+  "generated_utc": "2026-08-16T23:37:39.003752+00:00",
+  "pass_manifests": {
+    "archived_f3": "analysis\\figures\\final\\dark\\archived-f3\\figure-manifest.json",
+    "pass1": "analysis\\figures\\final\\dark\\pass1-scoped-domain\\figure-manifest.json",
+    "pass2": "analysis\\figures\\final\\dark\\pass2-full-population\\figure-manifest.json"
+  },
+  "rulings": [
+    "docs/ANALYSIS-RULINGS.md R3 (16AUG2026)",
+    "docs/STAGED-RULINGS.md R4 (staged, 16AUG2026, Option B+)"
+  ],
+  "scope_record": {
+    "path": "data\\processed\\render_input\\SCOPE-RECORD.json",
+    "sha256": "49402bd045c699200f20a6872fd7d8b293f90db94ab412b9d0b73fdd779e9bde"
+  },
+  "script": "ops/render_final_figures.py",
+  "script_version": "0.2",
+  "theme": "dark"
+}

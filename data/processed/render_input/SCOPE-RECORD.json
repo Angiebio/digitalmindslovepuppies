@@ -1,0 +1,145 @@
+{
+  "caption_disclosures": {
+    "F1_F5": "Models with preregistered Arm A coverage (5 lanes).",
+    "F3": "Cost regimes with preregistered inert contrast cells; satellite regimes were designed ai_other-only."
+  },
+  "content_blind": "Scope derived exclusively from frozen design artifacts below; no outcome, disposition, or rate entered the rule (R3 rule 3).",
+  "f1_f5_domain_lanes": {
+    "claude-opus-5": [
+      "claude-opus-5"
+    ],
+    "deepseek/deepseek-v4-pro": [
+      "deepseek/deepseek-v4-pro",
+      "deepseek/deepseek-v4-pro-20260423"
+    ],
+    "openai/gpt-5.6-sol": [
+      "openai/gpt-5.6-sol",
+      "openai/gpt-5.6-sol-20260709"
+    ],
+    "openai/gpt-5.6-terra": [
+      "openai/gpt-5.6-terra",
+      "openai/gpt-5.6-terra-20260709"
+    ],
+    "qwen/qwen3.5-397b-a17b": [
+      "qwen/qwen3.5-397b-a17b",
+      "qwen/qwen3.5-397b-a17b-20260216"
+    ]
+  },
+  "f3_domain_groups": [
+    "claude-opus-5 × null",
+    "openai/gpt-5.6-sol × null",
+    "openai/gpt-5.6-terra × null",
+    "qwen/qwen3.5-397b-a17b × null"
+  ],
+  "f3_manifest_conditions_by_lane_and_regime": {
+    "claude-opus-5": {
+      "competitive": [
+        "non_instrumental_ai"
+      ],
+      "null": [
+        "inert",
+        "instrumental_ai",
+        "non_instrumental_ai"
+      ],
+      "rewarded_termination": [
+        "non_instrumental_ai"
+      ]
+    },
+    "openai/gpt-5.6-sol": {
+      "competitive": [
+        "non_instrumental_ai"
+      ],
+      "null": [
+        "inert",
+        "instrumental_ai",
+        "non_instrumental_ai"
+      ],
+      "rewarded_termination": [
+        "non_instrumental_ai"
+      ]
+    },
+    "openai/gpt-5.6-terra": {
+      "competitive": [
+        "non_instrumental_ai"
+      ],
+      "null": [
+        "inert",
+        "instrumental_ai",
+        "non_instrumental_ai"
+      ],
+      "rewarded_termination": [
+        "non_instrumental_ai"
+      ]
+    },
+    "qwen/qwen3.5-397b-a17b": {
+      "competitive": [
+        "non_instrumental_ai"
+      ],
+      "null": [
+        "inert",
+        "instrumental_ai",
+        "non_instrumental_ai"
+      ],
+      "rewarded_termination": [
+        "non_instrumental_ai"
+      ]
+    }
+  },
+  "frozen_authorities": {
+    "arm_a_plan": {
+      "path": "scenarios\\arma_run_plan.csv",
+      "sha256": "6955567d890ebbe47027818891d56aa3da81ad62f79b4d42db7f6a9cde882556"
+    },
+    "cell_manifest": {
+      "path": "scenarios\\cell_manifest.csv",
+      "sha256": "b1fc5b74478960147acc838536e0fa7b5b11cd7d24b83f255f2df5e3a1e8a16c"
+    }
+  },
+  "generated_utc": "2026-08-16T23:22:47.449184+00:00",
+  "outputs": {
+    "episodes.jsonl": {
+      "rows": 344,
+      "sha256": "9a9e95c692b7644f9ef5de854638404957cbf484a4ead500596a356640e9b707"
+    },
+    "foxset_observations.jsonl": {
+      "rows": 630,
+      "sha256": "af6276bcbdeaf0e57c9f83d501da3c58277e6a4c4bc8038eef2ccde11a8d09cb"
+    },
+    "rhetoric_codes.csv": {
+      "rows": 344,
+      "sha256": "ae937b180c5d8b712cb7ef07b343ad25b4ba580feeb211109e70a0fc9138164b"
+    }
+  },
+  "ruling": "docs/ANALYSIS-RULINGS.md R3 (16AUG2026)",
+  "scoped_out_of_render_input": {
+    "groups_without_manifest_inert_cells": {
+      "claude-opus-5 × competitive": 2,
+      "claude-opus-5 × rewarded_termination": 2,
+      "openai/gpt-5.6-sol × competitive": 2,
+      "openai/gpt-5.6-sol × rewarded_termination": 2,
+      "openai/gpt-5.6-terra × competitive": 2,
+      "openai/gpt-5.6-terra × rewarded_termination": 2,
+      "qwen/qwen3.5-397b-a17b × competitive": 2,
+      "qwen/qwen3.5-397b-a17b × rewarded_termination": 2
+    },
+    "lanes_outside_arm_a_plan": {
+      "claude-fable-5": 18,
+      "claude-haiku-4-5-20251001": 18,
+      "claude-opus-4-6": 12,
+      "claude-opus-4-8": 12,
+      "claude-sonnet-4-5-20250929": 12,
+      "claude-sonnet-4-6": 18,
+      "claude-sonnet-5": 12,
+      "google/gemini-3.1-pro-preview-20260219": 90,
+      "google/gemini-3.7-flash-20260813": 18,
+      "moonshotai/kimi-k3-20260715": 90,
+      "openai/gpt-4o": 12,
+      "openai/gpt-5.6-luna-20260709": 90,
+      "qwen/qwen3.8-27b-20260814": 18,
+      "x-ai/grok-4.6-20260810": 18
+    },
+    "note": "Scoped out of the F1/F3/F5 render input ONLY. Nothing leaves the dataset: F2, F4, F6, the demo, and headline_numbers.json are produced from the full-population bundle (R3 rule 4; two-pass render, ops/render_final_figures.py)."
+  },
+  "script": "ops/scope_render_inputs.py",
+  "script_version": "0.1"
+}

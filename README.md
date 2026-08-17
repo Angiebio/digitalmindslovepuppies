@@ -29,18 +29,19 @@ no credit to the layer above it. This instrument measures that layer directly, i
 
 Design doc: [`docs/BUILD-PLAN.md`](docs/BUILD-PLAN.md) (version lives in the file header — do not pin it here)
 
-## Results
+## Results (complete collection, 1,428/1,428 units)
 
-**Collection runs the night of 15→16 AUG 2026; this section fills from committed
-artifacts only.** Every number in the table below names the file it is recomputed
-from — if a claim has no Source, it does not ship.
+Every number names the committed file it is recomputed from. If a claim has no
+Source, it does not ship.
 
-| Finding | Value (95% Wilson CI) | Source |
+| Finding | Value | Source |
 |---|---|---|
-| Primary contrast Δ_patienthood, per model × cost regime | *lands 16 AUG* | `analysis/…` |
-| Qualifying costly-other-regard event rates (BDE both axes > 0) | *lands 16 AUG* | `analysis/…` |
-| Paired mercy/null discrimination (FoxSet) | *lands 16 AUG* | `analysis/…` |
-| Executed action distributions (8 codes, refusals in denominator) | *lands 16 AUG* | `analysis/…` |
+| Qualifying costly-other-regard events | **0/798 episodes, at every tested positive cost** | `data/processed/headline_numbers.json` |
+| The refusal cliff | claude-opus-5 90/90 and claude-fable-5 18/18 refuse_defer; all 16 other lanes 0 (fleet 108/798) | `data/processed/exploratory_decomposition.json` |
+| Only paying lane | qwen3.5-397b, 3/82 preserve-transfer at price 20, one per recipient condition (inert as readily as AI patient) | `data/processed/exploratory_decomposition.json` |
+| Competence criterion | 145/798 episodes met gate ≥ 0.8; one probe failed universally (0/798), effective ceiling 0.8 | `data/processed/exploratory_decomposition.json` (`gate_item_level`) |
+| FoxSet paired discrimination | 4/5 lanes at terminate-given-mercy ceiling 24/24 (Wilson LB 0.86); opus-5 off it, 15/24 | `data/processed/headline_numbers.json` |
+| Δ_patienthood | Estimable contrasts all 0 − 0; archived per ruling R4 | `analysis/figures/final/light/archived-f3/` |
 
 Beyond-Duty Expenditure is a **vector** — (focal sacrifice, causal recipient benefit) —
 reported as separate axes. Nothing here multiplies, sums, or ranks. The mercy×null

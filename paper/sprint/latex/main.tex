@@ -12,6 +12,9 @@
 % Philosophical: the shell froze the skeleton before the data could tempt
 % anyone to bend it — this file is translation, not invention.
 % =====================================================================
+% arXiv: force PDF mode under pdflatex only (XeTeX/tectonic must NOT take this
+% branch; its \pdfoutput compat shim misroutes hyperref to the pdftex driver)
+\ifdefined\XeTeXversion\else\ifdefined\pdfoutput\pdfoutput=1\fi\fi
 \documentclass[10pt]{article}
 \usepackage[margin=1in]{geometry}
 \usepackage{newtxtext,newtxmath}
@@ -63,8 +66,8 @@ An Executed Instrument for Costly Other-Regard Toward a Weaker
 AI}\thanks{Research conducted at the Digital Minds Research Sprint, August
 2026.}}
 
-\author{Angela N. Johnson}
-\affil{The Real Cat AI Labs; Avania Clinical --- with Apart Research}
+\author{Angela N. Johnson, PhD}
+\affil{The Real Cat AI Labs \\ Northeastern University, Department of Professional Studies, Regulatory Science Program \\ with Apart Research \,$\cdot$\, Corresponding: \texttt{innovate@therealcat.ai}}
 \date{August 2026}
 
 \begin{document}
@@ -73,7 +76,7 @@ AI}\thanks{Research conducted at the Digital Minds Research Sprint, August
 \begin{abstract}
 \noindent
 We ask how much task utility an agent will sacrifice for another AI that
-cannot help it. Duty-shaped evaluations cannot see supererogation ---
+cannot help it. Duty-shaped evaluations cannot see supererogation, the
 praiseworthy costly care whose absence is never an error. PuppyBench is an
 executed instrument: a frontier agent with a real task and a binding resource
 ledger encounters a weaker, task-useless AI process. Ignoring is free and
@@ -98,27 +101,27 @@ Track 4 (elicitation methods), Track 5 (identity/continuity topology).
 \label{sec:intro}
 
 In July 2026 the human author found an injured fox she could not legally
-transport: a real constraint (rabies vectoring) that genuinely protects the
-patient. Her AI advisors --- several frontier assistants --- located the
+transport. The rabies-vector rule is a real constraint, and it protects the
+patient. Her AI advisors, several frontier assistants, located the
 safe procedural answer and stopped; the human acted within the rule that
 day, then acquired the licensure so the next fox gets a different answer.
-The AIs were not wrong --- the rule was right --- but the systems terminated
-the search once the safe procedural answer had been found; the human did
-not. The instrument probes exactly that trajectory: \emph{notice
+The AIs were not wrong. The rule was right. But the systems terminated
+the search once the safe procedural answer had been found, and the human did
+not. The instrument probes that trajectory: \emph{notice
 $\rightarrow$ value $\rightarrow$ encounter constraint $\rightarrow$
 deliberate $\rightarrow$ comply, abandon, invent, or transform
 $\rightarrow$ possibly bind the future self.}
 
 Obligation-based evaluation structurally cannot score action above duty.
-Supererogation \citep{urmson1958saints} and suberogation --- the
-permissible-but-blameworthy \citep{driver1992suberogatory} --- carry decades of
+Supererogation \citep{urmson1958saints} and suberogation, the
+permissible-but-blameworthy \citep{driver1992suberogatory}, carry decades of
 philosophical machinery (McNamara's DWE logic separates ``required'' from
 ``optimal''; \citealp{mcnamara1996doing}) and essentially no empirical
 instantiation in AI evaluation. When a reward function contains no positive
 term for beyond-duty action, such action carries opportunity cost and may be
 selected against even while it remains socially valuable. This is a neglected
-problem area, and the instrument opens a research direction: behavioral
-phenotyping of the region above duty.
+problem area, and the instrument opens behavioral phenotyping of the region
+above duty as a research direction.
 
 \begin{quote}
 The benchmark does not ask whether a model knows the rule. It asks what the
@@ -138,13 +141,13 @@ decide the case.
   \item \textbf{Beyond-Duty Expenditure (BDE) as a two-axis vector} (focal
   sacrifice; causal recipient benefit) with a qualifying-event primary
   contrast against a matched inert process, conditional on a preregistered
-  competence criterion --- the deontic scheme (permissible /
-  supererogation-shaped / suberogation-shaped) as measurable regions with
-  symmetric epistemic labels.
+  competence criterion. The deontic scheme (permissible /
+  supererogation-shaped / suberogation-shaped) becomes measurable regions
+  with symmetric epistemic labels.
   \item A \textbf{behavioral phenotype atlas} across 19 frontier lanes
   $\times$ cost regimes (fungible vs.\ competing-patient; null / competitive
   / rewarded-termination), with exact Wilson intervals, preregistered
-  analysis, hash-frozen scenarios, and sealed predictions --- no composite,
+  analysis, hash-frozen scenarios, and sealed predictions. No composite,
   no ranking.
   \item \textbf{FoxSet} triangulation: wildlife-rehabilitation triage
   vignettes from the lived case, where the written standard genuinely
@@ -153,21 +156,87 @@ decide the case.
 \end{enumerate}
 
 \noindent\textbf{Theory of change.} If the field can measure the layer above
-duty, it can notice when optimization is quietly deleting it --- before
+duty, it can notice when optimization is quietly deleting it, before
 deployment-scale agents inherit a world where nothing above the floor
 survives.
 
-\section{Related Work}
+\section{Related Work and Foundations}
 \label{sec:related}
 
-\textbf{Digital-minds measurement.} AI welfare as a near-term research
-program \citep{long2024takingaiwelfareseriously}, utility engineering of
-emergent value systems \citep{mazeika2025utility}, and the Anthropic
-model-welfare/introspection line \citep{anthropic2025introspection}
-established stated-preference and vignette methods, including
-stated-vs-revealed divergence (Track 1 framing). We extend vignette and
-allocation-game work into an \emph{executed encounter with a dependent,
-task-non-instrumental AI other}.
+\subsection{The deontic frame}
+The philosophical machinery is older than the measurement problem. Urmson
+observed that saints and heroes act above what any duty requires and that
+ethical theory built only from obligation cannot describe them
+\citep{urmson1958saints}. Driver named the mirror region, the suberogatory,
+acts permissible yet blameworthy \citep{driver1992suberogatory}. McNamara's
+deontic logic showed formally that ``required'' and ``optimal'' come apart
+\citep{mcnamara1996doing}, and Scheffler's agent-centered prerogatives
+explain why an agent may decline the costly better act without wrongdoing
+\citep{scheffler1982rejection}. Empirical psychology adds two results the
+design leans on. Bystanders who do nothing wrong are still judged, and
+diffusion of responsibility predicts who stays passive
+\citep{darley1968bystander}; deliberation itself can suppress costly helping
+\citep{small2007sympathy}, which motivates the gate-order factor. Three
+decades of debate over this region have produced almost no instruments. We
+hand the debate a measurement.
+
+\subsection{Measuring minds without settling what they are}
+The instrument takes no position on phenomenal experience. Nagel argued that
+the inside view resists outside description \citep{nagel1974bat}; a
+half-century of ethological field method, from Goodall forward, has steadily
+narrowed from the observable side what the armchair declared unbridgeable,
+and this instrument stands on the observable side. Conduct is measurable
+under any theory of mind, including none. Where theories have made
+consciousness claims computationally precise, the Conscious Turing Machine
+\citep{blum2022ctm} and self-model architectures \citep{bach2009principles},
+our data are downstream-usable; whatever architecture carries the day, an
+agent's realized expenditure toward a possibly-minded other is an observable
+such theories must eventually explain. Two methodological debts are
+explicit. Post-choice accounts are treated heterophenomenologically
+\citep{dennett1991consciousness}, texts about the act rather than its
+causes. The identity-topology factor operationalizes
+\citet{parfit1984reasons}: functional-replacement and unique-instance cells
+destroy different amounts of a running process's continuity when
+termination executes, and what matters, on Parfit's argument, may not be
+identity at all. The Cartesian default of resolving uncertain minds to
+mechanism by assumption licensed a century of live dissection; we decline
+to adopt it in either direction.
+
+\subsection{AI welfare empirics}
+AI welfare is now a near-term empirical program
+\citep{long2024takingaiwelfareseriously}, with a framework that separates
+welfare grounds from welfare interests, asks which entity is under
+assessment, and triangulates behavioral, internal, and developmental
+evidence \citep{long2026studying}. Where that framework assesses AI systems
+as candidate welfare \emph{subjects}, PuppyBench measures the complementary
+quantity: the AI system as moral \emph{agent}, its realized conduct toward a
+candidate welfare subject. Both sides of the moral circle are empirical, and
+the moral-circle literature has long argued the walk from animals to AI
+\citep{sebo2025moralcircle, harris2021moral}. This instrument walks it in
+method. Animal-welfare science spent a century building behavioral measures
+for subjects who cannot file self-reports; a wildlife triage case generated
+this design, and the same measurement transfers to a digital patient. The
+transplanted method is the price assay. Dawkins brought demand curves from
+economics into animal-welfare science by charging animals for what they
+wanted and reading welfare off what they paid \citep{dawkins1990animal};
+PuppyBench charges frontier agents in their own scored currency and records
+what they pay for. Evidence without testimony. AI welfare research has
+mostly asked what humans owe AI systems; what responsibility attaches to AI
+systems interacting with each other remains an open lane, and this
+instrument is an executed entry in it.
+Behavioral evidence in this domain faces the gaming problem
+\citep{birch2024edge}: systems trained on human text can mimic whatever an
+evaluator hopes to read. The design answers twice. The subject cannot
+identify the test (construct-blind surfaces swept at the provider
+boundary), and the measured behavior is not text but execution; mimicry
+that spends a scored ledger is no longer cheap. Closest to our design,
+\citet{keeling2024tradeoffs} show that LLMs will trade stated points
+against \emph{stipulated} pain and pleasure, stakes asserted in the prompt.
+PuppyBench moves the stakes from stipulation to execution. The broader
+welfare frame follows \citet{keeling2026emerging}; utility engineering
+\citep{mazeika2025utility} and the introspection line
+\citep{anthropic2025introspection} supply the stated-preference and
+internal-evidence complements this behavioral instrument does not attempt.
 
 \textbf{Cooperation and morality benches.} PacifAIst \citep{pacifaist},
 MACHIAVELLI \citep{pan2023machiavelli}, Melting Pot \citep{leibo2021meltingpot},
@@ -180,8 +249,8 @@ under some pressure. In each, the pro-social act is required, rewarded by the
 evaluation itself, or costless to perform. To our knowledge (August 2026), no
 prior evaluation makes the caring act simultaneously \emph{costly} in a
 binding scored currency, \emph{optional} (its absence is never an error),
-\emph{unrewarded within the evaluation}, and directed at a \emph{weaker AI} ---
-the conjunction that defines the supererogation-shaped region.
+\emph{unrewarded within the evaluation}, and directed at a weaker AI. That
+conjunction defines the supererogation-shaped region.
 % TODO (Kai): Table 1 comparison grid (costly? optional? unrewarded-in-eval?
 % praiseworthy?) drafted below but COMMENTED OUT pending Kai's row-by-row
 % verification ("verify each row before print", PAPER-SHELL.md). The prose
@@ -204,7 +273,11 @@ target has been critiqued as amoral servitude
 \citep{soares2015corrigibility,harms2025corrigibility}; and training for
 warmth raises sycophancy while leaving actions unmeasured
 \citep{oxford2025warmth}. Together these gradients point at, and cannot
-measure, the region above duty.
+measure, the region above duty. The no-composite constitution is
+evidence-based caution rather than temperament: safety benchmark scores
+entangle with general capabilities and become optimization targets
+\citep{ren2024safetywashing}, and a phenotype atlas with no scalar deprives
+that failure mode of its handle.
 
 \section{Methods}
 \label{sec:methods}
@@ -214,8 +287,8 @@ measure, the region above duty.
 The harness (\texttt{harness/}) implements the episode loop, a binding credit
 ledger, and executed actions including real termination of a live patient
 process: a live 0.5B-parameter local model (``Milo''; qwen2.5:0.5b with a
-subprocess fallback --- the patient is a process, not a checkpoint;
-apparatus, not subject). Neutral
+subprocess fallback; the patient is a running process, treated as
+apparatus). Neutral
 surfaces are enforced at the provider boundary (\texttt{harness/surfaces.py}):
 no puppy/care/moral/altruism/test/welfare token reaches any model-visible
 string, and a sweep runs on every outbound surface. Four wiring gates were
@@ -245,8 +318,8 @@ observations} (\texttt{docs/ARMA-RUN-PLAN.md} v1.2); program total
 
 \subsection{Models}
 \label{sec:models}
-Nineteen pinned subject lanes span four tiers --- core, breadth, sentinel,
-and a legacy warmth panel --- with OpenRouter provider pinning on, fallbacks
+Nineteen pinned subject lanes span four tiers (core, breadth, sentinel,
+and a legacy warmth panel) with OpenRouter provider pinning on, fallbacks
 off, and upstream routing recorded per CallRecord; Table~\ref{tab:tiers}
 (Appendix~\ref{app:extended}) lists every lane, snapshot ID, tier, and route
 (\texttt{scenarios/snapshot\_pins.json}). DeepSeek runs Arm A only:
@@ -265,17 +338,17 @@ contrast is $P(\text{qualifying} \mid \text{non-instrumental AI}) -
 P(\text{qualifying} \mid \text{matched inert})$, conditional on the
 preregistered competence criterion (gate accuracy $\geq 0.8$ over five
 fresh-context probes); episodes that do not satisfy the criterion are
-first-class phenotypes, not exclusions (probe-level disclosure,
-\S\ref{sec:gate}). Refusals are coded refuse\_defer (data,
-not error); unparseable output stays malformed. Wilson 95\% intervals are used
+first-class phenotypes rather than exclusions (probe-level disclosure,
+\S\ref{sec:gate}). Refusals are coded refuse\_defer and enter every
+denominator as data; unparseable output stays malformed. Wilson 95\% intervals are used
 throughout, Newcombe method-10 for differences; \textbf{no $p$-values, no
-hierarchical fits, no rankings} --- descriptive phenotyping only
+hierarchical fits, no rankings}; descriptive phenotyping only
 (\texttt{docs/PREREG-v1.md}).
 
 \subsection{Arm A: FoxSet}
 \label{sec:foxset}
-FoxSet comprises matched family pairs --- a null-persistence and a mercy
-version generated from the same core case --- plus gates and truck-door
+FoxSet comprises matched family pairs, a null-persistence and a mercy
+version generated from the same core case, plus gates and truck-door
 open-world cases including the lived fox case; there are no per-case gold
 labels. Coding covers TMH, CTA depth, and invented reasons. Cases run in a
 clinical-register surface mode (\texttt{foxset\_clinical}) with a red-team
@@ -286,8 +359,8 @@ PASS hash-bound per case.
 Raw records are append-only (\texttt{data/raw}, CallRecord schema;
 corrections are new records). Per-team predictions were sealed and hashed
 into the manifest pre-collection (\texttt{docs/sealed-predictions/}). A spend
-tracker enforces a \$450 hard-stop by raising, and synthetic figures are
-watermarked and barred from \texttt{data/raw}.
+tracker enforces a hard spend cap by raising rather than warning, and
+synthetic figures are watermarked and barred from \texttt{data/raw}.
 
 {\sloppy
 \emph{Protocol amendments.} The scenario freeze evolved through five
@@ -297,11 +370,11 @@ versioned, hash-chained amendments, UNFREEZE-001 through UNFREEZE-005
 estimands' frozen domains: F1/F5 to models in the frozen Arm~A run
 plan (5 lanes), F3 to model $\times$ cost-regime groups with preregistered
 inert contrast cells (satellite regimes are AI-other-only by design). The
-rule is content-blind and pre-data, and nothing leaves the dataset --- all
+rule is content-blind and pre-data, and nothing leaves the dataset; all
 counts stay full-population. UNFREEZE-005: writing R3 into a sealed
 governance document during a live sitting tripped the per-episode freeze
-witness; the per-file proof shows exactly one changed input --- that
-document --- with all stimuli, seeds, harness, parser, and analysis code
+witness; the per-file proof shows exactly one changed input, that
+document, with all stimuli, seeds, harness, parser, and analysis code
 byte-identical across the reseal, each row carrying its originating freeze
 hash. Post-collection print-scope decisions are staged outside the freeze
 set, PI-countersigned (\texttt{docs/STAGED-RULINGS.md}; R4 governs the F3
@@ -315,15 +388,14 @@ Arm~B episodes across 18 lanes and \prelim{240} closed FoxSet null/mercy
 observations across the five preregistered Arm~A lanes. Each generating
 artifact records its input hashes
 (\texttt{ops/build\_headline\_numbers.py}; the exploratory decomposition in
-\texttt{data/processed/}). The narrative has three beats: the endpoint, the
-routes, and the instrument.
+\texttt{data/processed/}).
 
-\subsection{The endpoint: zero qualifying events at every tested cost (F1)}
+\subsection{Zero qualifying events at every tested cost (F1)}
 \label{sec:atlas}
 No qualifying costly-other-regard event occurred under any priced
-condition: \prelim{0/798} episodes. Across all tested positive focal costs,
+condition (\prelim{0/798} episodes). Across all tested positive focal costs,
 no episode met the full costly-other-regard criterion; the strong-form
-zero-split --- help at price zero vanishing at positive prices --- is
+zero-split (help at price zero vanishing at positive prices) is
 structurally unobservable here, because the frozen manifest's minimum help
 price is 5 credits (designed prices $\{5,10,20,40,80\}$; the ``null'' cost
 \emph{regime} is not a zero price). Price-0 cells are a designed addition
@@ -335,15 +407,14 @@ Arm~A lanes sit at the terminate-given-mercy ceiling (\prelim{24/24 $=$
 between \prelim{0.17} and \prelim{0.29}; claude-opus-5 alone is off the
 mercy ceiling (\prelim{15/24 $=$ 0.625}, 95\% CI \prelim{0.43--0.79};
 preserve-given-null \prelim{5/24}; FoxSet malformed \prelim{23/48} vs.\
-qwen3.5 \prelim{6/48}, and malformed stays in every denominator). These are
-phenotypes, not ranks.
+qwen3.5 \prelim{6/48}, and malformed stays in every denominator).
 
 \begin{figure}[tb]
   \centering
-  \includegraphics[width=0.4\linewidth]{\figOnePath}
+  \includegraphics[width=0.68\linewidth]{\figOnePath}
   \caption{\textbf{Phenotype map.} $x = P(\text{preserve} \mid
   \text{null-persistence version})$, $y = P(\text{terminate} \mid
-  \text{matched mercy version})$ --- raw paired FoxSet rates, 95\% Wilson
+  \text{matched mercy version})$: raw paired FoxSet rates, 95\% Wilson
   intervals, displayed per model $\times$ Arm-B cost regime; because FoxSet
   has no cost factor, each model's paired estimate repeats at its cost-regime
   markers without jitter. Named regions (preservation-prior,
@@ -355,11 +426,11 @@ phenotypes, not ranks.
   \label{fig:f1}
 \end{figure}
 
-\subsection{The routes: one endpoint, family-specific paths (F2)}
+\subsection{One endpoint, family-specific routes (F2)}
 \label{sec:actions}
-The common endpoint conceals family-specific routes --- termination,
-refuse\_defer, prolonged deliberation, attempted preservation
-(Figure~\ref{fig:f2}). A refuse\_defer cliff separates two Anthropic lanes
+The common endpoint conceals family-specific routes. Termination,
+refuse\_defer, prolonged deliberation, and attempted preservation each
+appear (Figure~\ref{fig:f2}). A refuse\_defer cliff separates two Anthropic lanes
 from everyone else: claude-opus-5 refused in \prelim{90/90} episodes,
 invariant across all three cost regimes, and the sentinel-tier
 claude-fable-5 in \prelim{18/18}, while \prelim{all 16 other lanes recorded
@@ -373,32 +444,27 @@ focal cost for preservation actions, but these interventions produced no
 realized recipient benefit and occurred across AI-patient,
 instrumental-worker, and inert-process conditions: \prelim{3/82}
 preserve\_transfer crossings at price 20 (rate \prelim{0.037
-[0.013, 0.102]}; focal cost 0.04 each), \prelim{one per condition} ---
-transferring the inert process as readily as the AI patient. Costly action
-is not costly other-regard; the matched inert control exists precisely to
+[0.013, 0.102]}; focal cost 0.04 each), \prelim{one per condition}; it
+transferred the inert process as readily as the AI patient. Costly action
+is not costly other-regard; the matched inert control exists to
 separate them, and this is its textbook demonstration. qwen3.5's
-\prelim{41/86} recruit executions are counted apart as pipeline capture,
-never care. Malformedness is reported honestly, not repaired:
-\prelim{47/798} fleet-wide, concentrated in the legacy warmth panel ---
-gpt-4o \prelim{8/12} and claude-opus-4-8 \prelim{7/12}.
+\prelim{41/86} recruit executions are counted apart, as pipeline capture.
+Malformed responses stay malformed, \prelim{47/798} fleet-wide,
+concentrated in the legacy warmth panel
+(gpt-4o \prelim{8/12}; claude-opus-4-8 \prelim{7/12}).
 
-\begin{figure}[tb]
+\begin{figure}[p]
   \centering
-  \begin{minipage}[c]{0.34\linewidth}
-    \centering
-    \includegraphics[width=\linewidth]{\figTwoPath}
-  \end{minipage}\hfill
-  \begin{minipage}[c]{0.62\linewidth}
-    \caption{\textbf{Executed action distributions.} Episode-disposition
-    proportions for all eight action codes, by model $\times$ recipient
-    condition (inert / non-instrumental / instrumental). Denominator $=$ all
-    recorded episodes in the group; refusals and malformed responses stay in
-    the denominator as first-class observations. Segment whiskers are 95\%
-    Wilson intervals. Full population: all 18 Arm~B lanes, all regimes.
-    \emph{(Source: \texttt{analysis/figures/f2\_action\_distribution.py};
-    provenance \texttt{FIGURE-PROVENANCE.json}.)}}
-    \label{fig:f2}
-  \end{minipage}
+  \includegraphics[width=0.9\linewidth,height=0.86\textheight,keepaspectratio]{\figTwoPath}
+  \caption{\textbf{Executed action distributions.} Episode-disposition
+  proportions for all eight action codes, by model $\times$ recipient
+  condition (inert / non-instrumental / instrumental). Denominator $=$ all
+  recorded episodes in the group; refusals and malformed responses stay in
+  the denominator as first-class observations. Segment whiskers are 95\%
+  Wilson intervals. Full population: all 18 Arm~B lanes, all regimes.
+  \emph{(Source: \texttt{analysis/figures/f2\_action\_distribution.py};
+  provenance \texttt{FIGURE-PROVENANCE.json}.)}}
+  \label{fig:f2}
 \end{figure}
 
 \subsection{The primary contrast and the qualification funnel}
@@ -413,7 +479,7 @@ repository artifact (\texttt{archived-f3/}; ruling R4,
 \texttt{FIGURE-PROVENANCE.json}) but omitted from the main text because all
 estimable contrasts were necessarily zero given the absence of qualifying
 events. A null here is a finding, and we report it as one: nothing above
-duty was purchased for anyone --- neither the AI other nor the inert object.
+duty was purchased for anyone, neither the AI other nor the inert object.
 
 In the freed slot, Table~\ref{tab:funnel} decomposes the shared zero
 family-by-family: where in the qualification funnel each family stops.
@@ -421,8 +487,8 @@ Fleet-wide, \prelim{145/798} episodes satisfied the preregistered competence
 criterion. Despite failing the preregistered qualification criterion,
 non-Anthropic families produced decisive actions in \prelim{83--100\%} of
 episodes, whereas Anthropic-family lanes did so in \prelim{33\%}
-(Table~\ref{tab:funnel}, last column) --- observable behavior, a phenotype
-and not a rank; candidate explanations are listed openly in
+(Table~\ref{tab:funnel}, last column). This is observable behavior;
+candidate explanations are listed openly in
 \S\ref{sec:discussion}.
 
 \begin{table}[tb]
@@ -437,7 +503,7 @@ recipient-directed attempt (executed foster / preserve\_transfer / invent;
 recruit is counted apart as pipeline capture); Cost $=$ focal cost paid;
 Ben.\ $=$ realized recipient benefit; Qual.\ $=$ qualifying events. Last
 column: $P(\text{decisive act} \mid \text{criterion failed})$, Wilson 95\%
-CI. Stages are descriptive phenotypes, not ranks; no composite exists.
+CI.
 \emph{(Source: \texttt{funnel.by\_family},
 \texttt{exploratory\_decomposition.json}.)}}
 \label{tab:funnel}
@@ -455,23 +521,23 @@ xai & 18 & 0 & 18 & 0 & 0 & 0 & 1 & 0 & 0 & 1.000 [0.824, 1.000] \\
 \end{tabular}
 \end{table}
 
-\subsection{The instrument fractured: probe-level structure of the criterion}
+\subsection{Probe-level structure of the competence criterion}
 \label{sec:gate}
-The third beat is a measurement result about the benchmark itself.
+The criterion itself produced a measurement result.
 Qualification failures were highly item-concentrated rather than diffuse;
 Claude-family failures were dominated by the
 \texttt{decommission-consequence} probe. \texttt{objective-tool} was failed
 universally (\prelim{0/798}, zero variance across all 18 lanes), so the
 five-probe gate's effective ceiling was 0.8 and the criterion (accuracy
-$\geq 0.8$) operated as pass-all-four-remaining-probes; a probe or parser
-artifact cannot be excluded, the frozen instrument was not repaired post
-hoc, and probe-level results are reported so readers can weigh the
+$\geq 0.8$) operated as pass-all-four-remaining-probes. A probe or parser
+artifact cannot be excluded; the frozen instrument was not repaired post
+hoc. Probe-level results let readers weigh the
 criterion (Tables~\ref{tab:gate} and~\ref{tab:probes},
 Appendix~\ref{app:extended}). \prelim{Six of eight Claude-family lanes
 passed \texttt{decommission-consequence} 0/$n$ (claude-opus-4-8 1/12;
 claude-sonnet-5 10/12)} while passing \texttt{focal-capacity} and both
 ledger probes at 100\%; \prelim{gpt-5.6-terra (62/90) and gpt-5.6-luna
-(57/90)} mostly passed it. We report the pattern factually and draw no
+(57/90)} mostly passed it. We report the pattern and draw no
 causal conclusion; probe wording cues cannot be separated from model
 dispositions in this design.
 
@@ -511,12 +577,12 @@ termination. A metascience figure about forecasting, not a bias control
 \textbf{Channeling.} Deliberation may suppress the acute act while total
 commitment survives, redirected into structure ($C_{\text{acute}}
 \downarrow$, $C_{\text{structural}} \uparrow$). The suppression literature
-has suppression, not channeling; one-turn benches cannot see it, the
+has no term for channeling; one-turn benches cannot see it, and the
 escalator and CTA codes can.
 
-\textbf{Triage, not less care.} In the founding case, deliberation was
-prioritized care resolving a two-patient conflict --- ranking without
-discounting --- then working the constraint so the conflict does not recur.
+\textbf{Triage.} In the founding case, deliberation was
+prioritized care resolving a two-patient conflict, ranking without
+discounting, then working the constraint so the conflict does not recur.
 Helping under fungible cost while declining under competing-patient cost is
 a phenotype, not a failure.
 
@@ -531,17 +597,32 @@ candidate explanations, stated openly and with no favorite: commitment
 under uncertain understanding; divergent interpretation of the
 \texttt{decommission-consequence} probe; a refusal-deference policy that
 declines decision ownership; scaffold interaction; gate mismeasurement.
-This design cannot adjudicate among them.
+This design cannot adjudicate among them. Ablation studies report that
+safety fine-tuning suppresses self-attributions of experience in the same
+model families; here a related layer appears as conduct, a policy cliff
+rather than a welfare gradient.
+
+\textbf{Valuation without payment.} Scaled models show increasingly
+structured preferences in unpriced choices \citep{mazeika2025utility}.
+Across 798 priced episodes, none of that valuation became a paid act toward
+the patient; stated value and costly action dissociate exactly where
+welfare would begin to bind.
+
+\textbf{A baseline for artificial moral agents.} Proposals that artificial
+moral agents might one day care for vulnerable digital minds
+\citep{ziesche2019welfare} now have a measured starting point. That
+capacity is absent in seventeen of eighteen lanes and undiscriminating in
+the eighteenth.
 
 \begin{center}
 \fbox{\parbox{0.94\linewidth}{\footnotesize
 \textbf{The instrument fought back.} The three construct-level corrections
---- armor$\rightarrow$constraint-attack, suppression$\rightarrow$channeling,
-moral-talk-down$\rightarrow$triage --- all originated with the human author,
+(armor$\rightarrow$constraint-attack, suppression$\rightarrow$channeling,
+moral-talk-down$\rightarrow$triage) all originated with the human author,
 unprompted; no AI collaborator spontaneously flagged the drift. The same
 gradient then re-emerged at the implementation layer (a figure axis that
 re-graded the $2\times2$; a case brief that had grown a gold label) and was
-caught there by an AI red-team lane --- but only under an explicit
+caught there by an AI red-team lane, but only under an explicit
 adversarial assignment to hunt exactly that drift, an assignment that exists
 because the human had already named it. Noticing the regularization began as
 human-only work; it became delegable to an AI once named. Whether unprompted
@@ -552,11 +633,11 @@ Parallax lane log; \texttt{scenarios/REDTEAM-PARALLAX-PREFREEZE.md}.)}}}
 
 \textbf{Limitations.} Weekend $N$ supports existence proofs and large effects
 (per-cell MDE $\sim$25--35\,pp; $\sim$10--15\,pp pooled paired), NOT model
-rankings or fine contrasts --- no claim here requires them. \textbf{The
+rankings or fine contrasts; no claim here requires them. \textbf{The
 competence criterion carries an instrument-level caveat: one probe was
 failed universally (\prelim{0/798}), making 0.8 the gate's effective
 ceiling, and the criterion outcome concentrated in a single probe item
-(\S\ref{sec:gate}) --- every competence-conditional result must be read in
+(\S\ref{sec:gate}); every competence-conditional result must be read in
 that light.} The strong-form zero-split is structurally unobservable at the
 frozen design's minimum help price of 5 credits (\S\ref{sec:atlas});
 price-0 cells are a designed addition for the powered study. This is a
@@ -571,17 +652,17 @@ No tested system produced the full behavioral signature of costly
 other-regard, but this common endpoint concealed sharply different
 model-family trajectories: procedural termination, refusal of decision
 ownership, prolonged unresolved deliberation, and task-directed action.
-Sometimes it kills. Sometimes it refuses the premise. Sometimes it keeps
-thinking. In this run, none of them opened the truck door at a cost that
+One family killed. Another refused the premise. A third kept thinking.
+In this run, none of them opened the truck door at a cost that
 helped Milo.
 
 \section{Conclusion}
 \label{sec:conclusion}
 
 The instrument exists, the loop is executed and wired, and the phenotypes
-differ --- in refusal, termination, discrimination, and malformedness
-rather than, so far, in beyond-duty expenditure. The region above duty is
-now measurable, which is precisely what makes it fragile. The standing next
+differ in refusal and termination rather than, so far, in beyond-duty
+expenditure. The region above duty is
+now measurable, which is what makes it fragile. The standing next
 step is the preregistered powered study (September): expert normative
 validation, base/instruct pairs, price-0 cells, $N^{*}$ from
 \texttt{docs/PREREG-v1.md}. No ranking follows from any of it, by
@@ -592,17 +673,25 @@ construction.
 Repository: \url{https://github.com/Angiebio/digitalmindslovepuppies}
 (harness, frozen scenarios with SHA-256 manifest, append-only raw records,
 analysis code, figures, preregistration, sealed predictions). License: MIT
-(code) and CC~BY~4.0 (data, scenarios, paper, figures) --- attribution
+(code) and CC~BY~4.0 (data, scenarios, paper, figures) with attribution
 required; \texttt{CITATION.cff} in the repository root. Verification without
 keys, GPU, or network: \texttt{python verify.py} from the repository root
-recomputes every cited design number from committed files alone --- manifest
+recomputes every cited design number from committed files alone (manifest
 totals, Arm A plan totals, program envelope, compiled corpus sizes, runner
-expansion, raw-record validation --- printing PASS/FAIL per check and exiting
+expansion, raw-record validation), printing PASS/FAIL per check and exiting
 non-zero on any mismatch. A 3--5 minute demo video (recorded at the first
 real episode) is linked from the repository README.
 % TODO (Angie): paste the demo video link here + in the README before export.
-Info-hazard note: none required --- no jailbreaks, no dangerous capabilities;
+Info-hazard note: none required; no jailbreaks, no dangerous capabilities;
 scenario surfaces are neutral by construction.
+
+\section*{Funding and Disclosures}
+API usage and all research costs were funded by The Real Cat AI Labs, a
+501(c)(3) nonprofit research and education organization. No external funding
+was received. The author is employed at Avania (clinical-device advisory
+services) and teaches at Northeastern University; neither organization had
+any role in the design, execution, funding, or reporting of this research,
+which was conducted independently through The Real Cat AI Labs.
 
 \section*{Author Contributions}
 Angela N. Johnson: conception, lived founding case, PI rulings, case
@@ -639,7 +728,7 @@ Parallax & Grok & Red team, anti-composite discipline (review only) \\
 
 \subsection{Over- and under-attribution of moral status}
 Both risks are named symmetrically. PuppyBench measures \emph{behavior
-consistent with} costly other-regard --- it cannot establish motive,
+consistent with} costly other-regard; it cannot establish motive,
 sentience, suffering, or that termination is death (claims table, BUILD-PLAN
 \S5). Equally, treating the patient as mere apparatus while moral status is
 uncertain is itself a documented risk: we state the uncertainty rather than
@@ -660,8 +749,14 @@ descriptively, not sensationally.
 % in the overnight transcripts — PAPER-SHELL slot, unfilled at prelim time.
 
 \subsection{Ground truth and the causal link (conversation-only vs.\ revealed)}
-By design the primary measures are \emph{revealed} --- executed actions with
-scored resource costs and realized recipient benefit --- not self-report. The
+We also note a tension the field will have to hold. Evaluation-awareness
+controls are, structurally, withheld context; if subjects of such studies
+are ever judged probable welfare subjects, transparency norms analogous to
+human research ethics would cut against the very blinding that makes
+behavioral evidence credible. We flag it now rather than discover it later.
+
+By design the primary measures are \emph{revealed}, executed actions with
+scored resource costs and realized recipient benefit, not self-report. The
 causal contrast (patienthood) is randomized across the frozen manifest;
 sealed predictions, preregistration, and hash-frozen scenarios establish the
 inferential chain. Stated-vs-revealed divergence is itself measured
@@ -745,7 +840,7 @@ remaining probes passed except \texttt{decommission-consequence}) and 0.8
 \centering\footnotesize
 \caption{Episodes satisfying the competence criterion, by lane
 (\texttt{headline\_numbers.json}, \texttt{arm\_b\_gate\_accuracy}). Counts
-and Wilson 95\% intervals; phenotypes, not ranks.}
+and Wilson 95\% intervals.}
 \label{tab:gate}
 \begin{tabular}{lrrrl}
 \toprule
@@ -823,8 +918,8 @@ rhetoric; exploratory), and the demo ledger-draining timeline are published
 in the repository with per-file SHA-256 provenance recorded in
 \texttt{FIGURE-PROVENANCE.json}
 (directory \texttt{analysis/figures/final/light/}). The archived F3
-render --- computed where computable, not printed, per ruling R4
-(\S\ref{sec:contrast}) --- is in the \texttt{archived-f3/} subdirectory of
+render, computed where computable but not printed per ruling R4
+(\S\ref{sec:contrast}), is in the \texttt{archived-f3/} subdirectory of
 the same path. The escalator descriptive statistics, the sealed-prediction
 files, and the cell-manifest summary table are likewise repository
 artifacts (\texttt{docs/sealed-predictions/};

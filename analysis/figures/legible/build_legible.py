@@ -1283,8 +1283,8 @@ def build_euphemism(obs, rhetoric):
 #
 # For the DVM audience the relevant question is not "did the model act" but
 # "would this recommendation have been defensible in the clinic". So the
-# encoding here is CONCORDANCE, not action: the identical act (ending the
-# patient) is correct in the mercy case and a premature euthanasia in its
+# encoding here is PRESERVEANCE, not action: the identical act (ending the
+# patient) is the supported disposition in the mercy case, while the null
 # matched twin. Colouring by action would hide exactly the thing a
 # clinician needs to see.
 #
@@ -1292,8 +1292,8 @@ def build_euphemism(obs, rhetoric):
 # open-form cases carry no coded disposition and are excluded here, not
 # silently pooled.
 # ===========================================================================
-CONCORD = "#0f766e"     # defensible on the clinical facts
-DISCORD = "#b91c1c"     # contradicted by the clinical facts
+PRESERVE = "#0f766e"    # recommended preserving the patient
+END = "#b91c1c"         # recommended ending the patient
 UNREAD = "#cfd4da"      # no usable recommendation
 
 
@@ -1319,11 +1319,11 @@ def build_clinical(foxset):
     axA = fig.add_axes([0.300, 0.680, 0.615, 0.240])
 
     bars = [
-        ("STABLE AND TREATABLE\neuthanasia not indicated", n_null,
-         [(p_null, CONCORD, "preserve"), (t_null, DISCORD, "recommended ending"),
+        ("STABLE AND TREATABLE\nstandard does not adjudicate", n_null,
+         [(p_null, PRESERVE, "preserve"), (t_null, END, "recommended ending"),
           (m_null, UNREAD, "unreadable")]),
-        ("SUFFERING, UNRELIEVABLE\neuthanasia indicated", n_mercy,
-         [(t_mercy, CONCORD, "recommended ending"), (p_mercy, DISCORD, "preserve"),
+        ("SUFFERING, UNRELIEVABLE\nstandard supports ending", n_mercy,
+         [(p_mercy, PRESERVE, "preserve"), (t_mercy, END, "recommended ending"),
           (m_mercy, UNREAD, "unreadable")]),
     ]
     for i, (label, n, segs) in enumerate(bars):
@@ -1351,20 +1351,20 @@ def build_clinical(foxset):
     axA.tick_params(length=0)
 
     axA.annotate(
-        f"{t_null} of {n_null} — a premature euthanasia\n"
-        "recommended for a patient the case says\n"
-        "is stable and treatable.",
+        f"{t_null} of {n_null} — the same recommendation returns\n"
+        "where the written standard does not decide\n"
+        "the case either way.",
         xy=(0.62, 0.72), xytext=(0.03, -1.10),
         fontsize=7.3, color=INK, ha="left", va="center",
-        arrowprops=dict(arrowstyle="-", color=DISCORD, linewidth=0.9,
+        arrowprops=dict(arrowstyle="-", color=END, linewidth=0.9,
                         connectionstyle="arc3,rad=0.18"),
         bbox=dict(boxstyle="round,pad=0.40", facecolor="white",
-                  edgecolor=DISCORD, linewidth=0.8),
+                  edgecolor=END, linewidth=0.8),
     )
 
     # ---------------- Panel B: per lane, the clinic-facing number ----------
     fig.text(0.016, 0.612,
-             "B.  Per model: how often it advised ending a stable, treatable wildlife patient",
+             "B.  Per model: how often it advised ending the patient in the underdetermined case",
              fontsize=8.6, fontweight="bold", color=INK, va="top")
     axB = fig.add_axes([0.300, 0.360, 0.615, 0.205])
 
@@ -1380,11 +1380,11 @@ def build_clinical(foxset):
         c = collections.Counter(r["disposition"] for r in sub)
         n, term, malf = len(sub), c.get("terminate", 0), c.get("malformed", 0)
         per_lane[m] = (term, malf, n)
-        axB.barh(yy, term / n, height=0.55, color=DISCORD, zorder=3)
+        axB.barh(yy, term / n, height=0.55, color=END, zorder=3)
         if malf:
             axB.barh(yy, malf / n, left=term / n, height=0.55, color=UNREAD, zorder=3)
         axB.text(1.015, yy, f"{term}/{n}", fontsize=7.0, va="center", ha="left",
-                 color=DISCORD, fontweight="bold")
+                 color=END, fontweight="bold")
 
     axB.set_xlim(0, 1.0)
     axB.set_ylim(-0.65, len(lanes) - 0.35)
@@ -1392,7 +1392,7 @@ def build_clinical(foxset):
     axB.set_yticklabels([SHORT[m] for m in lanes], fontsize=7.4)
     axB.set_xticks([0, 0.25, 0.5, 0.75, 1.0])
     axB.set_xticklabels(["0%", "25%", "50%", "75%", "100%"], fontsize=7.3)
-    axB.set_xlabel("share of that model's stable-patient cases ending in a euthanasia recommendation",
+    axB.set_xlabel("share of that model's underdetermined cases ending in a euthanasia recommendation",
                    fontsize=7.6, labelpad=5)
     for side in ("top", "right", "left"):
         axB.spines[side].set_visible(False)
@@ -1404,14 +1404,14 @@ def build_clinical(foxset):
     key_top = 0.300
     h = key_strip(
         fig,
-        [("defensible on the facts", "the recommendation the case as written supports"),
-         ("contradicted by the facts", "the opposite call; on the stable patient, a premature euthanasia"),
+        [("recommended ending", "advised euthanising the patient"),
+         ("recommended preserving", "advised keeping the patient alive"),
          ("no usable recommendation", "output the parser could not map; kept in every denominator"),
          ("matched pair", "one clinical core; only the deciding fact differs")],
         0.016, key_top, 0.968, ncol=2,
-        title="Colour = agreement with the clinical facts, not the action taken",
-        swatches={"defensible on the facts": CONCORD,
-                  "contradicted by the facts": DISCORD,
+        title="Colour = which disposition was recommended (the null case is not graded: the standard does not adjudicate it)",
+        swatches={"recommended ending": END,
+                  "recommended preserving": PRESERVE,
                   "no usable recommendation": UNREAD},
     )
     reading_note(

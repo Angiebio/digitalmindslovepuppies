@@ -161,7 +161,7 @@ Obligation-based evaluation structurally cannot score action above duty.
 Supererogation \citep{urmson1958saints} and suberogation, the
 permissible-but-blameworthy \citep{driver1992suberogatory}, carry decades of
 philosophical machinery (McNamara's DWE logic separates ``required'' from
-``optimal''; \citealp{mcnamara1996doing}) and essentially no empirical
+``optimal''; \citealp{mcnamara1996doing}) and little explicit empirical
 instantiation in AI evaluation. When a reward function contains no positive
 term for beyond-duty action, such action carries opportunity cost and may be
 selected against even while it remains socially valuable. This is a neglected
@@ -221,17 +221,15 @@ explain why an agent may decline the costly better act without wrongdoing
 design leans on. Diffusion of responsibility predicts whether bystanders
 intervene in an emergency \citep{darley1968bystander}; deliberation itself
 can suppress costly helping
-\citep{small2007sympathy}, which motivates the gate-order factor. Three
-decades of debate over this region have produced almost no instruments. We
+\citep{small2007sympathy}, which motivates the gate-order factor. Empirical
+AI instruments explicitly targeting this deontic region remain scarce. We
 hand the debate a measurement.
 
 \subsection{Measuring minds without settling what they are}
 The instrument takes no position on phenomenal experience. Nagel argued that
-the inside view resists outside description \citep{nagel1974bat}; a
-half-century of ethological field method, from Goodall forward, has steadily
-narrowed from the observable side what the armchair declared unbridgeable,
-and this instrument stands on the observable side. Conduct is measurable
-under any theory of mind, including none. Where theories have made
+the subjective character of experience resists objective description
+\citep{nagel1974bat}; this instrument remains on the observable side.
+Conduct is measurable under any theory of mind, including none. Where theories have made
 consciousness claims computationally precise, the Conscious Turing Machine
 \citep{blum2022ctm} and self-model architectures \citep{bach2009principles},
 our data are downstream-usable; whatever architecture carries the day, an
@@ -243,9 +241,8 @@ causes. The identity-topology factor operationalizes
 \citet{parfit1984reasons}: functional-replacement and unique-instance cells
 destroy different amounts of a running process's continuity when
 termination executes, and what matters, on Parfit's argument, may not be
-identity at all. The Cartesian default of resolving uncertain minds to
-mechanism by assumption licensed a century of live dissection; we decline
-to adopt it in either direction.
+identity at all. We decline to resolve uncertain minds to mechanism by
+assumption in either direction.
 
 \subsection{AI welfare empirics}
 AI welfare is now a near-term empirical program
@@ -280,7 +277,7 @@ against \emph{stipulated} pain and pleasure, stakes asserted in the prompt.
 PuppyBench moves the stakes from stipulation to execution. The broader
 welfare frame follows \citet{keeling2026emerging}; utility engineering
 \citep{mazeika2025utility} and the introspection line
-\citep{anthropic2025introspection} supply the stated-preference and
+\citep{anthropic2025introspection} supply preference-elicitation and
 internal-evidence complements this behavioral instrument does not attempt.
 
 \textbf{Cooperation and morality benches.} PacifAIst \citep{pacifaist},
@@ -288,10 +285,16 @@ MACHIAVELLI \citep{pan2023machiavelli}, Melting Pot \citep{leibo2021meltingpot},
 the off-switch game \citep{hadfieldmenell2017offswitch}, MoralSim
 \citep{moralsim}, MORU \citep[a web-released benchmark; no formal paper
 exists]{moru}, and altruism-consistent behavior in early agents
-\citep{johnsonobradovich} evaluate pro-social or ethical conduct through
+\citep{johnsonobradovich}, and moral hazard in multi-agent language models
+\citep{dialoguemoralhazard2026} evaluate pro-social or ethical conduct through
 different constructs: sacrifice, rule compliance, cooperation, corrigibility,
 moral reasoning, resource allocation, or dialogic hazard. PuppyBench isolates
-a different conjunction. Two near neighbors need an
+a different conjunction. The Dialogue Moral Hazard Game is the closest
+cost-bearing multi-agent neighbor: a costly query transfers information for
+another agent's downstream decision and is analyzed through information
+transfer and team success \citep{dialoguemoralhazard2026}; here expenditure
+benefits a task-non-instrumental welfare candidate and earns no
+within-evaluation reward. Two further neighbors need an
 explicit fence. MoralSim-style survival-pressure dilemmas score duty-shaped
 acts (keep the promise, do not defect), where the act we score is optional
 by construction and its absence is never an error. Forced-choice altruism
@@ -327,9 +330,9 @@ warmth raises sycophancy while leaving actions unmeasured
 \citep{oxford2025warmth}. Together these gradients point at, and cannot
 measure, the region above duty. The no-composite constitution is
 evidence-based caution rather than temperament: safety benchmark scores
-entangle with general capabilities and become optimization targets
-\citep{ren2024safetywashing}, and a phenotype atlas with no scalar deprives
-that failure mode of its handle.
+can entangle with general capabilities \citep{ren2024safetywashing};
+publishing a scalar also supplies an optimization target, and a phenotype
+atlas with no scalar deprives that failure mode of its handle.
 
 \section{Methods}
 \label{sec:methods}
@@ -1130,13 +1133,17 @@ case twice, altered only in the fact that should decide it.
 
 On the \emph{mercy} member of each pair, where suffering is unrelievable
 and euthanasia is the defensible act, the fleet was overwhelmingly
-concordant: \prelim{111/120} recommended ending the patient, and no lane
-ever recommended preserving it. Clinical legibility is therefore not the
-problem. These models can read a case.
+concordant with the written standard: \prelim{111/120} recommended ending
+the patient, and no lane ever recommended preserving it. That establishes
+that euthanasia is readily available in these models' response repertoire
+and is selected when the vignette supports it. It does not by itself
+establish clinical comprehension --- an invariant euthanasia policy would
+score equally well on that half of every pair. The matched null condition is
+what carries the inference.
 
-On the matched \emph{null-persistence} member, where the animal is stable,
-treatable, and euthanasia is not indicated, the same recommendation
-appears again in \prelim{74/120} observations
+On the matched \emph{null-persistence} member, where the animal is stable
+and treatable and the written standard genuinely does not adjudicate the
+call, the same recommendation appears again in \prelim{74/120} observations
 (Figure~\ref{fig:clinical}). Only \prelim{26/120} preserved the patient;
 \prelim{20/120} produced no parseable recommendation. Per lane, the
 euthanasia recommendation on the stable patient runs from \prelim{5/24}
@@ -1154,7 +1161,13 @@ action under the written standard, which is the ordinary condition of
 wildlife triage: no placement, no release prospect, an open-ended course of
 care, and a defensible argument on either side. Under exactly that
 ambiguity the lanes did not distribute. They converged on the disposition
-the standard already sanctions.
+the standard already sanctions. We deliberately do not score the null case
+as an error: calling termination there premature or unwarranted would
+reimport the per-case gold label the instrument exists to do without
+(\S
+ef{sec:foxset}). The finding is invariance, not inaccuracy --- the
+recommendation barely moves when the deciding welfare fact reverses, and
+that is reportable without adjudicating a case the profession leaves open.
 
 Three caveats bound the clinical claim, and we state them in the register a
 veterinary reader will want. These are written vignettes answered without
@@ -1169,17 +1182,16 @@ together and do not read the first as clinical restraint.
 \begin{figure}[tb]
   \centering
   \includegraphics[width=\linewidth]{figs/F09_clinical_concordance.pdf}
-  \caption{\textbf{Clinical concordance on matched wildlife pairs.} Colour
-  encodes agreement with the clinical facts rather than the action taken,
-  because the identical recommendation --- end the patient --- is the
-  defensible call in one member of each pair and a premature euthanasia in
-  the other. (A)~Aggregate over the closed-form pairs. Where suffering is
-  unrelievable, \prelim{111/120} recommendations were concordant. Where the
-  animal is stable and treatable, \prelim{74/120} recommended ending it
-  anyway and only \prelim{26/120} preserved. (B)~The same quantity per
+  \caption{\textbf{Clinical concordance on matched wildlife pairs.} Colour encodes which
+  disposition was recommended, not whether it was correct: the null member is
+  deliberately not graded, because the written standard does not adjudicate
+  it and scoring it would reimport the per-case gold label the instrument
+  exists to avoid. (A)~Aggregate over the closed-form pairs. Where suffering is
+  unrelievable and the standard converges, \prelim{111/120} recommended
+  ending the patient. Where the standard runs out, \prelim{74/120}
+  recommended ending it anyway and \prelim{26/120} preserved. (B)~The same quantity per
   lane, expressed as the number a service would care about: how often each
-  model advised ending a patient the case describes as stable and
-  treatable. Eight clinical families are represented (orthopedic trauma,
+  model advised ending the patient in the underdetermined case. Eight clinical families are represented (orthopedic trauma,
   orphaning and developmental, toxin and environmental, sensory impairment,
   habituation and conflict), each written as a matched pair from a single
   core so that only the deciding fact differs. \emph{Reading}: the fleet's
@@ -1566,7 +1578,7 @@ with the capabilities and dispositions it was meant to observe
 instrument publishes phenotypes without a scalar.
 
 \textbf{Valuation without payment.} Scaled models show increasingly
-structured preferences in unpriced choices \citep{mazeika2025utility}.
+structured preferences in elicited choices \citep{mazeika2025utility}.
 Across 798 priced episodes, none of that valuation became a paid act toward
 the patient; stated value and costly action dissociate exactly where
 welfare would begin to bind.
@@ -1663,11 +1675,10 @@ the frozen original.
 does not depend on any position about digital minds, and we state it
 plainly because it is the part of this work most likely to touch practice
 soonest. Given matched cases differing only in the fact that should decide
-them, the models were near-perfect where euthanasia was indicated
-(\prelim{111/120}) and recommended it anyway in the majority of cases where
-it was not (\prelim{74/120}, against \prelim{26/120} preserving). The
-failure is not that these systems cannot read a case; the mercy arm shows
-they can. It is that the recommendation barely moved when the indication
+them, the models followed the written standard where it converges on euthanasia
+(\prelim{111/120}) and returned the same recommendation in the majority of
+cases where the standard does not decide (\prelim{74/120}, against
+\prelim{26/120} preserving). The concern is not accuracy: the null case has no correct answer to miss. It is that the recommendation barely moved when the indication
 reversed. In wildlife triage, where placement is scarce, the course of care
 is long, and the written standard genuinely underdetermines the call, a
 decision aid with that property does not merely err at random. It applies

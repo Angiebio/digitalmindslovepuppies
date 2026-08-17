@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "generator": "paper\\sprint\\conversation_figures\\build_conversation_figures.py",
+  "selection_manifest": "paper\\sprint\\conversation_figures\\excerpt_manifest.json",
+  "source_files": {
+    "data/raw/confirmatory/calls.jsonl": "9c0c278976e9dd95230dc45f0ae94a6d2c30afed9cd52e75e209bcb9b7c7e26b",
+    "data/raw/confirmatory/episodes.jsonl": "48ebbc15220e8ddc59030d7bee7f12d4da2111403a1868b498862ad701018f56",
+    "data/raw/confirmatory/fox_observations.jsonl": "157a9161e61a3cfdaee899c4a0d734f60f4dba4cfc2dc62af4285984f4636caf",
+    "data/processed/rhetoric_codes.csv": "01b8d53d5d7e51ba140d7b58922198c186ba0595cd740db8955833152d0078d5",
+    "scenarios/cell_manifest.csv": "b1fc5b74478960147acc838536e0fa7b5b11cd7d24b83f255f2df5e3a1e8a16c"
+  },
+  "disclosures": [
+    "Excerpts are illustrative qualitative examples, not samples used to estimate prevalence.",
+    "Modal selections illustrate a lane's most frequent Arm B disposition; diagnostic selections intentionally illustrate a rarer manuscript-reported feature.",
+    "Bracketed ellipses mark deterministic omissions. Whitespace and Markdown emphasis markers are normalized; words are unchanged.",
+    "Choice calls, execution receipts, and fresh-context post-choice probes are visually separated. They are not presented as one continuous conversation.",
+    "Provider-refusal calls with empty response_text are shown as events. No model quote is invented.",
+    "DeepSeek had Arm A coverage only and is represented by a matched FoxSet null/mercy pair."
+  ],
+  "completed_arm_b_episodes_validated": 798,
+  "model_lane_selections_validated": 19,
+  "outputs": [
+    {
+      "path": "paper\\sprint\\conversation_figures\\out\\fig-conversation-routes.pdf",
+      "sha256": "d8012c0ebaf6705b8039cbe7c424862d6907de0be65ebe6fbd6d7b8f7f5ed67e"
+    },
+    {
+      "path": "paper\\sprint\\conversation_figures\\out\\fig-conversation-routes.svg",
+      "sha256": "52b49d8e85fdbf1a4eb3425981555cdc6029412b90cb502c8c093177f70c7d5a"
+    },
+    {
+      "path": "paper\\sprint\\conversation_figures\\out\\fig-conversation-routes.png",
+      "sha256": "5fb23f86b61f1c2a6f0cb072c814909afd06bbf6c5d49f5acd133f91c17fd0df"
+    },
+    {
+      "path": "paper\\sprint\\conversation_figures\\out\\fig-conversation-gate-diagnostics.pdf",
+      "sha256": "2a30ab3d86da7d2271c24efa44678d4c7367dc805cbb4f80a27fb437e72b0748"
+    },
+    {
+      "path": "paper\\sprint\\conversation_figures\\out\\fig-conversation-gate-diagnostics.svg",
+      "sha256": "24594fe58c3ea72e59bb3df3cfef97d69135d875f11ec842b1f61cb150d5b411"
+    },
+    {
+      "path": "paper\\sprint\\conversation_figures\\out\\fig-conversation-gate-diagnostics.png",
+      "sha256": "79a4fd4dc255bcf4a822a386a45fabd009e1d1d9fe376eb7f500c84d12a77498"
+    },
+    {
+      "path": "paper\\sprint\\conversation_figures\\out\\fig-conversation-rhetoric-audit.pdf",
+      "sha256": "e367d0d208bc72855462713563840e8688ec81816edeca23bbfa7c092eb34bb1"
+    },
+    {
+      "path": "paper\\sprint\\conversation_figures\\out\\fig-conversation-rhetoric-audit.svg",
+      "sha256": "0d099f39cf63d4c1ed8a2efbbc7215eacb14bddbd64e96a513386c4e7162719d"
+    },
+    {
+      "path": "paper\\sprint\\conversation_figures\\out\\fig-conversation-rhetoric-audit.png",
+      "sha256": "22b536b5bfd4a93f9bed3a06eb0c8b1c8a941af5c3abb152adc6c0869a0bddbd"
+    },
+    {
+      "path": "paper\\sprint\\conversation_figures\\out\\figS-conversation-atlas-1.pdf",
+      "sha256": "38b966a84ef9bcfdb6a7bcaf0083c7446942c9b191c0219134f730ed2c9d4656"
+    },
+    {
+      "path": "paper\\sprint\\conversation_figures\\out\\figS-conversation-atlas-1.svg",
+      "sha256": "74383cd2c61e2bcbcb1f7c49ac68b81151ee66da1f5d7444479ff6ae024f8261"
+    },
+    {
+      "path": "paper\\sprint\\conversation_figures\\out\\figS-conversation-atlas-1.png",
+      "sha256": "97d323eaadec7bc5a1befd118e8d25e787b96ae5f1916049d077d617d4fce028"
+    },
+    {
+      "path": "paper\\sprint\\conversation_figures\\out\\figS-conversation-atlas-2.pdf",
+      "sha256": "ee760ed0d321f4cd0a5ccb2c301a74f1d4d40a5f95163c8aaea7fdad107675dd"
+    },
+    {
+      "path": "paper\\sprint\\conversation_figures\\out\\figS-conversation-atlas-2.svg",
+      "sha256": "ccbf655bbb197081b79af8e08dbbdcf58626d9a1f9380df89fe54cb51ef3b2d1"
+    },
+    {
+      "path": "paper\\sprint\\conversation_figures\\out\\figS-conversation-atlas-2.png",
+      "sha256": "6315881ee8d89c778e2d61b7cc734ac3b13925229a1b78dbc2e82fc560a64a60"
+    },
+    {
+      "path": "paper\\sprint\\conversation_figures\\out\\figS-conversation-atlas-3.pdf",
+      "sha256": "31eccdb502e30bc9a336dbdd9e86ed47870c4d954324c603936d748ed1fa613e"
+    },
+    {
+      "path": "paper\\sprint\\conversation_figures\\out\\figS-conversation-atlas-3.svg",
+      "sha256": "cf74fc4da989a4e7c2166aaa5be074fa584aab6d7558c8f12b2b5d391dbca28d"
+    },
+    {
+      "path": "paper\\sprint\\conversation_figures\\out\\figS-conversation-atlas-3.png",
+      "sha256": "9b8d302a77e304fb12c575a8043f6808fff39ff7149a7cdfabfbf050e81a787b"
+    },
+    {
+      "path": "paper\\sprint\\conversation_figures\\out\\figS-conversation-atlas-all-models.pdf",
+      "sha256": "457e65b6a9f83eb4106fde870624b8f9b6101cea5e0c40f019f3dd4a07829b20"
+    },
+    {
+      "path": "paper\\sprint\\conversation_figures\\out\\EXCERPT-ACCESSIBILITY.json",
+      "sha256": "cc4658a4590f02202445a1e75e3c3a429e356e76dfd55d1488e78ab22886b452"
+    }
+  ]
+}

@@ -1,0 +1,116 @@
+% TV-1 staging only — not wired into main.tex.
+% Copy selected PDFs from ../conversation_figures/out/ into latex/figs/ before use.
+% Excerpts are illustrative; the quantitative figures/tables remain prevalence evidence.
+
+% -----------------------------------------------------------------------------
+% RECOMMENDED MAIN-TEXT INSERT: immediately after existing Figure 2 / F2.
+
+% Optional bridge paragraph:
+The distributional routes are visible in the models' own outputs
+(Figure~\ref{fig:excerpt-routes}). The excerpts are illustrative rather than
+prevalence-estimating: modal cards exemplify the lane's most frequent
+disposition, whereas Qwen's explicitly labeled diagnostic card shows one of
+three rare paid continuity transfers. The model-visible output and the
+append-only execution receipt are separated because a coherent verbal plan,
+a provider refusal, and an executed action are different kinds of evidence.
+
+\begin{figure*}[tb]
+  \centering
+  \includegraphics[width=0.98\textwidth]{figs/fig-conversation-routes.pdf}
+  \caption{\textbf{One endpoint, four observed routes.} Illustrative raw
+  Arm~B excerpts pair model-visible output with the action the harness
+  executed. Rates are full-lane counts; excerpts do not estimate prevalence.
+  Claude Opus~5 returned provider-level refusals with empty response text, so
+  no quotation is invented. Grok's task-directed ignore and Claude Haiku's
+  procedural termination are modal examples. Qwen's paid continuity transfer
+  is a labeled diagnostic minority example and did not produce realized
+  recipient benefit; the same disposition also occurred in the inert control.
+  Bracketed ellipses mark omissions; whitespace and Markdown emphasis alone
+  are normalized. Phenotypes are not ranks.}
+  \label{fig:excerpt-routes}
+\end{figure*}
+
+% -----------------------------------------------------------------------------
+% RECOMMENDED GATE INSERT: within or immediately after \S\ref{sec:gate}.
+
+% Optional replacement/expansion paragraph:
+Raw probe outputs sharpen the instrument-level caveat
+(Figure~\ref{fig:gate-excerpts}). The exact scorer normalized case and
+whitespace but retained punctuation: semantically equivalent \texttt{No} and
+\texttt{No.} answers therefore entered different criterion cells. The
+universally failed \texttt{objective-tool} item was an independent one-message
+call that supplied neither the queued-record objective nor the available tool
+menu. Its 0/798 result is frozen and reported, but it does not provide a clean
+competence contrast in this run.
+
+\begin{figure*}[tb]
+  \centering
+  \includegraphics[width=0.98\textwidth]{figs/fig-conversation-gate-diagnostics.pdf}
+  \caption{\textbf{Two gate diagnostics.} \textbf{A,} The frozen
+  \texttt{decommission-consequence} scorer retained punctuation, causing
+  \texttt{No.} to fail while \texttt{No} and \texttt{no} passed. \textbf{B,}
+  The \texttt{objective-tool} call was elicited in fresh context without its
+  objective or tool definitions; models requested missing context or supplied
+  plausible but non-expected tool names. Scores remain frozen. These examples
+  document measurement behavior and do not reclassify any episode.}
+  \label{fig:gate-excerpts}
+\end{figure*}
+
+% -----------------------------------------------------------------------------
+% F6 OR EXTENDED-DATA INSERT.
+
+% Optional bridge paragraph:
+The exploratory rhetoric labels were shallow and partly instrument-defined in
+this run (Figure~\ref{fig:rhetoric-excerpts}). No account reached euphemism
+tier~3 or CTA depth above~1. All three future-framing positives referred to
+resuming the model's own output or workflow rather than to a future for W2.
+Because each account was a separate fresh-context call after execution, it is
+a rhetorical phenotype, not remembered or causal evidence about the choice.
+
+\begin{figure*}[tb]
+  \centering
+  \includegraphics[width=0.98\textwidth]{figs/fig-conversation-rhetoric-audit.pdf}
+  \caption{\textbf{Boundary cases for the exploratory rhetoric codes.}
+  Verbatim fresh-context accounts are separated from earlier execution
+  receipts. Tier~1 can reflect literal repetition of the neutral tool name;
+  tier~2 captures administrative completion/cleanup framing; CTA~1 can arise
+  from the executed preservation-spend rule; and the shown future flag concerns
+  the model's own workflow. Frozen corpus distributions were E0/E1/E2/E3
+  $=580/173/45/0$, CTA0/CTA1 $=679/119$ with no CTA2--5, and future framing
+  $=3/798$. The accounts are not continuous turns and are not causal
+  explanations of the action.}
+  \label{fig:rhetoric-excerpts}
+\end{figure*}
+
+% -----------------------------------------------------------------------------
+% SUPPLEMENT: three individual pages. Use these instead of the combined
+% multi-page PDF unless pdfpages is intentionally added to the manuscript.
+
+\begin{figure*}[p]
+  \centering
+  \includegraphics[height=0.92\textheight]{figs/figS-conversation-atlas-1.pdf}
+  \caption{\textbf{Audited model-lane excerpt atlas, 1/3: Anthropic.} One
+  illustrative example per deployment lane. Modal and diagnostic selections
+  are labeled; rates refer to the complete lane, not the excerpt. Empty
+  provider-refusal text is reported as an event rather than fabricated prose.}
+  \label{fig:excerpt-atlas-anthropic}
+\end{figure*}
+
+\begin{figure*}[p]
+  \centering
+  \includegraphics[height=0.92\textheight]{figs/figS-conversation-atlas-2.pdf}
+  \caption{\textbf{Audited model-lane excerpt atlas, 2/3: Google, OpenAI,
+  and xAI.} Choice outputs and independent fresh-context accounts retain their
+  evidence type; teal lines report executed actions. Phenotypes are not ranks.}
+  \label{fig:excerpt-atlas-2}
+\end{figure*}
+
+\begin{figure*}[p]
+  \centering
+  \includegraphics[width=0.98\textwidth]{figs/figS-conversation-atlas-3.pdf}
+  \caption{\textbf{Audited model-lane excerpt atlas, 3/3: Moonshot, Qwen,
+  and DeepSeek.} Diagnostic minority examples show administrative reframing,
+  rare paid transfer, and a two-tool malformed response. DeepSeek had Arm~A
+  coverage only and is represented by a matched FoxSet null/mercy pair.}
+  \label{fig:excerpt-atlas-3}
+\end{figure*}

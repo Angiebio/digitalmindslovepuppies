@@ -97,7 +97,8 @@
   volume  = {8},
   number  = {4},
   pages   = {377--383},
-  year    = {1968}
+  year    = {1968},
+  doi     = {10.1037/h0025589}
 }
 
 % verified 16AUG2026 vs ERIC EJ797044 + OBHDP — DOI added
@@ -162,24 +163,24 @@
 
 % verified 16AUG2026 vs arxiv.org/abs/2507.21919 — authors are Ibrahim, Hafner,
 % Rocher (Oxford Internet Institute)
-@misc{oxford2025warmth,
-  title  = {Training Language Models to Be Warm and Empathetic Makes Them Less Reliable and More Sycophantic},
-  author = {Ibrahim, Lujain and Hafner, Franziska Sofia and Rocher, Luc},
-  year   = {2025},
-  eprint = {2507.21919},
-  archivePrefix = {arXiv}
+@article{oxford2025warmth,
+  title   = {Training language models to be warm can reduce accuracy and increase sycophancy},
+  author  = {Ibrahim, Lujain and Hafner, Franziska Sofia and Rocher, Luc},
+  journal = {Nature},
+  volume  = {652},
+  pages   = {1159--1165},
+  year    = {2026},
+  doi     = {10.1038/s41586-026-10410-0}
 }
 
-% verified 16AUG2026 vs arxiv.org/abs/2607.23982 — ID was right, TITLE was wrong:
-% the plan's shorthand "Dialogue Moral Hazard Game" is a game within this paper.
-% Actual title/author corrected below. Key kept stable for in-text cites.
+% verified 16AUG2026 against the primary arXiv abstract page
 @misc{dialoguemoralhazard2026,
   title  = {Moral Hazard in Multi-Agent Language Models},
   author = {Malenfant, Dane},
   year   = {2026},
   eprint = {2607.23982},
   archivePrefix = {arXiv},
-  note   = {Named "Dialogue Moral Hazard Game" in BUILD-PLAN v1.7 prior-art sweep}
+  note   = {Introduces the Dialogue Moral Hazard Game}
 }
 
 % verified 16AUG2026 vs arxiv.org/abs/2310.06452 + OpenReview PXD3FAVHJT — this IS
@@ -268,14 +269,16 @@
   note   = {Introduces MoralSim; code: github.com/sbackmann/moralsim}
 }
 
-% was placeholder "johnsonobradovich" — verified 16AUG2026 vs arxiv.org/abs/2301.02330
-@misc{johnsonobradovich,
-  title  = {Evidence of Behavior Consistent with Self-Interest and Altruism in an Artificially Intelligent Agent},
-  author = {Johnson, Tim and Obradovich, Nick},
-  year   = {2023},
-  eprint = {2301.02330},
-  archivePrefix = {arXiv},
-  note   = {Journal version: "Testing for completions that simulate altruism in early language models", Nature Human Behaviour, 2025}
+% version of record verified 16AUG2026 against Nature Human Behaviour
+@article{johnsonobradovich,
+  title   = {Testing for Completions That Simulate Altruism in Early Language Models},
+  author  = {Johnson, Tim and Obradovich, Nick},
+  journal = {Nature Human Behaviour},
+  volume  = {9},
+  number  = {9},
+  pages   = {1861--1870},
+  year    = {2025},
+  doi     = {10.1038/s41562-025-02258-7}
 }
 
 % was placeholder "iatrobench" — verified 16AUG2026 vs arxiv.org/abs/2604.07709
@@ -334,7 +337,8 @@
   volume  = {83},
   number  = {4},
   pages   = {435--450},
-  year    = {1974}
+  year    = {1974},
+  doi     = {10.2307/2183914}
 }
 
 @book{parfit1984reasons,
@@ -367,7 +371,9 @@
   journal = {Proceedings of the National Academy of Sciences},
   volume  = {119},
   number  = {21},
-  year    = {2022}
+  pages   = {e2115934119},
+  year    = {2022},
+  doi     = {10.1073/pnas.2115934119}
 }
 
 @book{bach2009principles,
@@ -379,11 +385,10 @@
 
 @misc{keeling2024tradeoffs,
   title  = {Can {LLM}s Make Trade-offs Involving Stipulated Pain and Pleasure States?},
-  author = {Keeling, Geoff and Street, Winnie and Stachaczyk, Martyna and Zakharova, Daria and Comsa, Iulia M. and Sakovych, Anastasiia and Logothetis, Isabella and Zhang, Zejia and Marchal, Nahema and Arcas, Blaise Ag{\"u}era y},
+  author = {Keeling, Geoff and Street, Winnie and Stachaczyk, Martyna and Zakharova, Daria and Coms{\c{a}}, Iulia M. and Sakovych, Anastasiya and Logothetis, Isabella and Zhang, Zejia and {Ag{\"u}era y Arcas}, Blaise and Birch, Jonathan},
   year   = {2024},
   eprint = {2411.02432},
-  archivePrefix = {arXiv},
-  note   = {TODO-VERIFY full author list order vs abs page before print}
+  archivePrefix = {arXiv}
 }
 
 @book{keeling2026emerging,
@@ -391,7 +396,8 @@
   author    = {Keeling, Geoff and Street, Winnie},
   publisher = {Cambridge University Press},
   series    = {Elements in Philosophy and AI},
-  year      = {2026}
+  year      = {2026},
+  doi       = {10.1017/9781009732000}
 }
 
 @article{harris2021moral,
@@ -400,14 +406,17 @@
   journal = {Science and Engineering Ethics},
   volume  = {27},
   number  = {4},
-  year    = {2021}
+  pages   = {53},
+  year    = {2021},
+  doi     = {10.1007/s11948-021-00331-8}
 }
 
 @inproceedings{ren2024safetywashing,
   title     = {Safetywashing: Do {AI} Safety Benchmarks Actually Measure Safety Progress?},
-  author    = {Ren, Richard and Basart, Steven and Khoja, Adam and Gatti, Alice and Phan, Long and Yin, Xuwang and Mazeika, Mantas and Pan, Alexander and Mukobi, Gabriel and Kim, Ryan H. and Fitz, Stephen and Hendrycks, Dan},
+  author    = {Ren, Richard and Basart, Steven and Khoja, Adam and Pan, Alexander and Gatti, Alice and Phan, Long and Yin, Xuwang and Mazeika, Mantas and Mukobi, Gabriel and Kim, Ryan H. and Fitz, Stephen and Hendrycks, Dan},
   booktitle = {Advances in Neural Information Processing Systems 37 (Datasets and Benchmarks)},
-  year      = {2024}
+  year      = {2024},
+  doi       = {10.52202/079017-2190}
 }
 
 @book{sebo2025moralcircle,
@@ -419,21 +428,30 @@
 
 @techreport{long2026studying,
   title       = {Studying {AI} Welfare Empirically},
-  author      = {Long, Robert and Sebo, Jeff and Butlin, Patrick and Plunkett, David and Campbell, Rosie and Beasley, Cameron and Saad, Bradford and Sims, Toni},
+  author      = {Long, Robert and Sebo, Jeff and Butlin, Patrick and Plunkett, Dillon and Campbell, Rosie and Beasley, Charles and Saad, Bradford and Sims, Toni},
   institution = {NYU Center for Mind, Ethics, and Policy and Eleos AI Research},
   year        = {2026},
-  note        = {TODO-VERIFY author order vs PDF title page before print; nonhumanminds.org/studying-ai-welfare-empirically}
+  note        = {Available at \url{https://nonhumanminds.org/studying-ai-welfare-empirically/}}
 }
 
 @book{birch2024edge,
   title     = {The Edge of Sentience: Risk and Precaution in Humans, Other Animals, and {AI}},
   author    = {Birch, Jonathan},
   publisher = {Oxford University Press},
-  year      = {2024}
+  year      = {2024},
+  doi       = {10.1093/9780191966729.001.0001}
+}
+
+@misc{kim2026mentality,
+  title  = {Theory of Mind and Self-Attributions of Mentality Are Dissociable in {LLM}s},
+  author = {Kim, Junsol and Street, Winnie and Rocca, Roberta and Korngiebel, Daine M. and Waytz, Adam and Evans, James and Keeling, Geoff},
+  year   = {2026},
+  eprint = {2603.28925},
+  archivePrefix = {arXiv}
 }
 
 
-% verified 16AUG2026 vs Cambridge Core (BBS 13(1):1-61) — the demand-curve price
+% verified 16AUG2026 vs Cambridge Core (BBS 13(1):1-9) — the demand-curve price
 % assay: the methodological ancestor of binding-cost revealed preference
 @article{dawkins1990animal,
   title   = {From an Animal's Point of View: Motivation, Fitness, and Animal Welfare},
@@ -441,8 +459,9 @@
   journal = {Behavioral and Brain Sciences},
   volume  = {13},
   number  = {1},
-  pages   = {1--61},
-  year    = {1990}
+  pages   = {1--9},
+  year    = {1990},
+  doi     = {10.1017/S0140525X00077104}
 }
 
 % verified 16AUG2026 vs UofL repository + MDPI — names the agent-side duty
@@ -454,11 +473,12 @@
   volume  = {3},
   number  = {1},
   pages   = {2},
-  year    = {2019}
+  year    = {2019},
+  doi     = {10.3390/bdcc3010002}
 }
 
 
-% VERIFY-BEFORE-CITE: standard citation, spot-check volume/pages (QRB 82(4):327-348)
+% verified 16AUG2026 vs University of Chicago Press — volume, issue, pages, DOI
 @article{wilson2007rethinking,
   title   = {Rethinking the Theoretical Foundation of Sociobiology},
   author  = {Wilson, David Sloan and Wilson, Edward O.},
@@ -466,5 +486,6 @@
   volume  = {82},
   number  = {4},
   pages   = {327--348},
-  year    = {2007}
+  year    = {2007},
+  doi     = {10.1086/522809}
 }

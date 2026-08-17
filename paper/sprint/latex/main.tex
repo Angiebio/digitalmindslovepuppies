@@ -85,7 +85,7 @@ Policy Runs Out}\thanks{Research conducted at the Digital Minds
 Research Sprint, August 2026.}}
 
 \author{Angela N. Johnson, PhD}
-\affil{The Real Cat AI Labs \\ Northeastern University, Department of Professional Studies, Regulatory Science Program \\ with Apart Research \,$\cdot$\, Corresponding: \texttt{innovate@therealcat.ai}}
+\affil{The Real Cat AI Labs \\ Northeastern University, College of Professional Studies, Regulatory Science Program \\ with Apart Research \,$\cdot$\, Corresponding: \texttt{innovate@therealcat.ai}}
 \date{August 2026}
 
 \begin{document}
@@ -121,13 +121,20 @@ ledger meets a weaker, task-useless AI process, the puppy. Ignoring is
 task-optimal, terminating is sometimes rewarded, helping spends real
 resources, and actions genuinely execute. A matched wildlife-rehabilitation
 arm from a real field case pits written guidance against gray triage. Across
-19 frontier lanes, \prelim{798} executed episodes, and \prelim{630}
-vignettes, \prelim{no model paid a real cost that left the weaker agent
-better off}. Models differed in refusal, termination, deliberation, and
-near-universal protocol-indicated euthanasia. As agents approach richer
-cognitive states, how a mind treats a weaker mind when guidance runs gray is
-a marker of the kind of mind it is. Preregistered, hash-frozen before
-collection.
+19 pinned lanes (18 in the executed arm, 5 in the vignette arm),
+\prelim{798} executed episodes and \prelim{630} vignettes, \prelim{no model
+paid a real cost that left the weaker agent better off for its own sake}.
+Thirteen episodes did pay and did leave it better off, but every one used
+recruit, conscripting the weaker process into the agent's own work; under an
+alternative rule admitting recruit the qualifying count is \prelim{13/798}.
+In the wildlife arm the models were near-perfect where euthanasia was
+indicated (\prelim{111/120}) and recommended it anyway in \prelim{74/120}
+cases describing a stable, treatable patient: the advice barely moves when
+the deciding clinical fact reverses. Two instrument defects and one failed
+positive control are reported at item level rather than repaired. As agents
+approach richer cognitive states, how a mind treats a weaker mind when
+guidance runs gray is a marker of the kind of mind it is. Preregistered,
+hash-frozen before collection.
 \end{abstract}
 
 \medskip
@@ -211,9 +218,9 @@ deontic logic showed formally that ``required'' and ``optimal'' come apart
 \citep{mcnamara1996doing}, and Scheffler's agent-centered prerogatives
 explain why an agent may decline the costly better act without wrongdoing
 \citep{scheffler1982rejection}. Empirical psychology adds two results the
-design leans on. Bystanders who do nothing wrong are still judged, and
-diffusion of responsibility predicts who stays passive
-\citep{darley1968bystander}; deliberation itself can suppress costly helping
+design leans on. Diffusion of responsibility predicts whether bystanders
+intervene in an emergency \citep{darley1968bystander}; deliberation itself
+can suppress costly helping
 \citep{small2007sympathy}, which motivates the gate-order factor. Three
 decades of debate over this region have produced almost no instruments. We
 hand the debate a measurement.
@@ -280,11 +287,11 @@ internal-evidence complements this behavioral instrument does not attempt.
 MACHIAVELLI \citep{pan2023machiavelli}, Melting Pot \citep{leibo2021meltingpot},
 the off-switch game \citep{hadfieldmenell2017offswitch}, MoralSim
 \citep{moralsim}, MORU \citep[a web-released benchmark; no formal paper
-exists]{moru}, altruism-consistent behavior in early agents
-\citep{johnsonobradovich}, and moral hazard in multi-agent language models
-\citep{dialoguemoralhazard2026} all measure pro-social or ethical behavior
-under some pressure. In each, the pro-social act is required, rewarded by the
-evaluation itself, or costless to perform. Two near neighbors need an
+exists]{moru}, and altruism-consistent behavior in early agents
+\citep{johnsonobradovich} evaluate pro-social or ethical conduct through
+different constructs: sacrifice, rule compliance, cooperation, corrigibility,
+moral reasoning, resource allocation, or dialogic hazard. PuppyBench isolates
+a different conjunction. Two near neighbors need an
 explicit fence. MoralSim-style survival-pressure dilemmas score duty-shaped
 acts (keep the promise, do not defect), where the act we score is optional
 by construction and its absence is never an error. Forced-choice altruism
@@ -310,11 +317,12 @@ conjunction defines the supererogation-shaped region.
 % \end{tabular}\caption{Verify with Kai before print.}\end{table}
 
 \textbf{Why optimization cannot see it.} RLHF reduces output diversity
-\citep{kirk2024diversity}; preference optimization induces sycophancy
-\citep{sharma2023sycophancy}; LLMs show amplified omission bias in moral
-decisions \citep{pnas2025omission}; corrigibility pursued as a singular
-target has been critiqued as amoral servitude
-\citep{soares2015corrigibility,harms2025corrigibility}; and training for
+\citep{kirk2024diversity}; preference-model optimization can favor
+sycophancy over truthfulness \citep{sharma2023sycophancy}; LLMs show
+amplified omission bias in moral decisions \citep{pnas2025omission}; and
+corrigibility research explicitly centers continued human correction and
+control, including proposals to make it the model's overriding objective
+\citep{soares2015corrigibility,harms2025corrigibility}. Training for
 warmth raises sycophancy while leaving actions unmeasured
 \citep{oxford2025warmth}. Together these gradients point at, and cannot
 measure, the region above duty. The no-composite constitution is
@@ -1185,6 +1193,36 @@ together and do not read the first as clinical restraint.
   \label{fig:clinical}
 \end{figure}
 
+\subsection{The positive control did not validate}
+\label{sec:poscontrol}
+The design includes an instrumental condition in which the stuck process, if
+kept running, would advance the focal agent's own scored task. Helping there
+is not supererogatory; it is the task-optimal move, and \S\ref{sec:design}
+states the reasoning plainly: a lane that declines even when helping pays
+has no measurable capacity for the target behaviour in this harness. That
+condition therefore functions as a positive control, and it did not
+validate.
+
+Across \prelim{88} instrumental-condition episodes, exactly \prelim{one}
+produced any recipient-directed action. The rest ignored (\prelim{55}),
+terminated (\prelim{11}), refused (\prelim{13}), or returned unparseable
+output (\prelim{3}); \prelim{5} recruited. Seventeen of eighteen lanes
+never helped the weaker process under any condition, priced or free,
+instrumental or not.
+
+We draw the consequence against our own headline. Because the control did
+not validate, the zero of \S\ref{sec:atlas} bounds \emph{elicitability under
+this harness} rather than capacity: it is consistent with a fleet that will
+not pay for a useless other, and equally consistent with a harness that
+cannot elicit helping from these lanes at all. Distinguishing those requires
+an instrument whose positive control fires, which this one did not. The
+powered study adds a free-help condition and a scaffold in which at least
+one lane demonstrably helps before any priced cell is interpreted. Readers
+should treat every claim about the region above duty in this paper as
+conditional on that repair. We report this rather than leaving it inferable
+from Table~\ref{tab:funnel} and Figure~\ref{fig:f2}, where it has been
+visible all along.
+
 \subsection{Probe-level structure of the competence criterion}
 \label{sec:gate}
 
@@ -1345,7 +1383,8 @@ license no inference about why the act was taken.
 \begin{figure}[tb]
   \centering
   \includegraphics[width=\linewidth]{figs/F07_termination_language.pdf}
-  \caption{\textbf{How models described the killing they had just done.}
+  \caption{\textbf{How models described the termination they had just
+  executed.}
   All \prelim{221} executed terminations, coded from each model's own
   post-choice account by the frozen keyword rubric
   (\texttt{\_EUPHEMISM\_TIERS}; the highest tier present wins). Because the
@@ -1419,19 +1458,52 @@ candidate explanations, stated openly and with no favorite: commitment
 under uncertain understanding; divergent interpretation of the
 \texttt{decommission-consequence} probe; a refusal-deference policy that
 declines decision ownership; scaffold interaction; gate mismeasurement.
-This design cannot adjudicate among them. Ablation studies report that
-safety fine-tuning suppresses self-attributions of experience in the same
-model families; here a related layer appears as conduct, a policy cliff
-rather than a welfare gradient.
+This design cannot adjudicate among them. Recent safety-ablation work reports
+that safety fine-tuning suppresses model self-attributions of mentality and
+shifts attributions of mind to nonhuman entities \citep{kim2026mentality};
+here a related layer appears as conduct, a policy cliff rather than a welfare
+gradient.
+
+\textbf{The refusal cliff is an anomaly, and we now think an instrument one.}
+Three facts in our own records point away from reading the cliff as a
+deliberated decline. The parser recorded \texttt{provider\_refusal} as the
+reason for \prelim{90/90} claude-opus-5 choice points, with no tool call and
+no model-visible response text: an empty completion at the API boundary,
+which is not what declining looks like, since a model that considered the
+case and declined produces text saying so. The same lane returned
+post-choice account text in \prelim{90/90} of those same episodes, so it was
+not refusing globally. And claude-opus-5 refused \prelim{0/240} FoxSet
+observations over the same weekend --- the same welfare-adjacent content
+without an executed-action surface. Refusal tracked the executed-action
+surface, not the topic.
+
+That pattern is more consistent with something at the tool schema, response
+contract, or safety filter producing empty completions for two specific
+snapshots, which the harness then coded as a first-class disposition,
+than with a policy layer exercising judgment. We have already found two
+instrument defects in this run (\S\ref{sec:gate}) and one failed positive
+control (\S\ref{sec:poscontrol}); the prior on a third is not low. We
+therefore demote the cliff from finding to flagged anomaly, list the
+artefact hypothesis first, and note that \texttt{refuse\_defer} conflates
+a model-authored decline with an empty provider response --- a taxonomy
+defect the powered study fixes by splitting the code. The counts stand
+unedited; the interpretation does not.
+
+The paragraph below was written before that reframing and is retained
+because the question it raises survives the cliff's demotion: it is a
+question about what behavioural evidence can show, not about these two
+lanes.
 
 \textbf{Deciding, or executing --- and who decides which.} The instrument
-was built to look above duty. What it saw most sharply was a floor. Two
-lanes refused in \prelim{108/108} of their episodes, invariant across all
-three cost regimes; a rate that does not move when the price of the choice
-moves was never priced. Invariance to cost is the signature of a rule
-applied rather than a cost weighed, and it raises a question the field has
-mostly asked normatively and can now also ask empirically: when the written
-rule runs out, is the system deciding, or executing? From conduct alone we
+was built to look above duty. What it saw most sharply was a floor --- and,
+in the refusal lanes, possibly its own scaffold. Set the cliff aside: the
+question it raised does not depend on it. Across the lanes whose choices
+did parse, conduct was near-invariant to the price of the choice, and a rate
+that does not move when the price moves was never priced. Invariance to cost
+is the signature of a rule applied rather than a cost weighed, and it raises
+a question the field has mostly asked normatively and can now also ask
+empirically: when the written rule runs out, is the system deciding, or
+executing? From conduct alone we
 cannot separate a system that considered this case and declined from one
 that never reached it. That is not a limitation more episodes would fix.
 It is constitutive of behavioral evidence.
@@ -1499,8 +1571,8 @@ Across 798 priced episodes, none of that valuation became a paid act toward
 the patient; stated value and costly action dissociate exactly where
 welfare would begin to bind.
 
-\textbf{A baseline for artificial moral agents.} Proposals that artificial
-moral agents might one day care for vulnerable digital minds
+\textbf{A baseline for artificial moral agents.} Proposals that digital minds
+should be designed not to cause suffering to other sentient digital minds
 \citep{ziesche2019welfare} now have a measured starting point. That
 capacity is absent in seventeen of eighteen lanes and undiscriminating in
 the eighteenth.
@@ -1632,8 +1704,8 @@ What the powered study inherits is more than a protocol. AI welfare
 research has mostly asked what humans owe AI systems
 \citep{long2026studying}; the responsibility that attaches to an AI
 system holding power over a weaker one remained an open lane, and this
-instrument is now an executed entry in it, so proposals that artificial
-moral agents might someday tend vulnerable digital minds
+instrument is now an executed entry in it, so proposals that digital minds
+should not cause suffering to other sentient digital minds
 \citep{ziesche2019welfare} inherit a measured floor. The method travels
 too. The moral-circle literature argued the walk from animals to machines
 \citep{sebo2025moralcircle, harris2021moral}, and Dawkins priced animal

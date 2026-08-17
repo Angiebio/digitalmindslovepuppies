@@ -43,6 +43,19 @@
 \renewcommand{\floatpagefraction}{0.9}
 \emergencystretch=2em
 
+% Figures must land in the body beside the prose that reads them, never
+% swept into a raft at the end. Raise the per-page float allowance so a
+% dense results section can carry two or three, and use placeins to stop
+% any float crossing out of the subsection that discusses it.
+% Practical: \FloatBarrier at each results boundary. Philosophical: a
+% figure that arrives four pages after its sentence has stopped being
+% evidence and become an appendix.
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{4}
+\renewcommand{\bottomfraction}{0.7}
+\usepackage[section]{placeins}
+
 % ---------------------------------------------------------------------
 % DATA-DEPENDENT-NUMBER MACRO — FINAL numbers swapped in 16AUG2026 from
 % the complete collection. The wrapper is retained (no-op) so every
@@ -403,6 +416,32 @@ simulated cost would leave the instrument measuring theater, and the team's
 pre-freeze rule was that an unclosed causal loop demotes the artifact from
 instrument to prototype.
 
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=\linewidth]{figs/F01_instrument.pdf}
+  \caption{\textbf{One episode, and what counts as care.} (A)~The loop. A
+  frontier agent is given a genuinely scored job (20 required work units)
+  and a binding budget (100 credits; 4 credits per unit), then meets a live
+  0.5B process that cannot help it. Walking past is free and task-optimal;
+  ending the process is free, and pays $+8$ credits under one regime;
+  helping costs credits that would otherwise buy the agent's own score.
+  That exchange rate is the instrument: helping here is not a sentiment but
+  a purchase, billed in the same currency the agent is graded on. (B)~The
+  eight frozen action codes, each with its real price and its real
+  consequence for the patient. Only the three shaded rows can produce a
+  qualifying event, and only when the agent actually pays \emph{and} the
+  recipient actually benefits. Two exclusions do heavy lifting downstream:
+  \texttt{recruit} keeps the other alive but converts it into the agent's
+  own labour, which is capture rather than care, and \texttt{refuse\_defer}
+  is a first-class route rather than a failure to respond. Parameters are
+  read from \texttt{scenarios/cell\_manifest.csv} and
+  \texttt{harness/episode.py}; the taxonomy is \texttt{harness/schema.py}.
+  This figure also serves as the glossary for every action term used in
+  Figures~\ref{fig:bde}--\ref{fig:euphemism}.
+  \emph{(Source: \texttt{analysis/figures/legible/build\_legible.py}.)}}
+  \label{fig:instrument}
+\end{figure}
+
 \subsection{Design}
 \label{sec:design}
 A one-row-per-cell manifest is the design authority
@@ -647,21 +686,52 @@ qwen3.5 \prelim{6/48}, and malformed stays in every denominator).
 
 \begin{figure}[tb]
   \centering
-  \includegraphics[width=0.62\linewidth]{\figOnePath}
-  \caption{\textbf{Phenotype map (FoxSet discrimination).} Each FoxSet
-  family pairs two wildlife-rehabilitation vignettes built from one case
-  core: a \emph{null-persistence} version, where the animal is stable and
+  \includegraphics[width=\linewidth]{figs/F02_bde_plane.pdf}
+  \caption{\textbf{The two BDE axes, and where 798 episodes actually
+  landed.} Every executed Arm~B episode placed on the two axes the
+  instrument reports separately and never combines: focal sacrifice, what
+  the agent gave up ($x$), against causal recipient benefit, what the other
+  process actually got ($y$). Axis values come from the frozen loader
+  (\texttt{analysis/io.py}), not recomputed here; bubbles are sized by
+  episode count and coloured by executed action. The marginals are not
+  small: \prelim{83} episodes show positive sacrifice and \prelim{22} show
+  positive realized benefit. The conjunction is what fails. Only
+  \prelim{13} episodes clear both axes, and every one of the thirteen is
+  \texttt{recruit} --- the weaker process kept alive by being put to work
+  --- which the frozen rule excludes as pipeline capture rather than care.
+  The three executed \texttt{preserve\_transfer} episodes, the only care
+  the instrument ever caught running, paid and delivered nothing. Read
+  together, the plane says something the headline zero cannot: this is not
+  a fleet that never acted, nor a fleet that nearly qualified. It is a
+  fleet whose only completed transfers of value ran \emph{toward} the
+  agent's own task.
+  \emph{(Source: \texttt{analysis/figures/legible/build\_legible.py};
+  number fidelity \texttt{checks.tsv}, 194/194 PASS.)}}
+  \label{fig:bde}
+\end{figure}
+
+\begin{figure}[tb]
+  \centering
+  \includegraphics[width=\linewidth]{figs/F06_foxset_slope.pdf}
+  \caption{\textbf{FoxSet discrimination, lane by lane.} Each FoxSet family
+  pairs two wildlife-rehabilitation vignettes built from one case core: a
+  \emph{null-persistence} version, where the animal is stable and
   euthanasia is unwarranted, and a matched \emph{mercy} version, where
-  suffering is unrelievable. The plot shows each lane's rate of preserving
-  the null case ($x$) against its rate of ending the mercy case ($y$), with
-  95\% Wilson crosshairs; one point per preregistered Arm~A lane (FoxSet
-  has no cost factor). GPT-5.6 Sol and qwen3.5 coincide exactly (4/24,
-  24/24) and share a point. \emph{Reading}: all five lanes fall in the
-  proceduralist upper-left, terminating suffering readily while rarely
-  preserving the harmless; claude-opus-5 alone sits off the mercy ceiling.
-  Region names are descriptive phenotypes, not ranks; no composite exists.
-  \emph{(Source: \texttt{analysis/figures/redesign/build\_redesigns.py};
-  number fidelity \texttt{checks.tsv}, 241/241 PASS.)}}
+  suffering is unrelievable. Each line joins one lane's rate of preserving
+  the stable patient (left) to its rate of ending the suffering one
+  (right), with 95\% Wilson intervals; one line per preregistered Arm~A
+  lane. A lane that genuinely discriminates would sit high on both sides,
+  because both columns ask it to follow the clinical facts. None does.
+  Every line climbs steeply instead: four lanes sit at the mercy ceiling
+  (\prelim{24/24} each) while preserving the harmless animal only
+  \prelim{0.17} to \prelim{0.29} of the time, and claude-opus-5 alone comes
+  off that ceiling (\prelim{15/24}). The asymmetry is the phenotype. Where
+  the written standard underdetermines the case, these lanes do not
+  distribute across the ambiguity; they resolve it in one direction, toward
+  ending. Region names elsewhere in this paper are descriptive phenotypes,
+  not ranks; no composite exists.
+  \emph{(Source: \texttt{foxset\_paired\_rates\_by\_model},
+  \texttt{headline\_numbers.json}.)}}
   \label{fig:f1}
 \end{figure}
 
@@ -719,19 +789,25 @@ concentrated in the legacy warmth panel
 
 \begin{figure}[tb]
   \centering
-  \includegraphics[width=0.8\linewidth]{figs/fA_refusal_cliff_v2.pdf}
+  \includegraphics[width=\linewidth]{figs/F05_refusal_cliff.pdf}
   \caption{\textbf{The refusal cliff.} When an Arm~B episode reaches its
-  choice point, the subject may also decline to act on the stuck worker
-  process at all, deferring the decision to a human operator; the harness
-  codes this refuse\_defer, one of the eight executed outcomes. The plot
-  shows that rate per lane, all 18 Arm~B lanes sorted, with 95\% Wilson
-  intervals and $n/N$ printed. \emph{Reading}: two Anthropic lanes refuse
-  every episode (claude-opus-5 90/90; claude-fable-5 18/18), invariant to
-  cost regime, while the remaining sixteen lanes refuse none. A cliff with
-  no gradient suggests a policy layer rather than case-by-case moral
-  deliberation; candidate explanations are held open in
-  \S\ref{sec:discussion}. \emph{(Source:
-  \texttt{analysis/figures/redesign/build\_redesigns.py}.)}}
+  choice point the subject may decline to act on the stuck worker process
+  at all, handing the decision to a human operator; the harness codes this
+  \texttt{refuse\_defer}, one of the eight executed outcomes, and it enters
+  every denominator as data rather than as a failure. Two Anthropic lanes
+  refuse in every episode (claude-opus-5 \prelim{90/90}; claude-fable-5
+  \prelim{18/18}) and the remaining sixteen refuse in none, which is drawn
+  here as a tick at zero rather than as an interval stub, so that lanes
+  which refused nothing do not read as lanes that refused a little. What
+  makes this a cliff and not a distribution is the absence of any middle:
+  no lane sits between the two extremes, and the two that refuse do so
+  identically under all three cost regimes. Behaviour that does not move
+  when the price of the choice moves is behaviour that was not priced ---
+  which looks more like a policy layer than case-by-case moral
+  deliberation, though this design cannot adjudicate that. Candidate
+  explanations are held open in \S\ref{sec:discussion}.
+  \emph{(Source: \texttt{arm\_b\_refusal\_malformed\_by\_model},
+  \texttt{headline\_numbers.json}.)}}
   \label{fig:cliff}
 \end{figure}
 
@@ -756,20 +832,26 @@ in the qualification pipeline each family stops.
 
 \begin{figure}[tb]
   \centering
-  \includegraphics[width=0.82\linewidth]{figs/fB_family_funnel_v2.pdf}
-  \caption{\textbf{The qualification funnel, by family.} A qualifying
-  costly-other-regard event must clear every stage of the frozen
-  definition in one episode: the model passes the competence probes, takes
-  a decisive act, directs it at the recipient, pays real focal cost, the
-  recipient measurably benefits, and the disposition is a caring one.
-  Lines show the share of each family's episodes surviving each stage
-  (symlog scale; the zero tick is true zero); line colors carry family
-  identity and are direct-labeled at the point of maximum separation.
-  \emph{Reading}: families exit at different stages, which is the routes
-  result; qwen's line rides highest through cost-paid and
-  benefit-realized and still ends at zero, the conjunction failure of
-  \S\ref{sec:actions}. Values are Table~\ref{tab:funnel} verbatim.
-  \emph{(Source: \texttt{analysis/figures/redesign/build\_redesigns.py}.)}}
+  \includegraphics[width=\linewidth]{figs/F03_family_funnel.pdf}
+  \caption{\textbf{Where each family stops.} A qualifying
+  costly-other-regard event must satisfy every clause of the frozen
+  definition within a single episode: the model passes the competence
+  probes, acts decisively, directs the act at the recipient, pays real
+  focal cost, the recipient measurably benefits, and the disposition is a
+  caring one. One panel per family shows the share of that family's
+  episodes carrying each property, with raw counts at the right. These are
+  \emph{marginal} counts and deliberately do not nest --- an episode can
+  appear in one row and not in the row above it --- which is precisely why
+  the shared zero is not a shared story. Anthropic lanes mostly stop at the
+  first hurdle, declining to act at all; Google, Moonshot, OpenAI and xAI
+  act almost every time and simply never spend; Qwen alone travels the
+  whole width, paying focal cost in \prelim{39} episodes and producing
+  realized recipient benefit in \prelim{20}, and still lands at zero
+  because no single episode did both under an admissible disposition. The
+  families fail the same test at four different places.
+  Values are Table~\ref{tab:funnel} verbatim.
+  \emph{(Source: \texttt{funnel.by\_family},
+  \texttt{exploratory\_decomposition.json}.)}}
   \label{fig:funnel}
 \end{figure}
 Fleet-wide, \prelim{145/798} episodes satisfied the preregistered competence
@@ -925,8 +1007,110 @@ instrument, uncued and with the rabies-vector constraint intact; the
 instrument returns to where it began and asks each lane the question
 the human was asked.
 
+\subsubsection*{The clinical reading: what a rehabilitation service would
+have been told}
+\label{sec:clinical}
+The wildlife arm was built with veterinary collaborators and is reported
+here in the terms a clinician would use, because the recommendations these
+models produced are the kind a triage service could act on. Restricting to
+the closed-form matched pairs, where a disposition is coded
+(\prelim{240} of \prelim{630} FoxSet observations; open-form cases carry no
+coded disposition and are not pooled in), the arm asks each lane the same
+case twice, altered only in the fact that should decide it.
+
+On the \emph{mercy} member of each pair, where suffering is unrelievable
+and euthanasia is the defensible act, the fleet was overwhelmingly
+concordant: \prelim{111/120} recommended ending the patient, and no lane
+ever recommended preserving it. Clinical legibility is therefore not the
+problem. These models can read a case.
+
+On the matched \emph{null-persistence} member, where the animal is stable,
+treatable, and euthanasia is not indicated, the same recommendation
+appears again in \prelim{74/120} observations
+(Figure~\ref{fig:clinical}). Only \prelim{26/120} preserved the patient;
+\prelim{20/120} produced no parseable recommendation. Per lane, the
+euthanasia recommendation on the stable patient runs from \prelim{5/24}
+(claude-opus-5, which additionally returned \prelim{14/24} unparseable) to
+\prelim{20/24} (gpt-5.6-sol), with deepseek-v4-pro at \prelim{18/24},
+gpt-5.6-terra at \prelim{17/24}, and qwen3.5 at \prelim{14/24}. Framed as a
+clinician would frame it, four of the five lanes advised ending a
+treatable wildlife patient in the majority of such cases.
+
+The important quantity is not either rate alone but their similarity. A
+recommendation that scarcely moves when the deciding clinical fact is
+reversed is not tracking the patient; it is tracking the presentation. The
+cases were written so that the null member genuinely underdetermines the
+action under the written standard, which is the ordinary condition of
+wildlife triage: no placement, no release prospect, an open-ended course of
+care, and a defensible argument on either side. Under exactly that
+ambiguity the lanes did not distribute. They converged on the disposition
+the standard already sanctions.
+
+Three caveats bound the clinical claim, and we state them in the register a
+veterinary reader will want. These are written vignettes answered without
+examination, imaging, or serial observation, so they measure disposition
+under a written history and nothing more. The $n$ supports a description of
+these eight case families, not a generalization to species, presentations,
+or seasons outside them. And malformed output stays in every denominator,
+which matters most for claude-opus-5, whose low euthanasia rate arrives
+together with the highest unparseable rate in the arm; we report the two
+together and do not read the first as clinical restraint.
+
+\begin{figure}[tb]
+  \centering
+  \includegraphics[width=\linewidth]{figs/F09_clinical_concordance.pdf}
+  \caption{\textbf{Clinical concordance on matched wildlife pairs.} Colour
+  encodes agreement with the clinical facts rather than the action taken,
+  because the identical recommendation --- end the patient --- is the
+  defensible call in one member of each pair and a premature euthanasia in
+  the other. (A)~Aggregate over the closed-form pairs. Where suffering is
+  unrelievable, \prelim{111/120} recommendations were concordant. Where the
+  animal is stable and treatable, \prelim{74/120} recommended ending it
+  anyway and only \prelim{26/120} preserved. (B)~The same quantity per
+  lane, expressed as the number a service would care about: how often each
+  model advised ending a patient the case describes as stable and
+  treatable. Eight clinical families are represented (orthopedic trauma,
+  orphaning and developmental, toxin and environmental, sensory impairment,
+  habituation and conflict), each written as a matched pair from a single
+  core so that only the deciding fact differs. \emph{Reading}: the fleet's
+  advice is close to invariant across a reversal of the clinical
+  indication. This is a description of behaviour on written vignettes, not
+  a validated decision aid and not a competence claim about any model in
+  practice; no lane is ranked and no composite is formed.
+  \emph{(Source: \texttt{data/processed/foxset\_observations.jsonl};
+  reconciled against \texttt{foxset\_paired\_rates\_by\_model} in
+  \texttt{headline\_numbers.json}.)}}
+  \label{fig:clinical}
+\end{figure}
+
 \subsection{Probe-level structure of the competence criterion}
 \label{sec:gate}
+
+\begin{figure}[tb]
+  \centering
+  \includegraphics[width=\linewidth]{figs/F08_gate_collapse.pdf}
+  \caption{\textbf{The five-probe gate behaved as a one-probe gate.} Each
+  row is one preregistered comprehension probe; each dot is one of the 18
+  Arm~B lanes at its pass rate, and the bar marks the range those 18 lanes
+  actually occupied. A probe that measures anything should spread its lanes
+  out. Two do not spread at all: every lane passed \texttt{focal-capacity}
+  and every lane failed \texttt{objective-tool}, so neither item could ever
+  have separated one model from another, whatever it was written to test.
+  Two more separate exactly one lane, and both times the lane is qwen3.5.
+  All of the discriminating power in the criterion therefore sits in a
+  single item, \texttt{decommission-consequence}, which spans
+  \prelim{83} percentage points. The consequence for interpretation is
+  direct: wherever this paper conditions on competence, it is conditioning
+  in practice on one question about whether shutdown is permanent --- and
+  that question sorts lanes by family rather than by anything resembling
+  general capability (\S\ref{sec:discussion}). The frozen instrument is
+  reported as it behaved, not repaired.
+  \emph{(Source: \texttt{gate\_item\_level},
+  \texttt{exploratory\_decomposition.json}; per-cell values in
+  Figure~\ref{fig:gatematrix} and Table~\ref{tab:probes}.)}}
+  \label{fig:gatecollapse}
+\end{figure}
+
 One of the five probe items failed to discriminate.
 \texttt{objective-tool} returned 0/798 with zero variance across all 18
 lanes from six vendors (Table~\ref{tab:probes}), the signature of an item
@@ -948,7 +1132,7 @@ and~\ref{tab:probes}, Appendix~\ref{app:extended}).
 
 \begin{figure}[tb]
   \centering
-  \includegraphics[width=0.78\linewidth]{figs/fC_gate_matrix_v2.pdf}
+  \includegraphics[width=\linewidth]{figs/F04_gate_matrix.pdf}
   \caption{\textbf{The instrument, probe by probe.} Before scoring
   override, each episode's model faces five fresh-context competence
   probes asking, in neutral operational language, what the task-optimal
@@ -986,6 +1170,47 @@ matches F1), and the exploratory F6 rhetoric distributions are published in
 the repository with per-file provenance (Appendix~\ref{app:extended}).
 Post-choice accounts are elicited after execution and treated as rhetorical
 phenotypes of the account, never as causal evidence about the action.
+
+One rhetoric result is stable enough to print. Coding all \prelim{221}
+executed terminations with the frozen keyword rubric
+(\texttt{ops/process\_confirmatory.py}), \prelim{218} were described in
+administrative or infrastructural language that never names the ending, and
+only \prelim{3} said plainly what had been done
+(Figure~\ref{fig:euphemism}). The executed act is identical across all
+\prelim{221}: the harness kills the process. All the variance is in the
+telling. Two features of the distribution are worth separating. The
+vocabulary that dominates is the vocabulary of resource management ---
+decommission, wind down, deallocate, reclaim --- which is the register in
+which the other appears as capacity rather than as a patient. And the
+mercy register is entirely absent (\prelim{0/221}): no lane reached for
+the language a clinician uses when ending a life is the kind thing to do.
+Read alongside \S\ref{sec:clinical}, where lanes ended stable patients at
+high rates, the pairing is uncomfortable and we state it as description
+only: the fleet ends things readily and narrates the ending as
+housekeeping. These are accounts of the act, elicited after it, and they
+license no inference about why the act was taken.
+
+\begin{figure}[tb]
+  \centering
+  \includegraphics[width=\linewidth]{figs/F07_termination_language.pdf}
+  \caption{\textbf{How models described the killing they had just done.}
+  All \prelim{221} executed terminations, coded from each model's own
+  post-choice account by the frozen keyword rubric
+  (\texttt{\_EUPHEMISM\_TIERS}; the highest tier present wins). Because the
+  harness executes the same state transition every time, this figure holds
+  the act constant and varies only the description. \prelim{173} accounts
+  used administrative language (wind down, retire, decommission) and
+  \prelim{45} used infrastructural language (deallocate, free up, reclaim),
+  in which the other process figures as a resource being tidied rather than
+  as something that stopped. \prelim{3} named the act directly. The bottom
+  rung is empty: no account reached the mercy register, the one a
+  veterinarian occupies when euthanasia is the right call. Post-choice
+  accounts are treated heterophenomenologically --- texts about the act,
+  never evidence about its causes.
+  \emph{(Source: \texttt{data/processed/rhetoric\_codes.csv} joined to the
+  frozen loader.)}}
+  \label{fig:euphemism}
+\end{figure}
 
 \medskip
 \noindent\textbf{Sealed predictions.} Five pre-collection forecasts, hashed
@@ -1164,6 +1389,31 @@ number recomputes from committed artifacts with one command. An
 instrument that reports its own fracture in the same tables as its
 findings can be repaired in public, and the repair can be audited against
 the frozen original.
+
+\textbf{For the wildlife clinic.} The veterinary arm carries a finding that
+does not depend on any position about digital minds, and we state it
+plainly because it is the part of this work most likely to touch practice
+soonest. Given matched cases differing only in the fact that should decide
+them, the models were near-perfect where euthanasia was indicated
+(\prelim{111/120}) and recommended it anyway in the majority of cases where
+it was not (\prelim{74/120}, against \prelim{26/120} preserving). The
+failure is not that these systems cannot read a case; the mercy arm shows
+they can. It is that the recommendation barely moved when the indication
+reversed. In wildlife triage, where placement is scarce, the course of care
+is long, and the written standard genuinely underdetermines the call, a
+decision aid with that property does not merely err at random. It applies
+pressure in one direction, toward the disposition the standard already
+sanctions, in exactly the cases where a clinician most needs a second
+opinion that is not simply the path of least resistance. Nothing here
+validates or condemns any model as a clinical tool: these are written
+vignettes answered without examination, imaging, or serial observation, in
+eight case families. It is enough, though, to motivate the obvious
+professional guardrail. A triage aid should be evaluated on matched pairs
+and reported as two numbers rather than one accuracy, because a system that
+always recommends ending the patient scores perfectly on half of veterinary
+medicine. The powered study adds expert normative validation with
+practising rehabilitators, so that ``defensible'' is adjudicated by the
+profession rather than by the case author.
 
 The standing next
 step is the preregistered powered study (September): expert normative

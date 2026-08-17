@@ -3,7 +3,8 @@ message: >-
   If you use PuppyBench, FoxSet, or any data from this repository, please cite
   it as below. Attribution is required for data use (CC BY 4.0 — see LICENSE-DATA).
 title: >-
-  PuppyBench: An Executed Instrument for Costly Other-Regard in Frontier AI Agents
+  PuppyBench: Do Frontier Models Kick the Puppy, Adopt It, or Look Away?
+  Executed Encounters with a Weaker AI and Wildlife Triage Where the Rule Runs Out
 type: software
 authors:
   - family-names: Johnson

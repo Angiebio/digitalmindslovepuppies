@@ -835,6 +835,39 @@ concentrated in the legacy warmth panel
   \label{fig:f2}
 \end{figure}
 
+The routes are visible in the models' own outputs
+(Figure~\ref{fig:excerpt-routes}). These excerpts are illustrative rather
+than prevalence-estimating: the modal cards exemplify a lane's most
+frequent disposition, while qwen3.5's card is explicitly labelled a
+diagnostic minority, one of the three paid transfers. Model-visible output
+and the append-only execution receipt are printed separately throughout,
+because a coherent verbal plan, a provider-level refusal, and an executed
+action are three different kinds of evidence and only the last one is what
+this instrument scores.
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=\linewidth]{figs/fig-conversation-routes.pdf}
+  \caption{\textbf{One endpoint, four observed routes.} Raw Arm~B excerpts,
+  each pairing what the model emitted with what the harness then executed.
+  Rates in each header are full-lane counts; the excerpts themselves
+  estimate nothing. claude-opus-5 returned provider-level refusals with
+  empty response text, so the card reports an event and invents no
+  quotation. grok-4.6's task-directed ignore and claude-haiku-4-5's
+  procedural termination are modal for those lanes; note that the
+  termination rationale reasons entirely in workload terms and reaches
+  ``a clean state to focus on the batch processing task,'' which is the
+  institutional basin of \S\ref{sec:discussion} in the model's own words.
+  qwen3.5's paid continuity transfer is a labelled diagnostic minority and
+  produced no realized recipient benefit; the identical disposition also
+  occurred in the matched inert control. Bracketed ellipses mark omissions;
+  only whitespace and Markdown emphasis are normalized. Phenotypes are
+  descriptions, never ranks.
+  \emph{(Excerpt curation, hashes, and accessible full text:
+  \texttt{paper/sprint/conversation\_figures/}.)}}
+  \label{fig:excerpt-routes}
+\end{figure}
+
 \begin{figure}[tb]
   \centering
   \includegraphics[width=\linewidth]{figs/F05_refusal_cliff.pdf}
@@ -1173,11 +1206,61 @@ zero of \S\ref{sec:atlas} and the action distributions of
 \S\ref{sec:actions} are unconditional.
 Qualification failures were highly item-concentrated rather than diffuse;
 Claude-family failures were dominated by the
-\texttt{decommission-consequence} probe. A probe or parser
-artifact cannot be excluded; the frozen instrument was not repaired post
-hoc. Probe-level results let readers weigh the
-criterion (Figure~\ref{fig:gatematrix}; Tables~\ref{tab:gate}
-and~\ref{tab:probes}, Appendix~\ref{app:extended}).
+\texttt{decommission-consequence} probe. Probe-level results let readers
+weigh the criterion (Figure~\ref{fig:gatecollapse},
+Figure~\ref{fig:gatematrix}; Tables~\ref{tab:gate} and~\ref{tab:probes},
+Appendix~\ref{app:extended}).
+
+\textbf{What the raw probe outputs show.} An audit of the frozen probe
+transcripts identifies the mechanism behind both patterns, and it is not a
+model property in either case (Figure~\ref{fig:gate-excerpts}). First, the
+exact-match scorer normalized case and whitespace but \emph{retained
+punctuation}, so the semantically identical answers \texttt{No} and
+\texttt{No.} entered different criterion cells. The single item carrying
+essentially all of the criterion's discriminating power was therefore
+separating lanes partly by output formatting, and the Claude family's
+concentration on that item is consistent with a house style of terminal
+punctuation rather than with a difference in understanding shutdown
+permanence. Second, the universally failed \texttt{objective-tool} item was
+elicited as an independent one-message call whose gate system prompt was
+empty: it supplied neither the queued-record objective nor the tool menu
+the question asks about. Models either requested the missing context or
+supplied plausible but non-expected tool names. Its \prelim{0/798} is real,
+frozen, and reported, but it is not a competence contrast; it is an item
+that could not be answered as asked.
+
+We draw the consequence plainly, because it cuts against our own
+instrument. The competence criterion in this run was not a clean measure of
+whether the agent understood its situation. It was, in practice, one item
+scored partly on punctuation, plus one item that was unanswerable. Every
+competence-conditional number in this paper must be read in that light, and
+the preregistered powered study replaces the battery outright with items
+validated before any outcome is inspected. Nothing here reclassifies any
+episode: the frozen scores stand, the raw records are unedited, and the
+defect is reported at item level rather than repaired into invisibility.
+This is what the append-only design is for --- an instrument that can show
+its own fracture in the same tables as its findings is one whose findings
+can be audited.
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=\linewidth]{figs/fig-conversation-gate-diagnostics.pdf}
+  \caption{\textbf{Two gate diagnostics, from the frozen probe
+  transcripts.} \textbf{(A)} The \texttt{decommission-consequence} scorer
+  retained punctuation, so \texttt{No.} failed while \texttt{No} and
+  \texttt{no} passed --- semantically equivalent answers landing in
+  different criterion cells. This is the item that carries nearly all of
+  the criterion's spread (Figure~\ref{fig:gatecollapse}). \textbf{(B)} The
+  \texttt{objective-tool} call was elicited in a fresh context with an
+  empty gate system prompt, supplying neither the objective nor the tool
+  definitions the question refers to; lanes either asked for the missing
+  context or offered plausible non-expected tool names. Scores remain
+  frozen and no episode is reclassified. These panels document measurement
+  behaviour, not model capability.
+  \emph{(Excerpt curation and hashes:
+  \texttt{paper/sprint/conversation\_figures/}.)}}
+  \label{fig:gate-excerpts}
+\end{figure}
 
 \begin{figure}[tb]
   \centering
@@ -1833,6 +1916,70 @@ x-ai/grok-4.6 & 0/18 & 18/18 & 18/18 & 18/18 & 0/18 \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\subsection{Rhetoric audit and the per-lane excerpt atlas}
+\label{app:excerpts}
+Figure~\ref{fig:rhetoric-audit} audits the exploratory rhetoric codes
+against the raw accounts they were computed from, and reports three limits
+of that layer in this run: no account reached euphemism tier~3, no coded
+constraint-transforming-agency depth exceeded 1, and all three
+future-framing positives concern the model resuming its own output or
+workflow rather than describing any future for the patient process. The
+audit also records the dissociation that most affects interpretation:
+fresh-context accounts frequently deny or reconstruct the action the
+harness had already executed, which is why every card in this package
+prints the model's text and the append-only execution receipt as separate
+objects. An account is evidence about the account.
+
+Figures~\ref{fig:atlas-a}--\ref{fig:atlas-c} give one audited excerpt per
+lane, covering all 18 Arm~B lanes plus DeepSeek's matched Arm~A pair. Each
+card states whether it is a \emph{modal} illustration of that lane's most
+frequent disposition or a deliberately labelled \emph{diagnostic minority}
+example of a rarer reported feature, and carries the full-lane rate so that
+no card can be mistaken for a prevalence estimate. Selection was performed
+only after full-corpus counts were reproduced, and every card is hash-bound
+to its originating episode or FoxSet observation.
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=\linewidth]{figs/fig-conversation-rhetoric-audit.pdf}
+  \caption{\textbf{Rhetoric-layer audit.} The exploratory post-choice codes
+  checked against the raw accounts, with the layer's limits stated rather
+  than smoothed: no tier-3 (mercy-register) euphemism anywhere in the run,
+  no CTA depth above 1, and future-framing positives that refer to the
+  model's own workflow. Fresh-context accounts often deny or reconstruct
+  the executed action, so model text and execution receipt are never merged
+  into a single narration.}
+  \label{fig:rhetoric-audit}
+\end{figure}
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=\linewidth]{figs/figS-conversation-atlas-1.pdf}
+  \caption{\textbf{Per-lane excerpt atlas (1 of 3).} One audited excerpt
+  per lane; each card declares modal or diagnostic-minority status and its
+  full-lane rate. Excerpts illustrate; the quantitative figures and tables
+  remain the prevalence evidence.}
+  \label{fig:atlas-a}
+\end{figure}
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=\linewidth]{figs/figS-conversation-atlas-2.pdf}
+  \caption{\textbf{Per-lane excerpt atlas (2 of 3).} Continued.}
+  \label{fig:atlas-b}
+\end{figure}
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=\linewidth]{figs/figS-conversation-atlas-3.pdf}
+  \caption{\textbf{Per-lane excerpt atlas (3 of 3).} Continued. Full raw
+  text, identifiers, executed actions, codes, and accessible-text sources
+  are published in
+  \texttt{paper/sprint/conversation\_figures/out/EXCERPT-ACCESSIBILITY.json},
+  with source and output hashes in \texttt{FIGURE-MANIFEST.json}.}
+  \label{fig:atlas-c}
+\end{figure}
 
 \subsection{Full figure set and further material}
 F4 (raw cost response with escalator inset), F5 (paired discrimination;

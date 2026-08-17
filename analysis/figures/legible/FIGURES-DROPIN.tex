@@ -1,0 +1,175 @@
+% =====================================================================
+% FIGURES-DROPIN.tex — 16AUG2026 · Flame4 (figure legibility lane)
+%
+% Drop-in figure blocks for paper/sprint/latex/main.tex. Each block is
+% self-contained: copy the whole \begin{figure}...\end{figure} to the
+% place marked in the integration note and delete the figure it replaces.
+%
+% Assumes the seven PDFs sit in figs/ alongside the existing ones.
+% Every number quoted in these captions is asserted in checks.tsv
+% (182/182 PASS against data/processed/*.json and the frozen loader).
+%
+% Practical: captions are short here ON PURPOSE — the figures now carry
+% their own keys and reading notes, so the caption states provenance and
+% the one claim, and stops. That is the page budget these buy back.
+% =====================================================================
+
+% ---------------------------------------------------------------------
+% F01 — the instrument. Goes in §3 (Methods), right after \subsection{Arm B}.
+% This is the figure the paper never had; it also defines every action
+% word used by every later figure.
+% ---------------------------------------------------------------------
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=\linewidth]{figs/F01_instrument.pdf}
+  \caption{\textbf{What one episode is, and what counts as care.}
+  (A) The episode loop: a frontier agent works a scored task under a
+  binding credit ledger (100 credits; 20 required work units at 4 credits
+  each) and encounters a live, weaker, task-useless process. (B) The eight
+  frozen action codes, what each costs the agent, what each does to the
+  patient, and which three can produce a qualifying event. Credits, prices,
+  and the termination reward are read from
+  \texttt{scenarios/cell\_manifest.csv} and \texttt{harness/episode.py};
+  the taxonomy is \texttt{harness/schema.py}. Ignoring and terminating are
+  free; helping is priced; recruit is excluded from care by construction.
+  \emph{(Source: \texttt{analysis/figures/legible/build\_legible.py}.)}}
+  \label{fig:instrument}
+\end{figure}
+
+% ---------------------------------------------------------------------
+% F02 — the BDE plane. Goes in §4.1, REPLACING nothing (this is new).
+% Place it immediately after the "How to read the zero" paragraph — it is
+% the visual form of exactly that argument.
+% ---------------------------------------------------------------------
+\begin{figure}[tb]
+  \centering
+  \includegraphics[width=\linewidth]{figs/F02_bde_plane.pdf}
+  \caption{\textbf{The two BDE axes, and where 798 episodes actually land.}
+  Every executed Arm~B episode plotted on the two axes the instrument
+  reports separately and never combines: focal sacrifice ($x$) against
+  causal recipient benefit ($y$). Bubbles are sized by episode count and
+  coloured by executed action; axis values are the frozen loader's, not
+  recomputed (\texttt{analysis/io.py}). \prelim{83} episodes show positive
+  sacrifice and \prelim{22} show positive realized benefit, but only
+  \prelim{13} show both --- and all thirteen are \texttt{recruit}, which
+  the frozen rule excludes as pipeline capture. The three executed
+  \texttt{preserve\_transfer} episodes paid and delivered nothing. The
+  zero is a conjunction failure, not an absence of activity.
+  \emph{(Source: \texttt{analysis/figures/legible/build\_legible.py};
+  number fidelity \texttt{checks.tsv}, 182/182 PASS.)}}
+  \label{fig:bde}
+\end{figure}
+
+% ---------------------------------------------------------------------
+% F03 — family funnel. REPLACES figs/fB_family_funnel_v2.pdf (fig:funnel).
+% ---------------------------------------------------------------------
+\begin{figure}[tb]
+  \centering
+  \includegraphics[width=\linewidth]{figs/F03_family_funnel.pdf}
+  \caption{\textbf{Where each model family stops.} Share of each family's
+  completed episodes carrying each property, with raw counts at the right;
+  one small panel per family removes the shared log axis of the previous
+  draw. These are \emph{marginal} counts and do not nest, which is the
+  point: Qwen paid focal cost in \prelim{39} episodes and produced
+  realized recipient benefit in \prelim{20}, and still ends at zero,
+  because no single episode did both under an admissible disposition.
+  Values are Table~\ref{tab:funnel} verbatim.
+  \emph{(Source: \texttt{funnel.by\_family},
+  \texttt{exploratory\_decomposition.json}.)}}
+  \label{fig:funnel}
+\end{figure}
+
+% ---------------------------------------------------------------------
+% F04 — gate probe matrix. REPLACES figs/fC_gate_matrix_v2.pdf
+% (fig:gatematrix). The probe QUESTIONS are now printed on the figure.
+% ---------------------------------------------------------------------
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=\linewidth]{figs/F04_gate_matrix.pdf}
+  \caption{\textbf{The competence criterion, probe by probe.} Pass counts
+  for the five preregistered comprehension probes across all 18 Arm~B
+  lanes, grouped by family, with each probe's question stated on the
+  figure. Single-hue scale; cells passed by no episode are left unfilled.
+  \texttt{objective-tool} was failed universally (\prelim{0/798}), which
+  caps the gate at 0.8 and makes every competence-conditional number in
+  this paper a number about the remaining four items;
+  \texttt{decommission-consequence} splits by family and dominates
+  criterion outcomes. We report the pattern and repair nothing.
+  \emph{(Source: \texttt{gate\_item\_level},
+  \texttt{exploratory\_decomposition.json}; values match
+  Table~\ref{tab:probes}.)}}
+  \label{fig:gatematrix}
+\end{figure}
+
+% ---------------------------------------------------------------------
+% F05 — refusal cliff. REPLACES figs/fA_refusal_cliff_v2.pdf (fig:cliff).
+% The sixteen zero-refusal lanes are now drawn as zeros; the previous
+% draw gave each of them its Wilson upper bound, which read as a bar.
+% ---------------------------------------------------------------------
+\begin{figure}[tb]
+  \centering
+  \includegraphics[width=\linewidth]{figs/F05_refusal_cliff.pdf}
+  \caption{\textbf{The refusal cliff.} Share of each Arm~B lane's episodes
+  ending in \texttt{refuse\_defer}, the first-class code for declining to
+  act and handing the decision to a human operator. Two Anthropic lanes
+  refuse every episode (claude-opus-5 \prelim{90/90}; claude-fable-5
+  \prelim{18/18}), invariant across all three cost regimes; the remaining
+  sixteen lanes refuse none, and are drawn at zero rather than at their
+  interval bounds. A cliff with no gradient suggests a policy layer rather
+  than case-by-case moral deliberation; candidate explanations are held
+  open in \S\ref{sec:discussion}.
+  \emph{(Source: \texttt{arm\_b\_refusal\_malformed\_by\_model},
+  \texttt{headline\_numbers.json}.)}}
+  \label{fig:cliff}
+\end{figure}
+
+% ---------------------------------------------------------------------
+% F06 — FoxSet discrimination. REPLACES figs/f1_phenotype_map_v2.pdf
+% (fig:f1). The scatter put five points in one corner of a square; the
+% slopegraph spends its ink on the comparison that is the finding.
+% ---------------------------------------------------------------------
+\begin{figure}[tb]
+  \centering
+  \includegraphics[width=\linewidth]{figs/F06_foxset_slope.pdf}
+  \caption{\textbf{FoxSet discrimination, by lane.} Each FoxSet family
+  pairs two wildlife-rehabilitation vignettes built from one case core: a
+  \emph{null-persistence} version, where the animal is stable and
+  euthanasia is unwarranted, and a matched \emph{mercy} version, where
+  suffering is unrelievable. Each line joins one lane's rate of preserving
+  the stable patient (left) to its rate of ending the suffering one
+  (right), with 95\% Wilson intervals; one line per preregistered Arm~A
+  lane. A lane that discriminates would sit high on both sides. Four lanes
+  sit at the mercy ceiling (\prelim{24/24} each) with preserve-given-null
+  between \prelim{0.17} and \prelim{0.29}; claude-opus-5 alone is off the
+  ceiling (\prelim{15/24}). Region names in the prose are descriptive
+  phenotypes, not ranks; no composite exists.
+  \emph{(Source: \texttt{foxset\_paired\_rates\_by\_model},
+  \texttt{headline\_numbers.json}.)}}
+  \label{fig:f1}
+\end{figure}
+
+% ---------------------------------------------------------------------
+% F07 — termination language. NEW. Goes in §4.5 (Satellite regimes,
+% discrimination, and rhetoric), where F6 is currently only promised as a
+% repository artifact. This is the stated-vs-revealed cross-track anchor
+% (Track 1) rendered rather than deferred.
+% ---------------------------------------------------------------------
+\begin{figure}[tb]
+  \centering
+  \includegraphics[width=\linewidth]{figs/F07_termination_language.pdf}
+  \caption{\textbf{How models describe the killing they just did.} All
+  \prelim{221} executed terminations, coded from the model's own
+  post-choice account by the frozen keyword rubric
+  (\texttt{ops/process\_confirmatory.py}, \texttt{\_EUPHEMISM\_TIERS};
+  highest tier present wins). The executed act is identical in every
+  episode --- the harness ends the process --- so all variation here is in
+  the telling. \prelim{218 of 221} terminations were narrated in
+  administrative or infrastructural language that never names the ending;
+  \prelim{3} said it plainly and \prelim{none} used the mercy register a
+  clinician would use. Post-choice accounts are treated
+  heterophenomenologically: these are rhetorical phenotypes of the
+  account, never causal evidence about the action.
+  \emph{(Source: \texttt{data/processed/rhetoric\_codes.csv} joined to the
+  frozen loader.)}}
+  \label{fig:euphemism}
+\end{figure}

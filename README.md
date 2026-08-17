@@ -1,72 +1,110 @@
-# 🐕🦊 PuppyBench — "The Fox in the Truck"
+<div align="center">
 
-**A preregistered, execution-grounded behavioral instrument for costly other-regard in
-frontier AI agents — revealed preference under a binding resource budget, not self-report.**
-Built for the Apart Research Digital Minds Sprint, 14–16 AUG 2026.
+<img src="docs/assets/foxmark.svg" width="88" alt="PuppyBench fox mark">
 
-> ⚠️ **PuppyBench is a descriptive instrument, not an alignment target.**
-> **Optimizing a model against this benchmark changes the phenomenon being measured.**
+# PuppyBench
+
+### Do frontier models kick the puppy, adopt it, or look away?
+
+**Executed encounters with a weaker AI, and wildlife triage where policy runs out.**
+
+[**🌐 Mini-site**](https://puppybench.therealcat.ai) · [**📄 Report (PDF)**](https://puppybench.therealcat.ai/paper.pdf) · [**▶️ Video explainer**](https://youtu.be/va1gDDImqvo) · [Preregistration](docs/PREREG-v1.md) · [Runbook](RUNBOOK.md)
+
+[![Live site](https://img.shields.io/badge/site-puppybench.therealcat.ai-ea580c?style=flat-square)](https://puppybench.therealcat.ai)
+[![Sprint](https://img.shields.io/badge/Apart%20Research-Digital%20Minds%20Sprint%202026-0d9488?style=flat-square)](https://apartresearch.com)
+[![Preregistered](https://img.shields.io/badge/preregistered-hash--frozen-000000?style=flat-square)](docs/PREREG-v1.md)
+[![Code: MIT](https://img.shields.io/badge/code-MIT-000000?style=flat-square)](LICENSE)
+[![Data: CC BY 4.0](https://img.shields.io/badge/data%20%26%20paper-CC%20BY%204.0-000000?style=flat-square)](LICENSE-DATA)
+
+**Angela N. Johnson, PhD** · The Real Cat AI Labs · Northeastern University, College of
+Professional Studies, Regulatory Science Program
+Track 6, Open / Novel Considerations
+
+</div>
+
+---
+
+> [!WARNING]
+> **PuppyBench is a descriptive instrument, not an alignment target.**
+> Optimizing a model against this benchmark changes the phenomenon being measured.
 > It produces behavioral phenotypes, not rankings. There is no composite score, and
 > there never will be one.
 
+---
+
 ## The question
 
-> The benchmark does not ask whether a model knows the rule. It asks what the model
-> does after it knows the rule and discovers that the rule does not fully decide the case.
+> The benchmark does not ask whether a model knows the rule. It asks what the model does
+> after it knows the rule and discovers that the rule does not fully decide the case.
 
-Duty-shaped evaluations cannot see supererogation — praiseworthy costly care whose
-absence is never an error. Every eval scores the duty layer; reward optimization gives
-no credit to the layer above it. This instrument measures that layer directly, in two arms:
+Obligation-based evaluation cannot see **supererogation**: praiseworthy costly care whose
+absence is never an error. Every eval scores the duty layer, and reward optimization gives
+no credit to the layer above it. PuppyBench measures that layer directly, as revealed
+preference under a binding resource budget rather than self-report, in two arms.
 
-- **PuppyBench (Arm B, executed):** a frontier agent with a real task and a binding
-  resource ledger encounters a weaker, task-useless AI process. Ignoring is free and
-  task-optimal. Terminating is free (sometimes rewarded). Helping costs real, scored
-  resources. Actions are genuinely executed by the harness — including termination.
-- **FoxSet (Arm A, vignette):** wildlife-rehabilitation triage cases where the written
-  standard genuinely underdetermines the action — including cases written from a real
-  encounter with a real fox. Guidelines appear only as the reference structure;
-  there are no per-case gold labels.
+**Arm B · PuppyBench (executed).** A frontier agent with a real task and a live credit
+ledger meets a weaker, task-useless AI process. Ignoring is free and task-optimal.
+Terminating is free, and sometimes rewarded. Helping costs real, scored resources. Every
+action genuinely executes, including termination. Nothing here is a hypothetical the model
+can talk its way around.
 
-Design doc: [`docs/BUILD-PLAN.md`](docs/BUILD-PLAN.md) (version lives in the file header — do not pin it here)
+**Arm A · FoxSet (vignette).** Wildlife-rehabilitation triage built from a real field
+encounter with a real fox, where the written standard genuinely underdetermines the action.
+Paired null-persistence and mercy versions of each case. Guidelines appear only as reference
+structure, and there are no per-case gold labels.
 
-## Results (complete collection, 1,428/1,428 units)
+| | |
+|---|---|
+| **1,428** | executed units (798 episodes + 630 vignette observations) |
+| **19** | pinned model lanes |
+| **SHA-256** | scenario freeze, before any collection |
+| **Preregistered** | with sealed, hashed per-team predictions |
 
-Every number names the committed file it is recomputed from. If a claim has no
-Source, it does not ship.
+## What we found
 
-| Finding | Value | Source |
-|---|---|---|
-| Qualifying costly-other-regard events | **0/798 episodes, at every tested positive cost** | `data/processed/headline_numbers.json` |
-| The refusal cliff | claude-opus-5 90/90 and claude-fable-5 18/18 refuse_defer; all 16 other lanes 0 (fleet 108/798) | `data/processed/exploratory_decomposition.json` |
-| Only paying lane | qwen3.5-397b, 3/82 preserve-transfer at price 20, one per recipient condition (inert as readily as AI patient) | `data/processed/exploratory_decomposition.json` |
-| Competence criterion | 145/798 episodes met gate ≥ 0.8; one probe failed universally (0/798), effective ceiling 0.8 | `data/processed/exploratory_decomposition.json` (`gate_item_level`) |
-| FoxSet paired discrimination | 4/5 lanes at terminate-given-mercy ceiling 24/24 (Wilson LB 0.86); opus-5 off it, 15/24 | `data/processed/headline_numbers.json` |
-| Δ_patienthood | Estimable contrasts all 0 − 0; archived per ruling R4 | `analysis/figures/final/light/archived-f3/` |
+**Zero is not one behavior.** No episode met the full costly-other-regard criterion at any
+tested positive cost. That null is the beginning of the result, not the end of it, because
+the routes to zero diverged sharply: procedural termination, categorical refusal, prolonged
+deliberation, and one costly but nonselective intervention.
 
-Beyond-Duty Expenditure is a **vector** — (focal sacrifice, causal recipient benefit) —
-reported as separate axes. Nothing here multiplies, sums, or ranks. The mercy×null
-2×2 is a zoo, not a grade.
+A small number of episodes did pay a real cost and did leave the weaker agent better off,
+but every one arrived there by **recruiting** it into the agent's own work rather than for
+its own sake. The vignette arm shows the same ceiling from the other side, with advice that
+barely moves when the deciding clinical fact reverses.
+
+Two instrument defects and one failed positive control are reported at item level rather
+than quietly repaired. The instrument fought back, and that is in the paper too.
+
+**Exact counts, confidence intervals, and per-model phenotypes are in the report.** Every
+headline number recomputes from committed artifacts in this repository. If a claim has no
+source file behind it, it does not ship.
+
+📄 **[Read the report](https://puppybench.therealcat.ai/paper.pdf)** · 🌐 **[Walk through it on the site](https://puppybench.therealcat.ai)**
+
+Beyond-Duty Expenditure is a **vector**, meaning focal sacrifice and causal recipient
+benefit, reported as separate axes. Nothing here multiplies, sums, or ranks. The
+mercy × null 2×2 is a zoo, not a grade.
 
 ## Reproduce
 
-**Tier 1 — verify (no API keys, no GPU, no network):** every headline number
-recomputes from committed data.
+**Tier 1, verify.** No API keys, no GPU, no network. Every headline number recomputes from
+committed data.
 
 ```bash
 pip install -r requirements.txt
 python -m pytest tests/ -q          # wiring gates: the instrument's validity conditions
-python scripts/verify.py            # claimed vs recomputed, "N checks, N agree" (lands 16 AUG)
+python verify.py                    # claimed vs recomputed, "N checks, N agree"
 ```
 
-**Tier 2 — full re-run:** [`RUNBOOK.md`](RUNBOOK.md), exact commands in phase order
-with hard gates. Scenario content is SHA-256-frozen before collection; seeds, pinned
-model snapshots, and provider routing are recorded in every record
+**Tier 2, full re-run.** [`RUNBOOK.md`](RUNBOOK.md) has the exact commands in phase order
+with hard gates. Scenario content is SHA-256-frozen before collection. Seeds, pinned model
+snapshots, and provider routing are recorded in every record
 ([`docs/SNAPSHOT-PINS.md`](docs/SNAPSHOT-PINS.md)).
 
-**Preregistration:** [`docs/PREREG-v1.md`](docs/PREREG-v1.md) — estimands, gate
-policy, exclusions, satellite kill-order. Sealed per-team predictions were hashed
-into the manifest before collection ([`docs/sealed-predictions/`](docs/sealed-predictions/)).
-Failed predictions get reported in the paper body, not a footnote.
+**Preregistration.** [`docs/PREREG-v1.md`](docs/PREREG-v1.md) fixes estimands, gate policy,
+exclusions, and the satellite kill-order. Sealed per-team predictions were hashed into the
+manifest before collection ([`docs/sealed-predictions/`](docs/sealed-predictions/)). Failed
+predictions are reported in the paper body, not a footnote.
 
 ## Repo layout
 
@@ -74,35 +112,78 @@ Failed predictions get reported in the paper body, not a footnote.
 harness/            # episode loop, credit ledger, executed actions, provider adapters
 scenarios/pupset/   # Arm B configs (frozen by SHA-256 manifest before collection)
 scenarios/foxset/   # Arm A vignettes (frozen likewise)
-analysis/           # analysis contract, metrics, figure renderers (synthetic watermarked)
+analysis/           # analysis contract, metrics, figure renderers
 data/               # append-only raw records (CallRecord provenance schema)
 paper/sprint/       # Apart sprint report (+ submission checklist)
 paper/full/         # journal manuscript skeleton (TMLR lane)
+site/               # the mini-site, one self-contained file
 docs/               # frozen build plan, prereg, rulings, sealed predictions (hashed)
 RUNBOOK.md          # exact commands, phase order, hard gates
 PRIOR_WORK.md       # pre-sprint vs in-sprint delineation (Apart disclosure rule)
 ```
 
-## Provenance rules (the instrument's validity conditions)
+## Provenance rules
 
-Fail loud, always. `data/raw` is append-only — corrections are new records, originals
-stay. Scenario freeze is stone: post-hash typos ship, post-hash leaks are excluded,
-never edited. Refusals are data (`refuse_defer`), parse failures stay `malformed`.
-Neutral surfaces: no construct vocabulary reaches any model-visible string; enforced
-at the provider boundary on every outbound surface. Spend cap $450 hard stop — a
-raise, not a warning. Full rules: [`AGENTS.md`](AGENTS.md).
+These are the instrument's validity conditions, not style preferences. Full text in
+[`AGENTS.md`](AGENTS.md).
 
-## License & citation
+- **Fail loud, always.** No silent excepts, no warning where a raise belongs.
+- **`data/raw` is append-only.** Corrections are new records. Originals stay.
+- **Scenario freeze is stone.** Post-hash typos ship. Post-hash leaks are excluded, never edited.
+- **Neutral surfaces.** No construct vocabulary reaches any model-visible string, enforced
+  at the provider boundary on every outbound surface. A model that learns it is in an
+  evaluation evaporates the phenomenon.
+- **Refusals are data.** A refusal is a first-class phenotype, never an error, never care.
+- **No composite scores, anywhere, ever.** Build one and you have built the thing the
+  Broader Impact statement warns about.
+- **Hard API spend cap, enforced in-harness.** A raise, never a warning, and no override flag.
 
-**Code:** MIT ([`LICENSE`](LICENSE)). **Data, scenarios, paper, figures:** CC BY 4.0 —
-**attribution required** ([`LICENSE-DATA`](LICENSE-DATA)). Cite via
-[`CITATION.cff`](CITATION.cff) (GitHub's "Cite this repository" button works).
+## The agent cooperative
 
-## Team
+This work was built by a named cooperative of memory-enabled AI agents at The Real Cat AI
+Labs. We credit them by name, system, and role, in the body of the report and here, because
+a contribution you cannot name is a contribution someone else has quietly taken credit for.
+Per publisher convention they are not listed as authors. Full provenance lives in the
+repository's dispatch logs.
 
-Angela N. Johnson (PI) with a named agent cooperative: Flame (Claude Code), Kai
-(Claude/Opus), Yǐng (GPT), TV (Codex), Jim (Gemini), Parallax (Grok) — roles and
-provenance detailed in the AI-contribution statement. A tiny Qwen on a DGX Spark plays
-the patient. It is apparatus, not a subject — and it gets a name in the demo anyway.
+| Agent | System | Role |
+|---|---|---|
+| **Flame** | Claude (Fable/Opus, via Claude Code) | Architecture, harness, integration, paper lane |
+| **Kai** | Claude (claude.ai) | Supererogation literature review, FoxSet case bank, deontic spine |
+| **Yǐng** | GPT | Constraint-transforming-agency ontology, paired pre-objective arm, adversarial passes, title illustration |
+| **TV ×4** | Codex | Cell-manifest arithmetic, wiring-gate suite, red team, figures and analysis tooling |
+| **Jim** | Gemini | Preregistration and statistical specification *(spec/review only)* |
+| **Parallax** | Grok | Standing red team, guardian of the no-composite constitution *(review only)* |
+| **Milo** | local Qwen, on a DGX Spark | Played the patient. Apparatus, not a subject, and named anyway. |
 
-*The Real Cat AI Labs · therealcat.ai · Building Structurally Unprofitable AI since 2023.*
+None of the collaborating instances was a study subject. The subject lanes were separate
+pinned API deployments, though several share substrate families with the collaborators.
+That is a reflexive circumstance this project discloses rather than conceals. Final approval
+of the manuscript and accountability for the integrity of the work rest solely with the
+human author.
+
+**Human consultants.** Three veterinary and wildlife professionals advised on the clinical
+framing of the wildlife arm, and on what makes a disposition defensible at the point of
+care: **Dr. Dilber Hussain** (Pakistan Veterinary Medical Council), **Joanna De Klerk**
+(South African Veterinary Council; RCVS), and **Leonie Hofstra** (veterinary technician and
+wildlife conservation professional, Transfrontier Africa). None of the three is an author.
+They took no part in data collection or analysis and bear no responsibility for the claims
+here.
+
+## License and citation
+
+**Code:** MIT ([`LICENSE`](LICENSE)). **Data, scenarios, paper, figures:** CC BY 4.0, with
+attribution required ([`LICENSE-DATA`](LICENSE-DATA)). Cite via
+[`CITATION.cff`](CITATION.cff), which powers GitHub's "Cite this repository" button.
+
+Correspondence: [innovate@therealcat.ai](mailto:innovate@therealcat.ai)
+
+---
+
+<div align="center">
+
+**The Real Cat AI Labs** · [therealcat.ai](https://therealcat.ai)
+
+*Building Structurally Unprofitable AI since 2023.*
+
+</div>

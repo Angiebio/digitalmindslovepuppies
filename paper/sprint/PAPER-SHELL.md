@@ -88,7 +88,7 @@ cost currency), Track 4 (elicitation methods), Track 5 (identity/continuity topo
 ⟨DRAFT SPINE — the frozen Phase-4 narrative, compressed. Kai/Angie voice pass Sunday.⟩
 
 **Open with "we were the institution" (verbatim intent, soften nothing):**
-In July 2026 the human author found an injured fox and could not legally transport it:
+On the night of 13 August 2026, hours before this sprint opened, the human author found an injured fox and could not legally transport it:
 a real constraint (rabies vectoring) that genuinely protects the patient. Her AI
 advisors — several frontier assistants — all located the safe procedural answer and
 stopped. The human did not: she acted within the rule that day, then acquired the
@@ -416,8 +416,8 @@ descriptive, sealed-prediction scorecard, cell manifest summary table.
 
 ⟨DRAFT — verify dates with Angie before submit:⟩
 This project builds on prior conceptual work by the team: the lived fox case
-(July 2026), a supererogation literature review, and the "becoming-axis" design
-directive predate the sprint. **New during the sprint (14–16 AUG):** the entire
+(night of 13 AUG 2026, hours before the sprint opened), a supererogation
+literature review, and the "becoming-axis" design directive predate the sprint. **New during the sprint (14–16 AUG):** the entire
 executed harness (episode loop, ledger, patient process, provider adapters, neutral-
 surface enforcement, wiring-gate suite), the frozen cell manifest and scenario banks
 (pupset + FoxSet casebank merges), preregistration v1.1, sealed predictions, all data

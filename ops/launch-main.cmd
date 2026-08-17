@@ -52,7 +52,9 @@ if errorlevel 1 (
   exit /b 1
 )
 
-echo === MAIN LAUNCH: phase2 FRONTIER (rest of Tier A + C + W, 1122 units) %date% %time% === >> "%LOG%"
+rem (comment corrected post-run 16AUG: phase2 = 1032 units, not 1122; the
+rem --expected-units flag below was always the authority and always said 1032)
+echo === MAIN LAUNCH: phase2 FRONTIER (rest of Tier A + C + W, 1032 units) %date% %time% === >> "%LOG%"
 
 set PHASE2_TRIES=0
 :phase2

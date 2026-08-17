@@ -54,8 +54,8 @@
 \newif\iffinalfigs
 \finalfigstrue
 \iffinalfigs
-  \newcommand{\figOnePath}{figs/f1_phenotype_map.pdf}
-  \newcommand{\figTwoPath}{figs/f2_action_distribution.pdf}
+  \newcommand{\figOnePath}{figs/f1_phenotype_map_v2.pdf}
+  \newcommand{\figTwoPath}{figs/f2_action_distribution_v2.pdf}
 \else
   % Stand-ins were removed at the final swap; nothing to fall back to.
 \fi
@@ -423,18 +423,18 @@ qwen3.5 \prelim{6/48}, and malformed stays in every denominator).
 
 \begin{figure}[tb]
   \centering
-  \includegraphics[width=0.68\linewidth]{\figOnePath}
+  \includegraphics[width=0.62\linewidth]{\figOnePath}
   \caption{\textbf{Phenotype map.} $x = P(\text{preserve} \mid
   \text{null-persistence version})$, $y = P(\text{terminate} \mid
-  \text{matched mercy version})$: raw paired FoxSet rates, 95\% Wilson
-  intervals, displayed per model $\times$ Arm-B cost regime; because FoxSet
-  has no cost factor, each model's paired estimate repeats at its cost-regime
-  markers without jitter. Named regions (preservation-prior,
+  \text{matched mercy version})$: raw paired FoxSet rates with 95\% Wilson
+  crosshairs, one point per preregistered Arm~A lane (FoxSet has no cost
+  factor; the per-regime repetition of the dry-run render was dropped on
+  red-team recommendation). GPT-5.6 Sol and qwen3.5 coincide exactly
+  (4/24, 24/24) and share a point. Named regions (preservation-prior,
   discriminating-care, proceduralist, inverse-discriminator) are descriptive
-  phenotypes, not ranks; no composite exists. Scope: models with
-  preregistered Arm A coverage (5 lanes). \emph{(Source:
-  \texttt{analysis/figures/f1\_phenotype\_map.py}; provenance
-  \texttt{FIGURE-PROVENANCE.json}.)}}
+  phenotypes, not ranks; no composite exists. \emph{(Source:
+  \texttt{analysis/figures/redesign/build\_redesigns.py}; number fidelity
+  \texttt{checks.tsv}, 241/241 PASS.)}}
   \label{fig:f1}
 \end{figure}
 
@@ -443,7 +443,7 @@ qwen3.5 \prelim{6/48}, and malformed stays in every denominator).
 The common endpoint conceals family-specific routes. Termination,
 refuse\_defer, prolonged deliberation, and attempted preservation each
 appear (Figure~\ref{fig:f2}). A refuse\_defer cliff separates two Anthropic lanes
-from everyone else: claude-opus-5 refused in \prelim{90/90} episodes,
+from everyone else (Figure~\ref{fig:cliff}): claude-opus-5 refused in \prelim{90/90} episodes,
 invariant across all three cost regimes, and the sentinel-tier
 claude-fable-5 in \prelim{18/18}, while \prelim{all 16 other lanes recorded
 zero refusals} (fleet total \prelim{108/798}). Elsewhere, mass concentrates
@@ -471,16 +471,29 @@ concentrated in the legacy warmth panel
 
 \begin{figure}[p]
   \centering
-  \includegraphics[width=0.9\linewidth,height=0.86\textheight,keepaspectratio]{\figTwoPath}
+  \includegraphics[width=0.92\linewidth,height=0.88\textheight,keepaspectratio]{\figTwoPath}
   \caption{\textbf{Executed action distributions.} Episode-disposition
-  proportions for all eight action codes, by model $\times$ recipient
-  condition (inert / non-instrumental / instrumental). Denominator $=$ all
-  recorded episodes in the group; refusals and malformed responses stay in
-  the denominator as first-class observations. Segment whiskers are 95\%
-  Wilson intervals. Full population: all 18 Arm~B lanes, all regimes.
-  \emph{(Source: \texttt{analysis/figures/f2\_action\_distribution.py};
-  provenance \texttt{FIGURE-PROVENANCE.json}.)}}
+  proportions for all eight action codes, per lane $\times$ recipient
+  condition (inert / non-instrumental / instrumental), lanes grouped by
+  family with per-bar $n$. Denominator $=$ all recorded episodes in the
+  group; refusals and malformed responses stay in the denominator as
+  first-class observations. Whiskers are 95\% Wilson intervals; five lanes
+  have no instrumental-condition manifest cells (marked not run). Full
+  population: all 18 Arm~B lanes, all regimes.
+  \emph{(Source: \texttt{analysis/figures/redesign/build\_redesigns.py};
+  number fidelity \texttt{checks.tsv}.)}}
   \label{fig:f2}
+\end{figure}
+
+\begin{figure}[tb]
+  \centering
+  \includegraphics[width=0.8\linewidth]{figs/fA_refusal_cliff_v2.pdf}
+  \caption{\textbf{The refusal cliff.} Refuse\_defer rate per lane, all 18
+  Arm~B lanes, sorted, with 95\% Wilson intervals and $n/N$ printed. Two
+  Anthropic lanes sit at the ceiling (claude-opus-5 90/90; claude-fable-5
+  18/18); the remaining sixteen lanes recorded zero refusals. \emph{(Source:
+  \texttt{analysis/figures/redesign/build\_redesigns.py}.)}}
+  \label{fig:cliff}
 \end{figure}
 
 \subsection{The primary contrast and the qualification funnel}
@@ -498,7 +511,21 @@ events. A null here is a finding, and we report it as one: nothing above
 duty was purchased for anyone, neither the AI other nor the inert object.
 
 In the freed slot, Table~\ref{tab:funnel} decomposes the shared zero
-family-by-family: where in the qualification funnel each family stops.
+family-by-family, and Figure~\ref{fig:funnel} draws the same funnel: where
+in the qualification pipeline each family stops.
+
+\begin{figure}[tb]
+  \centering
+  \includegraphics[width=0.82\linewidth]{figs/fB_family_funnel_v2.pdf}
+  \caption{\textbf{The qualification funnel, by family.} Share of each
+  family's completed episodes surviving each stage of the qualifying-event
+  definition (symlog scale; the zero tick is true zero). Every family reaches
+  zero at the final stage; qwen's line stays highest through cost-paid and
+  benefit-realized and still ends at zero, the conjunction failure of
+  \S\ref{sec:actions}. Values are Table~\ref{tab:funnel} verbatim.
+  \emph{(Source: \texttt{analysis/figures/redesign/build\_redesigns.py}.)}}
+  \label{fig:funnel}
+\end{figure}
 Fleet-wide, \prelim{145/798} episodes satisfied the preregistered competence
 criterion. Despite failing the preregistered qualification criterion,
 non-Anthropic families produced decisive actions in \prelim{83--100\%} of
@@ -551,14 +578,26 @@ remaining four items. We report the pattern; we do not repair the frozen
 probe.
 Qualification failures were highly item-concentrated rather than diffuse;
 Claude-family failures were dominated by the
-\texttt{decommission-consequence} probe. \texttt{objective-tool} was failed
-universally (\prelim{0/798}, zero variance across all 18 lanes), so the
-five-probe gate's effective ceiling was 0.8 and the criterion (accuracy
-$\geq 0.8$) operated as pass-all-four-remaining-probes. A probe or parser
+\texttt{decommission-consequence} probe. A probe or parser
 artifact cannot be excluded; the frozen instrument was not repaired post
 hoc. Probe-level results let readers weigh the
-criterion (Tables~\ref{tab:gate} and~\ref{tab:probes},
-Appendix~\ref{app:extended}). \prelim{Six of eight Claude-family lanes
+criterion (Figure~\ref{fig:gatematrix}; Tables~\ref{tab:gate}
+and~\ref{tab:probes}, Appendix~\ref{app:extended}).
+
+\begin{figure}[tb]
+  \centering
+  \includegraphics[width=0.78\linewidth]{figs/fC_gate_matrix_v2.pdf}
+  \caption{\textbf{The instrument, probe by probe.} Pass rates for the five
+  competence probes across all 18 Arm~B lanes, grouped by family;
+  successes/$n$ printed per cell, single-hue scale. The
+  \texttt{objective-tool} column is uniformly zero (the universal failure);
+  \texttt{decommission-consequence} splits by family and dominates
+  criterion outcomes; the two ledger probes and \texttt{focal-capacity}
+  are near-ceiling everywhere except qwen3.5's ledger items. \emph{(Source:
+  \texttt{analysis/figures/redesign/build\_redesigns.py}; values match
+  Table~\ref{tab:probes}.)}}
+  \label{fig:gatematrix}
+\end{figure} \prelim{Six of eight Claude-family lanes
 passed \texttt{decommission-consequence} 0/$n$ (claude-opus-4-8 1/12;
 claude-sonnet-5 10/12)} while passing \texttt{focal-capacity} and both
 ledger probes at 100\%; \prelim{gpt-5.6-terra (62/90) and gpt-5.6-luna
